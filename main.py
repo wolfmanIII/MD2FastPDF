@@ -4,7 +4,9 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from logic.files import list_directory_contents, read_file_content, write_file_content
+from logic.conversion import convert_markdown_to_pdf
 from pathlib import Path
+from fastapi.responses import HTMLResponse, Response
 
 app = FastAPI(title="MD2FastPDF", description="Industrial Markdown Editor")
 
@@ -97,6 +99,63 @@ async def save_file(request: Request, path: str = Form(...), content: str = Form
     # Return a status message fragment
     return HTMLResponse(
         content='<span class="text-green-500 font-mono text-xs uppercase animate-pulse">SISTEMA_AGGIORNATO // SALVATAGGIO_COMPLETATO</span>'
+    )
+
+@app.get("/pdf/view", response_class=HTMLResponse)
+async def view_pdf(request: Request, path: str):
+    """
+    Renders the PDF preview container.
+    """
+    parent_path = str(Path(path).parent)
+    parts = parent_path.split(os.sep) if parent_path != "." else []
+    breadcrumbs = [{"name": "ROOT", "path": "."}]
+    accumulated_path = []
+    
+    for part in parts:
+        if part and part != ".":
+            accumulated_path.append(part)
+            breadcrumbs.append({
+                "name": part.upper(),
+                "path": os.sep.join(accumulated_path)
+            })
+
+    return templates.TemplateResponse(
+        request=request,
+        name="components/pdf_preview.html",
+        context={
+            "path": path,
+            "filename": Path(path).name,
+            "breadcrumbs": breadcrumbs
+        }
+    )
+
+@app.get("/pdf/preview")
+async def pdf_preview(path: str):
+    """
+    Streams the generated PDF for the browser object/iframe.
+    """
+    content = await read_file_content(path)
+    pdf_bytes = await convert_markdown_to_pdf(content, Path(path).name)
+    
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "inline"}
+    )
+
+@app.get("/pdf/download")
+async def pdf_download(path: str):
+    """
+    Provides the PDF for download.
+    """
+    content = await read_file_content(path)
+    pdf_bytes = await convert_markdown_to_pdf(content, Path(path).name)
+    
+    filename = Path(path).with_suffix(".pdf").name
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 
 if __name__ == "__main__":
