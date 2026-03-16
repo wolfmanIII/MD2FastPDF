@@ -1,0 +1,75 @@
+<div class="flex flex-col h-[70vh] industrial-border">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-zinc-900/40 shrink-0">
+        <div class="flex items-center space-x-3 text-xs font-mono uppercase tracking-widest text-zinc-400">
+            <span class="text-violet-500 font-bold">MODE_EDIT //</span>
+            <span>{{ filename }}</span>
+        </div>
+        <div id="save-status">
+            <button hx-post="/save" hx-include="#editor-form" hx-target="#save-status"
+                    class="px-4 py-1 bg-violet-600 hover:bg-violet-700 text-white text-xs font-mono uppercase transition-all shadow-md">
+                COMMIT_CHANGES
+            </button>
+        </div>
+    </div>
+
+    <!-- Hidden form for HTMX -->
+    <form id="editor-form" class="hidden">
+        <input type="hidden" name="path" value="{{ path }}">
+        <textarea name="content" id="mde-content"></textarea>
+    </form>
+
+    <!-- Editor Wrapper -->
+    <div class="flex-grow bg-zinc-950 relative overflow-hidden" id="editor-wrapper">
+        <textarea id="easymde-textarea">{{ content }}</textarea>
+    </div>
+
+    <style>
+        /* Minimal theme fixes */
+        .EasyMDEContainer {
+            height: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        .CodeMirror {
+            flex-grow: 1 !important;
+            height: auto !important;
+            background: #09090b !important;
+            color: #d4d4d8 !important;
+            border: 1px solid #27272a !important;
+            font-family: 'Roboto Mono', monospace !important;
+        }
+        .CodeMirror-scroll {
+            min-height: 0 !important;
+        }
+        .CodeMirror-cursor { border-left: 2px solid #a78bfa !important; }
+        .editor-toolbar { background: #18181b !important; border: 1px solid #27272a !important; }
+        .editor-toolbar button { color: #a1a1aa !important; }
+        .editor-toolbar button.active, .editor-toolbar button:hover { background: #27272a !important; color: #8b5cf6 !important; }
+        
+        .editor-preview-active-side { background: #09090b !important; color: #e4e4e7 !important; }
+        
+        /* Fullscreen isolation to prevent bleeding */
+        .EasyMDEContainer.fullscreen {
+            z-index: 10000 !important;
+            background: #09090b !important;
+        }
+    </style>
+
+    <script>
+        (function() {
+            const easyMDE = new EasyMDE({
+                element: document.getElementById('easymde-textarea'),
+                spellChecker: false,
+                autofocus: true,
+                status: ["lines", "words", "cursor"],
+                toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "|", "preview", "side-by-side", "fullscreen", "|", "guide"]
+            });
+
+            // Sync with hidden form
+            const hidden = document.getElementById('mde-content');
+            easyMDE.codemirror.on("change", () => { hidden.value = easyMDE.value(); });
+            hidden.value = easyMDE.value();
+        })();
+    </script>
+</div>
