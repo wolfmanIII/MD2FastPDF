@@ -30,7 +30,19 @@ async def list_files(request: Request, path: str = "."):
     Returns an HTMX fragment containing the list of files in the requested path.
     """
     items = await list_directory_contents(path)
-    parent_path = str(Path(path).parent) if path != "." else "."
+    
+    # Generate breadcrumbs
+    parts = path.split(os.sep) if path != "." else []
+    breadcrumbs = [{"name": "ROOT", "path": "."}]
+    accumulated_path = []
+    
+    for part in parts:
+        if part and part != ".":
+            accumulated_path.append(part)
+            breadcrumbs.append({
+                "name": part.upper(),
+                "path": os.sep.join(accumulated_path)
+            })
     
     return templates.TemplateResponse(
         request=request,
@@ -38,7 +50,7 @@ async def list_files(request: Request, path: str = "."):
         context={
             "items": items,
             "current_path": path,
-            "parent_path": parent_path
+            "breadcrumbs": breadcrumbs
         }
     )
 
@@ -48,13 +60,29 @@ async def get_editor(request: Request, path: str):
     Returns the EasyMDE editor fragment with file content.
     """
     content = await read_file_content(path)
+    
+    # Generate breadcrumbs for the parent path
+    parent_path = str(Path(path).parent)
+    parts = parent_path.split(os.sep) if parent_path != "." else []
+    breadcrumbs = [{"name": "ROOT", "path": "."}]
+    accumulated_path = []
+    
+    for part in parts:
+        if part and part != ".":
+            accumulated_path.append(part)
+            breadcrumbs.append({
+                "name": part.upper(),
+                "path": os.sep.join(accumulated_path)
+            })
+
     return templates.TemplateResponse(
         request=request,
         name="components/editor.html",
         context={
             "content": content,
             "path": path,
-            "filename": Path(path).name
+            "filename": Path(path).name,
+            "breadcrumbs": breadcrumbs
         }
     )
 

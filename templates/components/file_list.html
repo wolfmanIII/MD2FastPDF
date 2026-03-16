@@ -1,13 +1,18 @@
 <div class="industrial-border p-4 space-y-2">
     <div class="flex items-center justify-between mb-4 border-b border-zinc-800 pb-2">
-        <h3 class="text-xs font-mono text-violet-400 uppercase tracking-widest">File Explorer // {{ current_path }}</h3>
-        {% if current_path != "." %}
-        <button hx-get="/files?path={{ parent_path }}" 
-                hx-target="#main-view" 
-                class="text-[10px] font-mono text-zinc-500 hover:text-violet-400 transition-colors">
-            [UP_ONE_LEVEL]
-        </button>
-        {% endif %}
+        <div class="flex items-center space-x-1 overflow-x-auto no-scrollbar">
+            <h3 class="text-[10px] font-mono text-zinc-500 uppercase tracking-tighter shrink-0">FS_ROOT //</h3>
+            {% for crumb in breadcrumbs %}
+            <button hx-get="/files?path={{ crumb.path }}" 
+                    hx-target="#main-view"
+                    class="text-xs font-mono {% if loop.last %}text-violet-400{% else %}text-zinc-400 hover:text-violet-500{% endif %} transition-colors uppercase tracking-widest whitespace-nowrap">
+                {{ crumb.name }}
+            </button>
+            {% if not loop.last %}
+            <span class="text-zinc-700 font-mono">/</span>
+            {% endif %}
+            {% endfor %}
+        </div>
     </div>
 
     <div class="grid grid-cols-1 gap-1">

@@ -1,9 +1,17 @@
 <div class="flex flex-col h-[70vh] industrial-border">
     <!-- Header -->
     <div class="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-zinc-900/40 shrink-0">
-        <div class="flex items-center space-x-3 text-xs font-mono uppercase tracking-widest text-zinc-400">
-            <span class="text-violet-500 font-bold">MODE_EDIT //</span>
-            <span>{{ filename }}</span>
+        <div class="flex items-center space-x-1 text-[10px] font-mono uppercase tracking-widest text-zinc-500 overflow-x-auto no-scrollbar">
+            <span class="text-violet-500 font-bold shrink-0">MODE_EDIT //</span>
+            {% for crumb in breadcrumbs %}
+            <button hx-get="/files?path={{ crumb.path }}" 
+                    hx-target="#main-view"
+                    class="hover:text-violet-400 transition-colors whitespace-nowrap">
+                {{ crumb.name }}
+            </button>
+            <span class="text-zinc-700">/</span>
+            {% endfor %}
+            <span class="text-zinc-100 whitespace-nowrap">{{ filename }}</span>
         </div>
         <div id="save-status">
             <button hx-post="/save" hx-include="#editor-form" hx-target="#save-status"
@@ -35,10 +43,22 @@
             flex-grow: 1 !important;
             height: auto !important;
             background: #09090b !important;
-            color: #d4d4d8 !important;
+            color: #d4d4d8; /* Base color without !important to allow highlighting */
             border: 1px solid #27272a !important;
             font-family: 'Roboto Mono', monospace !important;
         }
+        /* CodeMirror Syntax Highlighting (Industrial Theme) */
+        .cm-s-easymde .cm-header-1 { color: #8b5cf6; font-size: 1.4em; }
+        .cm-s-easymde .cm-header-2 { color: #a78bfa; font-size: 1.2em; }
+        .cm-s-easymde .cm-keyword { color: #c084fc; font-weight: bold; }
+        .cm-s-easymde .cm-variable-2 { color: #818cf8; }
+        .cm-s-easymde .cm-string { color: #4ade80; }
+        .cm-s-easymde .cm-comment { color: #52525b; font-style: italic; }
+        .cm-s-easymde .cm-number { color: #fbbf24; }
+        .cm-s-easymde .cm-link { color: #8b5cf6; }
+        .cm-s-easymde .cm-url { color: #6366f1; }
+        .cm-s-easymde .cm-tag { color: #f472b6; }
+        .cm-s-easymde .cm-attribute { color: #fb7185; }
         .CodeMirror-scroll {
             min-height: 0 !important;
         }
@@ -47,7 +67,26 @@
         .editor-toolbar button { color: #a1a1aa !important; }
         .editor-toolbar button.active, .editor-toolbar button:hover { background: #27272a !important; color: #8b5cf6 !important; }
         
-        .editor-preview-active-side { background: #09090b !important; color: #e4e4e7 !important; }
+        .editor-preview-active-side, .editor-preview {
+            background: #09090b !important;
+            color: #e4e4e7 !important;
+        }
+        
+        .editor-preview h1, .editor-preview h2, .editor-preview h3,
+        .editor-preview-active-side h1, .editor-preview-active-side h2, .editor-preview-active-side h3 {
+            color: #8b5cf6 !important;
+            border-bottom: 1px solid #27272a;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .editor-preview p, .editor-preview-active-side p { margin-bottom: 1rem; line-height: 1.6; }
+        .editor-preview table, .editor-preview-active-side table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+        .editor-preview th, .editor-preview td, .editor-preview-active-side th, .editor-preview-active-side td { border: 1px solid #27272a; padding: 0.5rem; }
+        /* Let Highlight.js handle code coloring, only set the container background */
+        .editor-preview pre, .editor-preview-active-side pre { background: #18181b !important; padding: 1rem; border-radius: 4px; border: 1px solid #27272a; overflow-x: auto; }
+        .editor-preview code, .editor-preview-active-side code { font-family: 'Roboto Mono', monospace; background: transparent !important; }
         
         /* Fullscreen isolation to prevent bleeding */
         .EasyMDEContainer.fullscreen {
@@ -63,6 +102,10 @@
                 spellChecker: false,
                 autofocus: true,
                 status: ["lines", "words", "cursor"],
+                renderingConfig: {
+                    codeSyntaxHighlighting: true,
+                    hljs: window.hljs
+                },
                 toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "|", "preview", "side-by-side", "fullscreen", "|", "guide"]
             });
 

@@ -4,4 +4,4 @@ pkill -f uvicorn && pkill -f tailwindcss
 
 echo "--- STOPPED MD2FastPDF INDUSTRIAL TERMINAL ---"
 
-exit 0
+exit
