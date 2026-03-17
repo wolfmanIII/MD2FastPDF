@@ -1,23 +1,43 @@
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="border border-zinc-800 bg-zinc-900/40 p-6 rounded-sm">
-        <h3 class="text-xs font-mono text-violet-400 mb-4 uppercase tracking-widest">System Status</h3>
-        <div class="space-y-3">
-            <div class="flex justify-between text-sm">
-                <span class="text-zinc-500">PROJECT_ROOT:</span>
-                <span class="font-mono text-zinc-300">USER_HOME</span>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 tracking-widest uppercase">
+    <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative">
+        <!-- Decorative bg line -->
+        <div class="absolute -right-10 -top-10 w-32 h-32 bg-[var(--neon-cyan)]/5 rounded-full blur-2xl pointer-events-none"></div>
+
+        <h3 class="text-sm font-bold neon-text mb-4 border-b border-[var(--glass-border)] pb-2 flex items-center space-x-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>SYSTEM_STATUS</span>
+        </h3>
+        <div class="space-y-4">
+            <div class="flex justify-between items-center text-sm">
+                <span class="neon-dim">PROJECT_ROOT:</span>
+                <span class="neon-text">SYS_HOME</span>
             </div>
-            <div class="flex justify-between text-sm">
-                <span class="text-zinc-500">GOTENBERG:</span>
-                <span class="font-mono text-green-500">ONLINE</span>
+            <div class="flex justify-between items-center text-sm">
+                <span class="neon-dim">API_GATEWAY:</span>
+                <span class="neon-text animate-pulse">CONNECTED</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+                <span class="neon-dim">MEMORY_USAGE:</span>
+                <div class="w-32 h-[3px] bg-black overflow-hidden border border-[var(--glass-border)]">
+                    <div class="h-full neon-bg w-[34%]"></div>
+                </div>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+                <span class="neon-dim">CORE_TEMP:</span>
+                <span class="neon-text">OPTIMAL</span>
             </div>
         </div>
     </div>
     
-    <div class="border border-zinc-800 bg-zinc-900/40 p-6 rounded-sm flex flex-col justify-center items-center text-center">
-        <h3 class="text-xs font-mono text-violet-400 mb-4 uppercase tracking-widest">Kernel Info</h3>
-        <p class="text-sm text-zinc-400 leading-relaxed italic">
-            Welcome, operative. Select a file from the explorer to access the editing terminal. 
-            Stateless multi-tab mode is active.
+    <div class="glass-panel p-6 flex flex-col justify-center items-center text-center glass-panel-hover relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-t from-[var(--neon-cyan)]/5 to-transparent pointer-events-none"></div>
+        <div class="w-16 h-16 rounded-full border border-[var(--neon-cyan)] flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(0,240,255,0.2)] bg-[var(--neon-cyan)]/5">
+            <svg class="w-8 h-8 neon-text" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg>
+        </div>
+        <h3 class="text-sm font-bold neon-text mb-2 tracking-[0.2em] w-full z-10">A.I. MATRIX ACTIVE</h3>
+        <p class="text-[11px] neon-dim leading-relaxed max-w-xs z-10">
+            AWAITING INPUT COMMAND.<br><br>
+            INITIALIZE EXPLORER SEQUENCE TO ACCESS DATA FRAGMENTS.
         </p>
     </div>
 </div>

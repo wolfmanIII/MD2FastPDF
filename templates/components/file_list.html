@@ -1,55 +1,58 @@
-<div class="industrial-border p-4 space-y-2">
-    <div class="flex items-center justify-between mb-4 border-b border-zinc-800 pb-2">
-        <div class="flex items-center space-x-1 overflow-x-auto no-scrollbar">
-            <h3 class="text-[10px] font-mono text-zinc-500 uppercase tracking-tighter shrink-0">FS_ROOT //</h3>
+<div class="glass-panel p-4 space-y-2 uppercase tracking-widest relative overflow-hidden">
+    <!-- Subtle background accent -->
+    <div class="absolute -left-20 top-0 w-40 h-full bg-[var(--neon-cyan)]/5 blur-3xl pointer-events-none"></div>
+
+    <div class="flex items-center justify-between mb-4 neon-border-b pb-2 relative z-10">
+        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar">
+            <h3 class="font-bold neon-dim shrink-0">DATA_ARCHIVE //</h3>
             {% for crumb in breadcrumbs %}
             <button hx-get="/files?path={{ crumb.path }}" 
                     hx-target="#main-view"
-                    class="text-xs font-mono {% if loop.last %}text-violet-400{% else %}text-zinc-400 hover:text-violet-500{% endif %} transition-colors uppercase tracking-widest whitespace-nowrap">
+                    class="font-bold px-2 py-0.5 rounded-sm {% if loop.last %}neon-text{% else %}neon-dim neon-hover{% endif %} transition-colors whitespace-nowrap">
                 {{ crumb.name }}
             </button>
             {% if not loop.last %}
-            <span class="text-zinc-700 font-mono">/</span>
+            <span class="neon-dim">/</span>
             {% endif %}
             {% endfor %}
         </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-1">
+    <div class="grid grid-cols-1 gap-1 relative z-10">
         {% for item in items %}
-        <div class="group flex items-center justify-between p-2 hover:bg-violet-500/10 transition-colors border border-transparent hover:border-violet-500/30">
-            <div class="flex items-center space-x-3">
+        <button class="group flex items-center justify-between p-2 rounded-sm neon-text neon-hover transition-all text-left"
+            {% if item.is_dir %}
+                hx-get="/files?path={{ item.path }}" 
+            {% else %}
+                hx-get="/editor?path={{ item.path }}" 
+            {% endif %}
+            hx-target="#main-view">
+            
+            <div class="flex items-center space-x-4">
                 {% if item.is_dir %}
-                <span class="text-violet-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
+                <span class="neon-dim group-hover:neon-text transition-colors">
+                    <svg class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                 </span>
-                <button hx-get="/files?path={{ item.path }}" 
-                        hx-target="#main-view"
-                        class="text-sm font-mono text-zinc-300 group-hover:text-violet-300">
+                <span class="font-bold tracking-widest">
                     {{ item.name }}/
-                </button>
-                {% else %}
-                <span class="text-zinc-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
                 </span>
-                <button hx-get="/editor?path={{ item.path }}" 
-                        hx-target="#main-view"
-                        class="text-sm font-mono text-zinc-400 group-hover:text-zinc-100">
+                {% else %}
+                <span class="neon-dim group-hover:neon-text transition-colors">
+                    <svg class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </span>
+                <span class="font-bold tracking-widest">
                     {{ item.name }}
-                </button>
+                </span>
                 {% endif %}
             </div>
             
             <div class="opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
                 {% if not item.is_dir %}
-                <button class="text-[10px] text-zinc-600 hover:text-red-400">DELETE</button>
+                <div class="text-[10px] text-red-500 border border-red-500/50 hover:bg-red-500/20 px-2 py-1 rounded-sm font-bold z-10 transition-colors"
+                     onclick="event.stopPropagation(); alert('Deletion pending implementation...');">PURGE</div>
                 {% endif %}
             </div>
-        </div>
+        </button>
         {% endfor %}
     </div>
 </div>

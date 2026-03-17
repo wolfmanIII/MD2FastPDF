@@ -1,26 +1,28 @@
-<div class="flex flex-col h-[70vh] industrial-border">
+<div class="flex flex-col h-[70vh] glass-panel relative overflow-hidden tracking-widest uppercase">
     <!-- Header -->
-    <div class="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-zinc-900/40 shrink-0">
-        <div class="flex items-center space-x-1 text-[10px] font-mono uppercase tracking-widest text-zinc-500 overflow-x-auto no-scrollbar">
-            <span class="text-violet-500 font-bold shrink-0">MODE_EDIT //</span>
+    <div class="flex items-center justify-between px-4 py-3 neon-border-b shrink-0 relative z-10 bg-black/40">
+        <div class="flex items-center space-x-2 text-[10px] uppercase overflow-x-auto no-scrollbar">
+            <span class="font-bold shrink-0 neon-dim">MODE_EDIT //</span>
             {% for crumb in breadcrumbs %}
             <button hx-get="/files?path={{ crumb.path }}" 
                     hx-target="#main-view"
-                    class="hover:text-violet-400 transition-colors whitespace-nowrap">
+                    class="neon-hover transition-colors whitespace-nowrap px-2 py-0.5 rounded-sm">
                 {{ crumb.name }}
             </button>
-            <span class="text-zinc-700">/</span>
+            <span class="neon-dim">/</span>
             {% endfor %}
-            <span class="text-zinc-100 whitespace-nowrap">{{ filename }}</span>
+            <span class="neon-text font-bold whitespace-nowrap drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]">{{ filename }}</span>
         </div>
-        <div id="save-status" class="flex items-center space-x-2">
+        <div id="save-status" class="flex items-center space-x-3">
             <button hx-get="/pdf/view?path={{ path }}" hx-target="#main-view"
-                    class="px-4 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-mono uppercase transition-all shadow-md border border-zinc-700">
-                GENERATE_PDF
+                    class="px-5 py-1.5 text-[10px] uppercase transition-all neon-border neon-dim hover:neon-bg cursor-pointer rounded-sm bg-transparent flex items-center space-x-2">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                <span>GENERATE_PDF</span>
             </button>
             <button hx-post="/save" hx-include="#editor-form" hx-target="#save-status"
-                    class="px-4 py-1 bg-violet-600 hover:bg-violet-700 text-white text-xs font-mono uppercase transition-all shadow-md">
-                COMMIT_CHANGES
+                    class="px-5 py-1.5 text-[10px] uppercase transition-all neon-bg neon-border cursor-pointer rounded-sm flex items-center space-x-2">
+                <svg class="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                <span class="text-black font-bold">COMMIT_CHANGES</span>
             </button>
         </div>
     </div>
@@ -32,12 +34,12 @@
     </form>
 
     <!-- Editor Wrapper -->
-    <div class="flex-grow bg-zinc-950 relative overflow-hidden" id="editor-wrapper">
+    <div class="flex-grow bg-transparent relative overflow-hidden z-10" id="editor-wrapper">
         <textarea id="easymde-textarea">{{ content }}</textarea>
     </div>
 
     <style>
-        /* Minimal theme fixes */
+        /* Modern Sci-Fi Theme overrides */
         .EasyMDEContainer {
             height: 100% !important;
             display: flex !important;
@@ -46,57 +48,61 @@
         .CodeMirror {
             flex-grow: 1 !important;
             height: auto !important;
-            background: #09090b !important;
-            color: #d4d4d8; /* Base color without !important to allow highlighting */
-            border: 1px solid #27272a !important;
-            font-family: 'Roboto Mono', monospace !important;
-        }
-        /* CodeMirror Syntax Highlighting (Industrial Theme) */
-        .cm-s-easymde .cm-header-1 { color: #8b5cf6; font-size: 1.4em; }
-        .cm-s-easymde .cm-header-2 { color: #a78bfa; font-size: 1.2em; }
-        .cm-s-easymde .cm-keyword { color: #c084fc; font-weight: bold; }
-        .cm-s-easymde .cm-variable-2 { color: #818cf8; }
-        .cm-s-easymde .cm-string { color: #4ade80; }
-        .cm-s-easymde .cm-comment { color: #52525b; font-style: italic; }
-        .cm-s-easymde .cm-number { color: #fbbf24; }
-        .cm-s-easymde .cm-link { color: #8b5cf6; }
-        .cm-s-easymde .cm-url { color: #6366f1; }
-        .cm-s-easymde .cm-tag { color: #f472b6; }
-        .cm-s-easymde .cm-attribute { color: #fb7185; }
-        .CodeMirror-scroll {
-            min-height: 0 !important;
-        }
-        .CodeMirror-cursor { border-left: 2px solid #a78bfa !important; }
-        .editor-toolbar { background: #18181b !important; border: 1px solid #27272a !important; }
-        .editor-toolbar button { color: #a1a1aa !important; }
-        .editor-toolbar button.active, .editor-toolbar button:hover { background: #27272a !important; color: #8b5cf6 !important; }
-        
-        .editor-preview-active-side, .editor-preview {
-            background: #09090b !important;
+            background: rgba(9, 9, 11, 0.4) !important;
             color: #e4e4e7 !important;
+            border: none !important;
+            font-family: 'Roboto Mono', monospace !important;
+            font-size: 13px;
         }
+        
+        /* CodeMirror Syntax Highlighting (Neon/Modern) */
+        .cm-s-easymde .cm-header-1 { color: var(--neon-cyan); font-size: 1.4em; text-shadow: var(--neon-glow); font-family: 'Rajdhani', sans-serif; }
+        .cm-s-easymde .cm-header-2 { color: var(--neon-cyan); font-size: 1.2em; text-shadow: var(--neon-glow); font-family: 'Rajdhani', sans-serif; }
+        .cm-s-easymde .cm-keyword { color: #f472b6; font-weight: bold; }
+        .cm-s-easymde .cm-variable-2 { color: #818cf8; }
+        .cm-s-easymde .cm-string { color: #34d399; }
+        .cm-s-easymde .cm-comment { color: var(--neon-cyan-dim); font-style: italic; opacity: 0.7; }
+        .cm-s-easymde .cm-number { color: #fbbf24; font-weight: bold; }
+        .cm-s-easymde .cm-link { color: var(--neon-cyan); text-decoration: underline; }
+        .cm-s-easymde .cm-url { color: var(--neon-cyan-dim); }
+        .cm-s-easymde .cm-tag { color: #c084fc; }
+        
+        .CodeMirror-scroll { min-height: 0 !important; }
+        .CodeMirror-cursor { border-left: 2px solid var(--neon-cyan) !important; box-shadow: var(--neon-glow); }
+        
+        /* Opaque backgrounds to prevent text overlapping */
+        .editor-preview-active-side, .editor-preview, .CodeMirror-fullscreen, .editor-toolbar.fullscreen { 
+            background: #050505 !important; 
+            color: #e4e4e7 !important; 
+            z-index: 99999 !important; /* Ensure it covers everything */
+        }
+        
+        .editor-toolbar { background: rgba(0, 240, 255, 0.05) !important; border: none !important; border-bottom: 1px solid var(--glass-border) !important; backdrop-filter: blur(4px); }
+        .editor-toolbar button { color: var(--neon-cyan-dim) !important; border: 1px solid transparent !important; cursor: pointer; transition: all 0.2s; border-radius: 4px; }
+        .editor-toolbar button.active, .editor-toolbar button:hover { background: rgba(0, 240, 255, 0.15) !important; color: var(--neon-cyan) !important; border-color: var(--glass-border) !important; box-shadow: inset 0 0 10px rgba(0,240,255,0.2); }
         
         .editor-preview h1, .editor-preview h2, .editor-preview h3,
         .editor-preview-active-side h1, .editor-preview-active-side h2, .editor-preview-active-side h3 {
-            color: #8b5cf6 !important;
-            border-bottom: 1px solid #27272a;
+            color: var(--neon-cyan) !important;
+            border-bottom: 1px solid var(--glass-border);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
-            font-weight: 700;
+            text-transform: uppercase;
+            font-family: 'Rajdhani', sans-serif;
+            text-shadow: var(--neon-glow);
         }
         
-        .editor-preview p, .editor-preview-active-side p { margin-bottom: 1rem; line-height: 1.6; }
+        .editor-preview p, .editor-preview-active-side p { margin-bottom: 1rem; line-height: 1.6; font-family: 'Roboto Mono', monospace; font-size: 13px; }
         .editor-preview table, .editor-preview-active-side table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
-        .editor-preview th, .editor-preview td, .editor-preview-active-side th, .editor-preview-active-side td { border: 1px solid #27272a; padding: 0.5rem; }
-        /* Let Highlight.js handle code coloring, only set the container background */
-        .editor-preview pre, .editor-preview-active-side pre { background: #18181b !important; padding: 1rem; border-radius: 4px; border: 1px solid #27272a; overflow-x: auto; }
-        .editor-preview code, .editor-preview-active-side code { font-family: 'Roboto Mono', monospace; background: transparent !important; }
+        .editor-preview th, .editor-preview td, .editor-preview-active-side th, .editor-preview-active-side td { border: 1px solid var(--glass-border); padding: 0.5rem; font-family: 'Roboto Mono', monospace; font-size: 12px; }
+        .editor-preview pre, .editor-preview-active-side pre { background: rgba(0,0,0,0.5) !important; padding: 1rem; border: 1px solid var(--glass-border); overflow-x: auto; border-radius: 4px; }
+        .editor-preview code, .editor-preview-active-side code { font-family: 'Roboto Mono', monospace; background: transparent !important; font-size: 12px; }
         
-        /* Fullscreen isolation to prevent bleeding */
-        .EasyMDEContainer.fullscreen {
-            z-index: 10000 !important;
-            background: #09090b !important;
-        }
+        /* Highlight.js overrides */
+        .hljs { background: transparent !important; }
+        
+        /* Fullscreen isolation */
+        .EasyMDEContainer.fullscreen { z-index: 10000 !important; background: var(--glass-bg) !important; backdrop-filter: blur(20px); }
     </style>
 
     <script>
@@ -117,6 +123,21 @@
             const hidden = document.getElementById('mde-content');
             easyMDE.codemirror.on("change", () => { hidden.value = easyMDE.value(); });
             hidden.value = easyMDE.value();
+
+            // Fix Fullscreen being trapped by backdrop-filter
+            easyMDE.codemirror.on("refresh", () => {
+                const editorPanel = document.getElementById('editor-wrapper').closest('.glass-panel');
+                if (editorPanel) {
+                    if (easyMDE.isFullscreenActive()) {
+                        editorPanel.style.backdropFilter = 'none';
+                        editorPanel.style.webkitBackdropFilter = 'none';
+                    } else {
+                        editorPanel.style.backdropFilter = '';
+                        editorPanel.style.webkitBackdropFilter = '';
+                    }
+                }
+            });
         })();
+
     </script>
 </div>
