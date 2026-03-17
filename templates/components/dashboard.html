@@ -48,4 +48,52 @@
             INITIALIZE EXPLORER SEQUENCE TO ACCESS DATA FRAGMENTS.
         </p>
     </div>
+
+    <!-- Second Row -->
+    <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative min-h-[200px]">
+        <h3 class="text-sm font-bold neon-text mb-4 border-b border-[var(--glass-border)] pb-2 flex items-center space-x-2">
+            {% with class="w-4 h-4" %}{% include 'icons/folder.html' %}{% endwith %}
+            <span>RECENT_FRAGMENTS</span>
+        </h3>
+        <div class="space-y-2">
+            {% for file in recent_files %}
+            <div class="flex items-center justify-between text-[10px] group transition-all cursor-pointer hover:bg-[var(--neon-cyan)]/5 p-1 rounded-sm"
+                 hx-get="/editor?path={{ file.path }}" hx-target="#main-view">
+                <span class="neon-dim group-hover:neon-text transition-colors">>> {{ file.name }}</span>
+                <span class="text-zinc-600 font-mono">MOD_TS: {{ file.mtime|int }}</span>
+            </div>
+            {% else %}
+            <div class="text-[10px] neon-dim italic">NO_RECENT_ACTIVITY_DETECTED</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative min-h-[200px]">
+        <h3 class="text-sm font-bold neon-text mb-4 border-b border-[var(--glass-border)] pb-2 flex items-center space-x-2">
+            {% with class="w-4 h-4" %}{% include 'icons/ship-components.html' %}{% endwith %}
+            <span>STORAGE_NODE</span>
+        </h3>
+        <div class="space-y-4">
+            <div class="flex justify-between items-center text-sm">
+                <span class="neon-dim">ARCHIVE_SIZE:</span>
+                <span class="neon-text">{{ storage.total_size }}</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+                <span class="neon-dim">FRAGMENT_COUNT:</span>
+                <span class="neon-text">{{ storage.file_count }}</span>
+            </div>
+            <div class="flex flex-col space-y-1">
+                <div class="flex justify-between text-[10px] neon-dim uppercase">
+                    <span>DENSITY_CAPACITY</span>
+                    <span>{{ storage.usage_percent|round(1) }}%</span>
+                </div>
+                <div class="w-full h-[4px] bg-black border border-[var(--glass-border)] overflow-hidden">
+                    <div class="h-full neon-bg transition-all duration-1000" style="width: {{ storage.usage_percent }}%;"></div>
+                </div>
+            </div>
+            <p class="text-[9px] text-zinc-600 mt-2 uppercase tracking-tighter">
+                WARNING: EXCEEDING DATA DENSITY MAY TRIGGER AUTOMATIC PURGE PROTOCOL.
+            </p>
+        </div>
+    </div>
 </div>

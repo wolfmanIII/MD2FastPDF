@@ -130,3 +130,58 @@ async def delete_file(relative_path: str):
         
     # Use anyio to run os.remove in a thread pool to avoid blocking
     await anyio.to_thread.run_sync(os.remove, str(file_path))
+
+async def get_recent_files(limit: int = 5) -> List[Dict[str, Union[str, float]]]:
+    """
+    Returns the most recently modified markdown files in the project.
+    """
+    def _scan():
+        files = []
+        for root, _, filenames in os.walk(PROJECT_ROOT):
+            # Skip hidden directories
+            if any(part.startswith(".") for part in Path(root).relative_to(PROJECT_ROOT).parts):
+                continue
+                
+            for filename in filenames:
+                if filename.endswith(".md") and not filename.startswith("."):
+                    file_path = Path(root) / filename
+                    mtime = file_path.stat().st_mtime
+                    files.append({
+                        "name": filename,
+                        "path": str(file_path.relative_to(PROJECT_ROOT)),
+                        "mtime": mtime
+                    })
+        return sorted(files, key=lambda x: x["mtime"], reverse=True)[:limit]
+
+    return await anyio.to_thread.run_sync(_scan)
+
+async def get_storage_stats() -> Dict[str, Union[str, float]]:
+    """
+    Calculates storage metrics for the markdown archive.
+    """
+    def _calc():
+        total_size = 0
+        count = 0
+        for root, _, filenames in os.walk(PROJECT_ROOT):
+            if any(part.startswith(".") for part in Path(root).relative_to(PROJECT_ROOT).parts):
+                continue
+            for filename in filenames:
+                if filename.endswith(".md"):
+                    total_size += (Path(root) / filename).stat().st_size
+                    count += 1
+        
+        # Format size
+        if total_size < 1024:
+            size_str = f"{total_size} B"
+        elif total_size < 1024**2:
+            size_str = f"{total_size/1024:.1f} KB"
+        else:
+            size_str = f"{total_size/1024**2:.1f} MB"
+            
+        return {
+            "total_size": size_str,
+            "file_count": count,
+            "usage_percent": min(100, (total_size / (100 * 1024 * 1024)) * 100) # Assuming 100MB quota for Aegis Base
+        }
+
+    return await anyio.to_thread.run_sync(_calc)

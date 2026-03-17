@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from logic.files import list_directory_contents, read_file_content, write_file_content, create_new_file, delete_file
+from logic.files import list_directory_contents, read_file_content, write_file_content, create_new_file, delete_file, get_recent_files, get_storage_stats
 from logic.conversion import convert_markdown_to_pdf
 from pathlib import Path
 from fastapi.responses import HTMLResponse, Response
@@ -24,6 +24,8 @@ async def read_root(request: Request):
     # Get real system stats
     memory = psutil.virtual_memory()
     cpu_usage = psutil.cpu_percent()
+    recent = await get_recent_files(5)
+    storage = await get_storage_stats()
     
     return templates.TemplateResponse(
         request=request, 
@@ -32,6 +34,8 @@ async def read_root(request: Request):
             "title": "MD2FastPDF // Terminal",
             "memory_usage": memory.percent,
             "cpu_usage": cpu_usage,
+            "recent_files": recent,
+            "storage": storage,
             "api_gateway": "CONNECTED"
         }
     )
@@ -43,12 +47,17 @@ async def get_stats(request: Request):
     """
     memory = psutil.virtual_memory()
     cpu_usage = psutil.cpu_percent()
+    recent = await get_recent_files(5)
+    storage = await get_storage_stats()
+    
     return templates.TemplateResponse(
         request=request,
         name="components/dashboard.html",
         context={
             "memory_usage": memory.percent,
             "cpu_usage": cpu_usage,
+            "recent_files": recent,
+            "storage": storage,
             "api_gateway": "CONNECTED"
         }
     )
