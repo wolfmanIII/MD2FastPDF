@@ -34,13 +34,14 @@ async def read_root(request: Request):
         "cpu_usage": cpu_usage,
         "recent_files": recent,
         "storage": storage,
-        "api_gateway": "CONNECTED"
+        "api_gateway": "CONNECTED",
+        "component_template": "components/dashboard.html"
     }
 
     if request.headers.get("HX-Request"):
         return templates.TemplateResponse("components/dashboard.html", context)
 
-    return templates.TemplateResponse("index.html", context)
+    return templates.TemplateResponse("shell.html", context)
 
 @app.get("/stats", response_class=HTMLResponse)
 async def get_stats(request: Request):
@@ -84,15 +85,18 @@ async def list_files(request: Request, path: str = "."):
                 "path": os.sep.join(accumulated_path)
             })
     
-    return templates.TemplateResponse(
-        request=request,
-        name="components/file_list.html",
-        context={
-            "items": items,
-            "current_path": path,
-            "breadcrumbs": breadcrumbs
-        }
-    )
+    context = {
+        "request": request,
+        "items": items,
+        "current_path": path,
+        "breadcrumbs": breadcrumbs,
+        "component_template": "components/file_list.html"
+    }
+
+    if request.headers.get("HX-Request"):
+        return templates.TemplateResponse("components/file_list.html", context)
+    
+    return templates.TemplateResponse("shell.html", context)
 
 @app.get("/create/form", response_class=HTMLResponse)
 async def create_file_form(request: Request, path: str = "."):
@@ -125,16 +129,19 @@ async def get_editor(request: Request, path: str):
                 "path": os.sep.join(accumulated_path)
             })
 
-    return templates.TemplateResponse(
-        request=request,
-        name="components/editor.html",
-        context={
-            "content": content,
-            "path": path,
-            "filename": Path(path).name,
-            "breadcrumbs": breadcrumbs
-        }
-    )
+    context = {
+        "request": request,
+        "content": content,
+        "path": path,
+        "filename": Path(path).name,
+        "breadcrumbs": breadcrumbs,
+        "component_template": "components/editor.html"
+    }
+
+    if request.headers.get("HX-Request"):
+        return templates.TemplateResponse("components/editor.html", context)
+
+    return templates.TemplateResponse("shell.html", context)
 
 @app.post("/save")
 async def save_file(request: Request, path: str = Form(...), content: str = Form(...)):
@@ -208,15 +215,18 @@ async def view_pdf(request: Request, path: str):
                 "path": os.sep.join(accumulated_path)
             })
 
-    return templates.TemplateResponse(
-        request=request,
-        name="components/pdf_preview.html",
-        context={
-            "path": path,
-            "filename": Path(path).name,
-            "breadcrumbs": breadcrumbs
-        }
-    )
+    context = {
+        "request": request,
+        "path": path,
+        "filename": Path(path).name,
+        "breadcrumbs": breadcrumbs,
+        "component_template": "components/pdf_preview.html"
+    }
+
+    if request.headers.get("HX-Request"):
+        return templates.TemplateResponse("components/pdf_preview.html", context)
+
+    return templates.TemplateResponse("shell.html", context)
 
 @app.get("/pdf/preview")
 async def pdf_preview(path: str):

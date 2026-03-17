@@ -1,0 +1,15 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div id="main-view" class="w-full min-h-[60vh] relative">
+    <!-- HTMX Indicator -->
+    <div class="htmx-indicator absolute inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center rounded-sm opacity-0 transition-opacity duration-300">
+        <div class="flex items-center space-x-3 text-[var(--neon-cyan)] animate-pulse uppercase tracking-[0.3em] font-bold text-xs">
+            <span class="w-2 h-2 rounded-full bg-[var(--neon-cyan)]"></span>
+            <span>TRANSMITTING_DATA...</span>
+        </div>
+    </div>
+
+    {% include component_template %}
+</div>
+{% endblock %}

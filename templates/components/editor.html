@@ -5,7 +5,7 @@
             <span class="font-bold shrink-0 neon-dim">MODE_EDIT //</span>
             {% for crumb in breadcrumbs %}
             <button hx-get="/files?path={{ crumb.path }}" 
-                    hx-target="#main-view"
+                    hx-target="#main-view" hx-push-url="true"
                     class="aegis-link transition-colors whitespace-nowrap px-2 py-0.5 rounded-sm">
                 {{ crumb.name }}
             </button>

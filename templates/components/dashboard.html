@@ -1,5 +1,18 @@
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 tracking-widest uppercase"
-     hx-get="/stats" hx-trigger="every 30s" hx-swap="outerHTML">
+<div class="space-y-8">
+    <div class="flex items-center justify-between border-l-4 border-violet-500 pl-4 py-2 bg-violet-500/5">
+        <div>
+            <h1 class="text-2xl font-bold text-zinc-100 tracking-tight">DASHBOARD // OVERVIEW</h1>
+            <p class="text-zinc-500 text-sm mt-1">INDUSTRIAL DOCUMENTATION MANAGEMENT SYSTEM</p>
+        </div>
+        <div class="flex space-x-2">
+            <button hx-get="/files" hx-target="#main-view" hx-push-url="true" class="btn-solid text-xs rounded-sm transition-all focus:outline-none">
+                ACCESS_FILES
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 tracking-widest uppercase"
+         hx-get="/stats" hx-trigger="every 30s" hx-swap="outerHTML">
     <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative">
         <!-- Decorative bg line -->
         <div class="absolute -right-10 -top-10 w-32 h-32 bg-[var(--neon-cyan)]/5 rounded-full blur-2xl pointer-events-none"></div>
