@@ -55,7 +55,7 @@ async def get_stats(request: Request):
     
     return templates.TemplateResponse(
         request=request,
-        name="components/dashboard.html",
+        name="components/stats_grid.html",
         context={
             "memory_usage": memory.percent,
             "cpu_usage": cpu_usage,

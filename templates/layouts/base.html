@@ -205,6 +205,23 @@
     </footer>
 
     <div id="modal-container"></div>
+    
+    <!-- Global HTMX Indicator -->
+    <div id="htmx-global-indicator" class="htmx-indicator fixed top-0 left-0 w-full h-0.5 bg-[var(--neon-cyan)] z-[9999] opacity-0 pointer-events-none transition-opacity duration-300 shadow-[0_0_10px_rgba(0,240,255,1)]"></div>
+
+    <script>
+        document.body.addEventListener('htmx:beforeRequest', function(evt) {
+            console.log('SYSTEM_LOG // TRANSMITTING_DATA:', evt.detail.path);
+            document.getElementById('htmx-global-indicator').classList.add('htmx-request');
+        });
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            document.getElementById('htmx-global-indicator').classList.remove('htmx-request');
+        });
+        document.body.addEventListener('htmx:responseError', function(evt) {
+            console.error('SYSTEM_ERR // CONNECTION_FAILED:', evt.detail.xhr.status);
+            alert("COMMUNICATION_ERROR // STATUS: " + evt.detail.xhr.status);
+        });
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
