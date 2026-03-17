@@ -77,6 +77,10 @@
             text-transform: uppercase;
             letter-spacing: 0.15em;
             font-weight: 600;
+            padding: 0.6rem 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-ghost:hover {
             background-color: var(--neon-cyan);
@@ -94,6 +98,21 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase;
             letter-spacing: 0.15em;
+            padding: 0.6rem 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Prevent buttons from sticking together */
+        .btn-ghost + .btn-ghost, 
+        .btn-ghost + .btn-solid, 
+        .btn-solid + .btn-ghost, 
+        .btn-solid + .btn-solid,
+        button + button,
+        a.btn-ghost + a.btn-ghost,
+        a.btn-solid + a.btn-solid {
+            margin-left: 0.75rem;
         }
         .btn-solid:hover {
             background: #fff;

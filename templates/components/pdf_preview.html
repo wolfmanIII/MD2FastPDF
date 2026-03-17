@@ -13,14 +13,14 @@
             {% endfor %}
             <span class="neon-text font-bold whitespace-nowrap drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]">{{ filename }}</span>
         </div>
-        <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-1">
             <a href="/pdf/download?path={{ path }}" target="_blank"
-               class="btn-ghost px-5 py-1.5 text-[10px] rounded-sm flex items-center space-x-2 no-underline">
+               class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 no-underline">
                 {% with class="w-3 h-3" %}{% include 'icons/pdf.html' %}{% endwith %}
                 <span>DOWNLOAD_PDF</span>
             </a>
             <button hx-get="/editor?path={{ path }}" hx-target="#main-view"
-                    class="btn-solid px-5 py-2 text-[10px] rounded-sm flex items-center space-x-2">
+                    class="btn-solid text-[10px] rounded-sm flex items-center space-x-2">
                 {% with class="w-3 h-3" %}{% include 'icons/action-back.html' %}{% endwith %}
                 <span>BACK_TO_EDIT</span>
             </button>
