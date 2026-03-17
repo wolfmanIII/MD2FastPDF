@@ -117,3 +117,16 @@ async def create_new_file(relative_dir: str, filename: str):
         await f.write("")
     
     return str(Path(relative_dir) / filename)
+
+async def delete_file(relative_path: str):
+    """
+    Deletes a markdown file asynchronously.
+    """
+    file_path = sanitize_path(relative_path)
+    
+    # Check if it's a file and ends with .md
+    if not file_path.is_file() or not str(file_path).endswith(".md"):
+        raise HTTPException(status_code=400, detail="INVALID_FILE: Only .md files can be deleted")
+        
+    # Use anyio to run os.remove in a thread pool to avoid blocking
+    await anyio.to_thread.run_sync(os.remove, str(file_path))

@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from logic.files import list_directory_contents, read_file_content, write_file_content, create_new_file
+from logic.files import list_directory_contents, read_file_content, write_file_content, create_new_file, delete_file
 from logic.conversion import convert_markdown_to_pdf
 from pathlib import Path
 from fastapi.responses import HTMLResponse, Response
@@ -108,6 +108,29 @@ async def create_new_file_route(request: Request, path: str = Form("."), filenam
     """
     await create_new_file(path, filename)
     return await list_files(request, path)
+
+@app.get("/delete/confirm", response_class=HTMLResponse)
+async def delete_confirm(request: Request, path: str):
+    """
+    Returns the delete confirmation modal fragment.
+    """
+    filename = Path(path).name
+    return templates.TemplateResponse("components/delete_modal.html", {
+        "request": request,
+        "path": path,
+        "filename": filename
+    })
+
+@app.post("/delete", response_class=HTMLResponse)
+async def perform_delete(request: Request, path: str = Form(...)):
+    """
+    Deletes the file and returns the updated file list for the parent directory.
+    """
+    target_path = Path(path)
+    parent_dir = str(target_path.parent)
+    await delete_file(path)
+    # Return to the file list of the parent directory
+    return await list_files(request, parent_dir)
 
 @app.get("/pdf/view", response_class=HTMLResponse)
 async def view_pdf(request: Request, path: str):
