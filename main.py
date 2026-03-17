@@ -56,6 +56,16 @@ async def list_files(request: Request, path: str = "."):
         }
     )
 
+@app.get("/create/form", response_class=HTMLResponse)
+async def create_file_form(request: Request, path: str = "."):
+    """
+    Returns the file creation modal fragment.
+    """
+    return templates.TemplateResponse("components/create_modal.html", {
+        "request": request,
+        "path": path
+    })
+
 @app.get("/editor", response_class=HTMLResponse)
 async def get_editor(request: Request, path: str):
     """

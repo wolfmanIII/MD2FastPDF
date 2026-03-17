@@ -16,16 +16,13 @@
             {% endif %}
             {% endfor %}
         </div>
-        
-        <!-- NEW FILE INPUT -->
-        <form hx-post="/create" hx-target="#main-view" class="flex items-center space-x-2 ml-4">
-            <input type="hidden" name="path" value="{{ current_path }}">
-            <input type="text" name="filename" placeholder="NEW_FILE_NAME" required
-                   class="bg-black/40 border border-[var(--glass-border)] text-[var(--neon-cyan)] text-[10px] px-2 py-1 focus:outline-none focus:border-[var(--neon-cyan)] transition-colors rounded-sm uppercase tracking-widest w-32">
-            <button type="submit" class="btn-solid p-1 rounded-sm group">
-                {% with class="w-4 h-4" %}{% include 'icons/plus.html' %}{% endwith %}
-            </button>
-        </form>
+        <!-- NEW FILE BUTTON -->
+        <button hx-get="/create/form?path={{ current_path }}" 
+                hx-target="#modal-container"
+                class="btn-solid p-1.5 rounded-sm group flex items-center space-x-2 text-[10px] tracking-[0.2em] font-bold">
+            {% with class="w-4 h-4" %}{% include 'icons/plus.html' %}{% endwith %}
+            <span>NEW_ENTRY</span>
+        </button>
     </div>
 
     <div class="grid grid-cols-1 gap-1 relative z-10">
