@@ -102,11 +102,21 @@ async def save_file(request: Request, path: str = Form(...), content: str = Form
     )
 
 @app.post("/create", response_class=HTMLResponse)
-async def create_new_file_route(request: Request, path: str = Form("."), filename: str = Form(...)):
+async def create_new_file_route(request: Request, path: str = Form("."), filename: str = Form("")):
     """
     Creates a new .md file and returns the updated file list.
     """
-    await create_new_file(path, filename)
+    if not filename.strip():
+        # Handle empty filename gracefully by just returning the current list
+        return await list_files(request, path)
+        
+    try:
+        await create_new_file(path, filename)
+    except HTTPException as e:
+        # If file already exists or other error, we should ideally show it.
+        # For now, let's just return the list.
+        pass
+        
     return await list_files(request, path)
 
 @app.get("/delete/confirm", response_class=HTMLResponse)

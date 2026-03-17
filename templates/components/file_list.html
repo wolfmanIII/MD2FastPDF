@@ -20,7 +20,7 @@
         <!-- NEW FILE INPUT -->
         <form hx-post="/create" hx-target="#main-view" class="flex items-center space-x-2 ml-4">
             <input type="hidden" name="path" value="{{ current_path }}">
-            <input type="text" name="filename" placeholder="NEW_FILE_NAME" 
+            <input type="text" name="filename" placeholder="NEW_FILE_NAME" required
                    class="bg-black/40 border border-[var(--glass-border)] text-[var(--neon-cyan)] text-[10px] px-2 py-1 focus:outline-none focus:border-[var(--neon-cyan)] transition-colors rounded-sm uppercase tracking-widest w-32">
             <button type="submit" class="btn-solid p-1 rounded-sm group">
                 {% with class="w-4 h-4" %}{% include 'icons/plus.html' %}{% endwith %}
