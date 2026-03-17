@@ -6,7 +6,7 @@
         <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar">
             <h3 class="font-bold neon-dim shrink-0">DATA_ARCHIVE //</h3>
             <button hx-get="/" 
-                    hx-target="#main-view"
+                    hx-target="#aegis-view-core"
                     hx-push-url="true"
                     class="font-bold px-2 py-0.5 rounded-sm aegis-link transition-colors whitespace-nowrap">
                 DASHBOARD
@@ -14,7 +14,7 @@
             <span class="neon-dim">/</span>
             {% for crumb in breadcrumbs %}
             <button hx-get="/files?path={{ crumb.path }}" 
-                    hx-target="#main-view" hx-push-url="true"
+                    hx-target="#aegis-view-core" hx-push-url="true"
                     class="font-bold px-2 py-0.5 rounded-sm {% if loop.last %}neon-text{% else %}aegis-link{% endif %} transition-colors whitespace-nowrap">
                 {{ crumb.name }}
             </button>
@@ -40,7 +40,7 @@
             {% else %}
                 hx-get="/editor?path={{ item.path }}" 
             {% endif %}
-            hx-target="#main-view" hx-push-url="true">
+            hx-target="#aegis-view-core" hx-push-url="true">
             
             <div class="flex items-center space-x-4">
                 {% if item.is_dir %}

@@ -5,7 +5,7 @@
             <span class="font-bold shrink-0 neon-dim">MODE_PREVIEW //</span>
             {% for crumb in breadcrumbs %}
             <button hx-get="/files?path={{ crumb.path }}" 
-                    hx-target="#main-view" hx-push-url="true"
+                    hx-target="#aegis-view-core" hx-push-url="true"
                     class="aegis-link transition-colors whitespace-nowrap px-2 py-0.5 rounded-sm">
                 {{ crumb.name }}
             </button>
@@ -19,7 +19,7 @@
                 {% with class="w-3 h-3" %}{% include 'icons/pdf.html' %}{% endwith %}
                 <span>DOWNLOAD_PDF</span>
             </a>
-            <button hx-get="/editor?path={{ path }}" hx-target="#main-view" hx-push-url="true"
+            <button hx-get="/editor?path={{ path }}" hx-target="#aegis-view-core" hx-push-url="true"
                     class="btn-solid text-[10px] rounded-sm flex items-center space-x-2">
                 {% with class="w-3 h-3" %}{% include 'icons/action-back.html' %}{% endwith %}
                 <span>BACK_TO_EDIT</span>
