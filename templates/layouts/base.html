@@ -191,9 +191,9 @@
         </div>
     </header>
 
-    <main id="main-view" class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full relative z-10">
+    <div id="main-view" class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full relative z-10">
         {% block content %}{% endblock %}
-    </main>
+    </div>
 
     <footer class="neon-border-t py-6 bg-black/40 backdrop-blur-md tracking-widest uppercase">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
@@ -211,11 +211,12 @@
 
     <script>
         document.body.addEventListener('htmx:beforeRequest', function(evt) {
+            const target = evt.detail.target || document.querySelector(evt.detail.requestConfig.target);
             console.log('SYSTEM_LOG // TRANSMITTING_DATA:', evt.detail.path || evt.detail.requestConfig.path);
+            console.log('SYSTEM_LOG // TARGET_EXISTS:', !!document.getElementById('main-view'));
         });
         document.body.addEventListener('htmx:responseError', function(evt) {
             console.error('SYSTEM_ERR // CONNECTION_FAILED:', evt.detail.xhr.status);
-            alert("COMMUNICATION_ERROR // STATUS: " + evt.detail.xhr.status);
         });
     </script>
     {% block scripts %}{% endblock %}
