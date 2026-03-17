@@ -24,6 +24,7 @@ L'applicazione segue un modello di sviluppo asincrono basato su FastAPI, orienta
 
 ### 2.1 Gestione Filesystem (`logic/files.py`)
 - Filtra i file nascosti e di sistema.
+- Gestisce la creazione di nuovi file con estensione `.md` obbligatoria.
 - Implementa la sanitizzazione dei percorsi per prevenire attacchi di tipo *Directory Traversal*.
 - Esegue operazioni CRUD in modalità asincrona tramite `anyio`.
 

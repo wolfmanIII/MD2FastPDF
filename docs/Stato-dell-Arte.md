@@ -6,7 +6,7 @@
 
 ### 1.1 Gestione File
 - Navigazione filesystem locale con breadcrumbs dinamici.
-- Operazioni di lettura e scrittura asincrona di file Markdown.
+- Operazioni di creazione, lettura e scrittura asincrona di file Markdown.
 - Sistema di icone SVG per la distinzione tra file e directory.
 - Pulsante di eliminazione sicura (Purge) con interazione visiva.
 
