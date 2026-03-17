@@ -5,6 +5,13 @@
     <div class="flex items-center justify-between mb-4 neon-border-b pb-2 relative z-10">
         <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar">
             <h3 class="font-bold neon-dim shrink-0">DATA_ARCHIVE //</h3>
+            <button hx-get="/" 
+                    hx-target="#main-view"
+                    hx-push-url="true"
+                    class="font-bold px-2 py-0.5 rounded-sm aegis-link transition-colors whitespace-nowrap">
+                DASHBOARD
+            </button>
+            <span class="neon-dim">/</span>
             {% for crumb in breadcrumbs %}
             <button hx-get="/files?path={{ crumb.path }}" 
                     hx-target="#main-view"

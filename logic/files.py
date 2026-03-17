@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Union
 import anyio
@@ -149,7 +150,8 @@ async def get_recent_files(limit: int = 5) -> List[Dict[str, Union[str, float]]]
                     files.append({
                         "name": filename,
                         "path": str(file_path.relative_to(PROJECT_ROOT)),
-                        "mtime": mtime
+                        "mtime": mtime,
+                        "mtime_str": datetime.fromtimestamp(mtime).strftime("%d-%m %H:%M")
                     })
         return sorted(files, key=lambda x: x["mtime"], reverse=True)[:limit]
 

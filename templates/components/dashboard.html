@@ -57,10 +57,10 @@
         </h3>
         <div class="space-y-2">
             {% for file in recent_files %}
-            <div class="flex items-center justify-between text-[10px] group transition-all cursor-pointer hover:bg-[var(--neon-cyan)]/5 p-1 rounded-sm"
-                 hx-get="/editor?path={{ file.path }}" hx-target="#main-view">
+            <div class="flex items-center justify-between text-xs group transition-all cursor-pointer hover:bg-[var(--neon-cyan)]/5 p-1 rounded-sm"
+                 hx-get="/editor?path={{ file.path }}" hx-target="#main-view" hx-push-url="true">
                 <span class="neon-dim group-hover:neon-text transition-colors">>> {{ file.name }}</span>
-                <span class="text-zinc-600 font-mono">MOD_TS: {{ file.mtime|int }}</span>
+                <span class="text-zinc-600 font-mono text-[9px]">MOD_TS: {{ file.mtime_str }}</span>
             </div>
             {% else %}
             <div class="text-[10px] neon-dim italic">NO_RECENT_ACTIVITY_DETECTED</div>

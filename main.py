@@ -27,18 +27,20 @@ async def read_root(request: Request):
     recent = await get_recent_files(5)
     storage = await get_storage_stats()
     
-    return templates.TemplateResponse(
-        request=request, 
-        name="index.html", 
-        context={
-            "title": "MD2FastPDF // Terminal",
-            "memory_usage": memory.percent,
-            "cpu_usage": cpu_usage,
-            "recent_files": recent,
-            "storage": storage,
-            "api_gateway": "CONNECTED"
-        }
-    )
+    context = {
+        "request": request,
+        "title": "MD2FastPDF // Terminal",
+        "memory_usage": memory.percent,
+        "cpu_usage": cpu_usage,
+        "recent_files": recent,
+        "storage": storage,
+        "api_gateway": "CONNECTED"
+    }
+
+    if request.headers.get("HX-Request"):
+        return templates.TemplateResponse("components/dashboard.html", context)
+
+    return templates.TemplateResponse("index.html", context)
 
 @app.get("/stats", response_class=HTMLResponse)
 async def get_stats(request: Request):
