@@ -98,7 +98,7 @@ async def save_file(request: Request, path: str = Form(...), content: str = Form
     
     # Return a status message fragment
     return HTMLResponse(
-        content='<span class="text-green-500 font-mono text-xs uppercase animate-pulse">SISTEMA_AGGIORNATO // SALVATAGGIO_COMPLETATO</span>'
+        content='<span id="save-msg" class="text-[var(--neon-cyan)] font-bold text-[10px] tracking-widest uppercase mr-3" style="text-shadow: var(--neon-glow);">SISTEMA_AGGIORNATO // SALVATAGGIO_COMPLETATO</span><script>setTimeout(() => { let el = document.getElementById("save-msg"); if(el) el.remove(); }, 3000);</script>'
     )
 
 @app.get("/pdf/view", response_class=HTMLResponse)
