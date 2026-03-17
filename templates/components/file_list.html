@@ -8,7 +8,7 @@
             {% for crumb in breadcrumbs %}
             <button hx-get="/files?path={{ crumb.path }}" 
                     hx-target="#main-view"
-                    class="font-bold px-2 py-0.5 rounded-sm {% if loop.last %}neon-text{% else %}neon-dim neon-hover{% endif %} transition-colors whitespace-nowrap">
+                    class="font-bold px-2 py-0.5 rounded-sm {% if loop.last %}neon-text{% else %}aegis-link{% endif %} transition-colors whitespace-nowrap">
                 {{ crumb.name }}
             </button>
             {% if not loop.last %}
@@ -27,7 +27,7 @@
 
     <div class="grid grid-cols-1 gap-1 relative z-10">
         {% for item in items %}
-        <div class="group flex items-center justify-between p-2 rounded-sm neon-text neon-hover transition-all text-left cursor-pointer"
+        <div class="group flex items-center justify-between p-2 rounded-sm neon-text neon-hover-item transition-all text-left cursor-pointer"
             {% if item.is_dir %}
                 hx-get="/files?path={{ item.path }}" 
             {% else %}
