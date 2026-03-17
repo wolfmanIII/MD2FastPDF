@@ -31,14 +31,14 @@
             <div class="flex items-center space-x-4">
                 {% if item.is_dir %}
                 <span class="neon-dim group-hover:neon-text transition-colors">
-                    <svg class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                    {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/dossier.html' %}{% endwith %}
                 </span>
                 <span class="font-bold tracking-widest">
                     {{ item.name }}/
                 </span>
                 {% else %}
                 <span class="neon-dim group-hover:neon-text transition-colors">
-                    <svg class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/operations-checklist.html' %}{% endwith %}
                 </span>
                 <span class="font-bold tracking-widest">
                     {{ item.name }}
@@ -48,8 +48,11 @@
             
             <div class="opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
                 {% if not item.is_dir %}
-                <div class="text-[10px] text-red-500 border border-red-500/50 hover:bg-red-500/20 px-2 py-1 rounded-sm font-bold z-10 transition-colors"
-                     onclick="event.stopPropagation(); alert('Deletion pending implementation...');">PURGE</div>
+                <button type="button" class="group/btn flex items-center space-x-1 text-[10px] text-red-500 border border-red-500/50 hover:bg-red-500/20 px-2 py-1 rounded-sm font-bold z-10 transition-colors"
+                     onclick="event.stopPropagation(); alert('Deletion pending implementation...');">
+                     {% with class="w-3 h-3 group-hover/btn:animate-pulse" %}{% include 'icons/action-trash.html' %}{% endwith %}
+                     <span>PURGE</span>
+                </button>
                 {% endif %}
             </div>
         </button>

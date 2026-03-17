@@ -1,0 +1,13 @@
+{# Cargo Container - Cylinder/Drum #}
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ dim|default(24) }}" height="{{ dim|default(24) }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="{{ class|default('') }}">
+  {# Cylinder top lid #}
+  <ellipse cx="12" cy="5" rx="8" ry="3"/>
+  {# Cylinder body sides #}
+  <path d="M4 5v14"/>
+  <path d="M20 5v14"/>
+  {# Cylinder bottom #}
+  <ellipse cx="12" cy="19" rx="8" ry="3"/>
+  {# Horizontal bands/rings #}
+  <path d="M4 10c0 1.66 3.58 3 8 3s8-1.34 8-3"/>
+  <path d="M4 14c0 1.66 3.58 3 8 3s8-1.34 8-3"/>
+</svg>
