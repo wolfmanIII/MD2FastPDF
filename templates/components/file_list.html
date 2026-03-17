@@ -31,14 +31,14 @@
             <div class="flex items-center space-x-4">
                 {% if item.is_dir %}
                 <span class="neon-dim group-hover:neon-text transition-colors">
-                    {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/dossier.html' %}{% endwith %}
+                    {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/folder.html' %}{% endwith %}
                 </span>
                 <span class="font-bold tracking-widest">
                     {{ item.name }}/
                 </span>
                 {% else %}
                 <span class="neon-dim group-hover:neon-text transition-colors">
-                    {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/operations-checklist.html' %}{% endwith %}
+                    {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/cube.html' %}{% endwith %}
                 </span>
                 <span class="font-bold tracking-widest">
                     {{ item.name }}
