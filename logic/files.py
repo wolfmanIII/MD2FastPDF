@@ -92,3 +92,28 @@ async def write_file_content(relative_path: str, content: str):
 
     async with await anyio.open_file(file_path, mode="w", encoding="utf-8") as f:
         await f.write(content)
+
+async def create_new_file(relative_dir: str, filename: str):
+    """
+    Creates a new empty markdown file in the specified directory.
+    Ensures the .md extension.
+    """
+    filename = filename.strip()
+    if not filename:
+        raise HTTPException(status_code=400, detail="FILENAME_REQUIRED")
+        
+    if not filename.lower().endswith(".md"):
+        filename += ".md"
+        
+    # Sanitize the directory first, then join and sanitize the full path
+    target_dir = sanitize_path(relative_dir)
+    file_path = sanitize_path(os.path.join(relative_dir, filename))
+    
+    # Check if file already exists
+    if file_path.exists():
+        raise HTTPException(status_code=400, detail="FILE_ALREADY_EXISTS")
+        
+    async with await anyio.open_file(file_path, mode="w", encoding="utf-8") as f:
+        await f.write("")
+    
+    return str(Path(relative_dir) / filename)

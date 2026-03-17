@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from logic.files import list_directory_contents, read_file_content, write_file_content
+from logic.files import list_directory_contents, read_file_content, write_file_content, create_new_file
 from logic.conversion import convert_markdown_to_pdf
 from pathlib import Path
 from fastapi.responses import HTMLResponse, Response
@@ -100,6 +100,14 @@ async def save_file(request: Request, path: str = Form(...), content: str = Form
     return HTMLResponse(
         content='<span id="save-msg" class="text-[var(--neon-cyan)] font-bold text-[10px] tracking-widest uppercase mr-3" style="text-shadow: var(--neon-glow);">SISTEMA_AGGIORNATO // SALVATAGGIO_COMPLETATO</span><script>setTimeout(() => { let el = document.getElementById("save-msg"); if(el) el.remove(); }, 3000);</script>'
     )
+
+@app.post("/create", response_class=HTMLResponse)
+async def create_new_file_route(request: Request, path: str = Form("."), filename: str = Form(...)):
+    """
+    Creates a new .md file and returns the updated file list.
+    """
+    await create_new_file(path, filename)
+    return await list_files(request, path)
 
 @app.get("/pdf/view", response_class=HTMLResponse)
 async def view_pdf(request: Request, path: str):
