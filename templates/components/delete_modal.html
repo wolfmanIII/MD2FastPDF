@@ -2,11 +2,11 @@
     <div class="modal-box glass-panel border-red-500/50 max-w-md shadow-[0_0_30px_rgba(239,68,68,0.2)]">
         <div class="flex items-center space-x-3 mb-4 text-red-500">
             {% with class="w-6 h-6 animate-pulse" %}{% include 'icons/action-trash.html' %}{% endwith %}
-            <h2 class="text-xl font-bold tracking-[0.2em]">SISTEMA_DANGER // CONFERMA</h2>
+            <h2 class="text-xl font-bold tracking-[0.2em]">SISTEMA_DANGER // CONFIRMATION</h2>
         </div>
         
         <p class="text-zinc-400 text-sm mb-6 tracking-wide uppercase">
-            STAI PER ELIMINARE DEFINITIVAMENTE IL FILE:<br>
+            YOU ARE ABOUT TO PERMANENTLY DELETE THIS FILE:<br>
             <span class="text-white font-mono break-all">{{ filename }}</span>
         </p>
         
@@ -14,7 +14,7 @@
             <button type="button" 
                     onclick="document.getElementById('delete-modal').remove()"
                     class="btn btn-ghost btn-sm text-zinc-500 uppercase tracking-widest">
-                ANNULLA
+                CANCEL
             </button>
             <button hx-post="/delete" 
                     hx-vals='{"path": "{{ path }}"}'
