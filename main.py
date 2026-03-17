@@ -7,6 +7,7 @@ from logic.files import list_directory_contents, read_file_content, write_file_c
 from logic.conversion import convert_markdown_to_pdf
 from pathlib import Path
 from fastapi.responses import HTMLResponse, Response
+import psutil
 
 app = FastAPI(title="MD2FastPDF", description="Industrial Markdown Editor")
 
@@ -20,10 +21,36 @@ async def read_root(request: Request):
     Main entry point for the MD2FastPDF application.
     Renders the industrial dashboard.
     """
+    # Get real system stats
+    memory = psutil.virtual_memory()
+    cpu_usage = psutil.cpu_percent()
+    
     return templates.TemplateResponse(
         request=request, 
         name="index.html", 
-        context={"title": "MD2FastPDF // Terminal"}
+        context={
+            "title": "MD2FastPDF // Terminal",
+            "memory_usage": memory.percent,
+            "cpu_usage": cpu_usage,
+            "api_gateway": "CONNECTED"
+        }
+    )
+
+@app.get("/stats", response_class=HTMLResponse)
+async def get_stats(request: Request):
+    """
+    Returns the system status fragment for live updates.
+    """
+    memory = psutil.virtual_memory()
+    cpu_usage = psutil.cpu_percent()
+    return templates.TemplateResponse(
+        request=request,
+        name="components/dashboard.html",
+        context={
+            "memory_usage": memory.percent,
+            "cpu_usage": cpu_usage,
+            "api_gateway": "CONNECTED"
+        }
     )
 
 @app.get("/files", response_class=HTMLResponse)

@@ -11,6 +11,7 @@ jinja2 = "*"
 uvicorn = "*"
 aiofiles = "*"
 markdown = "*"
+psutil = "*"
 
 [dev-packages]
 
