@@ -1,0 +1,180 @@
+<div id="editor-pure-root" style="width: 100% !important; height: 85vh !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; min-width: 0 !important; background: transparent !important;">
+    
+    <div class="flex flex-col space-y-3 shrink-0" style="margin-bottom: 1rem !important;">
+        <!-- Row 1: Status & Context -->
+        <div class="glass-panel px-6 py-3 flex items-center justify-between border-b-0 rounded-b-none" style="background: rgba(20, 20, 25, 0.8) !important;">
+            <div class="flex items-center space-x-3 text-[10px] uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden flex-grow">
+                <span class="font-bold neon-text shrink-0">SYS_LINK //</span>
+                    <button hx-get="/" hx-target="#aegis-view-core" hx-push-url="true" class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">DASHBOARD</button>
+                    <span class="opacity-100 text-zinc-200 shrink-0">/</span>
+                    {% for crumb in breadcrumbs %}
+                    <button hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true" class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{ crumb.name }}</button>
+                    <span class="opacity-100 text-zinc-200 shrink-0">/</span>
+                    {% endfor %}
+                    <span class="text-white font-bold bg-white/10 px-2 py-0.5 rounded shadow-sm truncate">{{ filename }}</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4 text-xs uppercase tracking-widest font-mono">
+                <span id="char-count" class="text-zinc-100 font-bold">0 CHRS</span>
+                <div class="flex items-center space-x-2 group">
+                    <span class="text-zinc-100 font-bold">ST:</span>
+                    <span class="neon-text animate-pulse group-hover:neon-glow transition-all">ACTIVE_READY</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Action Control Panel -->
+        <div class="glass-panel px-6 py-2 flex items-center justify-between border-t border-white/5 rounded-t-none">
+            <div class="flex items-center space-x-4">
+                <!-- Group 1: Typography -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="insertTag('**', '**')" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-all rounded-md text-zinc-400 hover:text-white border border-transparent hover:border-white/5" title="Bold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z"></path></svg>
+                    </button>
+                    <button onclick="insertTag('*', '*')" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-all rounded-md text-zinc-400 hover:text-white border border-transparent hover:border-white/5" title="Italic">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m-4 0h4m-6 16h4"></path></svg>
+                    </button>
+                    <button onclick="insertTag('# ', '')" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-all rounded-md text-zinc-400 hover:text-white border border-transparent hover:border-white/5" title="Heading">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 2v20m10-20v20M7 12h10"></path></svg>
+                    </button>
+                </div>
+                
+                <span class="w-px h-6 bg-white/10 mx-2"></span>
+
+                <!-- Group 2: Layout & Blocks -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="insertTag('> ', '')" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-all rounded-md text-zinc-400 hover:text-white border border-transparent hover:border-white/5" title="Quote">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H16.017C14.9124 8 14.017 7.10457 14.017 6V3C14.017 2.44772 14.4647 2 15.017 2H19.017C21.2261 2 23.017 3.79086 23.017 6V15C23.017 18.3137 20.3307 21 17.017 21H14.017ZM3.017 21L3.017 18C3.017 16.8954 3.91243 16 5.017 16H8.017C8.56928 16 9.017 15.5523 9.017 15V9C9.017 8.44772 8.56928 8 8.017 8H5.017C3.91243 8 3.017 7.10457 3.017 6V3C3.017 2.44772 3.46472 2 4.017 2H8.017C10.2261 2 12.017 3.79086 12.017 6V15C12.017 18.3137 9.33071 21 6.017 21H3.017Z"></path></svg>
+                    </button>
+                    <button onclick="insertTag('- ', '')" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-all rounded-md text-zinc-400 hover:text-white border border-transparent hover:border-white/5" title="List">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                    <button onclick="insertTag('\n```mermaid\ngraph TD\n    A[START] --> B(PROCESS)\n```\n', '')" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-all rounded-md text-[var(--neon-cyan)] hover:text-white border border-[var(--neon-cyan-dim)]/20 hover:border-white/20 shadow-[0_0_10px_rgba(0,240,255,0.1)]" title="Mermaid Diagram">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21l4-4m0 0l4 4m-4-4V3"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <div id="save-notification" class="text-[9px] uppercase tracking-widest text-zinc-500 font-mono"></div>
+                <button hx-post="/save" hx-include="#editor-form" hx-target="#save-notification"
+                        class="btn-solid text-[10px] h-10 px-8 shadow-[0_0_15px_rgba(0,240,255,0.15)] hover:shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all">
+                    <span>COMMIT_CHANGES</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Editor Interface (FLEX SPLIT LOCK) -->
+    <div class="flex-grow flex space-x-3 min-w-0 min-h-0 overflow-hidden" style="width: 100% !important;">
+        
+        <!-- Input Pane -->
+        <div class="flex-1 min-w-0 flex flex-col glass-panel p-0 overflow-hidden relative group" style="background: rgba(10, 10, 15, 0.4) !important;">
+            <div class="flex items-center justify-between px-6 py-2 neon-border-b bg-black/40 shrink-0">
+                <span class="text-[11px] text-zinc-100 uppercase tracking-widest font-bold">INPUT_BUFFER</span>
+            </div>
+            <div class="flex-grow w-full overflow-hidden relative">
+                <form id="editor-form" class="h-full w-full absolute inset-0 flex flex-col m-0 overflow-hidden">
+                    <input type="hidden" name="path" value="{{ path }}">
+                    <textarea name="content" id="pure-editor-input"
+                        class="w-full h-full bg-transparent p-10 font-mono text-base leading-[1.8] outline-none resize-none text-zinc-300 focus:text-white transition-colors"
+                        style="border: none !important; font-family: 'JetBrains Mono', monospace !important; font-variant-ligatures: normal !important;"
+                        spellcheck="false">{{ content }}</textarea>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preview Pane -->
+        <div class="flex-1 min-w-0 flex flex-col glass-panel overflow-hidden relative" style="background: rgba(10, 10, 15, 0.4) !important;">
+            <div class="flex items-center justify-between px-6 py-2 neon-border-b bg-black/40 shrink-0">
+                <span class="text-[9px] neon-text uppercase tracking-widest font-bold">PREVIEW_RENDER</span>
+                <div class="w-2 h-2 rounded-full neon-bg animate-pulse shadow-[0_0_8px_rgba(0,240,255,0.5)]"></div>
+            </div>
+            <div class="flex-grow w-full overflow-hidden relative">
+                <div id="pure-preview-pane" 
+                     class="absolute inset-0 p-12 overflow-y-auto prose prose-invert prose-p:leading-[1.8] prose-zinc max-w-none prose-pre:bg-black/80 prose-pre:border prose-pre:border-white/10 prose-headings:neon-text prose-a:text-[var(--neon-cyan)] scrollbar-thin text-zinc-300">
+                    <!-- Content rendered by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const input = document.getElementById('pure-editor-input');
+            const preview = document.getElementById('pure-preview-pane');
+            const charCount = document.getElementById('char-count');
+            
+            marked.setOptions({
+                highlight: function(code, lang) {
+                    if (lang && hljs.getLanguage(lang)) {
+                        return hljs.highlight(code, { language: lang }).value;
+                    }
+                    return hljs.highlightAuto(code).value;
+                },
+                breaks: true,
+                gfm: true
+            });
+
+            const renderMarkdown = () => {
+                const raw = input.value;
+                preview.innerHTML = marked.parse(raw);
+                charCount.innerText = raw.length + ' CHRS';
+                
+                const mermaidBlocks = preview.querySelectorAll('pre code.language-mermaid');
+                mermaidBlocks.forEach((block, index) => {
+                    const code = block.innerText;
+                    const container = block.parentElement;
+                    const id = 'mermaid-' + Date.now() + '-' + index;
+                    container.innerHTML = `<div class="mermaid" id="${id}" style="width: 100% !important; overflow: auto !important;">${code}</div>`;
+                    try {
+                        mermaid.init(undefined, container.querySelector('.mermaid'));
+                    } catch (e) {
+                        console.error('MERMAID_ERR:', e);
+                    }
+                });
+            };
+
+            window.insertTag = (before, after) => {
+                const start = input.selectionStart;
+                const end = input.selectionEnd;
+                const scrollTop = input.scrollTop;
+                const text = input.value;
+                const selected = text.substring(start, end);
+                input.value = text.substring(0, start) + before + selected + after + text.substring(end);
+                input.focus();
+                input.selectionStart = start + before.length;
+                input.selectionEnd = end + before.length;
+                input.scrollTop = scrollTop;
+                renderMarkdown();
+            };
+
+            renderMarkdown();
+            input.addEventListener('input', renderMarkdown);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = input.selectionStart;
+                    const end = input.selectionEnd;
+                    const scrollTop = input.scrollTop;
+                    input.value = input.value.substring(0, start) + "    " + input.value.substring(end);
+                    input.selectionStart = input.selectionEnd = start + 4;
+                    input.scrollTop = scrollTop;
+                    renderMarkdown();
+                }
+            });
+        })();
+    </script>
+
+    <style>
+        #pure-editor-input { scrollbar-width: thin; scrollbar-color: rgba(0, 240, 255, 0.2) transparent; }
+        .scrollbar-thin::-webkit-scrollbar { width: 5px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; border: 1px solid rgba(0, 240, 255, 0.05); }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(0, 240, 255, 0.3); }
+        
+        .prose pre { background: rgba(0,0,0,0.4) !important; border-radius: 4px; padding: 1.5rem !important; }
+        .prose h1, .prose h2, .prose h3 { margin-top: 1.5em !important; margin-bottom: 0.5em !important; }
+        .prose p { margin-bottom: 1.25em !important; color: #f4f4f5; }
+    </style>
+</div>
