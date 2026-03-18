@@ -6,8 +6,10 @@
             <div class="flex items-center space-x-3 text-[10px] uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden flex-grow">
                 <span class="font-bold neon-text shrink-0">SYS_LINK //</span>
                 <div class="flex items-center space-x-2 neon-dim truncate">
+                    <button hx-get="/" hx-target="#aegis-view-core" hx-push-url="true" class="hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">DASHBOARD</button>
+                    <span class="opacity-30 shrink-0">/</span>
                     {% for crumb in breadcrumbs %}
-                    <span class="hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{ crumb.name }}</span>
+                    <button hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true" class="hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{ crumb.name }}</button>
                     <span class="opacity-30 shrink-0">/</span>
                     {% endfor %}
                     <span class="text-white font-bold bg-white/10 px-2 py-0.5 rounded shadow-sm truncate">{{ filename }}</span>
