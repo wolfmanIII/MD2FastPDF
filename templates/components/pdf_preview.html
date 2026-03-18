@@ -1,4 +1,4 @@
-<div class="flex-grow flex flex-col min-h-[85vh] glass-panel relative overflow-hidden tracking-widest uppercase">
+<div class="flex-grow flex flex-col h-[85vh] glass-panel relative overflow-hidden tracking-widest uppercase">
     <!-- Header -->
     <div class="flex items-center justify-between px-4 py-3 neon-border-b shrink-0 relative z-10 bg-black/40">
         <div class="flex items-center space-x-2 text-[10px] uppercase overflow-x-auto no-scrollbar">
@@ -28,10 +28,11 @@
     </div>
 
     <!-- PDF Viewer -->
-    <div class="flex-grow bg-transparent flex items-center justify-center p-4 relative z-10">
-        <object data="/pdf/preview?path={{ path }}#view=FitH" 
+    <div class="flex-grow relative z-10 p-6" style="height: 80vh !important;">
+        <object data="/pdf/preview?path={{ path }}#view=FitV" 
                 type="application/pdf" 
-                class="w-full h-full neon-border shadow-[0_0_20px_rgba(0,240,255,0.15)] rounded-sm bg-zinc-900/80">
+                class="w-full h-full neon-border shadow-[0_0_30px_rgba(0,240,255,0.2)] rounded-sm bg-zinc-950"
+                style="height: 100% !important; min-height: 100% !important;">
             <div class="text-center p-8 space-y-4">
                 <p class="neon-dim text-sm uppercase">Your browser does not support direct PDF viewing.</p>
                 <a href="/pdf/download?path={{ path }}" class="aegis-link text-xs">DOWNLOAD PDF DOCUMENT</a>
