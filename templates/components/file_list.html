@@ -4,23 +4,12 @@
 
     <div class="flex items-center justify-between mb-4 neon-border-b pb-2 relative z-10">
         <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar">
-            <h3 class="font-bold neon-dim shrink-0">DATA_ARCHIVE //</h3>
-            <button hx-get="/" 
-                    hx-target="#aegis-view-core"
-                    hx-push-url="true"
-                    class="font-bold px-2 py-0.5 rounded-sm aegis-link transition-colors whitespace-nowrap">
-                DASHBOARD
-            </button>
-            <span class="neon-dim">/</span>
+            <h3 class="font-bold text-zinc-100 shrink-0">DATA_ARCHIVE //</h3>
+            <button hx-get="/" hx-target="#aegis-view-core" hx-push-url="true" class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">DASHBOARD</button>
+            <span class="opacity-100 text-zinc-200 shrink-0">/</span>
             {% for crumb in breadcrumbs %}
-            <button hx-get="/files?path={{ crumb.path }}" 
-                    hx-target="#aegis-view-core" hx-push-url="true"
-                    class="font-bold px-2 py-0.5 rounded-sm {% if loop.last %}neon-text{% else %}aegis-link{% endif %} transition-colors whitespace-nowrap">
-                {{ crumb.name }}
-            </button>
-            {% if not loop.last %}
-            <span class="neon-dim">/</span>
-            {% endif %}
+            <button hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true" class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{ crumb.name }}</button>
+            <span class="opacity-100 text-zinc-200 shrink-0">/</span>
             {% endfor %}
         </div>
         <!-- NEW FILE BUTTON -->
@@ -44,14 +33,14 @@
             
             <div class="flex items-center space-x-4">
                 {% if item.is_dir %}
-                <span class="neon-dim group-hover:neon-text transition-colors">
+                <span class="text-zinc-100 group-hover:neon-text transition-colors">
                     {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/folder.html' %}{% endwith %}
                 </span>
                 <span class="font-bold tracking-widest">
                     {{ item.name }}/
                 </span>
                 {% else %}
-                <span class="neon-dim group-hover:neon-text transition-colors">
+                <span class="text-zinc-100 group-hover:neon-text transition-colors">
                     {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/cube.html' %}{% endwith %}
                 </span>
                 <span class="font-bold tracking-widest">

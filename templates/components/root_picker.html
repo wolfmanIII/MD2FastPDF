@@ -20,7 +20,7 @@
                 <div hx-get="/root-picker?path={{ parent_path }}" hx-target="#modal-container" 
                      class="flex items-center space-x-3 p-2 rounded-sm cursor-pointer hover:bg-[var(--neon-cyan)]/5 group transition-all">
                     <span class="neon-text opacity-50">{% with class="w-4 h-4" %}{% include 'icons/action-back.html' %}{% endwith %}</span>
-                    <span class="text-xs neon-dim group-hover:neon-text uppercase tracking-widest">.. [UP_DIRECTORY]</span>
+                    <span class="text-xs text-zinc-100 group-hover:neon-text uppercase tracking-widest">.. [UP_DIRECTORY]</span>
                 </div>
                 {% endif %}
 
@@ -29,7 +29,7 @@
                      class="flex items-center justify-between p-2 rounded-sm cursor-pointer hover:bg-[var(--neon-cyan)]/5 group transition-all">
                     <div class="flex items-center space-x-3">
                         <span class="neon-text">{% with class="w-4 h-4" %}{% include 'icons/folder.html' %}{% endwith %}</span>
-                        <span class="text-xs neon-dim group-hover:neon-text uppercase tracking-widest">{{ dir.name }}</span>
+                        <span class="text-xs text-zinc-100 group-hover:neon-text uppercase tracking-widest">{{ dir.name }}</span>
                     </div>
                 </div>
                 {% endfor %}

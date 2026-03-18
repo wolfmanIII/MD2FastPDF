@@ -8,28 +8,28 @@
         </h3>
         <div class="space-y-4">
             <div class="flex justify-between items-center text-sm">
-                <span class="neon-dim">PROJECT_ROOT:</span>
+                <span class="text-zinc-100">PROJECT_ROOT:</span>
                 <span class="neon-text" title="{{ full_root }}">{{ root_name }}</span>
             </div>
             <div class="flex justify-between items-center text-sm">
-                <span class="neon-dim">API_GATEWAY:</span>
+                <span class="text-zinc-100">API_GATEWAY:</span>
                 <span class="neon-text animate-pulse">{{ api_gateway }}</span>
             </div>
             <div class="flex justify-between items-center text-sm">
-                <span class="neon-dim">MEMORY_USAGE:</span>
+                <span class="text-zinc-100">MEMORY_USAGE:</span>
                 <div class="flex items-center space-x-2">
                     <div class="w-32 h-[3px] bg-black overflow-hidden border border-[var(--glass-border)]">
-                        <div class="h-full neon-bg transition-all" style="width: {{ memory_usage }}%;"></div>
+                        <div class="h-full neon-bg transition-all" style="--w: {{ memory_usage }}%; width: var(--w);"></div>
                     </div>
                     <span class="neon-text text-xs">{{ memory_usage }}%</span>
                 </div>
             </div>
             <div class="flex justify-between items-center text-sm">
-                <span class="neon-dim">CORE_LOAD:</span>
+                <span class="text-zinc-100">CORE_LOAD:</span>
                 <span class="neon-text">{{ cpu_usage }}%</span>
             </div>
             <div class="flex justify-between items-center text-sm">
-                <span class="neon-dim">CORE_TEMP:</span>
+                <span class="text-zinc-100">CORE_TEMP:</span>
                 <span class="neon-text">OPTIMAL</span>
             </div>
         </div>
@@ -41,7 +41,7 @@
             {% with class="w-8 h-8 neon-text" %}{% include 'icons/holocron.html' %}{% endwith %}
         </div>
         <h3 class="text-sm font-bold neon-text mb-2 tracking-[0.2em] w-full z-10">A.I. MATRIX ACTIVE</h3>
-        <p class="text-[13px] text-zinc-300 leading-relaxed max-w-xs z-10">
+        <p class="text-[13px] text-zinc-100 leading-relaxed max-w-xs z-10">
             AWAITING INPUT COMMAND.<br><br>
             INITIALIZE EXPLORER SEQUENCE TO ACCESS DATA FRAGMENTS.
         </p>
@@ -57,11 +57,11 @@
             {% for file in recent_files %}
             <div class="flex items-center justify-between text-xs group transition-all cursor-pointer hover:bg-[var(--neon-cyan)]/5 p-1 rounded-sm"
                  hx-get="/editor?path={{ file.path }}" hx-target="#aegis-view-core" hx-push-url="true">
-                <span class="neon-dim group-hover:neon-text transition-colors">>> {{ file.name }}</span>
-                <span class="text-zinc-400 font-mono text-[11px]">MOD_TS: {{ file.mtime_str }}</span>
+                <span class="text-zinc-100 group-hover:neon-text transition-colors">>> {{ file.name }}</span>
+                <span class="text-zinc-100 font-mono text-[11px]">MOD_TS: {{ file.mtime_str }}</span>
             </div>
             {% else %}
-            <div class="text-xs text-zinc-500 italic">NO_RECENT_ACTIVITY_DETECTED</div>
+            <div class="text-xs text-zinc-100 italic">NO_RECENT_ACTIVITY_DETECTED</div>
             {% endfor %}
         </div>
     </div>
@@ -73,23 +73,23 @@
         </h3>
         <div class="space-y-4">
             <div class="flex justify-between items-center text-sm">
-                <span class="neon-dim">ARCHIVE_SIZE:</span>
+                <span class="text-zinc-100">ARCHIVE_SIZE:</span>
                 <span class="neon-text">{{ storage.total_size }}</span>
             </div>
             <div class="flex justify-between items-center text-sm">
-                <span class="neon-dim">FRAGMENT_COUNT:</span>
+                <span class="text-zinc-100">FRAGMENT_COUNT:</span>
                 <span class="neon-text">{{ storage.file_count }}</span>
             </div>
             <div class="flex flex-col space-y-1">
-                <div class="flex justify-between text-xs text-zinc-400 uppercase">
+                <div class="flex justify-between text-xs text-zinc-200 uppercase">
                     <span>DENSITY_CAPACITY</span>
                     <span>{{ storage.usage_percent|round(1) }}%</span>
                 </div>
                 <div class="w-full h-[4px] bg-black border border-[var(--glass-border)] overflow-hidden">
-                    <div class="h-full neon-bg transition-all duration-1000" style="width: {{ storage.usage_percent }}%;"></div>
+                    <div class="h-full neon-bg transition-all duration-1000" style="--w: {{ storage.usage_percent }}%; width: var(--w);"></div>
                 </div>
             </div>
-            <p class="text-xs text-zinc-300 mt-2 uppercase tracking-wide">
+            <p class="text-xs text-zinc-100 mt-2 uppercase tracking-wide">
                 WARNING: EXCEEDING DATA DENSITY MAY TRIGGER AUTOMATIC PURGE PROTOCOL.
             </p>
         </div>

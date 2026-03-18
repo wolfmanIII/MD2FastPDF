@@ -5,20 +5,19 @@
         <div class="glass-panel px-6 py-3 flex items-center justify-between border-b-0 rounded-b-none" style="background: rgba(20, 20, 25, 0.8) !important;">
             <div class="flex items-center space-x-3 text-[10px] uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden flex-grow">
                 <span class="font-bold neon-text shrink-0">SYS_LINK //</span>
-                <div class="flex items-center space-x-2 neon-dim truncate">
-                    <button hx-get="/" hx-target="#aegis-view-core" hx-push-url="true" class="hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">DASHBOARD</button>
-                    <span class="opacity-30 shrink-0">/</span>
+                    <button hx-get="/" hx-target="#aegis-view-core" hx-push-url="true" class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">DASHBOARD</button>
+                    <span class="opacity-100 text-zinc-200 shrink-0">/</span>
                     {% for crumb in breadcrumbs %}
-                    <button hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true" class="hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{ crumb.name }}</button>
-                    <span class="opacity-30 shrink-0">/</span>
+                    <button hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true" class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{ crumb.name }}</button>
+                    <span class="opacity-100 text-zinc-200 shrink-0">/</span>
                     {% endfor %}
                     <span class="text-white font-bold bg-white/10 px-2 py-0.5 rounded shadow-sm truncate">{{ filename }}</span>
                 </div>
             </div>
             <div class="flex items-center space-x-4 text-xs uppercase tracking-widest font-mono">
-                <span id="char-count" class="text-zinc-200">0 CHRS</span>
+                <span id="char-count" class="text-zinc-100 font-bold">0 CHRS</span>
                 <div class="flex items-center space-x-2 group">
-                    <span class="text-zinc-400">ST:</span>
+                    <span class="text-zinc-100 font-bold">ST:</span>
                     <span class="neon-text animate-pulse group-hover:neon-glow transition-all">ACTIVE_READY</span>
                 </div>
             </div>
@@ -72,7 +71,7 @@
         <!-- Input Pane -->
         <div class="flex-1 min-w-0 flex flex-col glass-panel p-0 overflow-hidden relative group" style="background: rgba(10, 10, 15, 0.4) !important;">
             <div class="flex items-center justify-between px-6 py-2 neon-border-b bg-black/40 shrink-0">
-                <span class="text-[9px] neon-dim uppercase tracking-widest font-bold">INPUT_BUFFER</span>
+                <span class="text-[11px] text-zinc-100 uppercase tracking-widest font-bold">INPUT_BUFFER</span>
             </div>
             <div class="flex-grow w-full overflow-hidden relative">
                 <form id="editor-form" class="h-full w-full absolute inset-0 flex flex-col m-0 overflow-hidden">
@@ -176,6 +175,6 @@
         
         .prose pre { background: rgba(0,0,0,0.4) !important; border-radius: 4px; padding: 1.5rem !important; }
         .prose h1, .prose h2, .prose h3 { margin-top: 1.5em !important; margin-bottom: 0.5em !important; }
-        .prose p { margin-bottom: 1.25em !important; color: #a1a1aa; }
+        .prose p { margin-bottom: 1.25em !important; color: #f4f4f5; }
     </style>
 </div>
