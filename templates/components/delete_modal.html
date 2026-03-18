@@ -12,14 +12,14 @@
         
         <div class="modal-action">
             <button type="button" 
-                    onclick="document.getElementById('delete-modal').remove()"
+                    onclick="closeAegisModal('delete-modal')"
                     class="btn btn-ghost btn-sm text-zinc-500 uppercase tracking-widest">
                 CANCEL
             </button>
             <button hx-post="/delete" 
                     hx-vals='{"path": "{{ path }}"}'
                     hx-target="#aegis-view-core"
-                    hx-on::after-request="document.getElementById('delete-modal').remove()"
+                    hx-on::after-request="closeAegisModal('delete-modal')"
                     class="btn btn-error btn-sm btn-solid border-none bg-red-600 hover:bg-red-500 text-white px-6 font-bold tracking-widest">
                 CONFIRM_PURGE
             </button>
