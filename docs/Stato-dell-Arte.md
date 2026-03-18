@@ -35,4 +35,13 @@
 - **Container**: Gotenberg (Chromium-based PDF Engine).
 
 ---
-*Fine sessione. Sistema stabilizzato e potenziato con supporto Mermaid.*
+## 4. Evoluzione Proposta: Industrial Pure (v2.0)
+**Analisi**: EasyMDE/CodeMirror 5 presentano fragilità strutturali in ambienti moderni (Tailwind v4 + HTMX), causando glitch di layout e loop di rendering.
+
+**Soluzione Proposta**:
+- **Architettura**: Abbandono di EasyMDE in favore di una `<textarea>` standard potenziata.
+- **Engine**: Rendering lato client tramite `Marked.js` per istantaneità o `HTMX` per rendering server-side solido.
+- **Styling**: Layout `grid-cols-2` fisso, evitando posizionamenti `absolute`/`fixed` iniettati via JS.
+- **Mermaid**: Integrazione nativa tramite plugin Marked.js, eliminando hack di sincronizzazione manuale.
+
+*Documento aggiornato post-sessione di stabilizzazione critica.*
