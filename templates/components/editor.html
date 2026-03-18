@@ -15,10 +15,10 @@
                     <span class="text-white font-bold bg-white/10 px-2 py-0.5 rounded shadow-sm truncate">{{ filename }}</span>
                 </div>
             </div>
-            <div class="flex items-center space-x-4 text-[10px] uppercase tracking-widest font-mono">
-                <span id="char-count" class="text-zinc-500">0 CHRS</span>
+            <div class="flex items-center space-x-4 text-xs uppercase tracking-widest font-mono">
+                <span id="char-count" class="text-zinc-200">0 CHRS</span>
                 <div class="flex items-center space-x-2 group">
-                    <span class="text-zinc-600">ST:</span>
+                    <span class="text-zinc-400">ST:</span>
                     <span class="neon-text animate-pulse group-hover:neon-glow transition-all">ACTIVE_READY</span>
                 </div>
             </div>
@@ -78,8 +78,8 @@
                 <form id="editor-form" class="h-full w-full absolute inset-0 flex flex-col m-0 overflow-hidden">
                     <input type="hidden" name="path" value="{{ path }}">
                     <textarea name="content" id="pure-editor-input"
-                        class="w-full h-full bg-transparent p-8 font-mono text-sm leading-relaxed outline-none resize-none text-zinc-400 focus:text-white transition-colors"
-                        style="border: none !important;"
+                        class="w-full h-full bg-transparent p-10 font-mono text-base leading-[1.8] outline-none resize-none text-zinc-300 focus:text-white transition-colors"
+                        style="border: none !important; font-family: 'JetBrains Mono', monospace !important; font-variant-ligatures: normal !important;"
                         spellcheck="false">{{ content }}</textarea>
                 </form>
             </div>
@@ -93,7 +93,7 @@
             </div>
             <div class="flex-grow w-full overflow-hidden relative">
                 <div id="pure-preview-pane" 
-                     class="absolute inset-0 p-10 overflow-y-auto prose prose-invert max-w-none prose-pre:bg-black/80 prose-pre:border prose-pre:border-white/10 prose-headings:neon-text prose-a:text-[var(--neon-cyan)] scrollbar-thin">
+                     class="absolute inset-0 p-12 overflow-y-auto prose prose-invert prose-p:leading-[1.8] prose-zinc max-w-none prose-pre:bg-black/80 prose-pre:border prose-pre:border-white/10 prose-headings:neon-text prose-a:text-[var(--neon-cyan)] scrollbar-thin text-zinc-300">
                     <!-- Content rendered by JavaScript -->
                 </div>
             </div>
