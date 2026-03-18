@@ -49,18 +49,18 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
     _name = filename if len(filename) < 40 else filename[:37] + "..."
     
     header_template = f"""
-    <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in; border-bottom: 1px solid #00f0ff; padding-bottom: 5px;">
+    <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in;">
         <table style="width: 100%;">
             <tr>
-                <td style="text-align: left;">MD2FastPDF // {_name}</td>
-                <td style="text-align: right;">AEGIS // SECURED</td>
+                <td style="text-align: left; color: #64748b;">MD2FastPDF // {_name}</td>
+                <td style="text-align: right; color: #64748b;">AEGIS // SECURED</td>
             </tr>
         </table>
     </div>
     """
     
     footer_template = """
-    <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in; border-top: 1px solid #e5e7eb; padding-top: 5px; color: #64748b;">
+    <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in; color: #64748b;">
         <table style="width: 100%;">
             <tr>
                 <td style="text-align: left;">OS_CORE_v2.0 // MD2FASTPDF_PROTOCOL</td>
