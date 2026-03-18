@@ -284,6 +284,15 @@
              const path = evt.detail.elt.getAttribute('hx-get');
              if (path) window.location.href = path;
         });
+
+        // AEGIS_MODAL_PROTOCOL: Smooth closing
+        function closeAegisModal(targetId) {
+            const m = typeof targetId === 'string' ? document.getElementById(targetId) : targetId;
+            if (m) {
+                m.classList.add('modal-exit');
+                setTimeout(() => m.remove(), 250);
+            }
+        }
     </script>
     {% block scripts %}{% endblock %}
 </body>
