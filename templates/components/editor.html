@@ -1,4 +1,4 @@
-<div class="flex flex-col h-[70vh] glass-panel relative tracking-widest uppercase">
+<div id="editor-root" class="glass-panel w-full max-w-full overflow-hidden relative tracking-widest mb-12">
     <!-- Header -->
     <div class="flex items-center justify-between px-4 py-3 neon-border-b shrink-0 relative z-10 bg-black/40">
         <div class="flex items-center space-x-2 text-[10px] uppercase overflow-x-auto no-scrollbar">
@@ -33,156 +33,80 @@
         <textarea name="content" id="mde-content"></textarea>
     </form>
 
-    <!-- Editor Wrapper -->
-    <div class="flex-grow bg-transparent w-full max-w-full min-w-0" id="editor-wrapper">
-        <textarea id="easymde-textarea">{{ content }}</textarea>
-    </div>
-
     <style>
-        /* Modern Sci-Fi Theme overrides */
-        .EasyMDEContainer {
-            height: 100% !important;
+        /* TOOLBAR STABILIZATION */
+        .editor-toolbar {
             display: flex !important;
-            flex-direction: column !important;
-        }
-        .CodeMirror {
-            flex-grow: 1 !important;
-            height: auto !important;
-            background: rgba(9, 9, 11, 0.4) !important;
-            color: #e4e4e7 !important;
-            border: none !important;
-            font-family: 'Roboto Mono', monospace !important;
-            font-size: 12px;
-        }
-        
-        /* CodeMirror Syntax Highlighting (Neon/Modern) */
-        .cm-s-easymde .cm-header-1 { color: var(--neon-cyan); font-size: 1.3em; text-shadow: var(--neon-glow); font-family: 'Rajdhani', sans-serif; }
-        .cm-s-easymde .cm-header-2 { color: var(--neon-cyan); font-size: 1.1em; text-shadow: var(--neon-glow); font-family: 'Rajdhani', sans-serif; }
-        .cm-s-easymde .cm-keyword { color: #f472b6; font-weight: bold; }
-        .cm-s-easymde .cm-variable-2 { color: #818cf8; }
-        .cm-s-easymde .cm-string { color: #34d399; }
-        .cm-s-easymde .cm-comment { color: var(--neon-cyan-dim); font-style: italic; opacity: 0.7; }
-        .cm-s-easymde .cm-number { color: #fbbf24; font-weight: bold; }
-        .cm-s-easymde .cm-link { color: var(--neon-cyan); text-decoration: underline; }
-        .cm-s-easymde .cm-url { color: var(--neon-cyan-dim); }
-        .cm-s-easymde .cm-tag { color: #c084fc; }
-        
-        .CodeMirror-scroll { min-height: 0 !important; }
-        .CodeMirror-cursor { border-left: 2px solid var(--neon-cyan) !important; box-shadow: var(--neon-glow); }
-        
-        /* Opaque backgrounds to prevent text overlapping */
-        .editor-preview-active-side, .editor-preview, .CodeMirror-fullscreen, .editor-toolbar.fullscreen { 
-            background: #050505 !important; 
-            color: #e4e4e7 !important; 
-            z-index: 9999 !important; /* Extremely high z-index to stay above header (z-40) */
-        }
-        
-        .editor-preview-active-side {
-            border-left: 1px solid var(--glass-border) !important;
-        }
-        
-        .editor-toolbar { 
-            background: rgba(0, 240, 255, 0.05) !important; 
-            border: none !important; 
-            border-bottom: 1px solid var(--glass-border) !important; 
-            backdrop-filter: blur(4px);
-            padding: 8px 12px !important;
-            display: flex !important;
-            flex-wrap: nowrap !important;
-            overflow-x: auto !important;
-            scrollbar-width: none !important;
+            flex-wrap: wrap !important;
+            padding: 4px 8px !important;
+            gap: 2px !important;
             align-items: center !important;
-            min-height: 45px !important;
+            border: none !important;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.1) !important;
         }
-        .editor-toolbar::-webkit-scrollbar { display: none; }
-        
-        .editor-toolbar button { 
-            color: var(--neon-cyan-dim) !important; 
-            border: 1px solid transparent !important; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            border-radius: 2px !important;
-            width: 30px !important;
-            height: 30px !important;
-            margin: 0 3px !important;
+        .editor-toolbar button {
+            width: 28px !important;
+            height: 28px !important;
+            padding: 0 !important;
+            margin: 0 !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            flex-shrink: 0 !important;
+            opacity: 0.8;
+            transition: all 0.2s ease;
         }
-        .editor-toolbar button.active, .editor-toolbar button:hover { 
-            background: rgba(0, 240, 255, 0.15) !important; 
-            color: var(--neon-cyan) !important; 
-            border-color: var(--glass-border) !important; 
-            box-shadow: inset 0 0 8px rgba(0,240,255,0.2); 
-        }
+        .editor-toolbar button:hover { opacity: 1; transform: scale(1.1); }
         .editor-toolbar i.separator { 
-            border-left: 1px solid var(--glass-border) !important; 
-            margin: 0 8px !important; 
-            height: 16px !important;
+            height: 14px !important; 
+            margin: 0 4px !important; 
+            border-left: 1px solid rgba(0, 240, 255, 0.15) !important; 
         }
-        
-        .editor-preview h1, .editor-preview h2, .editor-preview h3,
-        .editor-preview-active-side h1, .editor-preview-active-side h2, .editor-preview-active-side h3 {
-            color: var(--neon-cyan) !important;
-            border-bottom: 1px solid var(--glass-border);
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            font-family: 'Rajdhani', sans-serif;
-            text-shadow: var(--neon-glow);
-        }
-        
-        .editor-preview p, .editor-preview-active-side p { margin-bottom: 1rem; line-height: 1.6; font-family: 'Roboto Mono', monospace; font-size: 12px; }
-        .editor-preview table, .editor-preview-active-side table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
-        .editor-preview th, .editor-preview td, .editor-preview-active-side th, .editor-preview-active-side td { border: 1px solid var(--glass-border); padding: 0.5rem; font-family: 'Roboto Mono', monospace; font-size: 11px; }
-        .editor-preview pre, .editor-preview-active-side pre { background: rgba(0,0,0,0.5) !important; padding: 1rem; border: 1px solid var(--glass-border); overflow-x: auto; border-radius: 4px; }
-        .editor-preview code, .editor-preview-active-side code { font-family: 'Roboto Mono', monospace; background: transparent !important; font-size: 11px; }
-        
-        /* Highlight.js overrides */
-        .hljs { background: transparent !important; }
-        
-        /* Fullscreen isolation */
-        .EasyMDEContainer.fullscreen { z-index: 9999 !important; background: var(--glass-bg) !important; backdrop-filter: blur(20px); }
-        .editor-preview-side { border-left: 1px solid var(--glass-border) !important; background: #050505 !important; }
 
-        /* Ensure Side-by-side doesn't break under header */
-        .editor-preview-active-side { z-index: 100 !important; cursor: default; }
+        /* CONTAINER LOCK (Prevent expansion) */
+        .CodeMirror, .CodeMirror-scroll, .EasyMDEContainer {
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+        }
+        .CodeMirror-lines { word-wrap: break-word !important; }
     </style>
+
+    <!-- Editor Wrapper -->
+    <div id="editor-wrapper" class="w-full overflow-hidden">
+        <textarea id="easymde-textarea">{{ content }}</textarea>
+    </div>
 
     <script>
         (function() {
-            const easyMDE = new EasyMDE({
-                element: document.getElementById('easymde-textarea'),
-                spellChecker: false,
-                autofocus: true,
-                status: ["lines", "words", "cursor"],
-                renderingConfig: {
-                    codeSyntaxHighlighting: true,
-                    hljs: window.hljs
-                },
-                toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "|", "preview", "side-by-side", "fullscreen", "|", "guide"]
-            });
+            setTimeout(() => {
+                const easyMDE = new EasyMDE({
+                    element: document.getElementById('easymde-textarea'),
+                    spellChecker: false,
+                    autofocus: true,
+                    forceSync: true,
+                    lineWrapping: true,
+                    minHeight: "450px",
+                    status: ["lines", "words", "cursor"],
+                    renderingConfig: {
+                        codeSyntaxHighlighting: true,
+                        hljs: window.hljs
+                    },
+                    toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "|", "preview", "side-by-side", "fullscreen", "|", "guide"]
+                });
 
-            // Sync with hidden form
-            const hidden = document.getElementById('mde-content');
-            easyMDE.codemirror.on("change", () => { hidden.value = easyMDE.value(); });
-            hidden.value = easyMDE.value();
+                // Sync with hidden form
+                const hidden = document.getElementById('mde-content');
+                easyMDE.codemirror.on("change", () => { hidden.value = easyMDE.value(); });
+                hidden.value = easyMDE.value();
 
-            // Fix Fullscreen being trapped by backdrop-filter
-            easyMDE.codemirror.on("refresh", () => {
-                const editorPanel = document.getElementById('editor-wrapper').closest('.glass-panel');
-                if (editorPanel) {
+                // Viewport Stability for Fullscreen
+                easyMDE.codemirror.on("refresh", () => {
                     if (easyMDE.isFullscreenActive()) {
-                        editorPanel.style.backdropFilter = 'none';
-                        editorPanel.style.webkitBackdropFilter = 'none';
+                        document.body.classList.add('aegis-fullscreen-active');
                     } else {
-                        editorPanel.style.backdropFilter = '';
-                        editorPanel.style.webkitBackdropFilter = '';
+                        document.body.classList.remove('aegis-fullscreen-active');
                     }
-                }
-            });
+                });
+            }, 5);
         })();
-
     </script>
 </div>
