@@ -47,16 +47,16 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
     """
 
     header_template = f"""
-    <div style="font-size: 8px; font-family: 'Roboto Mono', monospace; width: 100%; display: flex; justify-content: space-between; border-bottom: 1px solid #00f0ff; padding-bottom: 5px; margin: 0 40px; text-transform: uppercase;">
-        <div style="margin-left: 20px;">MD2FastPDF // DOCUMENT: {filename}</div>
-        <div style="margin-right: 20px;">AEGIS // CLASS_SECURED</div>
+    <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; border-bottom: 1px solid #00f0ff; padding-bottom: 5pt; margin: 0 40pt; height: 20px;">
+        <span style="float: left; margin-left: 20px;">MD2FastPDF // DOCUMENT: {filename}</span>
+        <span style="float: right; margin-right: 20px;">AEGIS // CLASS_SECURED</span>
     </div>
     """
     
     footer_template = """
-    <div style="font-size: 8px; font-family: 'Roboto Mono', monospace; width: 100%; display: flex; justify-content: space-between; border-top: 1px solid #e5e7eb; padding-top: 5px; margin: 0 40px; text-transform: uppercase; color: #64748b;">
-        <div style="margin-left: 20px;">OS_CORE_v2.0 // MD2FASTPDF_PROTOCOL</div>
-        <div style="margin-right: 20px;">PAGE <span class="pageNumber"></span> / <span class="totalPages"></span></div>
+    <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; color: #64748b; border-top: 1px solid #e5e7eb; padding-top: 5pt; margin: 0 40pt; height: 20px;">
+        <span style="float: left; margin-left: 20px;">OS_CORE_v2.0 // MD2FASTPDF_PROTOCOL</span>
+        <span style="float: right; margin-right: 20px;">PAGE <span class="pageNumber"></span> / <span class="totalPages"></span></span>
     </div>
     """
 
