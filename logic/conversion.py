@@ -113,8 +113,9 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
     </html>
     """
 
-    # Send to Gotenberg
+    # Send to Gotenberg (v7/8 Multipart logic)
     async with httpx.AsyncClient(timeout=30.0) as client:
+        # Form Data (Options)
         data = {
             "marginTop": "0.75",
             "marginBottom": "0.75",
@@ -123,14 +124,14 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
             "paperWidth": "8.27",
             "paperHeight": "11.69",
             "scale": "1.0",
-            "displayHeaderFooter": "true",
-            "headerTemplate": header_template,
-            "footerTemplate": footer_template,
             "printBackground": "true"
         }
         
+        # Files (HTML Content)
         files = {
-            "index.html": ("index.html", full_html.encode("utf-8"), "text/html")
+            "index.html": ("index.html", full_html.encode("utf-8"), "text/html"),
+            "header.html": ("header.html", header_template.encode("utf-8"), "text/html"),
+            "footer.html": ("footer.html", footer_template.encode("utf-8"), "text/html")
         }
         
         response = await client.post(
