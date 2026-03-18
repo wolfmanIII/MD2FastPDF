@@ -13,7 +13,7 @@ from pathlib import Path
 from fastapi.responses import HTMLResponse, Response
 import psutil
 
-app = FastAPI(title="MD2FastPDF", description="Industrial Markdown Editor")
+app = FastAPI(title="SC-ARCHIVE", description="Space Craft Archive Management System")
 
 # Static files and templating
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -33,7 +33,7 @@ async def read_root(request: Request):
     
     context = {
         "request": request,
-        "title": "MD2FastPDF // Terminal",
+        "title": "SC-ARCHIVE // Terminal",
         "memory_usage": memory.percent,
         "cpu_usage": cpu_usage,
         "recent_files": recent,

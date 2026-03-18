@@ -1,9 +1,17 @@
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 tracking-widest uppercase"
-     hx-get="/stats" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 tracking-widest uppercase" hx-get="/stats" hx-trigger="every 30s"
+    hx-swap="outerHTML" hx-target="this">
     <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative">
-        <div class="absolute -right-10 -top-10 w-32 h-32 bg-[var(--neon-cyan)]/5 rounded-full blur-2xl pointer-events-none"></div>
-        <h3 class="text-sm font-bold neon-text mb-4 border-b border-[var(--glass-border)] pb-2 flex items-center space-x-2">
-            {% with class="w-4 h-4" %}{% include 'icons/ship-components.html' %}{% endwith %}
+        <div
+            class="absolute -right-10 -top-10 w-32 h-32 bg-[var(--neon-cyan)]/5 rounded-full blur-2xl pointer-events-none">
+        </div>
+        <h3
+            class="text-sm font-bold neon-text mb-4 border-b border-[var(--glass-border)] pb-2 flex items-center space-x-2">
+            {% with class="w-5 h-5 aegis-radar-spin" %}{% include 'icons/radar.html' %}{% endwith %}
+            <style>
+                .aegis-radar-spin {
+                    animation: spin 3s linear infinite;
+                }
+            </style>
             <span>SYSTEM_STATUS</span>
         </h3>
         <div class="space-y-4">
@@ -19,7 +27,8 @@
                 <span class="text-zinc-100">MEMORY_USAGE:</span>
                 <div class="flex items-center space-x-2">
                     <div class="w-32 h-[3px] bg-black overflow-hidden border border-[var(--glass-border)]">
-                        <div class="h-full neon-bg transition-all" style="--w: {{ memory_usage }}%; width: var(--w);"></div>
+                        <div class="h-full neon-bg transition-all" style="--w: {{ memory_usage }}%; width: var(--w);">
+                        </div>
                     </div>
                     <span class="neon-text text-xs">{{ memory_usage }}%</span>
                 </div>
@@ -34,11 +43,14 @@
             </div>
         </div>
     </div>
-    
-    <div class="glass-panel p-6 flex flex-col justify-center items-center text-center glass-panel-hover relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-t from-[var(--neon-cyan)]/5 to-transparent pointer-events-none"></div>
-        <div class="w-16 h-16 rounded-full border border-[var(--neon-cyan)] flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(0,240,255,0.2)] bg-[var(--neon-cyan)]/5">
-            {% with class="w-8 h-8 neon-text" %}{% include 'icons/holocron.html' %}{% endwith %}
+
+    <div
+        class="glass-panel p-6 flex flex-col justify-center items-center text-center glass-panel-hover relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-t from-[var(--neon-cyan)]/5 to-transparent pointer-events-none">
+        </div>
+        <div
+            class="w-16 h-16 rounded-full border border-[var(--neon-cyan)] flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(0,240,255,0.2)] bg-[var(--neon-cyan)]/5">
+            {% with class="w-8 h-8 neon-text" %}{% include 'icons/folder.html' %}{% endwith %}
         </div>
         <h3 class="text-sm font-bold neon-text mb-2 tracking-[0.2em] w-full z-10">A.I. MATRIX ACTIVE</h3>
         <p class="text-[13px] text-zinc-100 leading-relaxed max-w-xs z-10">
@@ -49,14 +61,15 @@
 
     <!-- Second Row -->
     <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative min-h-[200px]">
-        <h3 class="text-sm font-bold neon-text mb-4 border-b border-[var(--glass-border)] pb-2 flex items-center space-x-2">
-            {% with class="w-4 h-4" %}{% include 'icons/folder.html' %}{% endwith %}
+        <h3
+            class="text-sm font-bold neon-text mb-4 border-b border-[var(--glass-border)] pb-2 flex items-center space-x-2">
+            {% with class="w-4 h-4" %}{% include 'icons/cube.html' %}{% endwith %}
             <span>RECENT_FRAGMENTS</span>
         </h3>
         <div class="space-y-2">
             {% for file in recent_files %}
             <div class="flex items-center justify-between text-xs group transition-all cursor-pointer hover:bg-[var(--neon-cyan)]/5 p-1 rounded-sm"
-                 hx-get="/editor?path={{ file.path }}" hx-target="#aegis-view-core" hx-push-url="true">
+                hx-get="/editor?path={{ file.path }}" hx-target="#aegis-view-core" hx-push-url="true">
                 <span class="text-zinc-100 group-hover:neon-text transition-colors">>> {{ file.name }}</span>
                 <span class="text-zinc-100 font-mono text-[11px]">MOD_TS: {{ file.mtime_str }}</span>
             </div>
@@ -67,8 +80,9 @@
     </div>
 
     <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative min-h-[200px]">
-        <h3 class="text-sm font-bold neon-text mb-4 border-b border-[var(--glass-border)] pb-2 flex items-center space-x-2">
-            {% with class="w-4 h-4" %}{% include 'icons/ship-components.html' %}{% endwith %}
+        <h3
+            class="text-sm font-bold neon-text mb-4 border-b border-[var(--glass-border)] pb-2 flex items-center space-x-2">
+            {% with class="w-4 h-4" %}{% include 'icons/assets.html' %}{% endwith %}
             <span>STORAGE_NODE</span>
         </h3>
         <div class="space-y-4">
@@ -86,7 +100,8 @@
                     <span>{{ storage.usage_percent|round(1) }}%</span>
                 </div>
                 <div class="w-full h-[4px] bg-black border border-[var(--glass-border)] overflow-hidden">
-                    <div class="h-full neon-bg transition-all duration-1000" style="--w: {{ storage.usage_percent }}%; width: var(--w);"></div>
+                    <div class="h-full neon-bg transition-all duration-1000"
+                        style="--w: {{ storage.usage_percent }}%; width: var(--w);"></div>
                 </div>
             </div>
             <p class="text-xs text-zinc-100 mt-2 uppercase tracking-wide">
