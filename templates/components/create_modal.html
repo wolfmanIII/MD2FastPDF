@@ -2,7 +2,8 @@
     <div class="modal-box glass-panel border-[var(--neon-cyan)]/30 max-w-sm">
         <h3 class="font-bold text-lg neon-text tracking-widest mb-4">NEW_ENTRY // INITIALIZE</h3>
         
-        <form hx-post="/create" hx-target="#aegis-view-core" hx-on::after-request="document.getElementById('create-modal').remove()">
+        <form hx-post="/create" hx-target="#aegis-view-core" 
+              hx-on::after-request="const m=document.getElementById('create-modal'); m.classList.add('modal-exit'); setTimeout(()=>m.remove(), 250)">
             <input type="hidden" name="path" value="{{ path }}">
             
             <div class="form-control w-full space-y-4">
@@ -13,7 +14,8 @@
                        class="input input-bordered w-full bg-black/40 border-[var(--glass-border)] focus:border-[var(--neon-cyan)] text-[var(--neon-cyan)] tracking-widest uppercase text-sm">
                 
                 <div class="modal-action">
-                    <button type="button" class="btn btn-ghost btn-sm text-zinc-500 uppercase tracking-widest" onclick="document.getElementById('create-modal').remove()">Cancel</button>
+                    <button type="button" class="btn btn-ghost btn-sm text-zinc-500 uppercase tracking-widest" 
+                            onclick="const m=this.closest('.modal'); m.classList.add('modal-exit'); setTimeout(()=>m.remove(), 250)">Cancel</button>
                     <button type="submit" class="btn btn-primary btn-sm btn-solid uppercase tracking-widest border-none">Initialize</button>
                 </div>
             </div>
