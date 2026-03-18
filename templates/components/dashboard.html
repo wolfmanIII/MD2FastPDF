@@ -1,15 +1,15 @@
 <div class="space-y-8">
-    <div class="flex items-center justify-between border-l-4 border-violet-500 pl-4 py-2 bg-violet-500/5">
+    <div class="flex items-center justify-between py-2 border-b border-white/5 no-border-l">
         <div>
             <h1 class="text-2xl font-bold text-zinc-100 tracking-tight">DASHBOARD // OVERVIEW</h1>
             <p class="text-zinc-500 text-sm mt-1">INDUSTRIAL DOCUMENTATION MANAGEMENT SYSTEM</p>
         </div>
-        <div class="flex space-x-2">
-            <button hx-get="/root-picker" hx-target="#modal-container" class="btn-solid text-xs rounded-sm border-zinc-700 bg-zinc-800 hover:bg-zinc-700 transition-all focus:outline-none">
-                CONFIGURE_ROOT
+        <div class="flex items-center space-x-4">
+            <button hx-get="/root-picker" hx-target="#modal-container" class="btn-ghost text-[10px] rounded-sm focus:outline-none">
+                CONFIGURE_SYSTEM
             </button>
-            <button hx-get="/files" hx-target="#aegis-view-core" hx-push-url="true" class="btn-solid text-xs rounded-sm transition-all focus:outline-none">
-                ACCESS_FILES
+            <button hx-get="/files" hx-target="#aegis-view-core" hx-push-url="true" class="btn-solid text-[10px] rounded-sm focus:outline-none shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                ACCESS_TERMINAL
             </button>
         </div>
     </div>

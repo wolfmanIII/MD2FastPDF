@@ -14,8 +14,6 @@
     <link rel="stylesheet" href="/static/css/output.css">
     <!-- daisyUI -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <!-- Font Awesome 4.7.0 (Required for EasyMDE) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <!-- Google Fonts: Inter & Roboto Mono for Industrial feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,41 +27,44 @@
             --glass-border: rgba(0, 240, 255, 0.2);
         }
 
+
         *, *::before, *::after {
             box-sizing: border-box !important;
         }
 
         body {
-            background-color: #050505 !important;
+            background-color: #09090b !important;
             background-image: 
-                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-            background-position: center center;
-            color: #e4e4e7 !important;
+                radial-gradient(circle at 50% -20%, rgba(0, 240, 255, 0.08) 0%, transparent 70%),
+                linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            background-attachment: fixed;
+            color: #d4d4d8 !important;
             font-family: 'Rajdhani', sans-serif !important;
+            overflow-x: hidden;
         }
 
         .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 4px; /* Slight rounding for modern feel */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            background: rgba(15, 15, 20, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
             transition: all 0.3s ease;
         }
 
         .glass-panel-hover:hover {
             border-color: var(--neon-cyan);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
-            background: rgba(9, 9, 11, 0.85);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+            background: rgba(15, 15, 25, 0.85);
         }
         
         .neon-text { color: var(--neon-cyan) !important; text-shadow: var(--neon-glow); }
         .neon-border { border-color: var(--neon-cyan) !important; box-shadow: 0 0 8px rgba(0,240,255,0.3); }
-        .neon-border-b { border-bottom: 1px solid var(--glass-border) !important; }
-        .neon-border-t { border-top: 1px solid var(--glass-border) !important; }
+        .neon-border-b { border-bottom: 1px solid rgba(255,255,255,0.1) !important; }
+        .neon-border-t { border-top: 1px solid rgba(255,255,255,0.1) !important; }
         
         .neon-bg { background-color: var(--neon-cyan) !important; color: #000 !important; font-weight: bold; box-shadow: var(--neon-glow); }
         
@@ -77,60 +78,53 @@
         
         .neon-dim { color: var(--neon-cyan-dim) !important; }
         
-        /* Action Buttons & Interactive elements */
+        /* Action Buttons - Polished Industrial */
         .btn-ghost {
             color: var(--neon-cyan);
-            border: 1px solid var(--neon-cyan);
-            background: rgba(0, 240, 255, 0.05);
-            box-shadow: inset 0 0 8px rgba(0,240,255,0.1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            background: rgba(0, 240, 255, 0.03);
+            backdrop-filter: blur(4px);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.2em;
             font-weight: 600;
-            padding: 0.4rem 1.25rem;
-            font-size: 11px;
+            padding: 0.6rem 1.75rem;
+            font-size: 10px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            border-radius: 2px;
         }
         .btn-ghost:hover {
-            background-color: var(--neon-cyan);
-            color: #000 !important;
-            box-shadow: 0 0 20px rgba(0,240,255,0.5), inset 0 0 10px rgba(255,255,255,0.5);
+            background-color: rgba(0, 240, 255, 0.1);
+            border-color: var(--neon-cyan);
+            color: #fff !important;
+            box-shadow: 0 0 20px rgba(0,240,255,0.2);
             transform: translateY(-1px);
         }
 
         .btn-solid {
-            background: linear-gradient(135deg, var(--neon-cyan) 0%, #00d0ee 100%);
+            background: var(--neon-cyan);
             color: #000 !important;
-            font-weight: bold;
+            font-weight: 700;
             border: 1px solid var(--neon-cyan);
-            box-shadow: 0 4px 12px rgba(0,240,255,0.3);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px rgba(0,240,255,0.2);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase;
-            letter-spacing: 0.15em;
-            padding: 0.4rem 1.25rem;
-            font-size: 11px;
+            letter-spacing: 0.2em;
+            padding: 0.6rem 1.75rem;
+            font-size: 10px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            border-radius: 2px;
         }
 
-        /* Prevent buttons from sticking together */
-        .btn-ghost + .btn-ghost, 
-        .btn-ghost + .btn-solid, 
-        .btn-solid + .btn-ghost, 
-        .btn-solid + .btn-solid,
-        button + button,
-        a.btn-ghost + a.btn-ghost,
-        a.btn-solid + a.btn-solid {
-            margin-left: 0.75rem;
-        }
         .btn-solid:hover {
             background: #fff;
             border-color: #fff;
             color: #000 !important;
-            box-shadow: 0 0 25px rgba(255,255,255,0.8);
+            box-shadow: 0 0 30px rgba(255,255,255,0.4);
             transform: translateY(-1px);
         }
 
@@ -144,20 +138,6 @@
             color: var(--neon-cyan);
             text-shadow: var(--neon-glow);
         }
-        .aegis-link::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background-color: var(--neon-cyan);
-            transition: width 0.3s ease;
-            box-shadow: var(--neon-glow);
-        }
-        .aegis-link:hover::after {
-            width: 100%;
-        }
 
         .neon-hover-item {
             transition: all 0.2s ease;
@@ -168,40 +148,14 @@
             border-color: rgba(0, 240, 255, 0.3);
             box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);
         }
-        /* EasyMDE Core Theme (Global) - Prevents white flash */
-        .CodeMirror, .EasyMDEContainer, .editor-preview, .editor-preview-side {
-            background-color: #09090b !important;
-            color: #e4e4e7 !important;
-            border-color: rgba(0, 240, 255, 0.1) !important;
-        }
-        .editor-toolbar {
-            background-color: #111 !important;
-            border-bottom: 2px solid rgba(0, 240, 255, 0.2) !important;
-        }
-        .editor-toolbar button { color: #888 !important; border: none !important; }
-        .editor-toolbar button.active, .editor-toolbar button:hover {
-            color: #00f0ff !important;
-            background: rgba(0, 240, 255, 0.1) !important;
-        }
-
-        /* Fullscreen Support (Disable backdrop-filter on parents) */
-        #editor-root:has(.CodeMirror-fullscreen), body:has(.CodeMirror-fullscreen) #editor-root {
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            filter: none !important;
-            position: static !important;
-            z-index: 50 !important;
-        }
-        .CodeMirror-fullscreen { z-index: 1000 !important; }
     </style>
     <!-- Highlight.js (Industrial Theme) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <!-- EasyMDE Assets (Pre-loaded for reliability) -->
-    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
     <!-- Mermaid.js for Diagrams -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- Marked.js for Markdown Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         mermaid.initialize({ 
             startOnLoad: false, 
@@ -216,22 +170,13 @@
             }
         });
     </script>
-    <style>
-        body.aegis-fullscreen-active { overflow: hidden !important; }
-        body.aegis-fullscreen-active header { display: none !important; }
-        .CodeMirror-fullscreen, .editor-preview-side, .editor-preview-active-side {
-            background-color: #050505 !important;
-            opacity: 1 !important;
-            z-index: 1000 !important;
-        }
-    </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col" hx-target="#aegis-view-core">
+<body class="antialiased min-h-screen bg-[#09090b] flex flex-col w-full overflow-x-hidden" hx-target="#aegis-view-core">
     <!-- Top Futuristic Bar -->
-    <div class="h-1 neon-bg w-full"></div>
+    <div class="h-1 neon-bg w-full shrink-0"></div>
 
-    <header class="glass-panel border-x-0 border-t-0 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+    <header class="w-full glass-panel border-x-0 border-t-0 sticky top-0 z-40 shrink-0">
+        <div class="w-full px-8 h-16 flex items-center justify-between mx-auto">
             <div class="flex items-center space-x-4">
                 <a href="/" hx-get="/" hx-push-url="true" class="flex items-center space-x-3 group no-underline cursor-pointer">
                     <img src="/static/favicon/favicon.png" alt="Aegis Logo" style="width: 32px; height: 32px; object-fit: contain;" class="drop-shadow-[0_0_8px_rgba(0,240,255,0.4)] group-hover:drop-shadow-[0_0_12px_rgba(0,240,255,0.6)] transition-all">
@@ -247,12 +192,17 @@
         </div>
     </header>
 
-    <div id="aegis-view-core" class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full min-w-0">
-        {% block content %}{% endblock %}
-    </div>
+    <main class="w-full flex-grow flex flex-col min-h-0">
+        <!-- STATIC PADDING WRAPPER (Never swapped by HTMX) -->
+        <div class="w-full px-8 py-8 flex-grow flex flex-col min-h-0">
+            <div id="aegis-view-core" class="flex-grow flex flex-col min-h-0 min-w-0 w-full">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </main>
 
-    <footer class="neon-border-t py-6 bg-black/40 backdrop-blur-md tracking-widest uppercase">
-        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+    <footer class="w-full neon-border-t py-6 bg-black/40 backdrop-blur-md tracking-widest uppercase shrink-0">
+        <div class="w-full px-8 flex justify-between items-center">
             <p class="neon-dim text-[10px]">
                 &copy; 2026 TERRAN MANDATE // AUTHENTICATED
             </p>
