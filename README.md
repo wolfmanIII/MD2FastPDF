@@ -1,42 +1,45 @@
-# MD2FastPDF // Industrial Markdown Editor
+# SC-ARCHIVE // Spacecraft Documentation Management System
 
-**MD2FastPDF** è un editor Markdown minimalista e potente, progettato per la rapidità operativa e la generazione di PDF professionali tramite l'infrastruttura **Gotenberg**.
+> [!NOTE]
+> **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
+
+**SC-ARCHIVE** is an "Aegis Class" documentation management system designed for operational speed and professional PDF generation via the **Gotenberg** infrastructure.
 
 ## 🛠 Tech Stack
 - **Core**: Python 3.12 + FastAPI
 - **Frontend**: HTMX + Tailwind CSS v4 + Jinja2
-- **Editor**: EasyMDE (CodeMirror)
-- **PDF Engine**: Gotenberg (via Docker)
+- **Editor**: EasyMDE (CodeMirror 5)
+- **PDF Engine**: Gotenberg (Chromium via Docker)
 - **Environment**: Pipenv
 
-## 🚀 Caratteristiche
-- **Tema Industrial**: Interfaccia dark con accenti violetti, ottimizzata per lunghe sessioni di scrittura.
-- **File Explorer**: Navigazione rapida del filesystem locale direttamente dalla dashboard.
-- **Side-by-Side Preview**: Anteprima in tempo reale sincronizzata.
-- **Salvataggio Atomico**: Implementazione HTMX per salvataggi veloci e non invasivi.
-- **Asincronia**: I/O gestito interamente in modo asincrono (`anyio`) per massima reattività.
+## 🚀 Features
+- **Aegis Theme**: "Spacecraft" interface with Neon Cyan accents and Holocron system logo.
+- **Terminal Matrix**: Integrated CPU/Memory monitoring and calibrated HUD radar (45s cycle).
+- **Aegis Transitions**: Smooth `scan-in` and `soft-exit` animations for a "no-blink" experience.
+- **PDF HUD**: Export with headers, footers, and automatic page numbering.
+- **Root Selector**: Dynamic working directory selection with intelligent redirect.
 
-## 📦 Installazione
-1. Assicurati di avere `pipenv` installato.
-2. Clona il repository.
-3. Installa le dipendenze:
+## 📦 Installation
+1. Ensure you have `pipenv` installed.
+2. Clone the repository.
+3. Install dependencies:
    ```bash
    pipenv install
    ```
-4. Avvia l'infrastruttura Gotenberg (richiede Docker):
+4. Start the Gotenberg infrastructure (requires Docker):
    ```bash
    docker run -d -p 3000:3000 gotenberg/gotenberg:8
    ```
-5. Avvia l'applicazione:
+5. Run the application:
    ```bash
-   ./dev.sh
+   ./bin/launch.sh
    ```
 
-## 📂 Struttura del Progetto
-- `main.py`: Entry point dell'applicazione FastAPI.
-- `logic/`: Logica di business (gestione file, conversione).
-- `templates/`: Fragment HTMX e layout Jinja2.
-- `static/`: Asset CSS e configurazioni Tailwind.
+## 📂 Project Structure
+- `main.py`: FastAPI application entry point.
+- `logic/`: Business logic (file management, conversion).
+- `templates/`: HTMX fragments and Jinja2 layouts.
+- `static/`: CSS assets and Tailwind configurations.
 
 ---
-*Progettato per i narratori di mondi digitali.*
+*Designed for the narrators of the SC-ARCHIVE station.*

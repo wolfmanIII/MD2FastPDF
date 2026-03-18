@@ -1,51 +1,49 @@
-# Analisi Tecnica: MD2FastPDF
-**Progetto**: Editor Markdown e Generatore PDF (FastAPI + HTMX)
-**Data**: 17 Marzo 2026
+# Analisi Tecnica: SC-ARCHIVE
+**Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
+**Nome Tecnico Interno**: MD2FastPDF
+**Data**: 18 Marzo 2026
 
 ## 1. Architettura di Sistema
-L'applicazione segue un modello di sviluppo asincrono basato su FastAPI, orientato al basso consumo di risorse e alla modularità dei componenti.
+L'applicazione segue un modello di sviluppo asincrono basato su FastAPI, orientato al basso consumo di risorse e alla modularità dei componenti, con un'estetica "Spacecraft Computer".
 
 ### 1.1 Backend (Python / FastAPI)
-- **FastAPI**: Utilizzato come framework web per la gestione delle rotte e della logica asincrona.
+- **FastAPI**: Cuore del sistema per la gestione delle rotte e della logica asincrona.
 - **Asincronia**: Gestione nativa tramite `asyncio` per operazioni di I/O (Filesystem) e richieste HTTP (Gotenberg API).
-- **Statelessness**: Lo stato della sessione (es. percorso corrente) è gestito sul client tramite parametri di query, eliminando la necessità di sessioni server-side.
-- **Jinja2**: Motore di templating per il rendering server-side di frammenti HTML.
+- **Statelessness**: Lo stato della sessione è gestito sul client tramite parametri di query.
+- **Jinja2**: Motore di templating per il rendering server-side.
 
 ### 1.2 Frontend (HTMX / Tailwind)
-- **HTMX**: Gestisce l'aggiornamento parziale del DOM tramite richieste AJAX/SSE, eliminando il caricamento completo della pagina.
-- **Tailwind CSS v4**: Fornisce il sistema di styling atomico e il design responsive.
-- **EasyMDE/CodeMirror**: Componente JavaScript per la gestione dell'editor Markdown con syntax highlighting.
+- **HTMX**: Gestisce l'aggiornamento parziale del DOM con transizioni fluide ("Aegis Transitions").
+- **Tailwind CSS v4**: Sistema di styling atomico e design "Glassmorphism" industriale.
+- **EasyMDE/CodeMirror**: Editor Markdown di bordo con supporto Fullscreen e Side-by-Side.
 
 ### 1.3 Generazione PDF (Gotenberg)
-- **Pipeline**: Il contenuto Markdown viene convertito in HTML via Jinja2 e inviato a un container Docker Gotenberg tramite richieste HTTP.
-- **CSS Tipografico**: Durante la conversione viene iniettato un foglio di stile specifico per la stampa (font Inter, scala di grigi), separato dalla UI dell'applicazione.
+- **Pipeline**: MD -> HTML -> PDF via Gotenberg (Chromium Engine).
+- **HUD Tipografico**: Iniezione di testate e piè di pagina con paginazione dinamica (`{{pageNumber}}` / `{{totalPages}}`).
+- **View Mode**: Forza la visualizzazione in "Fit Width" (`#view=FitH`) per coerenza con i monitor di bordo.
 
 ## 2. Struttura dei Moduli Logici
 
 ### 2.1 Gestione Filesystem (`logic/files.py`)
-- Filtra i file nascosti e di sistema.
-- Gestisce la creazione di nuovi file con estensione `.md` obbligatoria.
-- Implementa la sanitizzazione dei percorsi per prevenire attacchi di tipo *Directory Traversal*.
-- Esegue operazioni CRUD in modalità asincrona tramite `anyio`.
+- Filtra file nascosti e system-dirs (`.git`, `node_modules`, etc.).
+- Sanitizzazione dei percorsi (Anti-Traversal).
+- Operazioni CRUD asincrone tramite `anyio`.
 
 ### 2.2 Motore di Conversione (`logic/conversion.py`)
-- Gestisce il workflow di trasformazione da Markdown a PDF.
-- Implementa la logica di iniezione degli stili CSS print-ready.
-- Interfaccia con l'API di Gotenberg utilizzando `httpx`.
+- Gestisce il workflow di trasformazione verso Gotenberg.
+- Implementa lo stile "Aegis Print" (Inter, scala di grigi, 1cm margin).
 
 ### 2.3 Sistema di Icone (`templates/icons/`)
-- Libreria di icone SVG gestite come componenti Jinja2 (`{% include %}`).
-- Supporto per parametri dinamici (classi CSS, dimensioni).
+- Componenti SVG Jinja2. Include l'icona **Holocron** come simbolo di sistema.
 
 ## 3. Interfaccia Utente (UI)
-- **Stile**: Dark mode con accenti ciano. Utilizza `backdrop-filter` per effetti di trasparenza (Blur).
-- **Tipografia**: `Rajdhani` per intestazioni tecniche e `Roboto Mono` per i dati e l'editor.
-- **Feedback**: Notifiche di salvataggio temporanee tramite script inline che rimuovono l'elemento dal DOM dopo un timeout predefinito.
+- **Micro-animazioni**: Radar di sistema calibtrato a 45s per effetto atmosferico.
+- **Modali Aegis**: Transizioni di `scan-in` e `soft-exit` per eliminare i flash visivi.
+- **Branding**: Integrazione del logo Holocron vettoriale.
 
 ## 4. Sicurezza e Distribuzione
-- **Sanitizzazione**: Validation dei path rispetto a una `PROJECT_ROOT` fissa.
-- **Pipenv**: Gestione deterministica dell'ambiente virtuale e delle dipendenze.
-- **Docker**: Containerizzazione del microservizio di rendering PDF.
+- **Sanitizzazione**: Validation dei path rispetto alla `PROJECT_ROOT`.
+- **Docker**: Containerizzazione obbligatoria per Gotenberg.
 
 ---
-*Documento Tecnico Interno.*
+*Documento Tecnico Aegis Class System.*
