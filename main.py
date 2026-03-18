@@ -3,7 +3,11 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from logic.files import list_directory_contents, read_file_content, write_file_content, create_new_file, delete_file, get_recent_files, get_storage_stats
+from logic.files import (
+    list_directory_contents, read_file_content, write_file_content, 
+    create_new_file, delete_file, get_recent_files, get_storage_stats,
+    list_only_directories, set_project_root, get_project_root
+)
 from logic.conversion import convert_markdown_to_pdf
 from pathlib import Path
 from fastapi.responses import HTMLResponse, Response
@@ -35,6 +39,8 @@ async def read_root(request: Request):
         "recent_files": recent,
         "storage": storage,
         "api_gateway": "CONNECTED",
+        "root_name": get_project_root().name if get_project_root().name else "SYS_HOME",
+        "full_root": str(get_project_root()),
         "component_template": "components/dashboard.html"
     }
 
@@ -61,7 +67,9 @@ async def get_stats(request: Request):
             "cpu_usage": cpu_usage,
             "recent_files": recent,
             "storage": storage,
-            "api_gateway": "CONNECTED"
+            "api_gateway": "CONNECTED",
+            "root_name": get_project_root().name if get_project_root().name else "SYS_HOME",
+            "full_root": str(get_project_root())
         }
     )
 
@@ -256,6 +264,38 @@ async def pdf_download(path: str):
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
+
+@app.get("/root-picker", response_class=HTMLResponse)
+async def root_picker(request: Request, path: str = ""):
+    """
+    Returns the root directory picker modal fragment.
+    """
+    directories = await list_only_directories(path)
+    
+    # Calculate parent path for "up" navigation
+    parent_path = None
+    if path and path != ".":
+        parent = str(Path(path).parent)
+        parent_path = parent if parent != "." else ""
+
+    return templates.TemplateResponse("components/root_picker.html", {
+        "request": request,
+        "directories": directories,
+        "current_path": path,
+        "parent_path": parent_path
+    })
+
+@app.post("/root-picker/select", response_class=HTMLResponse)
+async def select_root(request: Request, path: str = Form("")):
+    """
+    Sets the new project root and reloads the dashboard.
+    """
+    home = Path.home().resolve()
+    new_root = home / path.strip("/")
+    set_project_root(new_root)
+    
+    # After setting root, return to dashboard
+    return await read_root(request)
 
 if __name__ == "__main__":
     import uvicorn
