@@ -46,58 +46,28 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
     img { max-width: 100%; height: auto; border-radius: 4px; margin: 1rem 0; }
     """
 
+    _name = filename if len(filename) < 40 else filename[:37] + "..."
+    
     header_template = f"""
-    <html>
-      <head>
-        <style>
-          #header {{
-            padding: 0;
-            margin: 0 10pt;
-            width: 100%;
-            font-size: 8px;
-            font-family: monospace;
-            text-transform: uppercase;
-            border-bottom: 1px solid #00f0ff;
-            display: flex;
-            justify-content: space-between;
-            color: #64748b;
-          }}
-        </style>
-      </head>
-      <body>
-        <div id="header">
-          <span>MD2FastPDF // DOCUMENT: {filename}</span>
-          <span>AEGIS // CLASS_SECURED</span>
-        </div>
-      </body>
-    </html>
+    <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in; border-bottom: 1px solid #00f0ff; padding-bottom: 5px;">
+        <table style="width: 100%;">
+            <tr>
+                <td style="text-align: left;">MD2FastPDF // {_name}</td>
+                <td style="text-align: right;">AEGIS // SECURED</td>
+            </tr>
+        </table>
+    </div>
     """
     
     footer_template = """
-    <html>
-      <head>
-        <style>
-          #footer {{
-            padding: 0;
-            margin: 0 10pt;
-            width: 100%;
-            font-size: 8px;
-            font-family: monospace;
-            text-transform: uppercase;
-            border-top: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-between;
-            color: #64748b;
-          }}
-        </style>
-      </head>
-      <body>
-        <div id="footer">
-          <span>OS_CORE_v2.0 // MD2FASTPDF_PROTOCOL</span>
-          <span>PAGE <span class="pageNumber"></span> / <span class="totalPages"></span></span>
-        </div>
-      </body>
-    </html>
+    <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in; border-top: 1px solid #e5e7eb; padding-top: 5px; color: #64748b;">
+        <table style="width: 100%;">
+            <tr>
+                <td style="text-align: left;">OS_CORE_v2.0 // MD2FASTPDF_PROTOCOL</td>
+                <td style="text-align: right;">PAGE <span class="pageNumber"></span> / <span class="totalPages"></span></td>
+            </tr>
+        </table>
+    </div>
     """
 
     full_html = f"""
@@ -119,8 +89,8 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
         data = {
             "marginTop": "0.75",
             "marginBottom": "0.75",
-            "marginLeft": "0.75",
-            "marginRight": "0.75",
+            "marginLeft": "0.5",
+            "marginRight": "0.5",
             "paperWidth": "8.27",
             "paperHeight": "11.69",
             "scale": "1.0",
