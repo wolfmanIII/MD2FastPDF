@@ -200,6 +200,31 @@
     <!-- EasyMDE Assets (Pre-loaded for reliability) -->
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
     <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <!-- Mermaid.js for Diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: false, 
+            theme: 'dark',
+            securityLevel: 'loose',
+            themeVariables: {
+                primaryColor: '#00f0ff',
+                lineColor: '#00f0ff',
+                textColor: '#e4e4e7',
+                mainBkg: '#09090b',
+                nodeBorder: '#0088aa'
+            }
+        });
+    </script>
+    <style>
+        body.aegis-fullscreen-active { overflow: hidden !important; }
+        body.aegis-fullscreen-active header { display: none !important; }
+        .CodeMirror-fullscreen, .editor-preview-side, .editor-preview-active-side {
+            background-color: #050505 !important;
+            opacity: 1 !important;
+            z-index: 1000 !important;
+        }
+    </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col" hx-target="#aegis-view-core">
     <!-- Top Futuristic Bar -->

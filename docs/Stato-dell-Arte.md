@@ -22,13 +22,17 @@
 - Generazione asincrona e anteprima integrata.
 - CSS dedicato alla stampa (Inter, grayscale) indipendente dal tema dell'app.
 
+### 1.4 Supporto Diagrammi (Nuovo)
+- Integrazione Mermaid.js v10 per il rendering di grafici e diagrammi direttamente nell'anteprima.
+- Tema custom coerente con l'estetica Industrial (Neon Cyan/Dark).
+
 ## 2. Bug Noti & Criticità (Da Risolvere)
-- [!] **Espansione Layout**: Navigando dalla Dashboard direttamente ad un file nell'Editor, il contenitore tende ad allargarsi orizzontalmente oltre i limiti previsti. Necessita di un ricalcolo delle dimensioni post-swap HTMX.
+- [x] **Espansione Layout**: Risolto tramite ricalcolo forzato (refresh) post-caricamento HTMX.
 
 ## 3. Infrastruttura Tecnica
 - **Backend**: FastAPI (Python 3.12).
-- **Frontend**: HTMX, Tailwind v4, DaisyUI, Font Awesome.
+- **Frontend**: HTMX, Tailwind v4, DaisyUI, Font Awesome, Mermaid.js.
 - **Container**: Gotenberg (Chromium-based PDF Engine).
 
 ---
-*Fine sessione. Sistema stabilizzato, ma con bug di layout navigazione attivo.*
+*Fine sessione. Sistema stabilizzato e potenziato con supporto Mermaid.*

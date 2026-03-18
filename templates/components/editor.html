@@ -62,12 +62,25 @@
             border-left: 1px solid rgba(0, 240, 255, 0.15) !important; 
         }
 
-        /* CONTAINER LOCK (Prevent expansion) */
-        .CodeMirror, .CodeMirror-scroll, .EasyMDEContainer {
+        /* CONTAINER LOCK & SCROLLBAR FIX */
+        .CodeMirror, .EasyMDEContainer {
             max-width: 100% !important;
-            overflow-x: hidden !important;
+            overflow: hidden !important; 
         }
         .CodeMirror-lines { word-wrap: break-word !important; }
+
+        .editor-preview-side {
+            position: fixed !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            right: 0 !important;
+            width: 50% !important;
+            height: 100% !important;
+            z-index: 1001 !important;
+            background: #050505 !important;
+            border-left: 2px solid var(--neon-cyan) !important;
+            overflow-y: auto !important;
+        }
     </style>
 
     <!-- Editor Wrapper -->
@@ -90,6 +103,23 @@
                         codeSyntaxHighlighting: true,
                         hljs: window.hljs
                     },
+                    previewRender: function(plainText, preview) {
+                        setTimeout(() => {
+                            const mermaidBlocks = preview.querySelectorAll('pre code.language-mermaid');
+                            mermaidBlocks.forEach((block, index) => {
+                                const raw = block.innerText;
+                                const id = 'mermaid-' + Date.now() + '-' + index;
+                                const container = block.parentElement;
+                                container.innerHTML = `<div class="mermaid" id="${id}">${raw}</div>`;
+                                try {
+                                    mermaid.init(undefined, container.querySelector('.mermaid'));
+                                } catch (e) {
+                                    container.innerHTML = `<div class="p-4 bg-red-900/20 border border-red-500/50 text-red-500 text-xs">MERMAID_SYNTAX_ERROR: ${e.message}</div>`;
+                                }
+                            });
+                        }, 50);
+                        return easyMDE.markdown(plainText);
+                    },
                     toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "|", "preview", "side-by-side", "fullscreen", "|", "guide"]
                 });
 
@@ -99,13 +129,20 @@
                 hidden.value = easyMDE.value();
 
                 // Viewport Stability for Fullscreen
-                easyMDE.codemirror.on("refresh", () => {
-                    if (easyMDE.isFullscreenActive()) {
+                const updateModes = () => {
+                    if (easyMDE.isFullscreenActive() || easyMDE.isSideBySideActive()) {
                         document.body.classList.add('aegis-fullscreen-active');
                     } else {
                         document.body.classList.remove('aegis-fullscreen-active');
                     }
-                });
+                };
+                easyMDE.codemirror.on("refresh", updateModes);
+
+                let stabilizationCycles = 0;
+                const stabilizer = setInterval(() => {
+                    easyMDE.codemirror.refresh();
+                    if (++stabilizationCycles >= 5) clearInterval(stabilizer);
+                }, 200);
             }, 5);
         })();
     </script>
