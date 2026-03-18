@@ -294,8 +294,8 @@ async def select_root(request: Request, path: str = Form("")):
     new_root = home / path.strip("/")
     set_project_root(new_root)
     
-    # After setting root, return to dashboard
-    return await read_root(request)
+    # After setting root, enter the file browser directly
+    return await list_files(request, ".")
 
 if __name__ == "__main__":
     import uvicorn
