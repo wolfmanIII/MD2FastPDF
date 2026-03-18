@@ -36,7 +36,28 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
     h1 { font-size: 24pt; color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 10pt; margin-top: 30pt; }
     h2 { font-size: 18pt; color: #111827; margin-top: 25pt; border-bottom: 1px solid #e5e7eb; }
     p { font-size: 11pt; margin-bottom: 12pt; text-align: justify; }
-...
+    code { font-family: 'Roboto Mono', monospace; background: #f3f4f6; color: #1f2937; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
+    pre { background: #f8fafc; color: #334155; padding: 1rem; border-radius: 4px; border: 1px solid #e2e8f0; overflow-x: auto; font-size: 0.85em; }
+    pre code { background: transparent; padding: 0; color: inherit; border: none; }
+    table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9em; }
+    th, td { border: 1px solid #cbd5e1; padding: 0.75rem; text-align: left; }
+    th { background: #f1f5f9; font-weight: 600; color: #0f172a; }
+    blockquote { border-left: 4px solid #cbd5e1; padding-left: 1rem; color: #475569; font-style: italic; margin-left: 0; }
+    img { max-width: 100%; height: auto; border-radius: 4px; margin: 1rem 0; }
+    """
+
+    header_template = f"""
+    <div style="font-size: 8px; font-family: 'Roboto Mono', monospace; width: 100%; border-bottom: 1px solid #00f0ff; padding-bottom: 5px; margin: 0 50px; text-transform: uppercase;">
+        <span style="float: left;">MD2FastPDF // DOCUMENT: {filename}</span>
+        <span style="float: right;">AEGIS // CLASS_SECURED</span>
+    </div>
+    """
+    
+    footer_template = """
+    <div style="font-size: 8px; font-family: 'Roboto Mono', monospace; width: 100%; border-top: 1px solid #e5e7eb; padding-top: 5px; margin: 0 50px; text-transform: uppercase; color: #64748b;">
+        <span style="float: left;">OS_CORE_v2.0 // MD2FASTPDF_PROTOCOL</span>
+        <span style="float: right;">PAGE <span class="pageNumber"></span> // <span class="totalPages"></span></span>
+    </div>
     """
 
     full_html = f"""
@@ -47,24 +68,25 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
         <style>{industrial_css}</style>
     </head>
     <body class="prose">
-        <div class="header">MD2FastPDF // DOCUMENT: {filename} // AEC_CLASS_SECURED</div>
         <div class="content">{html_body}</div>
     </body>
     </html>
     """
 
-    # Send to Gotenberg with specific A4 and Scaling parameters
+    # Send to Gotenberg
     async with httpx.AsyncClient(timeout=30.0) as client:
-        # Form data for Chromium module
         data = {
-            "marginTop": "0",
-            "marginBottom": "0",
-            "marginLeft": "0",
-            "marginRight": "0",
-            "paperWidth": "8.27",  # A4 Width in inches
-            "paperHeight": "11.69", # A4 Height in inches
+            "marginTop": "1.5",
+            "marginBottom": "1.0",
+            "marginLeft": "0.75",
+            "marginRight": "0.75",
+            "paperWidth": "8.27",
+            "paperHeight": "11.69",
             "scale": "1.0",
-            "preferCSSPageSize": "true"
+            "displayHeaderFooter": "true",
+            "headerTemplate": header_template,
+            "footerTemplate": footer_template,
+            "printBackground": "true"
         }
         
         files = {
