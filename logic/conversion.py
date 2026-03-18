@@ -47,17 +47,57 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
     """
 
     header_template = f"""
-    <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; border-bottom: 1px solid #00f0ff; padding-bottom: 5pt; margin: 0 40pt; height: 20px;">
-        <span style="float: left; margin-left: 20px;">MD2FastPDF // DOCUMENT: {filename}</span>
-        <span style="float: right; margin-right: 20px;">AEGIS // CLASS_SECURED</span>
-    </div>
+    <html>
+      <head>
+        <style>
+          #header {{
+            padding: 0;
+            margin: 0 10pt;
+            width: 100%;
+            font-size: 8px;
+            font-family: monospace;
+            text-transform: uppercase;
+            border-bottom: 1px solid #00f0ff;
+            display: flex;
+            justify-content: space-between;
+            color: #64748b;
+          }}
+        </style>
+      </head>
+      <body>
+        <div id="header">
+          <span>MD2FastPDF // DOCUMENT: {filename}</span>
+          <span>AEGIS // CLASS_SECURED</span>
+        </div>
+      </body>
+    </html>
     """
     
     footer_template = """
-    <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; color: #64748b; border-top: 1px solid #e5e7eb; padding-top: 5pt; margin: 0 40pt; height: 20px;">
-        <span style="float: left; margin-left: 20px;">OS_CORE_v2.0 // MD2FASTPDF_PROTOCOL</span>
-        <span style="float: right; margin-right: 20px;">PAGE <span class="pageNumber"></span> / <span class="totalPages"></span></span>
-    </div>
+    <html>
+      <head>
+        <style>
+          #footer {{
+            padding: 0;
+            margin: 0 10pt;
+            width: 100%;
+            font-size: 8px;
+            font-family: monospace;
+            text-transform: uppercase;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            color: #64748b;
+          }}
+        </style>
+      </head>
+      <body>
+        <div id="footer">
+          <span>OS_CORE_v2.0 // MD2FASTPDF_PROTOCOL</span>
+          <span>PAGE <span class="pageNumber"></span> / <span class="totalPages"></span></span>
+        </div>
+      </body>
+    </html>
     """
 
     full_html = f"""
@@ -76,8 +116,8 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
     # Send to Gotenberg
     async with httpx.AsyncClient(timeout=30.0) as client:
         data = {
-            "marginTop": "1.5",
-            "marginBottom": "1.0",
+            "marginTop": "0.75",
+            "marginBottom": "0.75",
             "marginLeft": "0.75",
             "marginRight": "0.75",
             "paperWidth": "8.27",
