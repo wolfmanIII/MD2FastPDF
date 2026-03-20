@@ -28,26 +28,13 @@ Identità finale "Spacecraft Documentation Management System".
 - **HUD PDF**: Aggiunta di testata, piè di pagina e numerazione automatica.
 - **View Mode**: Forza la visualizzazione PDF in "Fit Width" (`FitH`).
 
-## [2.1.0] - AEGIS PROTOCOL STABILIZATION
-Miglioramento dell'affidabilità dell'interfaccia.
-
-### Added
-- **EasyMDE Fullscreen**: Supporto completo per la modalità a schermo intero con fix dello Z-index (99999).
-- **Z-Index Breakout**: Protocollo per forzare la visibilità dell'editor sopra ogni pannello laterale.
-- **Font Correction**: Ripristino delle icone della toolbar (EasyMDE) tramite CDN affidabile.
-
-### Fixed
-- **Double Scroll**: Rimosso il conflitto tra le scrollbar dell'editor e del browser.
-- **Path Sanitization**: Blindato il sistema contro attacchi di tipo Directory Traversal.
-
-## [1.0.0] - INITIAL DEPLOYMENT (MD2FastPDF)
-Rilascio della struttura base del progetto.
-
-### Added
-- **FastAPI / HTMX**: Architettura asincrona e stateless.
-- **Dashboard**: Monitoraggio risorse (CPU/Memory) e file recenti.
-- **Markdown Editor**: Integrazione base di EasyMDE.
-- **PDF Preview**: Generazione PDF basilare (ex-WeasyPrint).
+## [3.0.0] - SC-ARCHIVE RELEASE (2026-03-18)
+Identità finale "Spacecraft Documentation Management System".
 
 ---
+
+### [ARCHIVE_LINK] // LOG_STORAGE
+Per i log storici delle versioni del Sistema precedenti alla v3.0.0:
+🔍 [Visualizza l'Archivio Storico (v1.0.0-v2.1.0)](docs/archive/CHANGELOG_v1-2.md)
+
 *Mantenuto dai protocolli Aegis Class System.*
