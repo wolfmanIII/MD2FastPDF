@@ -1,6 +1,18 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [3.1.0] - AEGIS SECURITY HARDENING (2026-03-20)
+Rafforzamento dei protocolli di sicurezza e stabilità del sistema "Aegis Class".
+
+### Added
+- **Sanitizzazione XSS (HTML Node)**: Integrazione di `bleach` nella pipeline di conversione PDF per bloccare l'iniezione di script malevoli via Markdown.
+
+### Changed
+- **System Stability**: Rimozione delle procedure di soppressione errori (`except: pass`) in favore della trasparenza dei guasti nel kernel dell'applicazione.
+
+### Fixed
+- **Compliance Protocol**: Allineamento completo alle `CODING GUIDELINES` del sistema SC-ARCHIVE.
+
 ## [3.0.0] - SC-ARCHIVE RELEASE (2026-03-18)
 Identità finale "Spacecraft Documentation Management System".
 

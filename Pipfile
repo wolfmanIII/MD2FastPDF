@@ -12,6 +12,7 @@ uvicorn = "*"
 aiofiles = "*"
 markdown = "*"
 psutil = "*"
+bleach = "*"
 
 [dev-packages]
 

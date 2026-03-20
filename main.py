@@ -176,9 +176,10 @@ async def create_new_file_route(request: Request, path: str = Form("."), filenam
     try:
         await create_new_file(path, filename)
     except HTTPException as e:
-        # If file already exists or other error, we should ideally show it.
-        # For now, let's just return the list.
-        pass
+        return HTMLResponse(
+            content=f'<div class="text-[var(--neon-cyan)] font-bold text-[10px] tracking-widest uppercase mt-4" style="text-shadow: var(--neon-glow);">SYSTEM_ERROR // {e.detail}</div>',
+            status_code=400
+        )
         
     return await list_files(request, path)
 

@@ -1,6 +1,7 @@
 import httpx
 import anyio
 import os
+import bleach
 from typing import Optional
 import markdown
 from jinja2 import Environment, FileSystemLoader
@@ -14,11 +15,23 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
     2. Sends the HTML to Gotenberg for Chromium-based PDF generation.
     """
     # Convert MD to HTML
-    html_body = markdown.markdown(
+    raw_html = markdown.markdown(
         markdown_content, 
         extensions=['fenced_code', 'tables', 'toc', 'attr_list']
     )
     
+    allowed_tags = bleach.sanitizer.ALLOWED_TAGS | {
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'code', 'table', 
+        'thead', 'tbody', 'tr', 'td', 'th', 'img', 'br', 'hr', 'blockquote',
+        'ul', 'ol', 'li', 'em', 'strong', 'del', 'a'
+    }
+    allowed_attributes = {
+        '*': ['class', 'id'],
+        'img': ['src', 'alt', 'title'],
+        'a': ['href', 'title']
+    }
+    html_body = bleach.clean(raw_html, tags=allowed_tags, attributes=allowed_attributes)
+
     # Professional Printable CSS for PDF
     industrial_css = """
     @page {

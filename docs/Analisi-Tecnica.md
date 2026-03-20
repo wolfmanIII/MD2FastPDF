@@ -1,7 +1,7 @@
 # Analisi Tecnica: SC-ARCHIVE
 **Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
 **Nome Tecnico Interno**: MD2FastPDF
-**Data**: 18 Marzo 2026
+**Data**: 20 Marzo 2026
 
 ## 1. Architettura di Sistema
 L'applicazione segue un modello di sviluppo asincrono basato su FastAPI, orientato al basso consumo di risorse e alla modularità dei componenti, con un'estetica "Spacecraft Computer".
@@ -31,6 +31,7 @@ L'applicazione segue un modello di sviluppo asincrono basato su FastAPI, orienta
 
 ### 2.2 Motore di Conversione (`logic/conversion.py`)
 - Gestisce il workflow di trasformazione verso Gotenberg.
+- **Sanitizzazione XSS**: Integra la libreria `bleach` per pulire l'HTML generato dal Markdown prima dell'invio a Gotenberg, prevenendo l'esecuzione di script malevoli nel PDF.
 - Implementa lo stile "Aegis Print" (Inter, scala di grigi, 1cm margin).
 
 ### 2.3 Sistema di Icone (`templates/icons/`)
@@ -42,7 +43,9 @@ L'applicazione segue un modello di sviluppo asincrono basato su FastAPI, orienta
 - **Branding**: Integrazione del logo Holocron vettoriale.
 
 ## 4. Sicurezza e Distribuzione
-- **Sanitizzazione**: Validation dei path rispetto alla `PROJECT_ROOT`.
+- **Sanitizzazione Path**: Validation dei path rispetto alla `PROJECT_ROOT` per prevenire Directory Traversal.
+- **Sanitizzazione Markdown**: Prevenzione XSS tramite `bleach` durante la pipeline di conversione.
+- **Error Handling**: Politica "Zero Suppression" (rimozione di `except: pass`) per garantire la visibilità dei guasti di sistema.
 - **Docker**: Containerizzazione obbligatoria per Gotenberg.
 
 ---

@@ -70,8 +70,8 @@ async def list_only_directories(relative_path: str = "") -> List[Dict[str, str]]
                     "name": entry.name,
                     "path": str((target / entry.name).relative_to(home))
                 })
-    except PermissionError:
-        pass
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail="ACCESS_DENIED: Directory non leggibile") from e
     
     return sorted(dirs, key=lambda x: x["name"].lower())
 

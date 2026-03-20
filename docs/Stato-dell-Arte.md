@@ -1,6 +1,6 @@
 # Stato del Progetto: SC-ARCHIVE
 **Stato Attuale**: Op_Ready / Versione 3.0 (Spacecraft Archive)
-**Ultimo Aggiornamento**: 18 Marzo 2026
+**Ultimo Aggiornamento**: 20 Marzo 2026
 
 ## 1. Funzionalità Implementation (Aegis Stack)
 
@@ -17,12 +17,14 @@
 
 ### 1.3 Esportazione PDF (Aegis Engine)
 - Integrazione Gotenberg (Docker) per rendering Chromium professionale.
+- **Aegis Security Layer**: Sanitizzazione XSS via `bleach` attiva sulla pipeline di conversione.
 - Paginazione HUD automatica e footer dati dinamico.
 - Viewport predefinita in "Adatta alla Larghezza" (`FitH`).
 
-### 1.4 UX Fluidity (Nuovo)
+### 1.4 UX Fluidity & Safety
 - Transizioni di `scan-in` e `soft-exit` per tutte le componenti modali.
 - Eliminazione totale del "blink" visivo durante l'intervallo di caricamento HTMX.
+- **System Stability**: Rimozione delle soppressioni di errore silenziose per conformità ai protocolli di bordo.
 
 ## 2. Infrastruttura Tecnica
 - **Backend**: FastAPI (Python 3.12).
