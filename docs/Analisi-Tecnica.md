@@ -1,7 +1,7 @@
 # Analisi Tecnica: SC-ARCHIVE
 **Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
 **Nome Tecnico Interno**: MD2FastPDF
-**Data**: 20 Marzo 2026
+**Data**: 21 Marzo 2026
 
 ## 1. Architettura di Sistema
 L'applicazione segue un modello di sviluppo asincrono basato su FastAPI, orientato al basso consumo di risorse e alla modularità dei componenti, con un'estetica "Spacecraft Computer".
@@ -36,6 +36,11 @@ L'applicazione segue un modello di sviluppo asincrono basato su FastAPI, orienta
 
 ### 2.3 Sistema di Icone (`templates/icons/`)
 - Componenti SVG Jinja2. Include l'icona **Holocron** come simbolo di sistema.
+
+### 2.4 Aegis Optimizer (`logic/optimizer.py`)
+- Suite di manutenzione ricorsiva per l'ottimizzazione strutturale del Data Archive.
+- **Table Promotion**: Rileva testate vuote e "promuove" la prima riga di dati per mantenere la validità del parsing Markdown.
+- **Redundancy Cleanup**: Elimina in modo differenziale i divisori di riga (`|---|`) superflui e le righe puramente vuote.
 
 ## 3. Interfaccia Utente (UI)
 - **Micro-animazioni**: Radar di sistema calibtrato a 45s per effetto atmosferico.
