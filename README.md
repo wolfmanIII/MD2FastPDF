@@ -16,6 +16,7 @@
 ## 🚀 Features
 - **Aegis Theme**: "Spacecraft" interface with Neon Cyan accents and Holocron system logo.
 - **Global Discovery**: Integrated recursive search engine for `.md`, `.html`, and `.pdf` files.
+- **Aegis Visualization**: Support for **Mermaid.js** diagrams (Flowcharts, Sequence, Gantt) in Markdown.
 - **Multiformat Browser**: Native viewing for Markdown, HTML (External Tab), and PDF (Aegis Preview).
 - **Terminal Matrix**: Integrated CPU/Memory monitoring and calibrated HUD radar (45s cycle).
 - **Aegis Transitions**: Smooth `scan-in` and `soft-exit` animations for a "no-blink" experience.

@@ -69,15 +69,15 @@
     <div class="flex-grow flex space-x-3 min-w-0 min-h-0 overflow-hidden" style="width: 100% !important;">
         
         <!-- Input Pane -->
-        <div class="flex-1 min-w-0 flex flex-col glass-panel p-0 overflow-hidden relative group" style="background: rgba(10, 10, 15, 0.4) !important;">
-            <div class="flex items-center justify-between px-6 py-2 neon-border-b bg-black/40 shrink-0">
+        <div class="flex-1 min-w-0 flex flex-col glass-panel p-0 overflow-hidden relative group" style="background: rgba(15, 23, 42, 0.5) !important;">
+            <div class="flex items-center justify-between px-6 py-2 neon-border-b bg-black/20 shrink-0">
                 <span class="text-[11px] text-zinc-100 uppercase tracking-widest font-bold">INPUT_BUFFER</span>
             </div>
             <div class="flex-grow w-full overflow-hidden relative">
                 <form id="editor-form" class="h-full w-full absolute inset-0 flex flex-col m-0 overflow-hidden">
                     <input type="hidden" name="path" value="{{ path }}">
                     <textarea name="content" id="pure-editor-input"
-                        class="w-full h-full bg-transparent p-10 font-mono text-base leading-[1.8] outline-none resize-none text-zinc-300 focus:text-white transition-colors"
+                        class="w-full h-full bg-transparent p-10 font-mono text-base leading-[1.8] outline-none resize-none text-slate-300 focus:text-white transition-colors"
                         style="border: none !important; font-family: 'JetBrains Mono', monospace !important; font-variant-ligatures: normal !important;"
                         spellcheck="false">{{ content }}</textarea>
                 </form>
@@ -85,14 +85,14 @@
         </div>
 
         <!-- Preview Pane -->
-        <div class="flex-1 min-w-0 flex flex-col glass-panel overflow-hidden relative" style="background: rgba(10, 10, 15, 0.4) !important;">
-            <div class="flex items-center justify-between px-6 py-2 neon-border-b bg-black/40 shrink-0">
+        <div class="flex-1 min-w-0 flex flex-col glass-panel overflow-hidden relative" style="background: rgba(15, 23, 42, 0.5) !important;">
+            <div class="flex items-center justify-between px-6 py-2 neon-border-b bg-black/20 shrink-0">
                 <span class="text-[9px] neon-text uppercase tracking-widest font-bold">PREVIEW_RENDER</span>
-                <div class="w-2 h-2 rounded-full neon-bg animate-pulse shadow-[0_0_8px_rgba(0,240,255,0.5)]"></div>
+                <div class="w-2 h-2 rounded-full neon-bg animate-pulse shadow-[0_0_8px_rgba(125, 211, 252, 0.5)]"></div>
             </div>
             <div class="flex-grow w-full overflow-hidden relative">
                 <div id="pure-preview-pane" 
-                     class="absolute inset-0 p-12 overflow-y-auto prose prose-invert prose-p:leading-[1.8] prose-zinc max-w-none prose-pre:bg-black/80 prose-pre:border prose-pre:border-white/10 prose-headings:neon-text prose-a:text-[var(--neon-cyan)] scrollbar-thin text-zinc-300">
+                     class="absolute inset-0 p-12 overflow-y-auto prose prose-invert prose-p:leading-[1.8] prose-slate max-w-none prose-pre:bg-black/80 prose-pre:border prose-pre:border-white/10 prose-headings:neon-text prose-a:text-[var(--neon-cyan)] scrollbar-thin text-slate-300">
                     <!-- Content rendered by JavaScript -->
                 </div>
             </div>
@@ -121,18 +121,10 @@
                 preview.innerHTML = marked.parse(raw);
                 charCount.innerText = raw.length + ' CHRS';
                 
-                const mermaidBlocks = preview.querySelectorAll('pre code.language-mermaid');
-                mermaidBlocks.forEach((block, index) => {
-                    const code = block.innerText;
-                    const container = block.parentElement;
-                    const id = 'mermaid-' + Date.now() + '-' + index;
-                    container.innerHTML = `<div class="mermaid" id="${id}" style="width: 100% !important; overflow: auto !important;">${code}</div>`;
-                    try {
-                        mermaid.init(undefined, container.querySelector('.mermaid'));
-                    } catch (e) {
-                        console.error('MERMAID_ERR:', e);
-                    }
-                });
+                // AEGIS_PURE_MERMAID: Use the global render protocol
+                if (typeof renderAegisMermaid === 'function') {
+                    renderAegisMermaid();
+                }
             };
 
             window.insertTag = (before, after) => {
@@ -167,14 +159,14 @@
     </script>
 
     <style>
-        #pure-editor-input { scrollbar-width: thin; scrollbar-color: rgba(0, 240, 255, 0.2) transparent; }
+        #pure-editor-input { scrollbar-width: thin; scrollbar-color: rgba(125, 211, 252, 0.2) transparent; }
         .scrollbar-thin::-webkit-scrollbar { width: 5px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; border: 1px solid rgba(0, 240, 255, 0.05); }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(0, 240, 255, 0.3); }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; border: 1px solid rgba(125, 211, 252, 0.05); }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(125, 211, 252, 0.3); }
         
         .prose pre { background: rgba(0,0,0,0.4) !important; border-radius: 4px; padding: 1.5rem !important; }
         .prose h1, .prose h2, .prose h3 { margin-top: 1.5em !important; margin-bottom: 0.5em !important; }
-        .prose p { margin-bottom: 1.25em !important; color: #f4f4f5; }
+        .prose p { margin-bottom: 1.25em !important; color: #cbd5e1; }
     </style>
 </div>

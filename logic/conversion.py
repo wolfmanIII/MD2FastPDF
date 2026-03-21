@@ -23,10 +23,10 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
     allowed_tags = bleach.sanitizer.ALLOWED_TAGS | {
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'code', 'table', 
         'thead', 'tbody', 'tr', 'td', 'th', 'img', 'br', 'hr', 'blockquote',
-        'ul', 'ol', 'li', 'em', 'strong', 'del', 'a'
+        'ul', 'ol', 'li', 'em', 'strong', 'del', 'a', 'div', 'span'
     }
     allowed_attributes = {
-        '*': ['class', 'id'],
+        '*': ['class', 'id', 'style'],
         'img': ['src', 'alt', 'title'],
         'a': ['href', 'title']
     }
@@ -57,6 +57,15 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
     th { background: #f1f5f9; font-weight: 600; color: #0f172a; }
     blockquote { border-left: 4px solid #cbd5e1; padding-left: 1rem; color: #475569; font-style: italic; margin-left: 0; }
     img { max-width: 100%; height: auto; border-radius: 4px; margin: 1rem 0; }
+    
+    /* Mermaid PDF styles */
+    .mermaid {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        text-align: center;
+    }
     """
 
     _name = filename if len(filename) < 40 else filename[:37] + "..."
@@ -89,6 +98,39 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
     <head>
         <meta charset="UTF-8">
         <style>{industrial_css}</style>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', async function() {{
+                try {{
+                    // Initialize
+                    mermaid.initialize({{ 
+                        startOnLoad: false, 
+                        theme: 'default',
+                        securityLevel: 'loose',
+                        logLevel: 'error'
+                    }});
+                    
+                    // Transform blocks
+                    const blocks = document.querySelectorAll('pre code.language-mermaid');
+                    if (blocks.length > 0) {{
+                        blocks.forEach(function(codeBlock) {{
+                            const pre = codeBlock.parentElement;
+                            const div = document.createElement('div');
+                            div.className = 'mermaid';
+                            div.textContent = codeBlock.textContent;
+                            pre.parentElement.replaceChild(div, pre);
+                        }});
+                        
+                        // Render all at once
+                        await mermaid.run();
+                        console.log("SYSTEM_LOG // Mermaid rendering complete");
+                    }}
+                }} catch (err) {{
+                    console.error("SYSTEM_ERR // Mermaid error:", err);
+                }}
+            }});
+        </script>
     </head>
     <body class="prose">
         <div class="content">{html_body}</div>
@@ -97,7 +139,7 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
     """
 
     # Send to Gotenberg (v7/8 Multipart logic)
-    async with httpx.AsyncClient(timeout=30.0) as client:
+    async with httpx.AsyncClient(timeout=60.0) as client:
         # Form Data (Options)
         data = {
             "marginTop": "0.75",
@@ -107,7 +149,8 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
             "paperWidth": "8.27",
             "paperHeight": "11.69",
             "scale": "1.0",
-            "printBackground": "true"
+            "printBackground": "true",
+            "waitDelay": "5s"  # Increase for safety
         }
         
         # Files (HTML Content)

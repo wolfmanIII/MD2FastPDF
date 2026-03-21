@@ -1,6 +1,23 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [3.9.1] - AEGIS SKY (2026-03-21)
+Ricalibrazione cromatica dell'intera UI verso tonalità Sky Blue/Slate e ottimizzazione del rendering live dei diagrammi Mermaid.
+
+### Added
+- **Aegis Sky Palette**: Nuova gamma cromatica Sky/Azure per migliorare leggibilità e contrasto nei sistemi di cockpit editoriale.
+- **Mermaid Sync (Deep Editor)**: Integrazione dinamica dei grafici nel preview di EasyMDE e Pure Editor con debouncing (250ms).
+- **Aegis Lumina Protocol**: Addio ai neri assoluti per una migliore profondità degli spazi di lavoro (Slate-Space).
+
+### Fixed
+- Risolto il bug di invisibilità dei grafici in Side-by-Side tramite protocollo di inizializzazione forcing.
+- Pipeline PDF stabilizzata con `waitDelay` ricalibrato a 5s per diagrammi complessi.
+
+## [3.9.0] - AEGIS VISUALIZATION (2026-03-21)
+- **Aegis Visualization**: Supporto nativo per diagrammi Mermaid (Flow, Seq, Gantt).
+- **Async Export Protocol**: Sincronizzazione con Gotenberg (waitDelay 3s) per export PDF coerente.
+- **Auto-Transform**: Protocollo JS per la conversione dinamica dei blocchi di codice Markdown in vettoriali.
+
 ## [3.5.0] - AEGIS DISCOVERY (2026-03-21)
 Introduzione del motore di ricerca globale e supporto multiformato per l'Archivio Dati.
 
