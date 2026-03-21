@@ -19,11 +19,19 @@
                 {% with class="w-3 h-3" %}{% include 'icons/pdf.html' %}{% endwith %}
                 <span>DOWNLOAD_PDF</span>
             </a>
+            <button hx-get="/files?path={{ path|parent_path }}" 
+                    hx-target="#aegis-view-core" hx-push-url="true"
+                    class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 mr-2">
+                {% with class="w-3 h-3 text-zinc-400" %}{% include 'icons/folder.html' %}{% endwith %}
+                <span>TERMINAL_FILES</span>
+            </button>
+            {% if not is_pdf_file %}
             <button hx-get="/editor?path={{ path }}" hx-target="#aegis-view-core" hx-push-url="true"
                     class="btn-solid text-[10px] rounded-sm flex items-center space-x-2">
                 {% with class="w-3 h-3" %}{% include 'icons/action-back.html' %}{% endwith %}
                 <span>BACK_TO_EDIT</span>
             </button>
+            {% endif %}
         </div>
     </div>
 

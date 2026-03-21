@@ -1,14 +1,15 @@
 # Stato del Progetto: SC-ARCHIVE
-**Stato Attuale**: Op_Ready / Versione 3.0 (Spacecraft Archive)
-**Ultimo Aggiornamento**: 20 Marzo 2026
+**Stato Attuale**: Op_Ready / Versione 3.5 (Aegis Discovery)
+**Ultimo Aggiornamento**: 21 Marzo 2026
 
 ## 1. Funzionalità Implementation (Aegis Stack)
 
-### 1.1 Gestione File & Dashboard
+### 1.1 Gestione File & Discovery
 - Navigazione filesystem locale con breadcrumbs dinamici e root-selection modale.
+- **Ricerca Globale Aegis**: Motore di scansione ricorsiva per file `.md`, `.html` e `.pdf`.
+- **Multiformat Viewer**: Supporto integrato per PDF (Aegis Preview) e HTML (scheda esterna).
 - Dashboard "Spacecraft" con monitoraggio CPU/Memoria e radar HUD (ciclo 45s).
 - Terminal Matrix: Sistema di monitoraggio core integrato.
-- Redirect automatico al File Browser dopo la selezione della root.
 
 ### 1.2 Editor Markdown (Aegis Edition)
 - Integrazione EasyMDE (CodeMirror) stabilizzata con CSS scuro anti-flash.

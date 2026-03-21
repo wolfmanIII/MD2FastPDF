@@ -4,9 +4,10 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from logic.files import (
-    list_directory_contents, read_file_content, write_file_content, 
-    create_new_file, delete_file, get_recent_files, get_storage_stats,
-    list_only_directories, set_project_root, get_project_root
+    list_directory_contents, read_file_content, read_file_bytes,
+    write_file_content, create_new_file, delete_file, get_recent_files, 
+    get_storage_stats, list_only_directories, set_project_root, get_project_root,
+    search_files
 )
 from logic.conversion import convert_markdown_to_pdf
 from pathlib import Path
@@ -18,6 +19,12 @@ app = FastAPI(title="SC-ARCHIVE", description="Space Craft Archive Management Sy
 # Static files and templating
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+def parent_path_filter(value: str) -> str:
+    path = Path(value)
+    return str(path.parent) if str(path.parent) != "." else "."
+
+templates.env.filters["parent_path"] = parent_path_filter
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -105,6 +112,29 @@ async def list_files(request: Request, path: str = "."):
         return templates.TemplateResponse("components/file_list.html", context)
     
     return templates.TemplateResponse("shell.html", context)
+
+@app.get("/files/search", response_class=HTMLResponse)
+async def perform_search(request: Request, q: str = ""):
+    """
+    Performs a recursive search (if q) or root listing (if empty) 
+    and returns ONLY the results grid fragment.
+    """
+    if not q.strip():
+        # If query is empty, show original root files
+        items = await list_directory_contents(".")
+    else:
+        items = await search_files(q)
+    
+    context = {
+        "request": request,
+        "items": items,
+        "current_path": ".",
+        "breadcrumbs": [{"name": "SEARCH_RESULTS", "path": "."}],
+        "searching": True,
+        "query": q
+    }
+    
+    return templates.TemplateResponse("components/results_grid.html", context)
 
 @app.get("/create/form", response_class=HTMLResponse)
 async def create_file_form(request: Request, path: str = "."):
@@ -229,6 +259,7 @@ async def view_pdf(request: Request, path: str):
         "path": path,
         "filename": Path(path).name,
         "breadcrumbs": breadcrumbs,
+        "is_pdf_file": str(path).lower().endswith(".pdf"),
         "component_template": "components/pdf_preview.html"
     }
 
@@ -240,10 +271,13 @@ async def view_pdf(request: Request, path: str):
 @app.get("/pdf/preview")
 async def pdf_preview(path: str):
     """
-    Streams the generated PDF for the browser object/iframe.
+    Streams the PDF (existing or generated from MD).
     """
-    content = await read_file_content(path)
-    pdf_bytes = await convert_markdown_to_pdf(content, Path(path).name)
+    if str(path).lower().endswith(".pdf"):
+        pdf_bytes = await read_file_bytes(path)
+    else:
+        content = await read_file_content(path)
+        pdf_bytes = await convert_markdown_to_pdf(content, Path(path).name)
     
     return Response(
         content=pdf_bytes,
@@ -254,17 +288,29 @@ async def pdf_preview(path: str):
 @app.get("/pdf/download")
 async def pdf_download(path: str):
     """
-    Provides the PDF for download.
+    Provides the PDF for download (MD converted or raw PDF).
     """
-    content = await read_file_content(path)
-    pdf_bytes = await convert_markdown_to_pdf(content, Path(path).name)
+    if str(path).lower().endswith(".pdf"):
+        pdf_bytes = await read_file_bytes(path)
+        filename = Path(path).name
+    else:
+        content = await read_file_content(path)
+        pdf_bytes = await convert_markdown_to_pdf(content, Path(path).name)
+        filename = Path(path).with_suffix(".pdf").name
     
-    filename = Path(path).with_suffix(".pdf").name
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
+
+@app.get("/html/view", response_class=HTMLResponse)
+async def view_html(request: Request, path: str):
+    """
+    Directly serves an HTML file from the project root.
+    """
+    content = await read_file_content(path)
+    return HTMLResponse(content=content)
 
 @app.get("/root-picker", response_class=HTMLResponse)
 async def root_picker(request: Request, path: str = ""):

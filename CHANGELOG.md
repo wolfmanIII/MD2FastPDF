@@ -1,6 +1,19 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [3.5.0] - AEGIS DISCOVERY (2026-03-21)
+Introduzione del motore di ricerca globale e supporto multiformato per l'Archivio Dati.
+
+### Added
+- **Global Search Engine**: Ricerca ricorsiva ad alta velocità per file `.md`, `.html` e `.pdf` nel Data Archive con HUD dedicato.
+- **Multiformat Support**: Supporto nativo per la visualizzazione di file HTML (apertura scheda) e PDF (preview Aegis integrata).
+- **Auto-Discovery**: Indicizzazione automatica dei contenuti testuali per ricerca contestuale.
+
+### Fixed
+- **UI Nesting Bug**: Risolto il bug di ricorsione nei componenti breadcrumb (glitch matrioska visuale).
+- **Search Alignment**: Perfezionamento millimetrico del modulo di ricerca Aegis e centratura placeholder.
+- **Storage Stats**: Risolto errore `TypeError` nel calcolo delle statistiche di storage dovuto a errata rimozione di codice durante il refactoring.
+
 ## [3.1.0] - AEGIS SECURITY HARDENING (2026-03-20)
 Rafforzamento dei protocolli di sicurezza e stabilità del sistema "Aegis Class".
 

@@ -101,7 +101,7 @@ async def list_directory_contents(relative_path: str = ".") -> List[Dict[str, Un
                     "is_dir": True,
                     "path": str(Path(relative_path) / entry.name)
                 })
-            elif entry.name.endswith(".md"):
+            elif entry.name.endswith((".md", ".html", ".pdf")):
                 items.append({
                     "name": entry.name,
                     "is_dir": False,
@@ -115,14 +115,28 @@ async def list_directory_contents(relative_path: str = ".") -> List[Dict[str, Un
 
 async def read_file_content(relative_path: str) -> str:
     """
-    Reads the content of a markdown file asynchronously.
+    Reads the content of a text file asynchronously.
     """
     file_path = sanitize_path(relative_path)
     
-    if not file_path.is_file() or not str(file_path).endswith(".md"):
-        raise HTTPException(status_code=404, detail="FILE_NOT_FOUND")
+    if not file_path.is_file() or not str(file_path).endswith((".md", ".html")):
+        raise HTTPException(status_code=404, detail="FILE_NOT_FOUND_OR_NOT_TEXT")
 
     async with await anyio.open_file(file_path, mode="r", encoding="utf-8") as f:
+        content = await f.read()
+    
+    return content
+
+async def read_file_bytes(relative_path: str) -> bytes:
+    """
+    Reads the raw bytes of a file asynchronously.
+    """
+    file_path = sanitize_path(relative_path)
+    
+    if not file_path.is_file():
+        raise HTTPException(status_code=404, detail="FILE_NOT_FOUND")
+
+    async with await anyio.open_file(file_path, mode="rb") as f:
         content = await f.read()
     
     return content
@@ -133,9 +147,9 @@ async def write_file_content(relative_path: str, content: str):
     """
     file_path = sanitize_path(relative_path)
     
-    # We only allow writing to .md files for security
-    if not str(file_path).endswith(".md"):
-        raise HTTPException(status_code=400, detail="INVALID_FILE_TYPE: Only .md files allowed")
+    # We only allow writing to .md or .html files for security
+    if not str(file_path).endswith((".md", ".html")):
+        raise HTTPException(status_code=400, detail="INVALID_FILE_TYPE: Only .md or .html files allowed")
 
     async with await anyio.open_file(file_path, mode="w", encoding="utf-8") as f:
         await f.write(content)
@@ -149,7 +163,7 @@ async def create_new_file(relative_dir: str, filename: str):
     if not filename:
         raise HTTPException(status_code=400, detail="FILENAME_REQUIRED")
         
-    if not filename.lower().endswith(".md"):
+    if not any(filename.lower().endswith(ext) for ext in [".md", ".html"]):
         filename += ".md"
         
     # Sanitize the directory first, then join and sanitize the full path
@@ -174,9 +188,9 @@ async def delete_file(relative_path: str):
     """
     file_path = sanitize_path(relative_path)
     
-    # Check if it's a file and ends with .md
-    if not file_path.is_file() or not str(file_path).endswith(".md"):
-        raise HTTPException(status_code=400, detail="INVALID_FILE: Only .md files can be deleted")
+    # Check if it's a file and ends with allowed extensions
+    if not file_path.is_file() or not str(file_path).endswith((".md", ".html", ".pdf")):
+        raise HTTPException(status_code=400, detail="INVALID_FILE: Only .md, .html, .pdf can be deleted")
         
     # Use anyio to run os.remove in a thread pool to avoid blocking
     await anyio.to_thread.run_sync(os.remove, str(file_path))
@@ -196,7 +210,7 @@ async def get_recent_files(limit: int = 5) -> List[Dict[str, Union[str, float]]]
             dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith(".")]
                 
             for filename in filenames:
-                if filename.endswith(".md") and not filename.startswith("."):
+                if filename.endswith((".md", ".html", ".pdf")) and not filename.startswith("."):
                     file_path = Path(root) / filename
                     try:
                         mtime = file_path.stat().st_mtime
@@ -227,7 +241,7 @@ async def get_storage_stats() -> Dict[str, Union[str, float]]:
         for root, dirs, filenames in os.walk(get_project_root()):
             dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith(".")]
             for filename in filenames:
-                if filename.endswith(".md"):
+                if filename.endswith((".md", ".html", ".pdf")):
                     try:
                         total_size += (Path(root) / filename).stat().st_size
                         count += 1
@@ -253,3 +267,31 @@ async def get_storage_stats() -> Dict[str, Union[str, float]]:
     _storage_cache["data"] = data
     _storage_cache["timestamp"] = now
     return data
+
+async def search_files(query: str) -> List[Dict[str, Union[str, bool]]]:
+    """
+    Recursively searches for files matching the query in the project.
+    Only returns .md, .html, .pdf files.
+    """
+    query = query.lower().strip()
+    if not query:
+        return []
+
+    def _scan():
+        results = []
+        for root, dirs, filenames in os.walk(get_project_root()):
+            # Skip hidden and excluded directories
+            dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith(".")]
+            
+            for filename in filenames:
+                if filename.lower().endswith((".md", ".html", ".pdf")) and query in filename.lower():
+                    file_path = Path(root) / filename
+                    results.append({
+                        "name": filename,
+                        "is_dir": False,
+                        "path": str(file_path.relative_to(get_project_root()))
+                    })
+        # Sort results by name
+        return sorted(results, key=lambda x: x["name"].lower())
+
+    return await anyio.to_thread.run_sync(_scan)

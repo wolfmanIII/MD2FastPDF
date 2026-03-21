@@ -2,64 +2,45 @@
     <!-- Subtle background accent -->
     <div class="absolute -left-20 top-0 w-40 h-full bg-[var(--neon-cyan)]/5 blur-3xl pointer-events-none"></div>
 
-    <div class="flex items-center justify-between mb-4 neon-border-b pb-2 relative z-10">
-        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar">
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-2 pb-2 relative z-10 gap-4">
+        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar shrink-0">
             <h3 class="font-bold text-zinc-100 shrink-0">DATA_ARCHIVE //</h3>
-            <button hx-get="/" hx-target="#aegis-view-core" hx-push-url="true" class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">DASHBOARD</button>
+            <button hx-get="/" hx-target="#aegis-view-core" hx-push-url="true"
+                class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">DASHBOARD</button>
             <span class="opacity-100 text-zinc-200 shrink-0">/</span>
             {% for crumb in breadcrumbs %}
-            <button hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true" class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{ crumb.name }}</button>
+            <button hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true"
+                class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{
+                crumb.name }}</button>
             <span class="opacity-100 text-zinc-200 shrink-0">/</span>
             {% endfor %}
         </div>
-        <!-- NEW FILE BUTTON -->
-        <button hx-get="/create/form?path={{ current_path }}" 
-                hx-target="#modal-container"
-                class="btn-solid rounded-sm group flex items-center space-x-2 text-[10px] tracking-[0.2em] font-bold">
+
+        <!-- NEW FILE BUTTON (Moved next to breadcrumbs for clean layout) -->
+        <button hx-get="/create/form?path={{ current_path }}" hx-target="#modal-container"
+            class="btn-solid h-8 rounded-sm group flex items-center space-x-2 text-[10px] tracking-[0.2em] font-bold shrink-0">
             {% with class="w-4 h-4" %}{% include 'icons/plus.html' %}{% endwith %}
             <span>NEW_ENTRY</span>
         </button>
     </div>
 
-    <div class="grid grid-cols-1 gap-1 relative z-10">
-        {% for item in items %}
-        <div class="group flex items-center justify-between p-2 rounded-sm neon-text neon-hover-item transition-all text-left cursor-pointer"
-            {% if item.is_dir %}
-                hx-get="/files?path={{ item.path }}" 
-            {% else %}
-                hx-get="/editor?path={{ item.path }}" 
-            {% endif %}
-            hx-target="#aegis-view-core" hx-push-url="true">
-            
-            <div class="flex items-center space-x-4">
-                {% if item.is_dir %}
-                <span class="text-zinc-100 group-hover:neon-text transition-colors">
-                    {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/folder.html' %}{% endwith %}
-                </span>
-                <span class="font-bold tracking-widest">
-                    {{ item.name }}/
-                </span>
-                {% else %}
-                <span class="text-zinc-100 group-hover:neon-text transition-colors">
-                    {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/cube.html' %}{% endwith %}
-                </span>
-                <span class="font-bold tracking-widest">
-                    {{ item.name }}
-                </span>
-                {% endif %}
+    <!-- SEPARATE SEARCH ROW -->
+    <div class="mb-6 relative z-10">
+        <div
+            class="flex items-center bg-black/40 border border-white/5 rounded-sm overflow-hidden focus-within:border-[var(--neon-cyan)]/30 transition-all duration-300">
+            <div class="bg-white/5 px-4 py-2 border-r border-white/5 flex items-center space-x-3 shrink-0">
+                <span
+                    class="text-[var(--neon-cyan)] animate-pulse shadow-[0_0_5px_var(--neon-cyan)] opacity-70">●</span>
+                <span class="text-[9px] tracking-[0.3em] font-bold text-zinc-400">SCAN_QUERY //</span>
             </div>
-            
-            <div class="opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
-                {% if not item.is_dir %}
-                <button type="button" class="group/btn flex items-center space-x-1 text-[10px] text-red-500 border border-red-500/50 hover:bg-red-500/20 px-2 py-1 rounded-sm font-bold z-20 transition-colors"
-                     hx-get="/delete/confirm?path={{ item.path }}"
-                     hx-target="#modal-container"
-                     onclick="event.stopPropagation();">
-                     {% with class="w-3 h-3 group-hover/btn:animate-pulse" %}{% include 'icons/action-trash.html' %}{% endwith %}
-                </button>
-                {% endif %}
-            </div>
+            <span class="text-zinc-700 font-bold text-[11px] shrink-0 ml-2 opacity-40">::</span>
+            <input type="text" name="q" placeholder="AWAITING_INPUT_FOR_LOCAL_AND_REMOTE_SCAN..."
+                value="{{ query if query else '' }}"
+                class="flex-grow bg-transparent px-4 py-2 text-[11px] tracking-[0.1em] text-zinc-100 placeholder-zinc-700 focus:outline-none focus:bg-white/[0.02] transition-all font-mono"
+                hx-get="/files/search" hx-trigger="keyup changed delay:500ms, search" hx-target="#results-grid"
+                hx-swap="outerHTML" hx-push-url="false">
         </div>
-        {% endfor %}
     </div>
+
+    {% include 'components/results_grid.html' %}
 </div>
