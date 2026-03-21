@@ -1,19 +1,18 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
-## [3.8.0] - AEGIS OPTIMIZER (2026-03-21)
-Introduzione della suite di ottimizzazione strutturale e riparazione profonda del Data Archive.
+## [3.5.0] - AEGIS DISCOVERY (2026-03-21)
+Introduzione del motore di ricerca globale e supporto multiformato per l'Archivio Dati.
 
 ### Added
-- **Aegis Table Optimizer (v2)**: Motore Python (`logic/optimizer.py`) per la riparazione ricorsiva delle tabelle Markdown.
-- **Table Promotion Logic**: Rilevamento automatico di testate vuote e "promozione" della prima riga utile per garantire la validità del parsing.
-- **Redundancy Cleanup**: Rimozione di circa 1000 divisori ridondanti (`|---|`) e righe vuote in tutto l'ecosistema Protocollo SIGMA.
+- **Global Search Engine**: Ricerca ricorsiva per `.md`, `.html`, `.pdf`.
+- **Multiformat Support**: Preview PDF Aegis e link esterni HTML.
+- **Auto-Discovery**: Indicizzazione dinamica del contenuto testuale all'avvio.
 
-### Changed
-- **Technical Analysis**: Aggiornata la documentazione interna per includere i protocolli di manutenzione asincrona.
-- **README HUD**: Espansione delle feature operative con la sezione Data Optimizer.
-
-## [3.5.0] - AEGIS DISCOVERY (2026-03-21)
+### Fixed
+- **UI Nesting Bug**: Risolto il loop ricorsivo dei breadcrumbs.
+- **Search Alignment**: Perfezionamento HUD e placeholder centrato.
+- **Storage Stats**: Fix `TypeError` nel calcolo della dimensione cartella.
 Introduzione del motore di ricerca globale e supporto multiformato per l'Archivio Dati.
 
 ### Added

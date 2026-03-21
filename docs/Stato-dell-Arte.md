@@ -1,5 +1,5 @@
 # Stato del Progetto: SC-ARCHIVE
-**Stato Attuale**: Op_Ready / Versione 3.8 (Aegis Optimizer)
+**Stato Attuale**: Op_Ready / Versione 3.5 (Aegis Discovery)
 **Ultimo Aggiornamento**: 21 Marzo 2026
 
 ## 1. Funzionalità Implementation (Aegis Stack)
@@ -7,7 +7,6 @@
 ### 1.1 Gestione File & Discovery
 - Navigazione filesystem locale con breadcrumbs dinamici e root-selection modale.
 - **Ricerca Globale Aegis**: Motore di scansione ricorsiva per file `.md`, `.html` e `.pdf`.
-- **Aegis Table Optimizer**: Suite Python (v2) per l'ottimizzazione automatica e la riparazione strutturale delle tabelle Markdown.
 - **Multiformat Viewer**: Supporto integrato per PDF (Aegis Preview) e HTML (scheda esterna).
 - Dashboard "Spacecraft" con monitoraggio CPU/Memoria e radar HUD (ciclo 45s).
 - Terminal Matrix: Sistema di monitoraggio core integrato.

@@ -37,11 +37,6 @@ L'applicazione segue un modello di sviluppo asincrono basato su FastAPI, orienta
 ### 2.3 Sistema di Icone (`templates/icons/`)
 - Componenti SVG Jinja2. Include l'icona **Holocron** come simbolo di sistema.
 
-### 2.4 Aegis Optimizer (`logic/optimizer.py`)
-- Suite di manutenzione ricorsiva per l'ottimizzazione strutturale del Data Archive.
-- **Table Promotion**: Rileva testate vuote e "promuove" la prima riga di dati per mantenere la validità del parsing Markdown.
-- **Redundancy Cleanup**: Elimina in modo differenziale i divisori di riga (`|---|`) superflui e le righe puramente vuote.
-
 ## 3. Interfaccia Utente (UI)
 - **Micro-animazioni**: Radar di sistema calibtrato a 45s per effetto atmosferico.
 - **Modali Aegis**: Transizioni di `scan-in` e `soft-exit` per eliminare i flash visivi.
