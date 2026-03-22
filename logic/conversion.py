@@ -88,10 +88,16 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
         <meta charset="UTF-8">
         <style>{INDUSTRIAL_CSS}</style>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', async function() {{
                 try {{
+                    // Highlight.js
+                    if (typeof hljs !== 'undefined') hljs.highlightAll();
+                    
+                    // Mermaid
                     mermaid.initialize({{ startOnLoad: false, theme: 'default', securityLevel: 'loose' }});
                     const blocks = document.querySelectorAll('pre code.language-mermaid');
                     if (blocks.length > 0) {{

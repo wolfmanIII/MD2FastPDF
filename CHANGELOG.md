@@ -1,18 +1,17 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
-## [3.9.4] - AEGIS MODULAR ARCH (2026-03-22)
-Rifacimento completo dell'architettura di sistema per una gestione modulare dei domini operativi tramite FastAPI APIRouter.
+## [3.9.5] - AEGIS OFFLINE READY (2026-03-22)
+Migrazione totale dell'infrastruttura verso l'isolamento locale per garantire operatività senza connessione internet.
 
 ### Added
-- **Aegis Modular Routing**: Scomposizione del monolite `main.py` in singoli moduli router (`core`, `archive`, `editor`, `pdf`, `config`).
-- **Unified Template Engine**: Centralizzato l'accesso alle risorse Jinja2 in un modulo logico dedicato per eliminare le dipendenze circolari.
+- **Aegis Local Isolation**: Tutte le dipendenze (HTMX, DaisyUI, Marked, Highlight.js, Mermaid, EasyMDE, FontAwesome) sono ora servite localmente da `static/js` e `static/css`.
+- **Offline DaisyUI Integration**: Integrata la libreria componenti DaisyUI direttamente nel bundle Tailwind v4 via import locale.
 
 ### Fixed
-- Rimosso il codice di avvio ridondante in `main.py`, delegando il pieno controllo ai protocolli shell (`launch.sh`).
-- Risolto il bug di rendering della Dashboard causato dalla perdita del puntatore `component_template` durante il refactoring.
+- Ottimizzato il protocollo di rendering PDF per includere Highlight.js anche nei documenti esportati (CDN fallback per Gotenberg).
 
-## [3.9.3] - AEGIS VISUAL & PERFORMANCE (2026-03-22)
+## [3.9.4] - AEGIS MODULAR ARCH (2026-03-22)
 
 ### Added
 - **Aegis Sky Palette**: Nuova gamma cromatica Sky/Azure per migliorare leggibilità e contrasto nei sistemi di cockpit editoriale.

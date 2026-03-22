@@ -8,12 +8,10 @@
     <!-- Favicon / Aegis Icon -->
     <link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg">
     <link rel="apple-touch-icon" href="/static/favicon/favicon.svg">
-    <!-- HTMX 1.9.12 (Stable) -->
-    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-    <!-- Tailwind v4 (Compiled) -->
+    <!-- HTMX 1.9.12 (Local) -->
+    <script src="/static/js/htmx.min.js"></script>
+    <!-- Tailwind v4 (Compiled with DaisyUI Bundle) -->
     <link rel="stylesheet" href="/static/css/output.css">
-    <!-- daisyUI -->
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
     <!-- Google Fonts: Inter & Roboto Mono for Industrial feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -178,17 +176,17 @@
         .mermaid:not([data-processed="true"]) { opacity: 0; height: 0; overflow: hidden; }
         .mermaid[data-processed="true"] { opacity: 1; transition: opacity 0.4s ease; background: rgba(0,0,0,0.2) !important; padding: 1.5rem !important; border: 1px solid rgba(0, 240, 255, 0.1) !important; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
     </style>
-    <!-- Highlight.js (Industrial Theme) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <!-- Mermaid.js for Diagrams -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-        <!-- EasyMDE and Icons -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
-        <!-- Marked.js for Pure Mode -->
-        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Highlight.js (Local) -->
+    <link rel="stylesheet" href="/static/css/atom-one-dark.min.css">
+    <script src="/static/js/highlight.min.js"></script>
+    <!-- Mermaid.js (Local) -->
+    <script src="/static/js/mermaid.min.js"></script>
+    <!-- EasyMDE and Icons (Local) -->
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/easymde.min.css">
+    <script src="/static/js/easymde.min.js"></script>
+    <!-- Marked.js (Local) -->
+    <script src="/static/js/marked.min.js"></script>
     <script>
         mermaid.initialize({ 
             startOnLoad: false, 
