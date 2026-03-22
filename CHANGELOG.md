@@ -10,6 +10,7 @@ Migrazione totale dell'infrastruttura verso l'isolamento locale per garantire op
 
 ### Fixed
 - Ottimizzato il protocollo di rendering PDF per includere Highlight.js anche nei documenti esportati (CDN fallback per Gotenberg).
+- Risolto il problema del "Shell Nesting" (duplicazione header/footer) tramite filtraggio `HX-Request` nella rotta dashboard.
 
 ## [3.9.4] - AEGIS MODULAR ARCH (2026-03-22)
 
