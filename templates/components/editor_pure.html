@@ -121,9 +121,9 @@
                 preview.innerHTML = marked.parse(raw);
                 charCount.innerText = raw.length + ' CHRS';
                 
-                // AEGIS_PURE_MERMAID: Use the global render protocol
-                if (typeof renderAegisMermaid === 'function') {
-                    renderAegisMermaid();
+                // AEGIS_PURE_VISUALS: Use the global render protocol
+                if (typeof renderAegisVisuals === 'function') {
+                    renderAegisVisuals();
                 }
             };
 

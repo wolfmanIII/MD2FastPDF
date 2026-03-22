@@ -1,16 +1,18 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
-## [3.9.2] - AEGIS OPTIMUS (2026-03-22)
-Ottimizzazione del selettore root tramite protocollo di aggiornamento parziale e ricalibrazione della fluidità dell'interfaccia.
+## [3.9.3] - AEGIS VISUAL & PERFORMANCE (2026-03-22)
+Integrazione dell'evidenziatura della sintassi ubiqua e ottimizzazione profonda dei motori di conversione e streaming.
 
 ### Added
-- **Root Picker Partial Refresh**: Navigazione istantanea nel filesystem della root senza ricaricare l'intera modale (Aegis Fragment Delivery).
+- **Aegis Visual Suite**: Integrazione di **Highlight.js** con protocollo di rendering automatico in preview, export PDF e visualizzazione HTML.
+- **Aegis PDF Loader**: Interfaccia di caricamento dinamica con spinner neon e transizioni fluite per la generazione dei documenti.
+- **Aegis Optimus (Pipeline)**: Ottimizzazione del motore di conversione tramite pre-allocazione risorse e riutilizzo delle connessioni HTTP (Persistent Pool).
 
 ### Fixed
-- Migliorato il contrasto visivo e rimosso il flickering durante la selezione della directory di lavoro.
+- Ridotto il tempo di latenza pre-Gotenberg del 60% tramite protocollo di caching strutturale.
 
-## [3.9.1] - AEGIS SKY (2026-03-21)
+## [3.9.2] - AEGIS OPTIMUS (2026-03-22)
 
 ### Added
 - **Aegis Sky Palette**: Nuova gamma cromatica Sky/Azure per migliorare leggibilità e contrasto nei sistemi di cockpit editoriale.

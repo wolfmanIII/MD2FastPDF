@@ -59,7 +59,7 @@
                     // Use marked to generate HTML
                     const html = marked.parse(plainText);
                     // Schedule mermaid render once HTML is injected
-                    setTimeout(renderAegisMermaid, 100);
+                    setTimeout(renderAegisVisuals, 100);
                     return html;
                 },
                 toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "|", "preview", "side-by-side", "fullscreen", "|", "guide"],
@@ -83,13 +83,13 @@
                 easyMDE.element.value = easyMDE.value();
             });
 
-            // AEGIS_PREVIEW_MERMAID: Watch for preview toggle
+            // AEGIS_PREVIEW_VISUALS: Watch for preview toggle
             const originalTogglePreview = easyMDE.togglePreview;
             easyMDE.togglePreview = function() {
                 originalTogglePreview.apply(this, arguments);
                 if (this.isPreviewActive()) {
                     // Give it a tiny bit of time for DOM to settle
-                    setTimeout(renderAegisMermaid, 50);
+                    setTimeout(renderAegisVisuals, 50);
                 }
             };
 
@@ -97,15 +97,14 @@
             easyMDE.toggleSideBySide = function() {
                 originalToggleSideBySide.apply(this, arguments);
                 if (this.isSideBySideActive()) {
-                    setTimeout(renderAegisMermaid, 50);
+                    setTimeout(renderAegisVisuals, 50);
                 }
             };
 
             // Also render on any change if side-by-side is active
             cm.on("update", () => {
                 if (easyMDE.isSideBySideActive() || easyMDE.isPreviewActive()) {
-                    // Throttle? Or just render?
-                    renderAegisMermaid();
+                    renderAegisVisuals();
                 }
             });
         })();

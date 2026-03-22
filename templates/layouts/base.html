@@ -286,39 +286,40 @@
             }
         }
 
-        // AEGIS_MERMAID_PROTOCOL: Auto-render on page load, HTMX swap, and editor events
-        let mermaidTimer = null;
-        function renderAegisMermaid() {
-            if (typeof mermaid === 'undefined') return;
-            
-            // Debounce for 250ms to prevent heavy UI load during typing
-            if (mermaidTimer) clearTimeout(mermaidTimer);
-            mermaidTimer = setTimeout(async () => {
-                const blocks = document.querySelectorAll('pre code.language-mermaid');
-                if (blocks.length === 0 && document.querySelectorAll('.mermaid').length === 0) return;
-
-                // Convert <pre><code class="language-mermaid"> to <div class="mermaid">
-                blocks.forEach(function(codeBlock) {
-                    const pre = codeBlock.parentElement;
-                    const div = document.createElement('div');
-                    div.className = 'mermaid';
-                    div.textContent = codeBlock.textContent;
-                    pre.parentElement.replaceChild(div, pre);
-                });
-                
-                try {
-                    // Render only nodes that haven't been processed
-                    await mermaid.run({
-                        nodes: document.querySelectorAll('.mermaid:not([data-processed="true"])')
+        // AEGIS_VISUAL_PROTOCOL: Auto-render on page load, HTMX swap, and editor events
+        let visualTimer = null;
+        function renderAegisVisuals() {
+            if (visualTimer) clearTimeout(visualTimer);
+            visualTimer = setTimeout(async () => {
+                // 1. Handle Mermaid
+                if (typeof mermaid !== 'undefined') {
+                    const blocks = document.querySelectorAll('pre code.language-mermaid');
+                    blocks.forEach(function(codeBlock) {
+                        const pre = codeBlock.parentElement;
+                        const div = document.createElement('div');
+                        div.className = 'mermaid';
+                        div.textContent = codeBlock.textContent;
+                        pre.parentElement.replaceChild(div, pre);
                     });
-                } catch (err) {
-                    console.warn("SYSTEM_WARN // Mermaid rendering interrupted");
+                    
+                    try {
+                        await mermaid.run({
+                            nodes: document.querySelectorAll('.mermaid:not([data-processed="true"])')
+                        });
+                    } catch (err) { }
+                }
+
+                // 2. Handle Syntax Highlighting (Highlight.js)
+                if (typeof hljs !== 'undefined') {
+                    document.querySelectorAll('pre code:not(.language-mermaid)').forEach((block) => {
+                        hljs.highlightElement(block);
+                    });
                 }
             }, 250);
         }
 
-        document.addEventListener('DOMContentLoaded', renderAegisMermaid);
-        document.body.addEventListener('htmx:afterSwap', renderAegisMermaid);
+        document.addEventListener('DOMContentLoaded', renderAegisVisuals);
+        document.body.addEventListener('htmx:afterSwap', renderAegisVisuals);
     </script>
     {% block scripts %}{% endblock %}
 </body>

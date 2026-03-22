@@ -36,15 +36,27 @@
     </div>
 
     <!-- PDF Viewer -->
-    <div class="flex-grow relative z-10 p-6" style="height: 80vh !important;">
-        <object data="/pdf/preview?path={{ path }}#view=FitH" 
-                type="application/pdf" 
-                class="w-full h-full neon-border shadow-[0_0_30px_rgba(0,240,255,0.2)] rounded-sm bg-zinc-950"
-                style="height: 100% !important; min-height: 100% !important;">
-            <div class="text-center p-8 space-y-4">
-                <p class="neon-dim text-sm uppercase">Your browser does not support direct PDF viewing.</p>
-                <a href="/pdf/download?path={{ path }}" class="aegis-link text-xs">DOWNLOAD PDF DOCUMENT</a>
+    <div class="flex-grow relative z-10 p-6 flex items-center justify-center bg-zinc-950/20" style="height: 80vh !important;">
+        <!-- Aegis Loader Overlay -->
+        <div id="aegis-pdf-loader" class="absolute inset-0 flex flex-col items-center justify-center z-20 space-y-6 pointer-events-none transition-opacity duration-500 bg-zinc-950/80">
+            <div class="relative w-16 h-16">
+                <!-- Outer Ring -->
+                <div class="absolute inset-0 border-2 border-[var(--neon-cyan)]/20 rounded-full"></div>
+                <!-- Inner Spinning Pulse -->
+                <div class="absolute inset-0 border-t-2 border-[var(--neon-cyan)] rounded-full animate-spin shadow-[0_0_15px_rgba(0,240,255,0.4)]"></div>
+                <!-- Core Pulse -->
+                <div class="absolute inset-2 bg-[var(--neon-cyan)]/10 rounded-full animate-pulse blur-sm"></div>
             </div>
-        </object>
+            <div class="flex flex-col items-center space-y-2">
+                <span class="text-[10px] neon-text font-bold tracking-[0.4em] uppercase animate-pulse">GENERATING_PDF_STREAM</span>
+                <span class="text-[8px] text-zinc-500 italic tracking-widest uppercase">Initializing Gotenberg Chromium Core...</span>
+            </div>
+        </div>
+
+        <iframe src="/pdf/preview?path={{ path }}#view=FitH" 
+                class="w-full h-full neon-border shadow-[0_0_30px_rgba(0,240,255,0.2)] rounded-sm bg-zinc-900 absolute inset-0 z-10"
+                style="height: 100% !important; min-height: 100% !important; border: 1px solid rgba(0,240,255,0.2) !important;"
+                onload="document.getElementById('aegis-pdf-loader').style.opacity='0'; setTimeout(()=>document.getElementById('aegis-pdf-loader').style.display='none', 500)">
+        </iframe>
     </div>
 </div>
