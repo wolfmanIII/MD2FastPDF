@@ -1,18 +1,18 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
-## [3.9.3] - AEGIS VISUAL & PERFORMANCE (2026-03-22)
-Integrazione dell'evidenziatura della sintassi ubiqua e ottimizzazione profonda dei motori di conversione e streaming.
+## [3.9.4] - AEGIS MODULAR ARCH (2026-03-22)
+Rifacimento completo dell'architettura di sistema per una gestione modulare dei domini operativi tramite FastAPI APIRouter.
 
 ### Added
-- **Aegis Visual Suite**: Integrazione di **Highlight.js** con protocollo di rendering automatico in preview, export PDF e visualizzazione HTML.
-- **Aegis PDF Loader**: Interfaccia di caricamento dinamica con spinner neon e transizioni fluite per la generazione dei documenti.
-- **Aegis Optimus (Pipeline)**: Ottimizzazione del motore di conversione tramite pre-allocazione risorse e riutilizzo delle connessioni HTTP (Persistent Pool).
+- **Aegis Modular Routing**: Scomposizione del monolite `main.py` in singoli moduli router (`core`, `archive`, `editor`, `pdf`, `config`).
+- **Unified Template Engine**: Centralizzato l'accesso alle risorse Jinja2 in un modulo logico dedicato per eliminare le dipendenze circolari.
 
 ### Fixed
-- Ridotto il tempo di latenza pre-Gotenberg del 60% tramite protocollo di caching strutturale.
+- Rimosso il codice di avvio ridondante in `main.py`, delegando il pieno controllo ai protocolli shell (`launch.sh`).
+- Risolto il bug di rendering della Dashboard causato dalla perdita del puntatore `component_template` durante il refactoring.
 
-## [3.9.2] - AEGIS OPTIMUS (2026-03-22)
+## [3.9.3] - AEGIS VISUAL & PERFORMANCE (2026-03-22)
 
 ### Added
 - **Aegis Sky Palette**: Nuova gamma cromatica Sky/Azure per migliorare leggibilità e contrasto nei sistemi di cockpit editoriale.
