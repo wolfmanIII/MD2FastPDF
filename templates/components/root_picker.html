@@ -1,58 +1,15 @@
 <!-- Root Picker Modal -->
 <div id="root-picker-modal" class="modal modal-open bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center fixed inset-0">
-    <div class="modal-box glass-panel border-[var(--neon-cyan)]/30 max-w-lg w-full p-6">
-        <div class="flex items-center justify-between mb-6 border-b border-[var(--glass-border)] pb-3">
+    <div class="modal-box glass-panel border-[var(--neon-cyan)]/30 max-w-lg w-full p-0 overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--glass-border)] bg-black/40">
             <h3 class="font-bold text-lg neon-text tracking-widest uppercase">Select Project Root</h3>
             <button onclick="closeAegisModal('root-picker-modal')" class="neon-dim hover:neon-text transition-colors">
                 <span class="text-xl">&times;</span>
             </button>
         </div>
         
-        <div class="space-y-4">
-            <div class="bg-black/40 p-3 rounded-sm border border-[var(--glass-border)] font-mono text-[10px] truncate">
-                <span class="neon-dim">CURRENT_SELECTION:</span> 
-                <span class="neon-text">/home/wolfman/{{ current_path }}</span>
-            </div>
-
-            <!-- Directory List -->
-            <div class="max-h-[300px] overflow-y-auto no-scrollbar space-y-1 pr-1">
-                {% if parent_path is not none %}
-                <div hx-get="/root-picker?path={{ parent_path }}" hx-target="#modal-container" 
-                     class="flex items-center space-x-3 p-2 rounded-sm cursor-pointer hover:bg-[var(--neon-cyan)]/5 group transition-all">
-                    <span class="neon-text opacity-50">{% with class="w-4 h-4" %}{% include 'icons/action-back.html' %}{% endwith %}</span>
-                    <span class="text-xs text-zinc-100 group-hover:neon-text uppercase tracking-widest">.. [UP_DIRECTORY]</span>
-                </div>
-                {% endif %}
-
-                {% for dir in directories %}
-                <div hx-get="/root-picker?path={{ dir.path }}" hx-target="#modal-container"
-                     class="flex items-center justify-between p-2 rounded-sm cursor-pointer hover:bg-[var(--neon-cyan)]/5 group transition-all">
-                    <div class="flex items-center space-x-3">
-                        <span class="neon-text">{% with class="w-4 h-4" %}{% include 'icons/folder.html' %}{% endwith %}</span>
-                        <span class="text-xs text-zinc-100 group-hover:neon-text uppercase tracking-widest">{{ dir.name }}</span>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-
-            <div class="flex flex-col space-y-3 pt-4 border-t border-[var(--glass-border)]">
-                <p class="text-[9px] text-zinc-600 uppercase italic">
-                    SELECT A DIRECTORY TO BECOME THE ACTIVE ARCHIVE ROOT.
-                    SYSTEM WILL RELOAD DASHBOARD UPON CONFIRMATION.
-                </p>
-                <div class="flex space-x-3">
-                    <button onclick="closeAegisModal('root-picker-modal')" class="btn btn-ghost flex-grow text-xs tracking-widest uppercase rounded-sm border-[var(--glass-border)]">
-                        ABORT_OP
-                    </button>
-                    <button hx-post="/root-picker/select" 
-                            hx-vals='{"path": "{{ current_path }}"}'
-                            hx-target="#aegis-view-core"
-                            hx-on::after-request="closeAegisModal('root-picker-modal')"
-                            class="btn-solid flex-grow text-xs tracking-widest uppercase rounded-sm py-2 px-4 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
-                        CONFIRM_ROOT
-                    </button>
-                </div>
-            </div>
+        <div class="p-6">
+            {% include 'components/root_picker_body.html' %}
         </div>
     </div>
 </div>

@@ -1,8 +1,16 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [3.9.2] - AEGIS OPTIMUS (2026-03-22)
+Ottimizzazione del selettore root tramite protocollo di aggiornamento parziale e ricalibrazione della fluidità dell'interfaccia.
+
+### Added
+- **Root Picker Partial Refresh**: Navigazione istantanea nel filesystem della root senza ricaricare l'intera modale (Aegis Fragment Delivery).
+
+### Fixed
+- Migliorato il contrasto visivo e rimosso il flickering durante la selezione della directory di lavoro.
+
 ## [3.9.1] - AEGIS SKY (2026-03-21)
-Ricalibrazione cromatica dell'intera UI verso tonalità Sky Blue/Slate e ottimizzazione del rendering live dei diagrammi Mermaid.
 
 ### Added
 - **Aegis Sky Palette**: Nuova gamma cromatica Sky/Azure per migliorare leggibilità e contrasto nei sistemi di cockpit editoriale.

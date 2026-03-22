@@ -325,12 +325,18 @@ async def root_picker(request: Request, path: str = ""):
         parent = str(Path(path).parent)
         parent_path = parent if parent != "." else ""
 
-    return templates.TemplateResponse("components/root_picker.html", {
+    context = {
         "request": request,
         "directories": directories,
         "current_path": path,
         "parent_path": parent_path
-    })
+    }
+    
+    # If partial update requested for the body, return ONLY the body
+    if request.headers.get("HX-Target") == "root-picker-body":
+        return templates.TemplateResponse("components/root_picker_body.html", context)
+
+    return templates.TemplateResponse("components/root_picker.html", context)
 
 @app.post("/root-picker/select", response_class=HTMLResponse)
 async def select_root(request: Request, path: str = Form("")):
