@@ -4,40 +4,43 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.0] - AEGIS CHRONOS (Versionamento Visivo)
+### [4.0] - AEGIS ORACLE (Integrazione AI Interna)
+**Obiettivo**: Dotare la stazione di uno strato di intelligenza neurale locale per massimizzare la velocità di produzione.
+- **Modello Operativo Primario**: `qwen2.5-coder:7b` (via Ollama locale). Ottimizzato per generazione strutturata e aderenza sintattica a Markdown/Mermaid.
+- **Specifiche Hardware Base**: Compatibilità certificata per Full GPU Offload su architettura Pascal (es. Nvidia GTX 1070 Ti 8GB VRAM) in ambiente WSL2 con 16GB RAM di sistema.
+- **Neural Completion**: Autocompletamento tecnico in-editor.
+  > *Nota Architetturale*: Implementare un *debounce* (es. 500-800ms) sul trigger JS per compensare il Time-To-First-Token su GPU prive di Tensor Cores, scongiurando il flood di richieste asincrone.
+- **Mermaid Synthesis**: Traduzione istantanea asincrona di direttive testuali in grafici interattivi (~20-30 token/s su 1070 Ti).
+- **Auto-Summarization**: Processamento in background e riepilogo contestuale dei documenti visualizzati nella Dashboard.
+
+---
+
+### [4.1] - AEGIS CHRONOS (Versionamento Visivo)
 **Obiettivo**: Integrazione profonda con i protocolli di controllo della versione.
 - **Git Terminal UI**: Pannello dedicato per commit, push e sync Git direttamente dall'interfaccia.
 - **Visual Diff Cockpit**: Confronto grafico tra buffer corrente e ultimo stato archiviato (Git Diff).
 
 ---
 
-### [4.1] - AEGIS BLUEPRINT (Technical Templating)
+### [4.2] - AEGIS BLUEPRINT (Technical Templating)
 **Obiettivo**: Standardizzazione della produzione documentale industriale.
 - **Galeria Blueprint**: Inserimento istantaneo di template (Missions, Tech Specs, Logs).
 - **Variable Injection**: Sostituzione dinamica di segnaposto nel Markdown prima dell'export PDF.
 
 ---
 
-### [4.2] - AEGIS MULTI-LINK (Efficiency Multi-Tasking)
+### [4.3] - AEGIS MULTI-LINK (Efficiency Multi-Tasking)
 **Obiettivo**: Gestione simultanea di più flussi informativi.
 - **Tabbed Workspace**: Interfaccia a schede HTMX per l'editing simultaneo di più documenti.
 - **Split Pane Sync**: Trascinamento e sincronizzazione di sezioni tra diversi documenti aperti.
 
 ---
 
-### [4.3] - AEGIS GUARD (Local Security Protocol)
+### [4.4] - AEGIS GUARD (Local Security Protocol)
 **Obiettivo**: Blindatura dei dati locali e gestione dell'accesso in rete.
 - **Buffer Encryption**: Cifratura simmetrica dei documenti sensibili a livello di filesystem.
 - **Network Gateway UI**: Strumenti per la gestione della visibilità della stazione nella rete WiFi locale.
 
 ---
 
-### [4.4] - AEGIS ORACLE (Integrazione AI Interna)
-**Obiettivo**: Dotare la stazione di uno strato di intelligenza neurale locale per massimizzare la velocità di produzione.
-- **Neural Completion**: Autocompletamento tecnico tramite Ollama locale.
-- **Mermaid Synthesis**: Traduzione istantanea di frasi in grafici e diagrammi strutturati.
-- **Auto-Summarization**: Funzione di riepilogo documenti nel cockpit della Dashboard.
-
----
-
-**(I flussi operativi futuri sono stati mappati e ricalibrati. Aegis Oracle impostato come traguardo finale del ciclo 4.x.)** 🚀🌑
+**(I flussi operativi futuri sono stati ricalibrati. Aegis Oracle promosso a priorità assoluta [4.0] del ciclo operativo corrente.)** 🚀🌑
