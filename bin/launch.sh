@@ -12,4 +12,4 @@ echo "--- STARTING MD2FastPDF INDUSTRIAL TERMINAL ---"
 ./tailwindcss -i static/css/main.css -o static/css/output.css --watch &
 
 # Start FastAPI server
-pipenv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
