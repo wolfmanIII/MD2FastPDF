@@ -1,28 +1,35 @@
-<div id="editor-easymde-root" style="width: 100% !important; height: 85vh !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; min-width: 0 !important; background: transparent !important;">
-    
+<div id="editor-easymde-root"
+    style="width: 100% !important; height: 85vh !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; min-width: 0 !important; background: transparent !important;">
+
     <!-- Row 1: Status & Context -->
-    <div class="glass-panel px-6 py-3 flex items-center justify-between border-b-0 rounded-b-none shrink-0" style="background: rgba(20, 20, 25, 0.8) !important; margin-bottom: 0.5rem !important;">
-        <div class="flex items-center space-x-3 text-xs uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden flex-grow">
+    <div class="glass-panel px-6 py-3 flex items-center justify-between border-b-0 rounded-b-none shrink-0"
+        style="background: rgba(20, 20, 25, 0.8) !important; margin-bottom: 0.5rem !important;">
+        <div
+            class="flex items-center space-x-3 text-xs uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden flex-grow">
             <span class="font-bold neon-text shrink-0">SYS_LINK //</span>
             <div class="flex items-center space-x-2 text-zinc-100 truncate">
-                <button hx-get="/" hx-target="#aegis-view-core" hx-push-url="true" class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">DASHBOARD</button>
+                <button hx-get="/" hx-target="#aegis-view-core" hx-push-url="true"
+                    class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">DASHBOARD</button>
                 <span class="opacity-100 text-zinc-200 shrink-0">/</span>
                 {% for crumb in breadcrumbs %}
-                <button hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true" class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{ crumb.name }}</button>
+                <button hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true"
+                    class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{
+                    crumb.name }}</button>
                 <span class="opacity-100 text-zinc-200 shrink-0">/</span>
                 {% endfor %}
-                <span class="text-white font-bold bg-white/10 px-2 py-0.5 rounded shadow-sm truncate">{{ filename }}</span>
+                <span class="text-white font-bold bg-white/10 px-2 py-0.5 rounded shadow-sm truncate">{{ filename
+                    }}</span>
             </div>
         </div>
         <div class="flex items-center space-x-6 text-xs uppercase tracking-widest font-mono">
             <div id="save-notification" class="text-xs uppercase tracking-widest text-zinc-300"></div>
             <div class="flex items-center space-x-3">
                 <button hx-post="/save" hx-include="#editor-form" hx-target="#save-notification"
-                        class="btn-solid text-xs h-9 px-6 shadow-[0_0_15px_rgba(0,240,255,0.15)] hover:shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all">
+                    class="btn-solid text-xs h-9 px-6 shadow-[0_0_15px_rgba(0,240,255,0.15)] hover:shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all">
                     <span>COMMIT_STABLE</span>
                 </button>
                 <button hx-get="/pdf/view?path={{ path }}" hx-target="#aegis-view-core" hx-push-url="true"
-                        class="btn-ghost text-xs h-9 px-6 border border-[var(--neon-cyan-dim)]/30 hover:border-[var(--neon-cyan)] transition-all flex items-center space-x-2">
+                    class="btn-ghost text-xs h-9 px-6 border border-[var(--neon-cyan-dim)]/30 hover:border-[var(--neon-cyan)] transition-all flex items-center space-x-2">
                     {% with class="w-3 h-3" %}{% include 'icons/pdf.html' %}{% endwith %}
                     <span>PRINT_DOCUMENT</span>
                 </button>
@@ -35,7 +42,8 @@
     </div>
 
     <!-- Main Editor -->
-    <div class="flex-grow flex flex-col min-w-0 min-h-0 overflow-hidden glass-panel" style="width: 100% !important; background: rgba(15, 23, 42, 0.5) !important; border-top: none !important; border-radius: 0 0 4px 4px !important;">
+    <div class="flex-grow flex flex-col min-w-0 min-h-0 overflow-hidden glass-panel"
+        style="width: 100% !important; background: rgba(15, 23, 42, 0.5) !important; border-top: none !important; border-radius: 0 0 4px 4px !important;">
         <form id="editor-form" class="flex-grow flex flex-col w-full overflow-hidden relative m-0">
             <input type="hidden" name="path" value="{{ path }}">
             <textarea name="content" id="easymde-editor">{{ content }}</textarea>
@@ -43,19 +51,20 @@
     </div>
 
     <script>
-        (function() {
+        (function () {
             const root = document.getElementById('editor-easymde-root');
             const easyMDE = new EasyMDE({
                 element: document.getElementById('easymde-editor'),
                 forceSync: true,
+                lineWrapping: true,
                 autoDownloadFontAwesome: false,
                 spellChecker: false,
                 status: ["lines", "words", "cursor"],
                 renderingConfig: {
                     singleLineBreaks: false,
-                    codeSyntaxHighlighting: true,
+                    codeSyntaxHighlighting: false,
                 },
-                previewRender: function(plainText, preview) {
+                previewRender: function (plainText, preview) {
                     // Use marked to generate HTML
                     const html = marked.parse(plainText);
                     // Schedule mermaid render once HTML is injected
@@ -68,7 +77,7 @@
 
             // Adjust EasyMDE for industrial look
             const cm = easyMDE.codemirror;
-            
+
             // Fullscreen Breakout Logic
             easyMDE.codemirror.on("refresh", () => {
                 if (easyMDE.isFullscreenActive()) {
@@ -85,7 +94,7 @@
 
             // AEGIS_PREVIEW_VISUALS: Watch for preview toggle
             const originalTogglePreview = easyMDE.togglePreview;
-            easyMDE.togglePreview = function() {
+            easyMDE.togglePreview = function () {
                 originalTogglePreview.apply(this, arguments);
                 if (this.isPreviewActive()) {
                     // Give it a tiny bit of time for DOM to settle
@@ -94,7 +103,7 @@
             };
 
             const originalToggleSideBySide = easyMDE.toggleSideBySide;
-            easyMDE.toggleSideBySide = function() {
+            easyMDE.toggleSideBySide = function () {
                 originalToggleSideBySide.apply(this, arguments);
                 if (this.isSideBySideActive()) {
                     setTimeout(renderAegisVisuals, 50);
@@ -112,68 +121,217 @@
 
     <style>
         /* EasyMDE Industrial Overrides - Aegis Sky */
-        .EasyMDEContainer { flex-grow: 1 !important; display: flex !important; flex-direction: column !important; min-height: 0 !important; }
-        .editor-toolbar { 
-            background: rgba(15, 23, 42, 0.9) !important; 
-            border: none !important; 
-            border-bottom: 1px solid rgba(125, 211, 252, 0.15) !important; 
-            padding: 8px 24px !important; 
+        .EasyMDEContainer {
+            flex-grow: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            min-height: 0 !important;
+        }
+
+        .editor-toolbar {
+            background: rgba(15, 23, 42, 0.9) !important;
+            border: none !important;
+            border-bottom: 1px solid rgba(125, 211, 252, 0.15) !important;
+            padding: 8px 24px !important;
             backdrop-filter: blur(10px) !important;
             border-radius: 0 !important;
         }
-        .editor-toolbar button { color: #f1f5f9 !important; border: 1px solid transparent !important; margin: 0 2px !important; width: 32px !important; height: 32px !important; }
-        .editor-toolbar button.active, .editor-toolbar button:hover { 
-            background: rgba(125, 211, 252, 0.12) !important; 
-            color: var(--neon-cyan) !important; 
-            border: 1px solid rgba(125, 211, 252, 0.3) !important; 
+
+        .editor-toolbar button {
+            color: #f1f5f9 !important;
+            border: 1px solid transparent !important;
+            margin: 0 2px !important;
+            width: 32px !important;
+            height: 32px !important;
+        }
+
+        .editor-toolbar button.active,
+        .editor-toolbar button:hover {
+            background: rgba(125, 211, 252, 0.12) !important;
+            color: var(--neon-cyan) !important;
+            border: 1px solid rgba(125, 211, 252, 0.3) !important;
             box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
         }
-        .CodeMirror { 
-            flex-grow: 1 !important; 
-            background: transparent !important; 
-            border: none !important; 
-            color: #f1f5f9 !important; 
-            font-family: 'JetBrains Mono', monospace !important; 
-            font-size: 16px !important; 
-            line-height: 1.8 !important;
+
+        .CodeMirror {
+            flex-grow: 1 !important;
+            background: transparent !important;
+            border: none !important;
+            color: #e2e8f0 !important;
+            font-family: 'Inconsolata', monospace !important;
+            font-weight: 300 !important;
+            font-size: 16px !important;
+            line-height: 1.6 !important;
+            letter-spacing: -0.01em !important;
             padding: 20px !important;
         }
-        .CodeMirror-scroll { padding-bottom: 50px !important; }
-        .editor-statusbar { background: rgba(15, 23, 42, 0.6) !important; border: none !important; color: #94a3b8 !important; padding: 6px 24px !important; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; border-top: 1px solid rgba(125, 211, 252, 0.1) !important; }
-        .CodeMirror-cursor { border-left: 2px solid var(--neon-cyan) !important; }
-        .CodeMirror-selected { background: rgba(56, 189, 248, 0.2) !important; }
-        
-        .editor-preview, .editor-preview-side { 
-            background: #0c0e14 !important; /* Deep Blue base but visible */
-            color: #f1f5f9 !important; 
-            padding: 40px !important; 
+
+        .CodeMirror-scroll {
+            padding-bottom: 50px !important;
+        }
+
+        .editor-statusbar {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: none !important;
+            color: #94a3b8 !important;
+            padding: 6px 24px !important;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            border-top: 1px solid rgba(125, 211, 252, 0.1) !important;
+        }
+
+        .CodeMirror-cursor {
+            border-left: 2px solid var(--neon-cyan) !important;
+        }
+
+        .CodeMirror-selected {
+            background: rgba(56, 189, 248, 0.2) !important;
+        }
+
+        .CodeMirror-hscrollbar {
+            display: none !important;
+        }
+
+        .CodeMirror-hscrollbar {
+            display: none !important;
+        }
+
+        /* Aegis Surgical Clean-up: Solo overflow orizzontale interno */
+        .CodeMirror-scroll {
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+        }
+
+        #editor-easymde-root,
+        .editor-toolbar {
+            overflow: visible !important;
+        }
+
+        /* Nasconde la scrollbar orizzontale in Webkit senza bloccare l'overflow verticale */
+        .CodeMirror-scroll::-webkit-scrollbar:horizontal {
+            height: 0px !important;
+            display: none !important;
+        }
+
+        .editor-preview,
+        .editor-preview-side {
+            background: #0c0e14 !important;
+            /* Deep Blue base but visible */
+            color: #f1f5f9 !important;
+            padding: 40px !important;
             font-family: 'Outfit', sans-serif !important;
             line-height: 1.8 !important;
         }
-        .editor-preview-side { border-left: 1px solid rgba(125, 211, 252, 0.1) !important; }
-        
-        .editor-preview h1, .editor-preview-side h1 { font-size: 2.5rem !important; color: var(--neon-cyan) !important; font-weight: 800 !important; margin: 1.5em 0 0.5em !important; border-bottom: 1px solid rgba(56, 189, 248, 0.2) !important; padding-bottom: 0.5rem !important; }
-        .editor-preview h2, .editor-preview-side h2 { font-size: 2rem !important; color: var(--neon-cyan) !important; font-weight: 700 !important; margin: 1.2em 0 0.5em !important; }
-        .editor-preview h3, .editor-preview-side h3 { font-size: 1.5rem !important; color: var(--neon-cyan) !important; font-weight: 600 !important; margin: 1.1em 0 0.5em !important; }
-        .editor-preview p, .editor-preview-side p { margin-bottom: 1.25em !important; color: #cbd5e1 !important; }
-        .editor-preview code, .editor-preview-side code { background: rgba(125, 211, 252, 0.1) !important; padding: 2px 4px !important; border-radius: 4px; font-family: 'JetBrains Mono', monospace !important; color: var(--neon-cyan) !important; }
-        .editor-preview pre, .editor-preview-side pre { background: rgba(0,0,0,0.3) !important; border: 1px solid rgba(125, 211, 252, 0.1) !important; padding: 1.5rem !important; border-radius: 8px !important; margin: 1.5rem 0 !important; }
-        .editor-preview a, .editor-preview-side a { color: var(--neon-cyan) !important; text-decoration: underline !important; }
-        .editor-preview ul, .editor-preview-side ul { list-style-type: disc !important; padding-left: 2rem !important; margin-bottom: 1.25em !important; }
-        .editor-preview ol, .editor-preview-side ol { list-style-type: decimal !important; padding-left: 2rem !important; margin-bottom: 1.25em !important; }
-        .editor-preview blockquote, .editor-preview-side blockquote { border-left: 4px solid var(--neon-cyan) !important; padding-left: 1.5rem !important; font-style: italic !important; background: rgba(56, 189, 248, 0.05) !important; padding: 1rem 1.5rem !important; margin: 1.5rem 0 !important; }
+
+        .editor-preview-side {
+            border-left: 1px solid rgba(125, 211, 252, 0.1) !important;
+        }
+
+        .editor-preview h1,
+        .editor-preview-side h1 {
+            font-size: 2.5rem !important;
+            color: var(--neon-cyan) !important;
+            font-weight: 800 !important;
+            margin: 1.5em 0 0.5em !important;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.2) !important;
+            padding-bottom: 0.5rem !important;
+        }
+
+        .editor-preview h2,
+        .editor-preview-side h2 {
+            font-size: 2rem !important;
+            color: var(--neon-cyan) !important;
+            font-weight: 700 !important;
+            margin: 1.2em 0 0.5em !important;
+        }
+
+        .editor-preview h3,
+        .editor-preview-side h3 {
+            font-size: 1.5rem !important;
+            color: var(--neon-cyan) !important;
+            font-weight: 600 !important;
+            margin: 1.1em 0 0.5em !important;
+        }
+
+        .editor-preview p,
+        .editor-preview-side p {
+            margin-bottom: 1.25em !important;
+            color: #cbd5e1 !important;
+        }
+
+        .editor-preview code,
+        .editor-preview-side code {
+            background: rgba(125, 211, 252, 0.1) !important;
+            padding: 2px 4px !important;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace !important;
+            color: var(--neon-cyan) !important;
+        }
+
+        .editor-preview pre,
+        .editor-preview-side pre {
+            background: rgba(0, 0, 0, 0.3) !important;
+            border: 1px solid rgba(125, 211, 252, 0.1) !important;
+            padding: 1.5rem !important;
+            border-radius: 8px !important;
+            margin: 1.5rem 0 !important;
+        }
+
+        .editor-preview a,
+        .editor-preview-side a {
+            color: var(--neon-cyan) !important;
+            text-decoration: underline !important;
+        }
+
+        .editor-preview ul,
+        .editor-preview-side ul {
+            list-style-type: disc !important;
+            padding-left: 2rem !important;
+            margin-bottom: 1.25em !important;
+        }
+
+        .editor-preview ol,
+        .editor-preview-side ol {
+            list-style-type: decimal !important;
+            padding-left: 2rem !important;
+            margin-bottom: 1.25em !important;
+        }
+
+        .editor-preview blockquote,
+        .editor-preview-side blockquote {
+            border-left: 4px solid var(--neon-cyan) !important;
+            padding-left: 1.5rem !important;
+            font-style: italic !important;
+            background: rgba(56, 189, 248, 0.05) !important;
+            padding: 1rem 1.5rem !important;
+            margin: 1.5rem 0 !important;
+        }
 
         /* Fullscreen Breakthrough Protocol */
-        .mde-fs-active { position: static !important; }
-        .mde-fs-active .glass-panel { backdrop-filter: none !important; transform: none !important; position: static !important; }
-        .CodeMirror-fullscreen, .editor-toolbar.fullscreen, .editor-preview-side.editor-preview-active-side {
+        .mde-fs-active {
+            position: static !important;
+        }
+
+        .mde-fs-active .glass-panel {
+            backdrop-filter: none !important;
+            transform: none !important;
+            position: static !important;
+        }
+
+        .CodeMirror-fullscreen,
+        .editor-toolbar.fullscreen,
+        .editor-preview-side.editor-preview-active-side {
             z-index: 99999 !important;
             position: fixed !important;
         }
+
         .CodeMirror-fullscreen {
             background: #0c0e14 !important;
-            top: 50px !important; /* Under toolbar */
+            top: 50px !important;
+            /* Under toolbar */
         }
+
         .editor-toolbar.fullscreen {
             background: rgba(15, 23, 42, 0.98) !important;
             border-bottom: 1px solid rgba(125, 211, 252, 0.3) !important;
