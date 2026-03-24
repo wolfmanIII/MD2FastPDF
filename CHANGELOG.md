@@ -13,6 +13,8 @@ Migrazione totale dell'infrastruttura verso l'isolamento locale per garantire op
 - **Aegis Visual Sync**: Risolta la divergenza cromatica tra editing e preview tramite mappatura CSS dedicata (Style Parity Protocol).
 - **Aegis Horizon Cleanup**: Rimossa la barra di scorrimento orizzontale "fantasma" tramite `lineWrapping` e soppressione mirata CSS.
 - **Aegis Core Restore**: Risolto il bug della toolbar tagliata e delle barre verticali parassite causate da overflow eccessivo.
+- **Branding Refresh**: Rebranding del footer in "CORE SERVICES" per bilanciare la gerarchia visiva con l'header "AEGIS CLASS".
+- **Telemetry Optimization**: Ridotto a 5 il numero di frammenti recenti caricati nella dashboard per un cockpit più asciutto.
 - Ottimizzato il protocollo di rendering PDF per includere Highlight.js anche nei documenti esportati (CDN fallback per Gotenberg).
 - Risolto il problema del "Shell Nesting" (duplicazione header/footer) tramite filtraggio `HX-Request` nella rotta dashboard.
 
@@ -33,17 +35,6 @@ Migrazione totale dell'infrastruttura verso l'isolamento locale per garantire op
 - **Auto-Transform**: Protocollo JS per la conversione dinamica dei blocchi di codice Markdown in vettoriali.
 
 ## [3.5.0] - AEGIS DISCOVERY (2026-03-21)
-Introduzione del motore di ricerca globale e supporto multiformato per l'Archivio Dati.
-
-### Added
-- **Global Search Engine**: Ricerca ricorsiva per `.md`, `.html`, `.pdf`.
-- **Multiformat Support**: Preview PDF Aegis e link esterni HTML.
-- **Auto-Discovery**: Indicizzazione dinamica del contenuto testuale all'avvio.
-
-### Fixed
-- **UI Nesting Bug**: Risolto il loop ricorsivo dei breadcrumbs.
-- **Search Alignment**: Perfezionamento HUD e placeholder centrato.
-- **Storage Stats**: Fix `TypeError` nel calcolo della dimensione cartella.
 Introduzione del motore di ricerca globale e supporto multiformato per l'Archivio Dati.
 
 ### Added

@@ -12,9 +12,10 @@
 - Dashboard "Spacecraft" con monitoraggio CPU/Memoria e radar HUD (ciclo 45s).
 - Terminal Matrix: Sistema di monitoraggio core integrato.
 
-### 1.2 Editor Markdown (Aegis Edition)
-- Integrazione EasyMDE (CodeMirror) stabilizzata con CSS scuro anti-flash.
-- Supporto Fullscreen e Side-by-Side con gestione Z-index (99999).
+### 1.2 Editor Markdown (Aegis Slim-Tech)
+- **Slim-Tech Aesthetic**: Passaggio a Inconsolata 300 per una scrittura densa e sottile.
+- Disattivata evidenziatura sintassi in editing (sx) per minimizzare il rumore visivo; mantenuta in preview (dx).
+- **Ariel Monospace Feel**: UI ottimizzata per neutralità e performance.
 - Integrazione logo Holocron e icone vettoriali HQ.
 
 ### 1.3 Esportazione PDF (Aegis Engine)

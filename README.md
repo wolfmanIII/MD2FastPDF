@@ -15,7 +15,7 @@
 - **Environment**: Pipenv
 
 ## 🚀 Features
-- **Aegis Theme**: "Spacecraft" interface with Neon Cyan accents and Holocron system logo.
+- **Aegis Slim-Tech Editor**: Interfaccia di scrittura compattata (Inconsolata 300) per una densità d'informazione aeronautica e zero distrazioni (no highlight sx).
 - **Global Discovery**: Integrated recursive search engine for `.md`, `.html`, and `.pdf` files.
 - **Aegis Visualization**: Support for **Mermaid.js** diagrams (Flowcharts, Sequence, Gantt) in Markdown.
 - **Multiformat Browser**: Native viewing for Markdown, HTML (External Tab), and PDF (Aegis Preview).

@@ -15,7 +15,7 @@ async def read_root(request: Request):
     """
     memory = psutil.virtual_memory()
     cpu_usage = psutil.cpu_percent()
-    recent = await get_recent_files(10)
+    recent = await get_recent_files(5)
     storage = await get_storage_stats()
     
     context = {
