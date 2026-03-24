@@ -6,7 +6,7 @@ Il protocollo AEGIS ORACLE dota SC-ARCHIVE di uno strato di intelligenza neurale
 Verrà creato un nuovo modulo (`logic/oracle.py`) per interfacciarsi con l'API REST locale di Ollama.
 
 ### [NEW] `logic/oracle.py`
-- Utilizza `httpx.AsyncClient` persistente (come Gotenberg) per comunicare con `http://127.0.0.1:11434`.
+- Utilizza `httpx.AsyncClient` persistente (come Gotenberg) per comunicare con `http://172.31.112.1:11434`.
 - **`generate_completion(prompt, stream=True)`**: Chiama `/api/generate` per l'inserimento ghost/autocompletamento in streaming.
 - **`generate_mermaid(text)`**: Converte direttive testuali in pura sintassi Mermaid (istruendo il system prompt a evitare convenevoli come "Certo, ecco il codice...").
 - **`summarize_document(content)`**: Estrae e condensa i punti chiave di un documento in Markdown sintetico.
