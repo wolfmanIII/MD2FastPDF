@@ -32,6 +32,6 @@ async def read_root(request: Request):
     }
     
     if request.headers.get("HX-Request"):
-        return templates.TemplateResponse("components/dashboard.html", context)
+        return templates.TemplateResponse(request=request, name="components/dashboard.html", context=context)
     
-    return templates.TemplateResponse("shell.html", context)
+    return templates.TemplateResponse(request=request, name="shell.html", context=context)

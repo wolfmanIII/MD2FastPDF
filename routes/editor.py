@@ -39,9 +39,9 @@ async def get_editor(request: Request, path: str):
     }
 
     if request.headers.get("HX-Request"):
-        return templates.TemplateResponse("components/editor.html", context)
+        return templates.TemplateResponse(request=request, name="components/editor.html", context=context)
 
-    return templates.TemplateResponse("shell.html", context)
+    return templates.TemplateResponse(request=request, name="shell.html", context=context)
 
 @router.post("/save")
 async def save_file(request: Request, path: str = Form(...), content: str = Form(...)):

@@ -39,9 +39,9 @@ async def list_files(request: Request, path: str = "."):
     }
 
     if request.headers.get("HX-Request"):
-        return templates.TemplateResponse("components/file_list.html", context)
+        return templates.TemplateResponse(request=request, name="components/file_list.html", context=context)
     
-    return templates.TemplateResponse("shell.html", context)
+    return templates.TemplateResponse(request=request, name="shell.html", context=context)
 
 @router.get("/files/search", response_class=HTMLResponse)
 async def perform_search(request: Request, q: str = ""):
@@ -62,14 +62,14 @@ async def perform_search(request: Request, q: str = ""):
         "query": q
     }
     
-    return templates.TemplateResponse("components/results_grid.html", context)
+    return templates.TemplateResponse(request=request, name="components/results_grid.html", context=context)
 
 @router.get("/create/form", response_class=HTMLResponse)
 async def create_file_form(request: Request, path: str = "."):
     """
     Returns the file creation modal fragment.
     """
-    return templates.TemplateResponse("components/create_modal.html", {
+    return templates.TemplateResponse(request=request, name="components/create_modal.html", context={
         "request": request,
         "path": path
     })
@@ -98,7 +98,7 @@ async def delete_confirm(request: Request, path: str):
     Returns the delete confirmation modal.
     """
     filename = Path(path).name
-    return templates.TemplateResponse("components/delete_modal.html", {
+    return templates.TemplateResponse(request=request, name="components/delete_modal.html", context={
         "request": request,
         "path": path,
         "filename": filename

@@ -37,9 +37,9 @@ async def view_pdf(request: Request, path: str):
     }
 
     if request.headers.get("HX-Request"):
-        return templates.TemplateResponse("components/pdf_preview.html", context)
+        return templates.TemplateResponse(request=request, name="components/pdf_preview.html", context=context)
 
-    return templates.TemplateResponse("shell.html", context)
+    return templates.TemplateResponse(request=request, name="shell.html", context=context)
 
 @router.get("/pdf/preview")
 async def pdf_preview(path: str):

@@ -3,11 +3,11 @@ from fastapi.staticfiles import StaticFiles
 from logic.templates import templates
 from routes import core, archive, editor, pdf, config
 
-# AEGIS_ARCH_v3.9.4: Modular Architecture Launch
+# AEGIS_ARCH_v3.9.5: Modular Architecture Launch
 app = FastAPI(
     title="SC-ARCHIVE", 
     description="Space Craft Archive Management System // Aegis Class",
-    version="3.9.4"
+    version="3.9.5"
 )
 
 # 1. Static and Template Configuration

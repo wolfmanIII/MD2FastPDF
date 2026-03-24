@@ -24,9 +24,9 @@ async def root_picker(request: Request, path: str = ""):
     }
     
     if request.headers.get("HX-Target") == "root-picker-body":
-        return templates.TemplateResponse("components/root_picker_body.html", context)
+        return templates.TemplateResponse(request=request, name="components/root_picker_body.html", context=context)
 
-    return templates.TemplateResponse("components/root_picker.html", context)
+    return templates.TemplateResponse(request=request, name="components/root_picker.html", context=context)
 
 @router.post("/root-picker/select", response_class=HTMLResponse)
 async def select_root(request: Request, path: str = Form("")):
@@ -46,4 +46,4 @@ async def select_root(request: Request, path: str = Form("")):
         "breadcrumbs": [{"name": "ROOT", "path": "."}],
         "component_template": "components/file_list.html"
     }
-    return templates.TemplateResponse("components/file_list.html", context)
+    return templates.TemplateResponse(request=request, name="components/file_list.html", context=context)
