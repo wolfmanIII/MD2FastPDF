@@ -14,12 +14,34 @@
             <span class="neon-text font-bold whitespace-nowrap drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]">{{ filename }}</span>
         </div>
         <div class="flex items-center space-x-1">
-            <a href="/pdf/download?path={{ path }}" target="_blank"
+            {% if not is_pdf_file %}
+            <!-- HUD_PRINT toggle: cycles header_footer param on iframe and download link -->
+            <button id="hud-toggle"
+                    onclick="(function(){
+                        var active = this.dataset.active === '1';
+                        active = !active;
+                        this.dataset.active = active ? '1' : '0';
+                        this.classList.toggle('btn-solid', active);
+                        this.classList.toggle('btn-ghost', !active);
+                        var loader = document.getElementById('aegis-pdf-loader');
+                        loader.style.display = 'flex';
+                        loader.style.opacity = '1';
+                        var hf = active ? '&header_footer=true' : '';
+                        document.getElementById('pdf-iframe').src = '/pdf/preview?path={{ path }}' + hf + '#view=FitH';
+                        document.getElementById('pdf-download-link').href = '/pdf/download?path={{ path }}' + hf;
+                    }).call(this)"
+                    data-active="0"
+                    class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2">
+                {% with class="w-3 h-3" %}{% include 'icons/shield.html' %}{% endwith %}
+                <span>HUD_PRINT</span>
+            </button>
+            {% endif %}
+            <a id="pdf-download-link" href="/pdf/download?path={{ path }}" target="_blank"
                class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 no-underline">
                 {% with class="w-3 h-3" %}{% include 'icons/pdf.html' %}{% endwith %}
                 <span>DOWNLOAD_PDF</span>
             </a>
-            <button hx-get="/files?path={{ path|parent_path }}" 
+            <button hx-get="/files?path={{ path|parent_path }}"
                     hx-target="#aegis-view-core" hx-push-url="true"
                     class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 mr-2">
                 {% with class="w-3 h-3 text-zinc-400" %}{% include 'icons/folder.html' %}{% endwith %}
@@ -53,7 +75,7 @@
             </div>
         </div>
 
-        <iframe src="/pdf/preview?path={{ path }}#view=FitH" 
+        <iframe id="pdf-iframe" src="/pdf/preview?path={{ path }}#view=FitH"
                 class="w-full h-full neon-border shadow-[0_0_30px_rgba(0,240,255,0.2)] rounded-sm bg-zinc-900 absolute inset-0 z-10"
                 style="height: 100% !important; min-height: 100% !important; border: 1px solid rgba(0,240,255,0.2) !important;"
                 onload="document.getElementById('aegis-pdf-loader').style.opacity='0'; setTimeout(()=>document.getElementById('aegis-pdf-loader').style.display='none', 500)">

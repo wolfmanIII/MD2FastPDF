@@ -182,6 +182,36 @@ async def create_new_file(relative_dir: str, filename: str):
     
     return str(Path(relative_dir) / filename)
 
+async def rename_file(relative_path: str, new_name: str):
+    """
+    Renames a file within the same directory.
+    """
+    new_name = new_name.strip()
+    if not new_name:
+        raise HTTPException(status_code=400, detail="FILENAME_REQUIRED")
+
+    file_path = sanitize_path(relative_path)
+
+    if not file_path.is_file():
+        raise HTTPException(status_code=404, detail="FILE_NOT_FOUND")
+
+    # Preserve extension if user omitted it
+    original_suffix = file_path.suffix
+    if not Path(new_name).suffix:
+        new_name += original_suffix
+
+    new_path = file_path.parent / new_name
+    # Sanitize destination
+    sanitize_path(str(new_path.relative_to(get_project_root())))
+
+    if new_path.exists():
+        raise HTTPException(status_code=400, detail="FILE_ALREADY_EXISTS")
+
+    await anyio.to_thread.run_sync(lambda: file_path.rename(new_path))
+    _storage_cache["timestamp"] = 0
+    return str(Path(relative_path).parent / new_name)
+
+
 async def delete_file(relative_path: str):
     """
     Deletes a markdown file asynchronously.

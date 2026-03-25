@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from logic.templates import templates
 from logic.files import (
-    list_directory_contents, create_new_file, delete_file, search_files
+    list_directory_contents, create_new_file, delete_file, rename_file, search_files
 )
 
 # AEGIS_ARCHIVE_ROUTER: Operational file management
@@ -103,6 +103,28 @@ async def delete_confirm(request: Request, path: str):
         "path": path,
         "filename": filename
     })
+
+@router.get("/rename/form", response_class=HTMLResponse)
+async def rename_file_form(request: Request, path: str):
+    return templates.TemplateResponse(request=request, name="components/rename_modal.html", context={
+        "request": request,
+        "path": path,
+        "filename": Path(path).name
+    })
+
+@router.post("/rename", response_class=HTMLResponse)
+async def perform_rename(request: Request, path: str = Form(...), new_name: str = Form(...)):
+    target_path = Path(path)
+    parent_dir = str(target_path.parent)
+    try:
+        await rename_file(path, new_name)
+    except HTTPException as e:
+        return HTMLResponse(
+            content=f'<div class="text-red-400 font-bold text-[10px] tracking-widest uppercase mt-4">RENAME_ERROR // {e.detail}</div>',
+            status_code=400
+        )
+    return await list_files(request, parent_dir)
+
 
 @router.post("/delete", response_class=HTMLResponse)
 async def perform_delete(request: Request, path: str = Form(...)):

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request, Response, Query
 from fastapi.responses import HTMLResponse
 import os
 from pathlib import Path
@@ -42,16 +42,17 @@ async def view_pdf(request: Request, path: str):
     return templates.TemplateResponse(request=request, name="shell.html", context=context)
 
 @router.get("/pdf/preview")
-async def pdf_preview(path: str):
+async def pdf_preview(path: str, header_footer: bool = Query(False)):
     """
     Streams the PDF (converted or native).
+    header_footer=true enables full branded header and footer.
     """
     if str(path).lower().endswith(".pdf"):
         pdf_bytes = await read_file_bytes(path)
     else:
         content = await read_file_content(path)
-        pdf_bytes = await convert_markdown_to_pdf(content, Path(path).name)
-    
+        pdf_bytes = await convert_markdown_to_pdf(content, Path(path).name, show_header_footer=header_footer)
+
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
@@ -59,16 +60,17 @@ async def pdf_preview(path: str):
     )
 
 @router.get("/pdf/download")
-async def pdf_download(path: str):
+async def pdf_download(path: str, header_footer: bool = Query(False)):
     """
     Downloads the PDF.
+    header_footer=true enables full branded header and footer.
     """
     if str(path).lower().endswith(".pdf"):
         pdf_bytes = await read_file_bytes(path)
         filename = Path(path).name
     else:
         content = await read_file_content(path)
-        pdf_bytes = await convert_markdown_to_pdf(content, Path(path).name)
+        pdf_bytes = await convert_markdown_to_pdf(content, Path(path).name, show_header_footer=header_footer)
         filename = Path(path).with_suffix(".pdf").name
     
     return Response(

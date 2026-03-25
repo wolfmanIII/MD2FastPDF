@@ -48,42 +48,51 @@ CLEANER = bleach.Cleaner(
 # 3. Persistent Client Connection Pool
 _http_client = httpx.AsyncClient(timeout=60.0, limits=httpx.Limits(max_keepalive_connections=5, max_connections=10))
 
-async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes:
+async def convert_markdown_to_pdf(markdown_content: str, filename: str, show_header_footer: bool = False) -> bytes:
     """
     Converts markdown content to PDF using Gotenberg (Aegis Optimus Path).
+    show_header_footer=True: full branded header + footer.
+    show_header_footer=False (default): footer with page number only, no header.
     """
     # Fast Markdown Render
     raw_html = markdown.markdown(
-        markdown_content, 
+        markdown_content,
         extensions=['fenced_code', 'tables', 'attr_list'] # Removed 'toc' for speed unless strictly needed
     )
-    
+
     # Fast Sanitization (using pre-compiled cleaner)
     html_body = CLEANER.clean(raw_html)
 
     _name = filename if len(filename) < 40 else filename[:37] + "..."
-    
-    header_html = f"""
-    <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in;">
-        <table style="width: 100%;">
-            <tr>
-                <td style="text-align: left; color: #64748b;">SC-ARCHIVE // {_name}</td>
-                <td style="text-align: right; color: #64748b;">AEGIS // SECURED</td>
-            </tr>
-        </table>
-    </div>
-    """
-    
-    footer_html = """
-    <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in; color: #64748b;">
-        <table style="width: 100%;">
-            <tr>
-                <td style="text-align: left;">OS_CORE_v2.0 // SC-ARCHIVE_PROTOCOL</td>
-                <td style="text-align: right;">PAGE <span class="pageNumber"></span> / <span class="totalPages"></span></td>
-            </tr>
-        </table>
-    </div>
-    """
+
+    if show_header_footer:
+        header_html = f"""
+        <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in;">
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: left; color: #64748b;">SC-ARCHIVE // {_name}</td>
+                    <td style="text-align: right; color: #64748b;">AEGIS // SECURED</td>
+                </tr>
+            </table>
+        </div>
+        """
+        footer_html = """
+        <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in; color: #64748b;">
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: left;">OS_CORE_v2.0 // SC-ARCHIVE_PROTOCOL</td>
+                    <td style="text-align: right;">PAGE <span class="pageNumber"></span> / <span class="totalPages"></span></td>
+                </tr>
+            </table>
+        </div>
+        """
+    else:
+        header_html = ""
+        footer_html = """
+        <div style="width: 100%; font-size: 8px; font-family: monospace; margin: 0 0.5in; color: #64748b; text-align: right;">
+            <span class="pageNumber"></span> / <span class="totalPages"></span>
+        </div>
+        """
 
     full_html = f"""
     <!DOCTYPE html>
@@ -92,7 +101,7 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
         <meta charset="UTF-8">
         <style>{INDUSTRIAL_CSS}</style>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
         <script>
@@ -100,7 +109,7 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
                 try {{
                     // Highlight.js
                     if (typeof hljs !== 'undefined') hljs.highlightAll();
-                    
+
                     // Mermaid
                     mermaid.initialize({{ startOnLoad: false, theme: 'default', securityLevel: 'loose' }});
                     const blocks = document.querySelectorAll('pre code.language-mermaid');
@@ -128,20 +137,21 @@ async def convert_markdown_to_pdf(markdown_content: str, filename: str) -> bytes
         "paperWidth": "8.27", "paperHeight": "11.69", "scale": "1.0",
         "printBackground": "true", "waitDelay": "5s"
     }
-    
-    files = {
+
+    files: dict = {
         "index.html": ("index.html", full_html.encode("utf-8"), "text/html"),
-        "header.html": ("header.html", header_html.encode("utf-8"), "text/html"),
-        "footer.html": ("footer.html", footer_html.encode("utf-8"), "text/html")
+        "footer.html": ("footer.html", footer_html.encode("utf-8"), "text/html"),
     }
-    
+    if show_header_footer:
+        files["header.html"] = ("header.html", header_html.encode("utf-8"), "text/html")
+
     response = await _http_client.post(
         f"{GOTENBERG_URL}/forms/chromium/convert/html",
         data=data,
         files=files
     )
-    
+
     if response.status_code != 200:
         raise Exception(f"Gotenberg error: {response.text}")
-        
+
     return response.content
