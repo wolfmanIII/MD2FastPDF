@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from logic.templates import templates
-from routes import core, archive, editor, pdf, config
+from routes import core, archive, editor, pdf, config, oracle
 
 # AEGIS_ARCH_v3.9.5: Modular Architecture Launch
 app = FastAPI(
@@ -20,6 +20,7 @@ app.include_router(archive.router)   # File Operations
 app.include_router(editor.router)    # Buffer Management
 app.include_router(pdf.router)       # Conversion Pipeline
 app.include_router(config.router)    # Workspace Config
+app.include_router(oracle.router)    # Neural Interface (Aegis Oracle)
 
 # AEGIS_INIT_READY: Server configuration complete.
 # Start via bin/launch.sh to initialize Tailwind and Uvicorn logic.

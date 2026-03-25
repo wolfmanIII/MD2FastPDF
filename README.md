@@ -1,5 +1,5 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
-**Versione 3.9.6** (Aegis Modernized Stack)
+**Versione 4.0.0-BETA** // AEGIS ORACLE (Neural Patch)
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -18,10 +18,8 @@
 - **Aegis Slim-Tech Editor**: Interfaccia di scrittura compattata (Inconsolata 300) per una densità d'informazione aeronautica e zero distrazioni (no highlight sx).
 - **Global Discovery**: Integrated recursive search engine for `.md`, `.html`, and `.pdf` files.
 - **Aegis Visualization**: Support for **Mermaid.js** diagrams (Flowcharts, Sequence, Gantt) in Markdown.
-- **Multiformat Browser**: Native viewing for Markdown, HTML (External Tab), and PDF (Aegis Preview).
-- **Terminal Matrix**: Integrated CPU/Memory monitoring and calibrated HUD radar (45s cycle).
-- **Aegis Transitions**: Smooth `scan-in` and `soft-exit` animations for a "no-blink" experience.
-- **PDF HUD**: Export with headers, footers, and automatic page numbering.
+- **Neural Synthesis // AEGIS ORACLE**: Integrated AI layer (Local Ollama) for instant Mermaid diagram generation and automated document analysis.
+- **Aegis UI Normalization**: Standardized form controls based on DaisyUI architecture for surgical layout precision.
 - **Root Selector**: Dynamic working directory selection with intelligent redirect.
 
 ## 📦 Installation

@@ -4,7 +4,7 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.0] - AEGIS ORACLE (Integrazione AI Interna)
+### [4.0] - AEGIS ORACLE (Active Deployment // Phase 1)
 **Obiettivo**: Dotare la stazione di uno strato di intelligenza neurale locale per massimizzare la velocità di produzione.
 - **Modello Operativo Primario**: `qwen2.5-coder:7b` (via Ollama locale). Ottimizzato per generazione strutturata e aderenza sintattica a Markdown/Mermaid.
 - **Specifiche Hardware Base**: Compatibilità certificata per Full GPU Offload su architettura Pascal (es. Nvidia GTX 1070 Ti 8GB VRAM) in ambiente WSL2 con 16GB RAM di sistema.

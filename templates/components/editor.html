@@ -74,6 +74,7 @@
                 toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "|", "preview", "side-by-side", "fullscreen", "|", "guide"],
                 theme: "dark"
             });
+            window.aegisEditor = easyMDE;
 
             // Adjust EasyMDE for industrial look
             const cm = easyMDE.codemirror;
@@ -116,7 +117,27 @@
                     renderAegisVisuals();
                 }
             });
+            // AEGIS_ORACLE_LINK: Expansion Protocol
+            const toolbar = root.querySelector('.editor-toolbar');
+            if (toolbar) {
+                const guideBtn = toolbar.querySelector('.fa-question-circle')?.parentNode;
+                if (guideBtn) {
+                    const sep1 = document.createElement('i'); sep1.className = 'separator';
+                    const sep2 = document.createElement('i'); sep2.className = 'separator';
+                    const neuralBtn = document.createElement('button');
+                    neuralBtn.type = 'button';
+                    neuralBtn.className = 'fa fa-microchip';
+                    neuralBtn.title = 'Neural Synthesis (Aegis Oracle)';
+                    neuralBtn.setAttribute('hx-get', '/api/oracle/mermaid-modal');
+                    neuralBtn.setAttribute('hx-target', '#modal-container');
+                    guideBtn.before(sep2);
+                    sep2.before(neuralBtn);
+                    neuralBtn.before(sep1);
+                    if (window.htmx) window.htmx.process(neuralBtn);
+                }
+            }
         })();
+
     </script>
 
     <style>
