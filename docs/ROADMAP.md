@@ -15,7 +15,27 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.1] - AEGIS CHRONOS (Versionamento Visivo)
+### [4.1] - AEGIS REFACTOR (SOLID Compliance)
+**Obiettivo**: Eliminare le violazioni SOLID critiche identificate dall'analisi architetturale per garantire testabilità, estensibilità e manutenibilità del codebase.
+
+#### Priorità 1 — `logic/files.py` (SRP + OCP)
+- **SRP**: Decomporre il modulo in responsabilità distinte: `PathSanitizer`, `FileManager`, `DirectoryLister`, `StorageCache`.
+- **OCP**: Centralizzare estensioni file ammesse (`ALLOWED_EXTENSIONS`) e directory da escludere (`SKIP_DIRS`) in costanti configurabili, eliminando la duplicazione in 5+ punti.
+
+#### Priorità 2 — DIP sui Client HTTP
+- **`GotenbergClient`**: Incapsulare `_http_client` di `logic/conversion.py` in una classe dedicata con lifecycle gestito (startup/shutdown FastAPI), iniettabile e mockable.
+- **`OracleClient`**: Stessa architettura per `logic/oracle.py` — separare il transport HTTP dalla logica di prompt engineering.
+
+#### Priorità 3 — `logic/oracle.py` (SRP + LSP)
+- **SRP**: Separare `OracleClient` (gestione connessione, retry, errori HTTP) da `PromptTemplates` (definizione system prompt per completion, mermaid, summarize).
+- **LSP**: Uniformare i contratti di ritorno — tutte le funzioni oracle usano eccezioni per errori anziché stringhe `ERROR_*` come valore di ritorno.
+
+#### Priorità 4 — Import nascosti in `routes/oracle.py`
+- Eliminare import locali dentro funzione (`get_project_root`, `anyio` a riga 56-57) dichiarandoli a livello modulo.
+
+---
+
+### [4.2] - AEGIS CHRONOS (Versionamento Visivo)
 **Obiettivo**: Integrazione profonda con i protocolli di controllo della versione.
 - **Git Terminal UI**: Pannello dedicato per commit, push e sync Git direttamente dall'interfaccia.
 - **Visual Diff Cockpit**: Confronto grafico tra buffer corrente e ultimo stato archiviato (Git Diff).
