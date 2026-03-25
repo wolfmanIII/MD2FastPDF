@@ -43,4 +43,10 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
+### [4.5] - AEGIS STABILITY (System Integrity)
+**Obiettivo**: Rafforzamento della robustezza del codice e della diagnostica in tempo reale.
+- **Centralized Exception Handling**: Implementazione di un gestore centralizzato delle eccezioni custom (`logic/exceptions.py`) per una telemetria ultra-precisa dei guasti (timeout Gotenberg, errori di rete, fallimenti Oracle) direttamente nell'HUD operativo tramite messaggistica HTMX dedicata.
+
+---
+
 **(I flussi operativi futuri sono stati ricalibrati. Aegis Oracle promosso a priorità assoluta [4.0] del ciclo operativo corrente.)** 🚀🌑

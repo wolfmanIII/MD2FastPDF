@@ -16,6 +16,10 @@ body { font-family: 'Inter', -apple-system, sans-serif; color: #000000; line-hei
 h1 { font-size: 24pt; color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 10pt; margin-top: 30pt; }
 h2 { font-size: 18pt; color: #111827; margin-top: 25pt; border-bottom: 1px solid #e5e7eb; }
 p { font-size: 11pt; margin-bottom: 12pt; text-align: justify; }
+ul, ol { margin-bottom: 12pt; padding-left: 20pt; }
+ul { list-style-type: disc; }
+ol { list-style-type: decimal; }
+li { margin-bottom: 4pt; font-size: 11pt; }
 code { font-family: 'Roboto Mono', monospace; background: #f3f4f6; color: #1f2937; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
 pre { background: #f8fafc; color: #334155; padding: 1rem; border-radius: 4px; border: 1px solid #e2e8f0; overflow-x: auto; font-size: 0.85em; }
 pre code { background: transparent; padding: 0; color: inherit; border: none; }
