@@ -25,16 +25,15 @@
     </div>
 
     <!-- SEPARATE SEARCH ROW -->
-    <div class="mb-6 relative z-10 flex items-center gap-3">
-        <div class="flex items-center space-x-3 shrink-0 px-4 py-2 bg-black/40 border border-zinc-800 rounded-sm">
-            <span class="text-(--neon-cyan) animate-pulse shadow-[0_0_5px_var(--neon-cyan)] opacity-70">●</span>
-            <span class="text-[9px] tracking-[0.3em] font-bold text-zinc-400">SCAN_QUERY //</span>
-        </div>
-        <input type="text" name="q" placeholder="AWAITING_INPUT_FOR_LOCAL_AND_REMOTE_SCAN..."
-            value="{{ query if query else '' }}"
-            class="input input-bordered grow bg-black/40 border-zinc-800 text-zinc-100 placeholder-zinc-700 focus:border-zinc-600 font-mono text-[11px] tracking-widest rounded-sm h-10"
-            hx-get="/files/search" hx-trigger="keyup changed delay:500ms, search" hx-target="#results-grid"
-            hx-swap="outerHTML" hx-push-url="false">
+    <div class="mb-6 relative z-10">
+        <label class="input input-bordered w-full flex items-center gap-4 bg-black/40 border-zinc-800 focus-within:border-zinc-600">
+            <span class="text-[11px] tracking-[0.3em] font-bold text-(--neon-cyan) shrink-0">SCAN_QUERY //</span>
+            <input type="text" name="q" placeholder="AWAITING_INPUT..."
+                value="{{ query if query else '' }}"
+                class="grow font-mono text-[11px] tracking-widest"
+                hx-get="/files/search" hx-trigger="keyup changed delay:500ms, search" hx-target="#results-grid"
+                hx-swap="outerHTML" hx-push-url="false">
+        </label>
     </div>
 
     {% include 'components/results_grid.html' %}
