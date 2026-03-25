@@ -2,10 +2,10 @@
     hx-swap="outerHTML" hx-target="this">
     <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative">
         <div
-            class="absolute -right-10 -top-10 w-32 h-32 bg-[var(--neon-cyan)]/5 rounded-full blur-2xl pointer-events-none">
+            class="absolute -right-10 -top-10 w-32 h-32 bg-(--neon-cyan)/5 rounded-full blur-2xl pointer-events-none">
         </div>
         <h3
-            class="text-sm font-bold neon-text mb-4 border-b border-[var(--glass-border)] pb-2 flex items-center space-x-2">
+            class="text-sm font-bold neon-text mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2">
             {% with class="w-5 h-5 aegis-radar-spin" %}{% include 'icons/radar.html' %}{% endwith %}
             <style>
                 .aegis-radar-spin {
@@ -26,7 +26,7 @@
             <div class="flex justify-between items-center text-sm">
                 <span class="text-zinc-100">MEMORY_USAGE:</span>
                 <div class="flex items-center space-x-2">
-                    <div class="w-32 h-[3px] bg-black overflow-hidden border border-[var(--glass-border)]">
+                    <div class="w-32 h-[3px] bg-black overflow-hidden border border-(--glass-border)">
                         <div class="h-full neon-bg transition-all" style="--w: {{ memory_usage }}%; width: var(--w);">
                         </div>
                     </div>
@@ -46,10 +46,10 @@
 
     <div
         class="glass-panel p-6 flex flex-col justify-center items-center text-center glass-panel-hover relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-t from-[var(--neon-cyan)]/5 to-transparent pointer-events-none">
+        <div class="absolute inset-0 bg-linear-to-t from-(--neon-cyan)/5 to-transparent pointer-events-none">
         </div>
         <div
-            class="w-16 h-16 rounded-full border border-[var(--neon-cyan)] flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(0,240,255,0.2)] bg-[var(--neon-cyan)]/5">
+            class="w-16 h-16 rounded-full border border-(--neon-cyan) flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(0,240,255,0.2)] bg-(--neon-cyan)/5">
             {% with class="w-8 h-8 neon-text" %}{% include 'icons/folder.html' %}{% endwith %}
         </div>
         <h3 class="text-sm font-bold neon-text mb-2 tracking-[0.2em] w-full z-10">TERMINAL MATRIX ACTIVE</h3>
@@ -62,13 +62,13 @@
     <!-- Second Row -->
     <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative min-h-[200px]">
         <h3
-            class="text-sm font-bold neon-text mb-4 border-b border-[var(--glass-border)] pb-2 flex items-center space-x-2">
+            class="text-sm font-bold neon-text mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2">
             {% with class="w-4 h-4" %}{% include 'icons/cube.html' %}{% endwith %}
             <span>RECENT_FRAGMENTS</span>
         </h3>
         <div class="space-y-2">
             {% for file in recent_files %}
-            <div class="flex items-center justify-between text-xs group transition-all cursor-pointer hover:bg-[var(--neon-cyan)]/5 p-1 rounded-sm"
+            <div class="flex items-center justify-between text-xs group transition-all cursor-pointer hover:bg-(--neon-cyan)/5 p-1 rounded-sm"
                 hx-get="/editor?path={{ file.path }}" hx-target="#aegis-view-core" hx-push-url="true">
                 <span class="text-zinc-100 group-hover:neon-text transition-colors">>> {{ file.name }}</span>
                 <span class="text-zinc-100 font-mono text-[11px]">MOD_TS: {{ file.mtime_str }}</span>
@@ -81,7 +81,7 @@
 
     <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative min-h-[200px]">
         <h3
-            class="text-sm font-bold neon-text mb-4 border-b border-[var(--glass-border)] pb-2 flex items-center space-x-2">
+            class="text-sm font-bold neon-text mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2">
             {% with class="w-4 h-4" %}{% include 'icons/assets.html' %}{% endwith %}
             <span>STORAGE_NODE</span>
         </h3>
@@ -99,7 +99,7 @@
                     <span>DENSITY_CAPACITY</span>
                     <span>{{ storage.usage_percent|round(1) }}%</span>
                 </div>
-                <div class="w-full h-[4px] bg-black border border-[var(--glass-border)] overflow-hidden">
+                <div class="w-full h-1 bg-black border border-(--glass-border) overflow-hidden">
                     <div class="h-full neon-bg transition-all duration-1000"
                         style="--w: {{ storage.usage_percent }}%; width: var(--w);"></div>
                 </div>

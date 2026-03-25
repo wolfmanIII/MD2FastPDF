@@ -1,6 +1,6 @@
 <div class="glass-panel p-6 space-y-2 uppercase tracking-widest relative overflow-hidden">
     <!-- Subtle background accent -->
-    <div class="absolute -left-20 top-0 w-40 h-full bg-[var(--neon-cyan)]/5 blur-3xl pointer-events-none"></div>
+    <div class="absolute -left-20 top-0 w-40 h-full bg-(--neon-cyan)/5 blur-3xl pointer-events-none"></div>
 
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-2 pb-2 relative z-10 gap-4">
         <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar shrink-0">
@@ -27,16 +27,16 @@
     <!-- SEPARATE SEARCH ROW -->
     <div class="mb-6 relative z-10">
         <div
-            class="flex items-center bg-black/40 border border-white/5 rounded-sm overflow-hidden focus-within:border-[var(--neon-cyan)]/30 transition-all duration-300">
+            class="flex items-center bg-black/40 border border-white/5 rounded-sm overflow-hidden focus-within:border-(--neon-cyan)/30 transition-all duration-300">
             <div class="bg-white/5 px-4 py-2 border-r border-white/5 flex items-center space-x-3 shrink-0">
                 <span
-                    class="text-[var(--neon-cyan)] animate-pulse shadow-[0_0_5px_var(--neon-cyan)] opacity-70">●</span>
+                    class="text-(--neon-cyan) animate-pulse shadow-[0_0_5px_var(--neon-cyan)] opacity-70">●</span>
                 <span class="text-[9px] tracking-[0.3em] font-bold text-zinc-400">SCAN_QUERY //</span>
             </div>
             <span class="text-zinc-700 font-bold text-[11px] shrink-0 ml-2 opacity-40">::</span>
             <input type="text" name="q" placeholder="AWAITING_INPUT_FOR_LOCAL_AND_REMOTE_SCAN..."
                 value="{{ query if query else '' }}"
-                class="flex-grow bg-transparent px-4 py-2 text-[11px] tracking-[0.1em] text-zinc-100 placeholder-zinc-700 focus:outline-none focus:bg-white/[0.02] transition-all font-mono"
+                class="grow bg-transparent px-4 py-2 text-[11px] tracking-widest text-zinc-100 placeholder-zinc-700 focus:outline-none focus:bg-white/2 transition-all font-mono"
                 hx-get="/files/search" hx-trigger="keyup changed delay:500ms, search" hx-target="#results-grid"
                 hx-swap="outerHTML" hx-push-url="false">
         </div>

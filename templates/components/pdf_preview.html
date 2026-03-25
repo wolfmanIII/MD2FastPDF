@@ -1,4 +1,4 @@
-<div class="flex-grow flex flex-col h-[85vh] glass-panel relative overflow-hidden tracking-widest uppercase">
+<div class="grow flex flex-col h-[85vh] glass-panel relative overflow-hidden tracking-widest uppercase">
     <!-- Header -->
     <div class="flex items-center justify-between px-4 py-3 neon-border-b shrink-0 relative z-10 bg-black/40">
         <div class="flex items-center space-x-2 text-[10px] uppercase overflow-x-auto no-scrollbar">
@@ -58,16 +58,16 @@
     </div>
 
     <!-- PDF Viewer -->
-    <div class="flex-grow relative z-10 p-6 flex items-center justify-center bg-zinc-950/20" style="height: 80vh !important;">
+    <div class="grow relative z-10 p-6 flex items-center justify-center bg-zinc-950/20" style="height: 80vh !important;">
         <!-- Aegis Loader Overlay -->
         <div id="aegis-pdf-loader" class="absolute inset-0 flex flex-col items-center justify-center z-20 space-y-6 pointer-events-none transition-opacity duration-500 bg-zinc-950/80">
             <div class="relative w-16 h-16">
                 <!-- Outer Ring -->
-                <div class="absolute inset-0 border-2 border-[var(--neon-cyan)]/20 rounded-full"></div>
+                <div class="absolute inset-0 border-2 border-(--neon-cyan)/20 rounded-full"></div>
                 <!-- Inner Spinning Pulse -->
-                <div class="absolute inset-0 border-t-2 border-[var(--neon-cyan)] rounded-full animate-spin shadow-[0_0_15px_rgba(0,240,255,0.4)]"></div>
+                <div class="absolute inset-0 border-t-2 border-(--neon-cyan) rounded-full animate-spin shadow-[0_0_15px_rgba(0,240,255,0.4)]"></div>
                 <!-- Core Pulse -->
-                <div class="absolute inset-2 bg-[var(--neon-cyan)]/10 rounded-full animate-pulse blur-sm"></div>
+                <div class="absolute inset-2 bg-(--neon-cyan)/10 rounded-full animate-pulse blur-sm"></div>
             </div>
             <div class="flex flex-col items-center space-y-2">
                 <span class="text-[10px] neon-text font-bold tracking-[0.4em] uppercase animate-pulse">GENERATING_PDF_STREAM</span>

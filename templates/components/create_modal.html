@@ -1,5 +1,5 @@
 <div id="create-modal" class="modal modal-open">
-    <div class="modal-box glass-panel border-[var(--neon-cyan)]/30 max-w-sm">
+    <div class="modal-box glass-panel border-(--neon-cyan)/30 max-w-sm">
         <h3 class="font-bold text-lg neon-text tracking-widest mb-4">NEW_ENTRY // INITIALIZE</h3>
         
         <form hx-post="/create" hx-target="#aegis-view-core" 
@@ -11,7 +11,7 @@
                     <span class="label-text text-zinc-100 text-xs uppercase tracking-tighter">Enter FileName (MD_ONLY)</span>
                 </label>
                 <input type="text" name="filename" placeholder="REQUIRED_NAME" required autofocus
-                       class="input input-bordered w-full bg-black/40 border-[var(--glass-border)] focus:border-[var(--neon-cyan)] text-[var(--neon-cyan)] tracking-widest uppercase text-sm">
+                       class="input input-bordered w-full bg-black/40 border-(--glass-border) focus:border-(--neon-cyan) text-(--neon-cyan) tracking-widest uppercase text-sm">
                 
                 <div class="modal-action">
                     <button type="button" class="btn btn-ghost btn-sm text-zinc-500 uppercase tracking-widest" 

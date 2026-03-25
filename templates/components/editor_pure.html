@@ -3,7 +3,7 @@
     <div class="flex flex-col space-y-3 shrink-0" style="margin-bottom: 1rem !important;">
         <!-- Row 1: Status & Context -->
         <div class="glass-panel px-6 py-3 flex items-center justify-between border-b-0 rounded-b-none" style="background: rgba(20, 20, 25, 0.8) !important;">
-            <div class="flex items-center space-x-3 text-[10px] uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden flex-grow">
+            <div class="flex items-center space-x-3 text-[10px] uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden grow">
                 <span class="font-bold neon-text shrink-0">SYS_LINK //</span>
                     <button hx-get="/" hx-target="#aegis-view-core" hx-push-url="true" class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">DASHBOARD</button>
                     <span class="opacity-100 text-zinc-200 shrink-0">/</span>
@@ -49,7 +49,7 @@
                     <button onclick="insertTag('- ', '')" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-all rounded-md text-zinc-400 hover:text-white border border-transparent hover:border-white/5" title="List">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     </button>
-                    <button onclick="insertTag('\n```mermaid\ngraph TD\n    A[START] --> B(PROCESS)\n```\n', '')" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-all rounded-md text-[var(--neon-cyan)] hover:text-white border border-[var(--neon-cyan-dim)]/20 hover:border-white/20 shadow-[0_0_10px_rgba(0,240,255,0.1)]" title="Mermaid Diagram">
+                    <button onclick="insertTag('\n```mermaid\ngraph TD\n    A[START] --> B(PROCESS)\n```\n', '')" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-all rounded-md text-(--neon-cyan) hover:text-white border border-(--neon-cyan-dim)/20 hover:border-white/20 shadow-[0_0_10px_rgba(0,240,255,0.1)]" title="Mermaid Diagram">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21l4-4m0 0l4 4m-4-4V3"></path></svg>
                     </button>
                 </div>
@@ -66,14 +66,14 @@
     </div>
 
     <!-- Main Editor Interface (FLEX SPLIT LOCK) -->
-    <div class="flex-grow flex space-x-3 min-w-0 min-h-0 overflow-hidden" style="width: 100% !important;">
+    <div class="grow flex space-x-3 min-w-0 min-h-0 overflow-hidden" style="width: 100% !important;">
         
         <!-- Input Pane -->
         <div class="flex-1 min-w-0 flex flex-col glass-panel p-0 overflow-hidden relative group" style="background: rgba(15, 23, 42, 0.5) !important;">
             <div class="flex items-center justify-between px-6 py-2 neon-border-b bg-black/20 shrink-0">
                 <span class="text-[11px] text-zinc-100 uppercase tracking-widest font-bold">INPUT_BUFFER</span>
             </div>
-            <div class="flex-grow w-full overflow-hidden relative">
+            <div class="grow w-full overflow-hidden relative">
                 <form id="editor-form" class="h-full w-full absolute inset-0 flex flex-col m-0 overflow-hidden">
                     <input type="hidden" name="path" value="{{ path }}">
                     <textarea name="content" id="pure-editor-input"
@@ -90,9 +90,9 @@
                 <span class="text-[9px] neon-text uppercase tracking-widest font-bold">PREVIEW_RENDER</span>
                 <div class="w-2 h-2 rounded-full neon-bg animate-pulse shadow-[0_0_8px_rgba(125, 211, 252, 0.5)]"></div>
             </div>
-            <div class="flex-grow w-full overflow-hidden relative">
+            <div class="grow w-full overflow-hidden relative">
                 <div id="pure-preview-pane" 
-                     class="absolute inset-0 p-12 overflow-y-auto prose prose-invert prose-p:leading-[1.8] prose-slate max-w-none prose-pre:bg-black/80 prose-pre:border prose-pre:border-white/10 prose-headings:neon-text prose-a:text-[var(--neon-cyan)] scrollbar-thin text-slate-300">
+                     class="absolute inset-0 p-12 overflow-y-auto prose prose-invert prose-p:leading-[1.8] prose-slate max-w-none prose-pre:bg-black/80 prose-pre:border prose-pre:border-white/10 prose-headings:neon-text prose-a:text-(--neon-cyan) scrollbar-thin text-slate-300">
                     <!-- Content rendered by JavaScript -->
                 </div>
             </div>

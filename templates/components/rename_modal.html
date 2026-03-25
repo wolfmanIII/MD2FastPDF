@@ -1,5 +1,5 @@
 <div id="rename-modal" class="modal modal-open">
-    <div class="modal-box glass-panel border-[var(--neon-cyan)]/30 max-w-sm">
+    <div class="modal-box glass-panel border-(--neon-cyan)/30 max-w-sm">
         <h3 class="font-bold text-lg neon-text tracking-widest mb-4">RENAME // REROUTE</h3>
 
         <form hx-post="/rename" hx-target="#aegis-view-core"
@@ -12,7 +12,7 @@
                 </label>
                 <input type="text" name="new_name" placeholder="NEW_FILENAME" required autofocus
                        value="{{ filename }}"
-                       class="input input-bordered w-full bg-black/40 border-[var(--glass-border)] focus:border-[var(--neon-cyan)] text-[var(--neon-cyan)] tracking-widest uppercase text-sm">
+                       class="input input-bordered w-full bg-black/40 border-(--glass-border) focus:border-(--neon-cyan) text-(--neon-cyan) tracking-widest uppercase text-sm">
 
                 <div class="modal-action">
                     <button type="button" class="btn btn-ghost btn-sm text-zinc-500 uppercase tracking-widest"
