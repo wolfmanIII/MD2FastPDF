@@ -1,5 +1,5 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
-**Versione 4.2.0** // AEGIS PROTOCOL (Neural Interface)
+**Versione 4.6.2** // AEGIS PROTOCOL (Neural Interface)
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -16,11 +16,12 @@
 - **Environment**: Pipenv / Poetry
 
 ## 🚀 Features
-- **Aegis Slim-Tech Editor**: Interfaccia di scrittura compattata (Inconsolata 300) per una densità d'informazione aeronautica e zero distrazioni (no highlight sx).
-- **DaisyUI Tooltips**: Tutti i comandi della stazione sono ora dotati di indicatori di funzione neon-styled per un'esperienza industriale moderna.
+- **Aegis Slim-Tech Editor**: Interfaccia di scrittura compattata con supporto **Fullscreen Breakthrough** (bypass automatico dei filtri glass-panel).
+- **Native Multi-Tab Navigation**: Pieno supporto per apertura in nuove schede (Ctrl+Click) su Dashboard, File Grid e Breadcrumbs.
+- **DaisyUI Tooltips**: Indicatori di funzione ad alta priorità (`z-index: 500+`) coerenti con la stratigrafia industriale.
 - **Aegis Oracle (Neural Synthesis)**:
-    *   **Ghost-Text (On-Demand)**: Suggerimenti di completamento predittivo attivabili manualmente via pulsante `fa-magic`. Supporto per interruzione immediata via [ESC].
-    *   **Neural Scan (Auto-Summary)**: Analisi neurale istantanea e debriefing tecnico dei documenti direttamente dal browser dell'archivio.
+    *   **Ghost-Text (On-Demand)**: Suggerimenti di completamento predittivo (300 tokens) con logica di conclusione frase e supporto per accettazione via [TAB].
+    *   **Neural Scan (Auto-Summary)**: Analisi neurale istantanea con Wide-HUD (1200px) e Scan-Overlay protettivo.
     *   **Mermaid Synthesis**: Conversione "Pensiero-Diagramma" via input naturale.
 - **Aegis Uplink Config**: Pannello di configurazione globale per la gestione del link neurale e del branding PDF persistito localmente.
 - **Global PDF Branding**: Esportazione PDF automatizzata con testata e piè di pagina SC-ARCHIVE (configurabile).

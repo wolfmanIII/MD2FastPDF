@@ -7,12 +7,12 @@
         <div class="flex items-center space-x-4">
             <button hx-get="/root-picker" hx-target="#modal-container"
                 class="btn-ghost text-[10px] rounded-sm focus:outline-none">
-                CONFIGURE_SYSTEM
+                SET_ARCHIVE
             </button>
-            <button hx-get="/files" hx-target="#aegis-view-core" hx-push-url="true"
-                class="btn-solid text-[10px] rounded-sm focus:outline-none shadow-[0_0_15px_rgba(0,240,255,0.2)]">
-                ACCESS_TERMINAL
-            </button>
+            <a href="/files" hx-get="/files" hx-target="#aegis-view-core" hx-push-url="true"
+                class="btn-solid text-[10px] rounded-sm focus:outline-none shadow-[0_0_15px_rgba(0,240,255,0.2)] no-underline">
+                LIBRARY_ACCESS
+            </a>
         </div>
     </div>
 

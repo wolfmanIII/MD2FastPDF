@@ -1,39 +1,46 @@
-<div class="grow flex flex-col h-[85vh] glass-panel relative overflow-hidden tracking-widest uppercase">
+<div class="grow flex flex-col h-[85vh] glass-panel relative tracking-widest uppercase" style="overflow: visible !important;">
+    <style>
+        /* AEGIS_TOOLTIP_OVERRIDE: Force tooltips above PDF context */
+        .aegis-pdf-header .tooltip::before,
+        .aegis-pdf-header .tooltip::after {
+            z-index: 9999 !important;
+        }
+    </style>
     <!-- Header -->
-    <div class="flex items-center justify-between px-4 py-3 neon-border-b shrink-0 relative z-10 bg-black/40">
-        <div class="flex items-center space-x-2 text-[10px] uppercase overflow-x-auto no-scrollbar">
+    <div class="flex items-center justify-between px-4 py-3 neon-border-b shrink-0 relative z-50 bg-black/40 aegis-pdf-header" style="overflow: visible !important;">
+        <div class="flex items-center space-x-2 text-[10px] uppercase overflow-x-auto no-scrollbar" style="overflow: visible !important;">
             <span class="font-bold shrink-0 text-zinc-100">MODE_PREVIEW //</span>
             {% for crumb in breadcrumbs %}
-            <button hx-get="/files?path={{ crumb.path }}" 
+            <a href="/files?path={{ crumb.path }}" hx-get="/files?path={{ crumb.path }}" 
                     hx-target="#aegis-view-core" hx-push-url="true"
-                    class="text-zinc-100 hover:text-white transition-colors whitespace-nowrap px-2 py-0.5 rounded-sm bg-white/5">
+                    class="text-zinc-100 hover:text-white transition-colors whitespace-nowrap px-2 py-0.5 rounded-sm bg-white/5 no-underline">
                 {{ crumb.name }}
-            </button>
+            </a>
             <span class="text-zinc-200">/</span>
             {% endfor %}
             <span class="neon-text font-bold whitespace-nowrap drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]">{{ filename }}</span>
         </div>
-        <div class="flex items-center space-x-1">
+        <div class="flex items-center space-x-1" style="overflow: visible !important;">
             <a id="pdf-download-link" href="/pdf/download?path={{ path }}" target="_blank"
-               class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 no-underline tooltip tooltip-bottom"
+               class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 no-underline tooltip tooltip-top"
                data-tip="Scarica Documento Certificato">
                 {% with class="w-3 h-3" %}{% include 'icons/pdf.html' %}{% endwith %}
                 <span>DOWNLOAD_PDF</span>
             </a>
-            <button hx-get="/files?path={{ path|parent_path }}"
+            <a href="/files?path={{ path|parent_path }}" hx-get="/files?path={{ path|parent_path }}"
                     hx-target="#aegis-view-core" hx-push-url="true"
-                    class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 mr-2 tooltip tooltip-bottom"
+                    class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 mr-2 tooltip tooltip-top no-underline"
                     data-tip="Torna all'Archivio">
                 {% with class="w-3 h-3 text-zinc-400" %}{% include 'icons/folder.html' %}{% endwith %}
                 <span>TERMINAL_FILES</span>
-            </button>
+            </a>
             {% if not is_pdf_file %}
-            <button hx-get="/editor?path={{ path }}" hx-target="#aegis-view-core" hx-push-url="true"
-                    class="btn-solid text-[10px] rounded-sm flex items-center space-x-2 tooltip tooltip-bottom"
+            <a href="/editor?path={{ path }}" hx-get="/editor?path={{ path }}" hx-target="#aegis-view-core" hx-push-url="true"
+                    class="btn-solid text-[10px] rounded-sm flex items-center space-x-2 tooltip tooltip-top no-underline"
                     data-tip="Torna all'Editing Buffer">
                 {% with class="w-3 h-3" %}{% include 'icons/action-back.html' %}{% endwith %}
                 <span>BACK_TO_EDIT</span>
-            </button>
+            </a>
             {% endif %}
         </div>
     </div>

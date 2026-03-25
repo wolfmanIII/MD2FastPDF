@@ -1,6 +1,25 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [4.6.2] - AEGIS_PROTOCOL (2026-03-26)
+Consolidamento della stabilità dell'interfaccia e rilascio delle barriere fisiche di rendering.
+
+### Added
+- **Native Multi-Tab Sync**: Conversione universale dei trigger di navigazione in ancore `<a>` per supporto nativo browser.
+- **Full-Grid Scan Overlay**: Schermo di caricamento neurale ad alta visibilità durante le scansioni dell'Oracle.
+- **Wide-Format Intelligence HUD**: Modale di riepilogo espansa a 1200px per aderenza agli standard aeronautici.
+- **Status Notifier 2.0**: Feedback di salvataggio potenziato con effetti pulse e glow neon Cyan.
+
+### Fixed
+- **Fullscreen Breakthrough**: Risolto il bug di "trapping" dei pannelli EasyMDE tramite disabilitazione automatica dei `backdrop-filter` genitori.
+- **Z-Index Stratigraphy**: Stabilizzata la gerarchia dei layer; i tooltip ora dominano la visuale sopra l'editor e i breadcrumb.
+- **Method Fallback**: Inserito supporto GET per le rotte Oracle per prevenire errori 405 durante la navigazione accidentale.
+
+### Changed
+- **Aegis Horizon Palette**: Aggiornamento cromatico verso Zinc-800 per l'editor e Slate Profondo per la preview.
+- **Neural Capacity Boost**: Elevato il limite di predizione a 300 token con nuova logica di "Thought Completion".
+- **Ghost-Text Visibility**: Suggerimenti IA ora visualizzati in Violetto ad alta opacità (0.8) per un contrasto ottimale.
+
 ## [4.2.0] - AEGIS PROTOCOL (2026-03-25)
 Consolidamento dello strato neurale e perfezionamento dell'interfaccia industriale Aegis.
 

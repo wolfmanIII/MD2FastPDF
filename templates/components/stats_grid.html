@@ -16,7 +16,7 @@
         </h3>
         <div class="space-y-4">
             <div class="flex justify-between items-center text-sm">
-                <span class="text-zinc-100">PROJECT_ROOT:</span>
+                <span class="text-zinc-100">ARCHIVE:</span>
                 <span class="neon-text" title="{{ full_root }}">{{ root_name }}</span>
             </div>
             <div class="flex justify-between items-center text-sm">
@@ -68,11 +68,12 @@
         </h3>
         <div class="space-y-2">
             {% for file in recent_files %}
-            <div class="flex items-center justify-between text-xs group transition-all cursor-pointer hover:bg-(--neon-cyan)/5 p-1 rounded-sm"
-                hx-get="/editor?path={{ file.path }}" hx-target="#aegis-view-core" hx-push-url="true">
+            <a href="/editor?path={{ file.path }}" 
+               hx-get="/editor?path={{ file.path }}" hx-target="#aegis-view-core" hx-push-url="true"
+               class="flex items-center justify-between text-xs group transition-all cursor-pointer hover:bg-(--neon-cyan)/5 p-1 rounded-sm no-underline">
                 <span class="text-zinc-100 group-hover:neon-text transition-colors">>> {{ file.name }}</span>
                 <span class="text-zinc-100 font-mono text-[11px]">MOD_TS: {{ file.mtime_str }}</span>
-            </div>
+            </a>
             {% else %}
             <div class="text-xs text-zinc-100 italic">NO_RECENT_ACTIVITY_DETECTED</div>
             {% endfor %}
@@ -105,7 +106,7 @@
                 </div>
             </div>
             <p class="text-xs text-zinc-100 mt-2 uppercase tracking-wide">
-                WARNING: EXCEEDING DATA DENSITY MAY TRIGGER AUTOMATIC PURGE PROTOCOL.
+                CAUTION: MONITOR DATA DENSITY TO ENSURE ARCHIVE INTEGRITY.
             </p>
         </div>
     </div>

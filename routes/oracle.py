@@ -44,7 +44,7 @@ async def oracle_complete(request: PromptRequest):
         async for token in oracle.stream_completion(
             request.prompt, 
             system=PromptTemplates.GHOST_SYSTEM,
-            options={"num_predict": 100, "temperature": 0.5} # Refined temperature for fluid technical writing
+            options={"num_predict": 300, "temperature": 0.4} # AEGIS_BUFF: Increased capacity for full phrase completions
         ):
             # SSE format: data: <payload>\n\n
             yield f"data: {json.dumps({'token': token})}\n\n"
@@ -58,6 +58,11 @@ async def oracle_mermaid(request: MermaidRequest):
     """
     syntax = await generate_mermaid(request.description)
     return JSONResponse(content={"syntax": syntax})
+
+@router.get("/summarize")
+async def get_summarize_fallback():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/")
 
 @router.post("/summarize", response_class=HTMLResponse)
 async def oracle_summarize(request: Request, content: Optional[str] = Form(None), path: Optional[str] = Form(None)):

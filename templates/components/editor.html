@@ -1,5 +1,37 @@
 <div id="editor-easymde-root"
     style="width: 100% !important; height: 85vh !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; min-width: 0 !important; background: transparent !important;">
+    
+    <style>
+        /* AEGIS_FULLSCREEN_FIX: Release parent containers and KILL filters that trap position:fixed */
+        #editor-easymde-root.aegis-fullscreen-active,
+        #editor-easymde-root.aegis-fullscreen-active .glass-panel,
+        #aegis-view-core:has(.aegis-fullscreen-active) {
+            overflow: visible !important;
+            height: auto !important;
+            position: static !important;
+            backdrop-filter: none !important;
+            filter: none !important;
+            transform: none !important;
+        }
+        .EasyMDEContainer.editor-fullscreen {
+            z-index: 8999 !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+        }
+        /* AEGIS_TOOLTIP_PRIORITY: Absolute dominance for operational hints */
+        .tooltip, .tooltip:before, .tooltip:after {
+            z-index: 99999 !important;
+        }
+        /* Top-level escape for the shell */
+        body:has(.aegis-fullscreen-active) main {
+            overflow: visible !important;
+            filter: none !important;
+            backdrop-filter: none !important;
+        }
+    </style>
 
     <!-- Row 1: Status & Context -->
     <div class="glass-panel px-6 py-3 flex items-center justify-between border-b-0 rounded-b-none shrink-0"
@@ -8,13 +40,13 @@
             class="flex items-center space-x-3 text-xs uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden grow">
             <span class="font-bold neon-text shrink-0">SYS_LINK //</span>
             <div class="flex items-center space-x-2 text-zinc-100 truncate">
-                <button hx-get="/" hx-target="#aegis-view-core" hx-push-url="true"
-                    class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">DASHBOARD</button>
+                <a href="/" hx-get="/" hx-target="#aegis-view-core" hx-push-url="true"
+                    class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0 no-underline">DASHBOARD</a>
                 <span class="opacity-100 text-zinc-200 shrink-0">/</span>
                 {% for crumb in breadcrumbs %}
-                <button hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true"
-                    class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{
-                    crumb.name }}</button>
+                <a href="/files?path={{ crumb.path }}" hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true"
+                    class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0 no-underline">{{
+                    crumb.name }}</a>
                 <span class="opacity-100 text-zinc-200 shrink-0">/</span>
                 {% endfor %}
                 <span class="text-white font-bold bg-white/10 px-2 py-0.5 rounded shadow-sm truncate">{{ filename
@@ -28,11 +60,11 @@
                     class="btn-solid text-xs h-9 px-6 shadow-[0_0_15px_rgba(0,240,255,0.15)] hover:shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all">
                     <span>COMMIT_STABLE</span>
                 </button>
-                <button hx-get="/pdf/view?path={{ path }}" hx-target="#aegis-view-core" hx-push-url="true"
-                    class="btn-ghost text-xs h-9 px-6 border border-(--neon-cyan-dim)/30 hover:border-(--neon-cyan) transition-all flex items-center space-x-2">
+                <a href="/pdf/view?path={{ path }}" hx-get="/pdf/view?path={{ path }}" hx-target="#aegis-view-core" hx-push-url="true"
+                    class="btn-ghost text-xs h-9 px-6 border border-(--neon-cyan-dim)/30 hover:border-(--neon-cyan) transition-all flex items-center space-x-2 no-underline">
                     {% with class="w-3 h-3" %}{% include 'icons/pdf.html' %}{% endwith %}
                     <span>PRINT_DOCUMENT</span>
-                </button>
+                </a>
             </div>
             <div class="flex items-center space-x-2 group pl-4 border-l border-white/10">
                 <span class="text-zinc-100 font-bold">ST:</span>
@@ -78,26 +110,26 @@
                     return html;
                 },
                 toolbar: [
-                    "bold", "italic", "heading", "|", 
-                    "quote", "unordered-list", "ordered-list", "|", 
-                    "link", "image", "table", "|", 
-                    "preview", "side-by-side", "fullscreen", "|", 
+                    "bold", "italic", "heading", "|",
+                    "quote", "unordered-list", "ordered-list", "|",
+                    "link", "image", "table", "|",
+                    "preview", "side-by-side", "fullscreen", "|",
                     {
                         name: "aegis-mermaid",
-                        action: () => htmx.ajax('GET', '/api/oracle/mermaid-modal', {target: '#modal-container'}),
+                        action: () => htmx.ajax('GET', '/api/oracle/mermaid-modal', { target: '#modal-container' }),
                         className: "fa fa-microchip",
                         title: "Mermaid Synthesis (Aegis Oracle)"
                     },
                     {
                         name: "aegis-ghost",
                         action: () => fetchNeuralSuggestion(),
-                        className: "fa fa-magic",
+                        className: "fa-brands fa-uncharted",
                         title: "Neural Hint (Ghost-Text)"
                     },
                     "|",
                     {
                         name: "aegis-config",
-                        action: () => htmx.ajax('GET', '/neural-settings', {target: '#modal-container'}),
+                        action: () => htmx.ajax('GET', '/neural-settings', { target: '#modal-container' }),
                         className: "fa fa-cog",
                         title: "Uplink Settings (Aegis Oracle)"
                     },
@@ -106,9 +138,31 @@
                 theme: "dark"
             });
             window.aegisEditor = easyMDE;
-
-            // Adjust EasyMDE for industrial look
             const cm = easyMDE.codemirror;
+
+            // AEGIS_HUD_SYNC: Force root state to match editor mode
+            const syncHUD = () => {
+                const isFull = easyMDE.isFullscreenActive();
+                root.classList.toggle('aegis-fullscreen-active', isFull);
+                document.body.style.overflow = isFull ? 'hidden' : '';
+            };
+
+            // Direct override of core functions to bypass event lag/failure
+            const originalToggleFS = easyMDE.toggleFullScreen;
+            easyMDE.toggleFullScreen = function() {
+                originalToggleFS.apply(this, arguments);
+                syncHUD();
+            };
+
+            const originalToggleSide = easyMDE.toggleSideBySide;
+            easyMDE.toggleSideBySide = function() {
+                originalToggleSide.apply(this, arguments);
+                syncHUD();
+                setTimeout(renderAegisVisuals, 100);
+            };
+
+            // Fallback for keybindings
+            cm.on("refresh", syncHUD);
 
             // AEGIS_INPUT_PRIORITY: Hard-link Tab and Esc to Oracle protocols
             cm.setOption("extraKeys", {
@@ -129,7 +183,7 @@
                 }
             });
 
-            window.clearAegisGhost = function() {
+            window.clearAegisGhost = function () {
                 if (abortController) {
                     abortController.abort();
                     abortController = null;
@@ -143,30 +197,30 @@
                 if (isFetching) return;
                 window.clearAegisGhost();
                 cm.focus(); // AEGIS_FOCUS_RESTORE: Return focus to editor for single-tab acceptance
-                
-                const magicBtn = root.querySelector('.fa-magic');
+
+                const magicBtn = root.querySelector('.fa-uncharted');
                 if (magicBtn) {
-                    magicBtn.classList.remove('fa-magic');
-                    magicBtn.classList.add('fa-circle-notch', 'fa-spin', 'text-(--neon-cyan)');
+                    magicBtn.classList.remove('fa-brands', 'fa-uncharted');
+                    magicBtn.classList.add('fa', 'fa-circle-notch', 'fa-spin', 'text-(--neon-cyan)');
                 }
 
                 const pos = cm.getCursor();
-                const context = cm.getRange({line: Math.max(0, pos.line - 15), ch: 0}, pos);
+                const context = cm.getRange({ line: Math.max(0, pos.line - 15), ch: 0 }, pos);
                 if (!context.trim()) {
                     if (magicBtn) {
-                        magicBtn.classList.remove('fa-circle-notch', 'fa-spin', 'text-(--neon-cyan)');
-                        magicBtn.classList.add('fa-magic');
+                        magicBtn.classList.remove('fa', 'fa-circle-notch', 'fa-spin', 'text-(--neon-cyan)');
+                        magicBtn.classList.add('fa-brands', 'fa-uncharted');
                     }
                     return;
                 }
 
                 isFetching = true;
                 abortController = new AbortController();
-                
+
                 try {
                     const response = await fetch('/api/oracle/complete', {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
+                        headers: { 'Content-Type': 'application/json' },
                         signal: abortController.signal,
                         body: JSON.stringify({ prompt: context })
                     });
@@ -175,8 +229,8 @@
 
                     const reader = response.body.getReader();
                     const decoder = new TextDecoder();
-                    
-                    while(true) {
+
+                    while (true) {
                         const { value, done } = await reader.read();
                         if (done) break;
                         const chunk = decoder.decode(value);
@@ -189,11 +243,11 @@
                                         ghostText += data.token;
                                         renderGhostWidget(ghostText);
                                     }
-                                } catch(e) {}
+                                } catch (e) { }
                             }
                         }
                     }
-                } catch(e) {
+                } catch (e) {
                     if (e.name !== 'AbortError') {
                         console.error("ORACLE_UPLINK_ERROR:", e);
                     }
@@ -201,8 +255,8 @@
                     isFetching = false;
                     const magicBtn = root.querySelector('.fa-circle-notch.fa-spin');
                     if (magicBtn) {
-                        magicBtn.classList.remove('fa-circle-notch', 'fa-spin', 'text-(--neon-cyan)');
-                        magicBtn.classList.add('fa-magic');
+                        magicBtn.classList.remove('fa', 'fa-circle-notch', 'fa-spin', 'text-(--neon-cyan)');
+                        magicBtn.classList.add('fa-brands', 'fa-uncharted');
                     }
                 }
             }
@@ -213,7 +267,7 @@
                     const pos = cm.getCursor();
                     const span = document.createElement("span");
                     span.className = "aegis-ghost-text";
-                    span.style.cssText = "opacity: 0.4; color: #a78bfa; font-style: italic; pointer-events: none;";
+                    span.style.cssText = "opacity: 0.8; color: #a78bfa; font-style: italic; pointer-events: none;";
                     span.textContent = text;
                     ghostMark = cm.setBookmark(pos, { widget: span, insertLeft: false });
                 });
@@ -258,7 +312,7 @@
                             wrap.setAttribute('data-tip', title);
                             btn.parentNode.insertBefore(wrap, btn);
                             wrap.appendChild(btn);
-                            btn.removeAttribute('title'); 
+                            btn.removeAttribute('title');
                         }
                     });
                 }
@@ -279,9 +333,11 @@
             background: rgba(15, 23, 42, 0.9) !important;
             border: none !important;
             border-bottom: 1px solid rgba(125, 211, 252, 0.15) !important;
-            padding: 8px 24px !important;
+            padding: 8px 10px !important;
             backdrop-filter: blur(10px) !important;
             border-radius: 0 !important;
+            z-index: 500 !important;
+            position: relative !important;
         }
 
         .editor-toolbar button {
@@ -467,16 +523,47 @@
         }
 
         .CodeMirror-fullscreen,
+        /* AEGIS_PREVIEW_AESTHETIC: Deep Slate/Industrial styles for Markdown preview */
+        .editor-preview, .editor-preview-side {
+            background: rgba(15, 23, 42, 0.98) !important; 
+            color: #f8fafc !important;
+            font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+            padding: 3rem !important;
+            box-shadow: inset 0 0 100px rgba(167, 139, 250, 0.05) !important;
+        }
+        .editor-preview h1, .editor-preview-side h1 { border-bottom: 1px solid rgba(167, 139, 250, 0.3) !important; color: #a78bfa !important; padding-bottom: 0.5rem !important; margin-bottom: 1.5rem !important; }
+        .editor-preview h2, .editor-preview-side h2 { color: #818cf8 !important; margin-top: 2rem !important; }
+        .editor-preview blockquote, .editor-preview-side blockquote { border-left: 4px solid #a78bfa !important; background: rgba(167, 139, 250, 0.05) !important; padding: 1rem !important; font-style: italic !important; }
+        .editor-preview code, .editor-preview-side code { background: rgba(0, 0, 0, 0.3) !important; color: #f472b6 !important; border-radius: 4px !important; padding: 0.2rem 0.4rem !important; border: 1px solid rgba(255, 255, 255, 0.05) !important; }
+        .editor-preview pre code, .editor-preview-side pre code { background: transparent !important; border: none !important; color: #e4e4e7 !important; }
+        .editor-preview pre, .editor-preview-side pre { background: rgba(0, 0, 0, 0.4) !important; border: 1px solid rgba(255, 255, 255, 0.05) !important; border-radius: 4px !important; padding: 1.5rem !important; overflow-x: auto !important; }
+        .editor-preview table, .editor-preview-side table { width: 100% !important; border-collapse: collapse !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; margin: 1.5rem 0 !important; }
+        .editor-preview th, .editor-preview-side th { background: rgba(167, 139, 250, 0.1) !important; padding: 0.75rem !important; text-align: left !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; font-size: 0.8rem !important; }
+        .editor-preview td, .editor-preview-side td { padding: 0.75rem !important; border: 1px solid rgba(255, 255, 255, 0.05) !important; font-size: 0.9rem !important; }
         .editor-toolbar.fullscreen,
         .editor-preview-side.editor-preview-active-side {
             z-index: 99999 !important;
             position: fixed !important;
         }
 
-        .CodeMirror-fullscreen {
-            background: #0c0e14 !important;
+        .editor-preview-side.editor-preview-active-side {
             top: 50px !important;
+            height: calc(100vh - 50px) !important;
+            width: 50% !important;
+            right: 0 !important;
+            border-left: 1px solid rgba(167, 139, 250, 0.2) !important;
+        }
+
+        .CodeMirror-fullscreen {
+            background: #27272a !important;
+            top: 50px !important;
+            height: calc(100vh - 50px) !important;
             /* Under toolbar */
+        }
+        
+        .CodeMirror {
+            background: #27272a !important;
+            color: #f8fafc !important;
         }
 
         .editor-toolbar.fullscreen {
