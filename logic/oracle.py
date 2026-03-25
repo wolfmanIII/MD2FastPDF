@@ -28,6 +28,18 @@ class PromptTemplates:
         "Language: Match the language of the source document. "
         "Output ONLY the summary in Markdown format. No filler."
     )
+    
+    GHOST_SYSTEM = (
+        "You are the AEGIS NEURAL HINT system. "
+        "Your goal is to provide a brief, professional continuation of the user's document. "
+        "RULES: "
+        "- COMPLETE THE CURRENT SENTENCE gracefully. "
+        "- YOU MAY ADD 1 EXTRA CONCISE, TECHNICAL SENTENCE to follow up. "
+        "- LIMIT: 1-2 sentences total. "
+        "- NO INTRODUCTIONS, NO CHAT, NO FILLER. "
+        "- Tone: Industrial, technical, sci-fi traveller. "
+        "- Language: Use the same language as the provided context."
+    )
 
 class OracleClient:
     """Industrial Client for the Neural Layer (Ollama)."""
@@ -43,7 +55,7 @@ class OracleClient:
     async def shutdown(self):
         await self.client.aclose()
 
-    async def stream_completion(self, prompt: str, system: Optional[str] = None) -> AsyncGenerator[str, None]:
+    async def stream_completion(self, prompt: str, system: Optional[str] = None, options: Optional[dict] = None) -> AsyncGenerator[str, None]:
         """Streams neural completion tokens to the caller."""
         payload = {
             "model": self.model,
@@ -52,6 +64,8 @@ class OracleClient:
         }
         if system:
             payload["system"] = system
+        if options:
+            payload["options"] = options
 
         try:
             async with self.client.stream("POST", f"{self.url}/api/generate", json=payload) as response:

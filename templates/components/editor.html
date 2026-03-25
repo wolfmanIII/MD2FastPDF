@@ -53,6 +53,12 @@
     <script>
         (function () {
             const root = document.getElementById('editor-easymde-root');
+            // AEGIS_COMPLETION_STATE: Persistent neural buffer
+            let ghostMark = null;
+            let ghostText = "";
+            let isFetching = false;
+            let abortController = null;
+
             const easyMDE = new EasyMDE({
                 element: document.getElementById('easymde-editor'),
                 forceSync: true,
@@ -104,25 +110,24 @@
             // Adjust EasyMDE for industrial look
             const cm = easyMDE.codemirror;
 
-            // Fullscreen Breakout Logic
-            easyMDE.codemirror.on("refresh", () => {
-                if (easyMDE.isFullscreenActive()) {
-                    root.classList.add('mde-fs-active');
-                } else {
-                    root.classList.remove('mde-fs-active');
+            // AEGIS_INPUT_PRIORITY: Hard-link Tab and Esc to Oracle protocols
+            cm.setOption("extraKeys", {
+                "Tab": (cm) => {
+                    if (ghostText) {
+                        cm.replaceSelection(ghostText);
+                        window.clearAegisGhost();
+                        return; // ACCEPTED
+                    }
+                    return EasyMDE.CodeMirror.Pass;
+                },
+                "Esc": (cm) => {
+                    if (ghostText || isFetching) {
+                        window.clearAegisGhost();
+                        return; // CANCELLED
+                    }
+                    return EasyMDE.CodeMirror.Pass;
                 }
             });
-
-            // Sync content for HTMX form submission
-            cm.on("change", () => {
-                easyMDE.element.value = easyMDE.value();
-            });
-
-            // AEGIS_GHOST_TEXT_PROTOCOL: Manual Synthesis Layer
-            let ghostMark = null;
-            let ghostText = "";
-            let isFetching = false;
-            let abortController = null;
 
             window.clearAegisGhost = function() {
                 if (abortController) {
@@ -137,10 +142,23 @@
             async function fetchNeuralSuggestion() {
                 if (isFetching) return;
                 window.clearAegisGhost();
+                cm.focus(); // AEGIS_FOCUS_RESTORE: Return focus to editor for single-tab acceptance
                 
+                const magicBtn = root.querySelector('.fa-magic');
+                if (magicBtn) {
+                    magicBtn.classList.remove('fa-magic');
+                    magicBtn.classList.add('fa-circle-notch', 'fa-spin', 'text-(--neon-cyan)');
+                }
+
                 const pos = cm.getCursor();
                 const context = cm.getRange({line: Math.max(0, pos.line - 15), ch: 0}, pos);
-                if (!context.trim()) return;
+                if (!context.trim()) {
+                    if (magicBtn) {
+                        magicBtn.classList.remove('fa-circle-notch', 'fa-spin', 'text-(--neon-cyan)');
+                        magicBtn.classList.add('fa-magic');
+                    }
+                    return;
+                }
 
                 isFetching = true;
                 abortController = new AbortController();
@@ -176,9 +194,16 @@
                         }
                     }
                 } catch(e) {
-                    if (e.name !== 'AbortError') console.error("NEURAL_ERR //", e.message);
+                    if (e.name !== 'AbortError') {
+                        console.error("ORACLE_UPLINK_ERROR:", e);
+                    }
                 } finally {
                     isFetching = false;
+                    const magicBtn = root.querySelector('.fa-circle-notch.fa-spin');
+                    if (magicBtn) {
+                        magicBtn.classList.remove('fa-circle-notch', 'fa-spin', 'text-(--neon-cyan)');
+                        magicBtn.classList.add('fa-magic');
+                    }
                 }
             }
 
@@ -193,25 +218,6 @@
                     ghostMark = cm.setBookmark(pos, { widget: span, insertLeft: false });
                 });
             }
-
-            cm.on("keydown", (cm, e) => {
-                // ESC to cancel or stop
-                if (e.keyCode === 27) {
-                    window.clearAegisGhost();
-                    return;
-                }
-                // TAB to accept
-                if (ghostText && e.keyCode === 9) {
-                    e.preventDefault();
-                    cm.replaceSelection(ghostText);
-                    window.clearAegisGhost();
-                    return;
-                }
-                // Any other typing clears ghost if not fetching
-                if (!isFetching && e.keyCode !== 16 && e.keyCode !== 17 && e.keyCode !== 18) {
-                    window.clearAegisGhost();
-                }
-            });
 
             cm.on("cursorActivity", () => {
                 if (!isFetching) window.clearAegisGhost();

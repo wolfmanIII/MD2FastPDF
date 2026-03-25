@@ -27,27 +27,54 @@
 - **Global Discovery**: Search engine integrato per file `.md`, `.html`, e `.pdf`.
 - **File Operations**: Gestione completa del buffer (Create, Rename, Delete) con navigazione `UP_DIRECTORY`.
 
-## 📦 Installation
-1. Ensure you have `pyenv` and `poetry` installed.
-2. Clone the repository.
-3. Install dependencies:
-   ```bash
-   poetry install
-   ```
-4. Start the Gotenberg infrastructure (requires Docker):
-   ```bash
-   docker run -d -p 3000:3000 gotenberg/gotenberg:8
-   ```
-5. Run the application:
-   ```bash
-   ./bin/launch.sh
-   ```
+## 📦 Protocollo di Installazione (Setup Manual)
 
-## 📂 Project Structure
-- `main.py`: FastAPI application entry point.
-- `logic/`: Business logic (file management, conversion).
-- `templates/`: HTMX fragments and Jinja2 layouts.
-- `static/`: CSS assets and Tailwind configurations.
+La stazione **SC-ARCHIVE** richiede un ambiente Linux (Ubuntu 24.04 via WSL2 raccomandato) con i seguenti sottosistemi attivi:
+
+### 1. Ambiente Python & Dipendenze
+Il progetto utilizza `Pipenv` per la gestione dell'isolamento.
+```bash
+# Installa Pipenv se non presente
+pip install pipenv
+
+# Clona e installa le dipendenze Aegis
+git clone <repository_url>
+cd MD2FastPDF
+pipenv install
+```
+
+### 2. Kernel di Conversione PDF (Gotenberg)
+La generazione PDF è delegata a un'istanza Docker di **Gotenberg**. È mandatorio che il servizio sia attivo sulla porta `3000`.
+```bash
+# Avvio del motore di conversione
+docker run -d -p 3000:3000 gotenberg/gotenberg:8
+```
+
+### 3. Strato Neurale (Ollama)
+L'intelligenza **Aegis Oracle** richiede Ollama in esecuzione.
+- **Installazione**: `curl -fsSL https://ollama.com/install.sh | sh`
+- **Modello Consigliato**: `ollama pull qwen2.5-coder:7b`
+- **Guida Dettagliata (Ubuntu 24.04)**: Consulta il manuale dedicato [ollama_ubuntu_24_04_guida.md](docs/ollama_ubuntu_24_04_guida.md).
+
+### 4. Compilatore CSS (Tailwind v4)
+Il progetto utilizza il binario standalone di Tailwind CSS v4 per la compilazione JIT degli asset. Assicurati che il file `./tailwindcss` sia eseguibile:
+```bash
+chmod +x tailwindcss
+```
+
+## 🚀 Sequenza di Avvio (Boot Sequence)
+
+Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
+```bash
+./bin/launch.sh
+```
+
+## 📂 Struttura del Progetto
+- `main.py`: Punto di convergenza dei router Aegis.
+- `logic/`: Logica di business (File management, Conversion, Oracle).
+- `templates/components/`: Frammenti HTML/HTMX industriali.
+- `static/css/`: Sorgenti e output del design system Aegis.
+- `docs/`: Database di documentazione operativa e tecnica.
 
 ---
-*Designed for the narrators of the SC-ARCHIVE station.*
+*Progettato per i narratori della stazione SC-ARCHIVE.*

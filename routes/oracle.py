@@ -37,8 +37,15 @@ async def oracle_complete(request: PromptRequest):
     """
     AEGIS_SSE_STREAM: Real-time neural completions for the editor.
     """
+    from logic.oracle import oracle, PromptTemplates
+    
     async def event_generator():
-        async for token in generate_completion(request.prompt):
+        # Inject tactical constraints for Ghost-Text
+        async for token in oracle.stream_completion(
+            request.prompt, 
+            system=PromptTemplates.GHOST_SYSTEM,
+            options={"num_predict": 100, "temperature": 0.5} # Refined temperature for fluid technical writing
+        ):
             # SSE format: data: <payload>\n\n
             yield f"data: {json.dumps({'token': token})}\n\n"
     

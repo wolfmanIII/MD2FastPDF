@@ -5,11 +5,12 @@ Tutte le modifiche degne di nota a questo progetto saranno documentate in questo
 Consolidamento dello strato neurale e perfezionamento dell'interfaccia industriale Aegis.
 
 ### Added
-- **Manual Ghost-Text Unit**: Implementato motore di completamento predittivo on-demand. Attivazione tramite pulsante `fa-magic` e interruzione istantanea (`AbortController`) via tasto [ESC].
-- **Aegis Intelligence Scan**: Introdotta funzionalità di riepilogo automatico (Neural Summary) accessibile direttamente dal browser dei file tramite l'icona `fa-microchip`.
-- **Aegis Uplink Config**: Terminale di configurazione centralizzato per la gestione dei protocolli neurali e delle preferenze di output.
-- **Global PDF Branding**: Opzione di branding automatico (Header/Footer SC-ARCHIVE) per l'esportazione PDF, gestita globalmente e persistita localmente.
-- **Industrial Tooltips**: Integrazione sistematica dei tooltip DaisyUI con posizionamento dinamico e isolamento dei layer (Wrapper protocol) per evitare conflitti con FontAwesome.
+- **Manual Ghost-Text Unit**: Completamento predittivo manuale sincronizzato con priorità di input [TAB] (Single-Tab Acceptance).
+- **Aegis Pulse Spinner**: Feedback visivo di uplink (`fa-circle-notch`) durante la generazione neurale per il monitoraggio della latenza.
+- **Aegis Intelligence Scan**: Funzionalità di riepilogo automatico (Neural Summary) accessibile dal browser dei file.
+- **Aegis Uplink Config**: Terminale di configurazione centralizzato per Branding PDF e protocolli Oracle.
+- **Industrial Tooltips**: Integrazione sistematica dei tooltip DaisyUI su tutta la toolbar editoriale.
+- **Documentation Expansion**: Integrata guida tecnica dettagliata per il setup industriale di Ollama su Ubuntu 24.04.
 
 ### Fixed
 - **UI Ergonomics**: Ottimizzata la leggibilità delle modali neurali tramite l'adozione di `prose-lg` e ricalibrazione delle scale tipografiche (18px per i riepiloghi).
