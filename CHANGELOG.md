@@ -1,6 +1,34 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [4.2.0] - AEGIS PROTOCOL (2026-03-25)
+Consolidamento dello strato neurale e perfezionamento dell'interfaccia industriale Aegis.
+
+### Added
+- **Manual Ghost-Text Unit**: Implementato motore di completamento predittivo on-demand. Attivazione tramite pulsante `fa-magic` e interruzione istantanea (`AbortController`) via tasto [ESC].
+- **Aegis Intelligence Scan**: Introdotta funzionalità di riepilogo automatico (Neural Summary) accessibile direttamente dal browser dei file tramite l'icona `fa-microchip`.
+- **Aegis Uplink Config**: Terminale di configurazione centralizzato per la gestione dei protocolli neurali e delle preferenze di output.
+- **Global PDF Branding**: Opzione di branding automatico (Header/Footer SC-ARCHIVE) per l'esportazione PDF, gestita globalmente e persistita localmente.
+- **Industrial Tooltips**: Integrazione sistematica dei tooltip DaisyUI con posizionamento dinamico e isolamento dei layer (Wrapper protocol) per evitare conflitti con FontAwesome.
+
+### Fixed
+- **UI Ergonomics**: Ottimizzata la leggibilità delle modali neurali tramite l'adozione di `prose-lg` e ricalibrazione delle scale tipografiche (18px per i riepiloghi).
+- **Editor Stability**: Risolto il bug dei "salti" di scrolling durante la generazione neurale tramite operazioni atomiche (`cm.operation`) di rendering del widget.
+- **Icon Rendering conflict**: Risolta la collisione di pseudo-elementi tra DaisyUI e FontAwesome nella toolbar dell'editor.
+
+## [4.1.0] - AEGIS REFACTOR (2026-03-25)
+Protocollo di ristrutturazione architetturale completato. Allineamento totale ai principi SOLID.
+
+### Changed
+- **SOLID Filesystem Core**: Rifattorizzazione di `logic/files.py` in classi specializzate (`FileManager`, `DirectoryLister`, `Sanitizer`).
+- **DIP Client Integration**: Implementati client dedicati e persistenti per Gotenberg e Oracle con gestione del ciclo di vita (FastAPI Lifespan).
+- **Oracle Refactor**: Separazione del transport dalla logica di prompt engineering e transizione verso eccezioni strutturate.
+- **Import Cleanup**: Eliminati gli import locali "pigri" nei router per una migliore telemetria degli errori in fase di startup.
+
+### Fixed
+- **Sanitization Warning**: Soppresso il warning `NoCssSanitizerWarning` tramite hardening del parser di stile in `bleach`.
+- **Resource Leakage**: Risolto il potenziale leak di socket tramite pool client gestiti e chiusura automatica allo shutdown del kernel.
+
 ## [4.0.1] - AEGIS STABILITY PATCH (2026-03-25)
 Correzioni UI e funzionalità operative post-BETA.
 

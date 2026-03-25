@@ -1,13 +1,25 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from logic.templates import templates
 from routes import core, archive, editor, pdf, config, oracle
+from logic.conversion import gotenberg
+from logic.oracle import oracle as neural_oracle
 
-# AEGIS_ARCH_v3.9.5: Modular Architecture Launch
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # AEGIS_BOOT: Initializing persistent resources
+    yield
+    # AEGIS_SHUTDOWN: Graceful connection cleanup
+    await gotenberg.shutdown()
+    await neural_oracle.shutdown()
+
+# AEGIS_ARCH_v4.1.0: SOLID Architecture Refactor
 app = FastAPI(
     title="SC-ARCHIVE", 
     description="Space Craft Archive Management System // Aegis Class",
-    version="3.9.5"
+    version="4.1.0",
+    lifespan=lifespan
 )
 
 # 1. Static and Template Configuration

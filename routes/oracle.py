@@ -7,6 +7,11 @@ from pydantic import BaseModel
 import json
 import markdown
 
+from logic.conversion import CLEANER
+
+import anyio
+from logic.files import get_project_root
+
 # AEGIS_ORACLE_ROUTER: Neural interface exposure
 router = APIRouter(prefix="/api/oracle", tags=["Aegis Oracle"])
 
@@ -53,8 +58,6 @@ async def oracle_summarize(request: Request, content: Optional[str] = Form(None)
     AEGIS_INTELLIGENCE: Returns rendered summary for HTMX injection.
     """
     if not content and path:
-        from logic.files import get_project_root
-        import anyio
         full_path = get_project_root() / path.strip("/")
         if full_path.exists() and full_path.is_file():
             content = await anyio.Path(full_path).read_text()
@@ -69,6 +72,7 @@ async def oracle_summarize(request: Request, content: Optional[str] = Form(None)
         summary_markdown,
         extensions=['fenced_code', 'tables']
     )
+    summary_html = CLEANER.clean(summary_html) # Aegis Security Seal
     
     # Render using the dedicated component
     return templates.TemplateResponse(

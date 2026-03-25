@@ -4,7 +4,7 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.0] - AEGIS ORACLE (Active Deployment // Phase 1)
+### [4.0] - AEGIS ORACLE (Active Deployment // Phase 1) [COMPLETED]
 **Obiettivo**: Dotare la stazione di uno strato di intelligenza neurale locale per massimizzare la velocità di produzione.
 - **Modello Operativo Primario**: `qwen2.5-coder:7b` (via Ollama locale). Ottimizzato per generazione strutturata e aderenza sintattica a Markdown/Mermaid.
 - **Specifiche Hardware Base**: Compatibilità certificata per Full GPU Offload su architettura Pascal (es. Nvidia GTX 1070 Ti 8GB VRAM) in ambiente WSL2 con 16GB RAM di sistema.
@@ -15,23 +15,12 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.1] - AEGIS REFACTOR (SOLID Compliance)
-**Obiettivo**: Eliminare le violazioni SOLID critiche identificate dall'analisi architetturale per garantire testabilità, estensibilità e manutenibilità del codebase.
-
-#### Priorità 1 — `logic/files.py` (SRP + OCP)
-- **SRP**: Decomporre il modulo in responsabilità distinte: `PathSanitizer`, `FileManager`, `DirectoryLister`, `StorageCache`.
-- **OCP**: Centralizzare estensioni file ammesse (`ALLOWED_EXTENSIONS`) e directory da escludere (`SKIP_DIRS`) in costanti configurabili, eliminando la duplicazione in 5+ punti.
-
-#### Priorità 2 — DIP sui Client HTTP
-- **`GotenbergClient`**: Incapsulare `_http_client` di `logic/conversion.py` in una classe dedicata con lifecycle gestito (startup/shutdown FastAPI), iniettabile e mockable.
-- **`OracleClient`**: Stessa architettura per `logic/oracle.py` — separare il transport HTTP dalla logica di prompt engineering.
-
-#### Priorità 3 — `logic/oracle.py` (SRP + LSP)
-- **SRP**: Separare `OracleClient` (gestione connessione, retry, errori HTTP) da `PromptTemplates` (definizione system prompt per completion, mermaid, summarize).
-- **LSP**: Uniformare i contratti di ritorno — tutte le funzioni oracle usano eccezioni per errori anziché stringhe `ERROR_*` come valore di ritorno.
-
-#### Priorità 4 — Import nascosti in `routes/oracle.py`
-- Eliminare import locali dentro funzione (`get_project_root`, `anyio` a riga 56-57) dichiarandoli a livello modulo.
+### [4.1] - AEGIS REFACTOR (SOLID Compliance & UI Refinement) [COMPLETED]
+**Obiettivo**: Eliminare le violazioni SOLID e perfezionare l'ergonomia visiva della stazione per un workflow industriale fluido.
+- **SRP Implementation**: Scomposizione di `logic/files.py` in kernel specializzati.
+- **Persistent Clients**: Implementati client dedicati con lifecycle gestito per Gotenberg e Oracle.
+- **DIP Architecture**: Transizione verso interfacce iniettabili e gestione centralizzata dei client HTTP.
+- **Aegis UI Refinement**: Normalizzazione dei tooltip (DaisyUI), raggruppamento logico della toolbar editoriale e implementazione della **Configurazione Uplink** globale per preferenze persistite (PDF Branding, Neural Link).
 
 ---
 
@@ -42,30 +31,30 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.2] - AEGIS BLUEPRINT (Technical Templating)
+### [4.3] - AEGIS BLUEPRINT (Technical Templating)
 **Obiettivo**: Standardizzazione della produzione documentale industriale.
 - **Galeria Blueprint**: Inserimento istantaneo di template (Missions, Tech Specs, Logs).
 - **Variable Injection**: Sostituzione dinamica di segnaposto nel Markdown prima dell'export PDF.
 
 ---
 
-### [4.3] - AEGIS MULTI-LINK (Efficiency Multi-Tasking)
+### [4.4] - AEGIS MULTI-LINK (Efficiency Multi-Tasking)
 **Obiettivo**: Gestione simultanea di più flussi informativi.
 - **Tabbed Workspace**: Interfaccia a schede HTMX per l'editing simultaneo di più documenti.
 - **Split Pane Sync**: Trascinamento e sincronizzazione di sezioni tra diversi documenti aperti.
 
 ---
 
-### [4.4] - AEGIS GUARD (Local Security Protocol)
+### [4.5] - AEGIS GUARD (Local Security Protocol)
 **Obiettivo**: Blindatura dei dati locali e gestione dell'accesso in rete.
 - **Buffer Encryption**: Cifratura simmetrica dei documenti sensibili a livello di filesystem.
 - **Network Gateway UI**: Strumenti per la gestione della visibilità della stazione nella rete WiFi locale.
 
 ---
 
-### [4.5] - AEGIS STABILITY (System Integrity)
+### [4.6] - AEGIS STABILITY (System Integrity)
 **Obiettivo**: Rafforzamento della robustezza del codice e della diagnostica in tempo reale.
-- **Centralized Exception Handling**: Implementazione di un gestore centralizzato delle eccezioni custom (`logic/exceptions.py`) per una telemetria ultra-precisa dei guasti (timeout Gotenberg, errori di rete, fallimenti Oracle) direttamente nell'HUD operativo tramite messaggistica HTMX dedicata.
+- **Centralized Exception Handling**: Implementazione di un gestore centralizzato delle eccezioni custom (`logic/exceptions.py`) per una telemetria ultra-precisa dei guasti direttamente nell'HUD operativo.
 
 ---
 

@@ -1,5 +1,5 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
-**Versione 4.0.0-BETA** // AEGIS ORACLE (Neural Patch)
+**Versione 4.2.0** // AEGIS PROTOCOL (Neural Interface)
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -11,19 +11,21 @@
 - **Frontend**: HTMX + Tailwind CSS v4 Standalone CLI (v4.2.1) + Jinja2
 - **Editor**: EasyMDE (CodeMirror 5)
 - **PDF Engine**: Gotenberg (Chromium via Docker)
+- **Neural Engine**: local Ollama (`qwen2.5-coder:7b`)
 - **CSS Optimizer**: Tailwind CSS Standalone Compiler (v4.2.1)
-- **Environment**: Poetry (with pyenv)
+- **Environment**: Pipenv / Poetry
 
 ## 🚀 Features
 - **Aegis Slim-Tech Editor**: Interfaccia di scrittura compattata (Inconsolata 300) per una densità d'informazione aeronautica e zero distrazioni (no highlight sx).
-- **Global Discovery**: Integrated recursive search engine for `.md`, `.html`, and `.pdf` files.
-- **Aegis Visualization**: Support for **Mermaid.js** diagrams (Flowcharts, Sequence, Gantt) in Markdown.
-- **Neural Synthesis // AEGIS ORACLE**: Integrated AI layer (Local Ollama) for instant Mermaid diagram generation and automated document analysis.
-- **HUD_PRINT Toggle**: PDF export in slim mode (page number only) or full HUD mode (SC-ARCHIVE header/footer).
-- **File Operations**: Create, rename, and delete files directly from the archive browser.
-- **UP_DIRECTORY Navigation**: One-click parent directory access in the file browser.
-- **Aegis UI Normalization**: Standardized form controls based on DaisyUI architecture for surgical layout precision.
-- **Root Selector**: Dynamic working directory selection with intelligent redirect.
+- **DaisyUI Tooltips**: Tutti i comandi della stazione sono ora dotati di indicatori di funzione neon-styled per un'esperienza industriale moderna.
+- **Aegis Oracle (Neural Synthesis)**:
+    *   **Ghost-Text (On-Demand)**: Suggerimenti di completamento predittivo attivabili manualmente via pulsante `fa-magic`. Supporto per interruzione immediata via [ESC].
+    *   **Neural Scan (Auto-Summary)**: Analisi neurale istantanea e debriefing tecnico dei documenti direttamente dal browser dell'archivio.
+    *   **Mermaid Synthesis**: Conversione "Pensiero-Diagramma" via input naturale.
+- **Aegis Uplink Config**: Pannello di configurazione globale per la gestione del link neurale e del branding PDF persistito localmente.
+- **Global PDF Branding**: Esportazione PDF automatizzata con testata e piè di pagina SC-ARCHIVE (configurabile).
+- **Global Discovery**: Search engine integrato per file `.md`, `.html`, e `.pdf`.
+- **File Operations**: Gestione completa del buffer (Create, Rename, Delete) con navigazione `UP_DIRECTORY`.
 
 ## 📦 Installation
 1. Ensure you have `pyenv` and `poetry` installed.

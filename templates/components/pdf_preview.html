@@ -14,42 +14,23 @@
             <span class="neon-text font-bold whitespace-nowrap drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]">{{ filename }}</span>
         </div>
         <div class="flex items-center space-x-1">
-            {% if not is_pdf_file %}
-            <!-- HUD_PRINT toggle: cycles header_footer param on iframe and download link -->
-            <button id="hud-toggle"
-                    onclick="(function(){
-                        var active = this.dataset.active === '1';
-                        active = !active;
-                        this.dataset.active = active ? '1' : '0';
-                        this.classList.toggle('btn-solid', active);
-                        this.classList.toggle('btn-ghost', !active);
-                        var loader = document.getElementById('aegis-pdf-loader');
-                        loader.style.display = 'flex';
-                        loader.style.opacity = '1';
-                        var hf = active ? '&header_footer=true' : '';
-                        document.getElementById('pdf-iframe').src = '/pdf/preview?path={{ path }}' + hf + '#view=FitH';
-                        document.getElementById('pdf-download-link').href = '/pdf/download?path={{ path }}' + hf;
-                    }).call(this)"
-                    data-active="0"
-                    class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2">
-                {% with class="w-3 h-3" %}{% include 'icons/shield.html' %}{% endwith %}
-                <span>HUD_PRINT</span>
-            </button>
-            {% endif %}
             <a id="pdf-download-link" href="/pdf/download?path={{ path }}" target="_blank"
-               class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 no-underline">
+               class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 no-underline tooltip tooltip-bottom"
+               data-tip="Scarica Documento Certificato">
                 {% with class="w-3 h-3" %}{% include 'icons/pdf.html' %}{% endwith %}
                 <span>DOWNLOAD_PDF</span>
             </a>
             <button hx-get="/files?path={{ path|parent_path }}"
                     hx-target="#aegis-view-core" hx-push-url="true"
-                    class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 mr-2">
+                    class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 mr-2 tooltip tooltip-bottom"
+                    data-tip="Torna all'Archivio">
                 {% with class="w-3 h-3 text-zinc-400" %}{% include 'icons/folder.html' %}{% endwith %}
                 <span>TERMINAL_FILES</span>
             </button>
             {% if not is_pdf_file %}
             <button hx-get="/editor?path={{ path }}" hx-target="#aegis-view-core" hx-push-url="true"
-                    class="btn-solid text-[10px] rounded-sm flex items-center space-x-2">
+                    class="btn-solid text-[10px] rounded-sm flex items-center space-x-2 tooltip tooltip-bottom"
+                    data-tip="Torna all'Editing Buffer">
                 {% with class="w-3 h-3" %}{% include 'icons/action-back.html' %}{% endwith %}
                 <span>BACK_TO_EDIT</span>
             </button>
@@ -81,4 +62,18 @@
                 onload="document.getElementById('aegis-pdf-loader').style.opacity='0'; setTimeout(()=>document.getElementById('aegis-pdf-loader').style.display='none', 500)">
         </iframe>
     </div>
+
+    <!-- AEGIS_PDF_AUTO_PROTOCOL -->
+    <script>
+        (function() {
+            const isBrandingEnabled = localStorage.getItem('aegis_pdf_branding') === 'true';
+            
+            if (isBrandingEnabled) {
+                // Auto-inject header_footer parameter on load if global preference is active
+                const hf = '&header_footer=true';
+                document.getElementById('pdf-iframe').src = '/pdf/preview?path={{ path }}' + hf + '#view=FitH';
+                document.getElementById('pdf-download-link').href = '/pdf/download?path={{ path }}' + hf;
+            }
+        })();
+    </script>
 </div>

@@ -71,7 +71,32 @@
                     setTimeout(renderAegisVisuals, 100);
                     return html;
                 },
-                toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "|", "preview", "side-by-side", "fullscreen", "|", "guide"],
+                toolbar: [
+                    "bold", "italic", "heading", "|", 
+                    "quote", "unordered-list", "ordered-list", "|", 
+                    "link", "image", "table", "|", 
+                    "preview", "side-by-side", "fullscreen", "|", 
+                    {
+                        name: "aegis-mermaid",
+                        action: () => htmx.ajax('GET', '/api/oracle/mermaid-modal', {target: '#modal-container'}),
+                        className: "fa fa-microchip",
+                        title: "Mermaid Synthesis (Aegis Oracle)"
+                    },
+                    {
+                        name: "aegis-ghost",
+                        action: () => fetchNeuralSuggestion(),
+                        className: "fa fa-magic",
+                        title: "Neural Hint (Ghost-Text)"
+                    },
+                    "|",
+                    {
+                        name: "aegis-config",
+                        action: () => htmx.ajax('GET', '/neural-settings', {target: '#modal-container'}),
+                        className: "fa fa-cog",
+                        title: "Uplink Settings (Aegis Oracle)"
+                    },
+                    "guide"
+                ],
                 theme: "dark"
             });
             window.aegisEditor = easyMDE;
@@ -93,12 +118,110 @@
                 easyMDE.element.value = easyMDE.value();
             });
 
+            // AEGIS_GHOST_TEXT_PROTOCOL: Manual Synthesis Layer
+            let ghostMark = null;
+            let ghostText = "";
+            let isFetching = false;
+            let abortController = null;
+
+            window.clearAegisGhost = function() {
+                if (abortController) {
+                    abortController.abort();
+                    abortController = null;
+                }
+                if (ghostMark) { ghostMark.clear(); ghostMark = null; }
+                ghostText = "";
+                isFetching = false;
+            };
+
+            async function fetchNeuralSuggestion() {
+                if (isFetching) return;
+                window.clearAegisGhost();
+                
+                const pos = cm.getCursor();
+                const context = cm.getRange({line: Math.max(0, pos.line - 15), ch: 0}, pos);
+                if (!context.trim()) return;
+
+                isFetching = true;
+                abortController = new AbortController();
+                
+                try {
+                    const response = await fetch('/api/oracle/complete', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        signal: abortController.signal,
+                        body: JSON.stringify({ prompt: context })
+                    });
+
+                    if (!response.ok) throw new Error("LINK_OFFLINE");
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    
+                    while(true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        const chunk = decoder.decode(value);
+                        const lines = chunk.split('\n');
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                try {
+                                    const data = JSON.parse(line.substring(6));
+                                    if (data.token) {
+                                        ghostText += data.token;
+                                        renderGhostWidget(ghostText);
+                                    }
+                                } catch(e) {}
+                            }
+                        }
+                    }
+                } catch(e) {
+                    if (e.name !== 'AbortError') console.error("NEURAL_ERR //", e.message);
+                } finally {
+                    isFetching = false;
+                }
+            }
+
+            function renderGhostWidget(text) {
+                cm.operation(() => {
+                    if (ghostMark) ghostMark.clear();
+                    const pos = cm.getCursor();
+                    const span = document.createElement("span");
+                    span.className = "aegis-ghost-text";
+                    span.style.cssText = "opacity: 0.4; color: #a78bfa; font-style: italic; pointer-events: none;";
+                    span.textContent = text;
+                    ghostMark = cm.setBookmark(pos, { widget: span, insertLeft: false });
+                });
+            }
+
+            cm.on("keydown", (cm, e) => {
+                // ESC to cancel or stop
+                if (e.keyCode === 27) {
+                    window.clearAegisGhost();
+                    return;
+                }
+                // TAB to accept
+                if (ghostText && e.keyCode === 9) {
+                    e.preventDefault();
+                    cm.replaceSelection(ghostText);
+                    window.clearAegisGhost();
+                    return;
+                }
+                // Any other typing clears ghost if not fetching
+                if (!isFetching && e.keyCode !== 16 && e.keyCode !== 17 && e.keyCode !== 18) {
+                    window.clearAegisGhost();
+                }
+            });
+
+            cm.on("cursorActivity", () => {
+                if (!isFetching) window.clearAegisGhost();
+            });
+
             // AEGIS_PREVIEW_VISUALS: Watch for preview toggle
             const originalTogglePreview = easyMDE.togglePreview;
             easyMDE.togglePreview = function () {
                 originalTogglePreview.apply(this, arguments);
                 if (this.isPreviewActive()) {
-                    // Give it a tiny bit of time for DOM to settle
                     setTimeout(renderAegisVisuals, 50);
                 }
             };
@@ -111,33 +234,30 @@
                 }
             };
 
-            // Also render on any change if side-by-side is active
             cm.on("update", () => {
                 if (easyMDE.isSideBySideActive() || easyMDE.isPreviewActive()) {
                     renderAegisVisuals();
                 }
             });
-            // AEGIS_ORACLE_LINK: Expansion Protocol
-            const toolbar = root.querySelector('.editor-toolbar');
-            if (toolbar) {
-                const guideBtn = toolbar.querySelector('.fa-question-circle')?.parentNode;
-                if (guideBtn) {
-                    const sep1 = document.createElement('i'); sep1.className = 'separator';
-                    const sep2 = document.createElement('i'); sep2.className = 'separator';
-                    const neuralBtn = document.createElement('button');
-                    neuralBtn.type = 'button';
-                    neuralBtn.className = 'fa fa-microchip';
-                    neuralBtn.title = 'Neural Synthesis (Aegis Oracle)';
-                    neuralBtn.setAttribute('hx-get', '/api/oracle/mermaid-modal');
-                    neuralBtn.setAttribute('hx-target', '#modal-container');
-                    guideBtn.before(sep2);
-                    sep2.before(neuralBtn);
-                    neuralBtn.before(sep1);
-                    if (window.htmx) window.htmx.process(neuralBtn);
-                }
-            }
-        })();
 
+            // DAISY_TOOLTIP_CONVERSION: Convert all tooltips (standard and Aegis)
+            setTimeout(() => {
+                const toolbar = root.querySelector('.editor-toolbar');
+                if (toolbar) {
+                    toolbar.querySelectorAll('button').forEach(btn => {
+                        const title = btn.getAttribute('title');
+                        if (title && !btn.parentNode.classList.contains('tooltip')) {
+                            const wrap = document.createElement('span');
+                            wrap.className = 'tooltip tooltip-bottom align-middle';
+                            wrap.setAttribute('data-tip', title);
+                            btn.parentNode.insertBefore(wrap, btn);
+                            wrap.appendChild(btn);
+                            btn.removeAttribute('title'); 
+                        }
+                    });
+                }
+            }, 100);
+        })();
     </script>
 
     <style>

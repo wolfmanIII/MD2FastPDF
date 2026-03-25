@@ -1,0 +1,72 @@
+<div id="neural-config-modal" class="modal modal-open">
+    <div class="modal-box glass-panel border-zinc-800 max-w-md w-full p-0 overflow-hidden shadow-2xl rounded-sm">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-black/40">
+            <h3 class="font-bold text-lg tracking-widest uppercase flex items-center space-x-3" style="color: #a78bfa !important;">
+                <i class="fa fa-cog"></i>
+                <span>Aegis Uplink Config</span>
+            </h3>
+            <button onclick="closeAegisModal('neural-config-modal')" class="text-zinc-500 hover:text-white transition-colors">
+                <span style="font-size: 24px !important;">&times;</span>
+            </button>
+        </div>
+        
+        <div class="p-8">
+            <div class="flex flex-col space-y-8">
+                <!-- Toggle Item: Neural Link -->
+                <div class="flex items-start justify-between border-b border-white/5 pb-8">
+                    <div class="space-y-2 pr-4">
+                        <label class="text-sm font-bold text-zinc-100 uppercase tracking-widest">Neural Link (Ghost-Text)</label>
+                        <p class="text-xs text-zinc-400 leading-relaxed">Attiva il protocollo di completamento neurale predittivo durante l'editing. Richiede uplink stabile all'Oracle.</p>
+                    </div>
+                    <input type="checkbox" id="neural-toggle" class="toggle toggle-primary bg-zinc-800 border-zinc-700 checked:bg-[#a78bfa]" onchange="updateNeuralConfig('aegis_neural_enabled', this.checked)">
+                </div>
+
+                <!-- Toggle Item: PDF Branding -->
+                <div class="flex items-start justify-between border-b border-white/5 pb-8">
+                    <div class="space-y-2 pr-4">
+                        <label class="text-sm font-bold text-zinc-100 uppercase tracking-widest">PDF Branded Export</label>
+                        <p class="text-xs text-zinc-400 leading-relaxed">Include testata e piè di pagina industriali nei PDF generati. Personalizza l'output per la stazione SC-ARCHIVE.</p>
+                    </div>
+                    <input type="checkbox" id="pdf-branding-toggle" class="toggle toggle-primary bg-zinc-800 border-zinc-700 checked:bg-[#a78bfa]" onchange="updateNeuralConfig('aegis_pdf_branding', this.checked)">
+                </div>
+
+                <!-- Info Box -->
+                <div class="bg-blue-950/20 border border-blue-500/20 p-5 rounded-sm flex items-start space-x-3">
+                    <i class="fa fa-info-circle text-blue-400 mt-0.5"></i>
+                    <p class="text-[11px] text-blue-300 uppercase leading-normal tracking-wide">
+                        Le configurazioni uplink vengono persistite localmente. La disattivazione ricalibra immediatamente i buffer di output e di editing.
+                    </p>
+                </div>
+            </div>
+
+            <div class="modal-action mt-10">
+                <button type="button" onclick="closeAegisModal('neural-config-modal')" 
+                        class="btn-solid text-zinc-950 font-bold h-11 px-10 transition-all uppercase tracking-widest text-xs"
+                        style="background-color: #a78bfa !important; border-color: #a78bfa !important; color: #000 !important;">
+                    Applica Protocollo
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        (function() {
+            const nt = document.getElementById('neural-toggle');
+            const pt = document.getElementById('pdf-branding-toggle');
+            
+            nt.checked = localStorage.getItem('aegis_neural_enabled') !== 'false';
+            pt.checked = localStorage.getItem('aegis_pdf_branding') === 'true'; // Default FALSE
+        })();
+
+        function updateNeuralConfig(key, value) {
+            localStorage.setItem(key, value);
+            
+            // Cleanup ghost text immediately if neural link disabled
+            if (key === 'aegis_neural_enabled' && value === false) {
+                if (window.clearAegisGhost) window.clearAegisGhost();
+            }
+        }
+    </script>
+</div>

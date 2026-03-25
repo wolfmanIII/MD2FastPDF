@@ -1,22 +1,33 @@
-<div class="glass-panel p-6 mb-6 overflow-hidden relative fade-in">
-    <div class="absolute -right-10 -top-10 w-32 h-32 bg-(--neon-violet)/10 rounded-full blur-2xl pointer-events-none"></div>
-    
-    <h3 class="text-sm font-bold neon-text-violet mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2 uppercase tracking-widest">
-        <i class="fa-solid fa-brain-circuit animate-pulse"></i>
-        <span>NEURAL_SUMMARY_LOG</span>
-    </h3>
-
-    <div class="prose prose-invert prose-sm max-w-none text-zinc-300 leading-relaxed font-mono text-[13px]">
-        {{ summary_html | safe }}
-    </div>
-
-    <div class="mt-6 pt-4 border-t border-(--glass-border) flex justify-between items-center">
-        <div class="flex items-center space-x-2 text-[10px] uppercase tracking-tighter text-zinc-500">
-            <span class="w-2 h-2 rounded-full bg-(--neon-violet) animate-ping"></span>
-            <span>UPLINK_STATUS: {{ status }}</span>
+<div id="oracle-summary-modal" class="modal modal-open">
+    <div class="modal-box glass-panel border-zinc-800 max-w-2xl w-full p-0 overflow-hidden shadow-2xl rounded-sm">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-black/40">
+            <h3 class="font-bold text-lg tracking-widest uppercase flex items-center space-x-3 text-[#a78bfa]">
+                <i class="fa fa-microchip animate-pulse"></i>
+                <span>Aegis Intelligence Scan</span>
+            </h3>
+            <button onclick="closeAegisModal('oracle-summary-modal')" class="text-zinc-500 hover:text-white transition-colors">
+                <span style="font-size: 24px !important;">&times;</span>
+            </button>
         </div>
-        <div class="text-[10px] uppercase tracking-tighter text-zinc-500">
-            INTELLIGENCE_EXTRACTOR_v2.5
+        
+        <div class="p-8">
+            <div class="prose prose-lg prose-invert max-w-none text-zinc-100 leading-relaxed font-mono bg-black/40 p-12 rounded-sm border border-white/5 shadow-inner">
+                {{ summary_html | safe }}
+            </div>
+
+            <div class="modal-action mt-10 border-t border-white/5 pt-6 flex justify-between items-center w-full">
+                <div class="flex items-center space-x-2 text-xs uppercase tracking-widest text-zinc-400">
+                    <span class="w-3 h-3 rounded-full bg-[#a78bfa] animate-ping"></span>
+                    <span>UPLINK_STATUS: {{ status }}</span>
+                </div>
+                <button type="button" onclick="closeAegisModal('oracle-summary-modal')" 
+                        class="btn-solid h-9 px-8 transition-all uppercase tracking-widest text-[11px]"
+                        style="background-color: #a78bfa !important; border-color: #a78bfa !important; color: #000 !important;">
+                    Termina Sessione
+                </button>
+            </div>
         </div>
     </div>
 </div>
