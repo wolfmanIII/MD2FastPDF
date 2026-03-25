@@ -1,6 +1,25 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [4.0.1] - AEGIS STABILITY PATCH (2026-03-25)
+Correzioni UI e funzionalità operative post-BETA.
+
+### Added
+- **HUD_PRINT Toggle**: Generazione PDF con header/footer SC-ARCHIVE completo (HUD mode) oppure solo numero di pagina (default slim).
+- **UP_DIRECTORY**: Riga di navigazione verso la directory superiore nel browser file, coerente con il Root Selector.
+- **File Rename**: Funzionalità di rinomina file tramite modal HTMX con preservazione estensione automatica.
+
+### Fixed
+- **PDF Code Blocks**: Sostituito tema `atom-one-dark` con `default` di Highlight.js per leggibilità ottimale su sfondo bianco in stampa.
+- **Search Icon Overflow**: L'icona di stato vuoto nella griglia risultati ora rispetta la classe dimensionale `w-12 h-12` passata via Jinja2 `with`.
+- **Search Focus Style**: Campo di ricerca migrato a `input input-bordered` DaisyUI per uniformità con i controlli form delle modali (Neural Synthesis).
+
+### Changed
+- **Tailwind v4 Syntax**: Migrazione sistematica alla sintassi canonica v4 — `grow` (ex `flex-grow`), `(--var)` (ex `[var(--var)]`), `bg-linear-to-*` (ex `bg-gradient-to-*`), `z-n` (ex `z-[n]`).
+- **CLAUDE.md**: Istruzioni agente consolidate con regole di stile, stack tecnologico e principi SOLID come riferimento operativo.
+
+---
+
 ## [4.0.0-BETA] - AEGIS ORACLE (2026-03-25)
 Integrazione dello strato di intelligenza neurale locale e normalizzazione industriale dell'interfaccia.
 

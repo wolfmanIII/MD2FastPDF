@@ -19,6 +19,9 @@
 - **Global Discovery**: Integrated recursive search engine for `.md`, `.html`, and `.pdf` files.
 - **Aegis Visualization**: Support for **Mermaid.js** diagrams (Flowcharts, Sequence, Gantt) in Markdown.
 - **Neural Synthesis // AEGIS ORACLE**: Integrated AI layer (Local Ollama) for instant Mermaid diagram generation and automated document analysis.
+- **HUD_PRINT Toggle**: PDF export in slim mode (page number only) or full HUD mode (SC-ARCHIVE header/footer).
+- **File Operations**: Create, rename, and delete files directly from the archive browser.
+- **UP_DIRECTORY Navigation**: One-click parent directory access in the file browser.
 - **Aegis UI Normalization**: Standardized form controls based on DaisyUI architecture for surgical layout precision.
 - **Root Selector**: Dynamic working directory selection with intelligent redirect.
 
