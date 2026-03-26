@@ -1,6 +1,29 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [4.7.0] - AEGIS RENDER & COCKPIT REFINEMENT (2026-03-26)
+Completamento del modulo di export Mermaid, ottimizzazione del cockpit editoriale e introduzione del pannello di telemetria backend.
+
+### Added
+- **Aegis Render Engine**: Nuovo modulo `logic/render.py` + `routes/render.py` per l'export dei diagrammi Mermaid via Gotenberg (screenshot headless Chromium).
+  - `GET /render/mermaid/png?path=&index=N` — export PNG singolo per blocco.
+  - `GET /render/mermaid/bulk?path=` — download ZIP di tutti i blocchi del documento.
+  - Modal lista blocchi (`mermaid_list_modal.html`) con link apertura in nuova scheda.
+- **Backend Services Status Panel**: Nuovo pannello dashboard (`components/services_status.html`) con sondaggio real-time di Gotenberg (`/health`) e Ollama (`/api/tags`). Auto-refresh ogni 30s via HTMX. Mostra modelli Ollama caricati.
+- **Editor Toolbar — Render Actions**: Pulsanti `aegis-render` (lista blocchi) e `aegis-render-all` (ZIP bulk) integrati nella toolbar EasyMDE dopo Neural Hint.
+- **Editor Toolbar — COMMIT_STABLE e PRINT_DOCUMENT**: Spostati dall'action bar breadcrumb alla toolbar EasyMDE per coerenza operativa.
+- **File Grid — Export Mermaid**: Bottone export ZIP visibile direttamente nella griglia per ogni file `.md`.
+
+### Fixed
+- **File Grid Button Visibility**: Rimosso `opacity-0 group-hover:opacity-100` — tutti i pulsanti azione ora sempre visibili con intensità uniforme al bottone Delete.
+- **Input/Textarea Background**: Risolto il layer conflict DaisyUI (`.input`, `.textarea` impostano `background-color` fuori `@layer`, battono le utility Tailwind) tramite `style` inline con `rgba(0,0,0,0.4)` su tutti i campi form: search bar, create modal, rename modal, oracle modal.
+- **HTMX Target Inheritance**: `services-status-container` ora dichiara esplicitamente `hx-target="this"` per prevenire l'override del `hx-target` ereditato dal `body` (`#aegis-view-core`).
+
+### Changed
+- **Search Bar**: Migrata a `label.input input-bordered` DaisyUI con prefisso `SCAN_QUERY //` in neon cyan integrato — coerente con lo stile delle modali.
+- **File Grid Buttons**: Aggiunto `btn-neon` (cyan) a tutti i pulsanti non-Delete e gap `gap-2` tra i bottoni. Aggiunto wrapper DaisyUI `tooltip tooltip-bottom` per ogni azione.
+- **CSS — `.btn-neon`**: Aggiunta classe custom in `main.css` con `!important` per override DaisyUI su `btn-outline`.
+
 ## [4.6.2] - AEGIS_PROTOCOL (2026-03-26)
 Consolidamento della stabilità dell'interfaccia e rilascio delle barriere fisiche di rendering.
 

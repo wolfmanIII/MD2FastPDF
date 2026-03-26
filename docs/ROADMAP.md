@@ -24,12 +24,12 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.2] - AEGIS RENDER (Mermaid Image Export) [PRIORITY]
+### [4.2] - AEGIS RENDER (Mermaid Image Export) [COMPLETED]
 **Obiettivo**: Estrazione e export dei diagrammi Mermaid come immagini standalone dal documento.
-- **SVG Export**: Rendering lato server del codice Mermaid in SVG tramite `mermaid-js` headless (via Gotenberg o Node subprocess).
-- **PNG Rasterization**: Conversione SVG→PNG a risoluzione configurabile per embed in documenti tecnici.
+- **PNG Export**: Rendering lato server del codice Mermaid in PNG tramite Gotenberg (screenshot headless Chromium).
 - **Bulk Extract**: Estrazione di tutti i blocchi Mermaid presenti nel documento in un archivio `.zip`.
-- **Inline Inject**: Opzione per sostituire il blocco ` ```mermaid ` nel buffer con il tag `![diagram](path)` dell'immagine generata.
+- **Toolbar Integration**: Azioni `aegis-render` e `aegis-render-all` integrate nella toolbar EasyMDE.
+- **File Grid Actions**: Bottoni export ZIP Mermaid visibili direttamente nella griglia file per ogni `.md`.
 
 ---
 

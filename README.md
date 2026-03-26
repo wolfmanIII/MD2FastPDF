@@ -1,5 +1,5 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
-**Versione 4.6.2** // AEGIS PROTOCOL (Neural Interface)
+**Versione 4.7.0** // AEGIS RENDER & COCKPIT REFINEMENT
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -13,12 +13,14 @@
 - **PDF Engine**: Gotenberg (Chromium via Docker)
 - **Neural Engine**: local Ollama (`qwen2.5-coder:7b`)
 - **CSS Optimizer**: Tailwind CSS Standalone Compiler (v4.2.1)
-- **Environment**: Pipenv / Poetry
+- **Environment**: Poetry + pyenv
 
 ## 🚀 Features
 - **Aegis Slim-Tech Editor**: Interfaccia di scrittura compattata con supporto **Fullscreen Breakthrough** (bypass automatico dei filtri glass-panel).
 - **Native Multi-Tab Navigation**: Pieno supporto per apertura in nuove schede (Ctrl+Click) su Dashboard, File Grid e Breadcrumbs.
 - **DaisyUI Tooltips**: Indicatori di funzione ad alta priorità (`z-index: 500+`) coerenti con la stratigrafia industriale.
+- **Aegis Render Engine**: Export PNG singolo e ZIP bulk dei diagrammi Mermaid direttamente da file `.md` o dalla toolbar dell'editor.
+- **Backend Services Status**: Pannello dashboard con telemetria real-time di Gotenberg e Ollama (stato, endpoint, modelli caricati).
 - **Aegis Oracle (Neural Synthesis)**:
     *   **Ghost-Text (On-Demand)**: Suggerimenti di completamento predittivo (300 tokens) con logica di conclusione frase e supporto per accettazione via [TAB].
     *   **Neural Scan (Auto-Summary)**: Analisi neurale istantanea con Wide-HUD (1200px) e Scan-Overlay protettivo.

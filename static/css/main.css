@@ -7,6 +7,14 @@
 }
 
 /* Custom UI Elements */
+.btn-neon {
+    border-color: var(--neon-cyan) !important;
+    color: var(--neon-cyan) !important;
+}
+.btn-neon:hover {
+    background-color: var(--neon-cyan) !important;
+    color: #0f172a !important;
+}
 .industrial-border {
     @apply border border-zinc-800 bg-zinc-900/40;
 }

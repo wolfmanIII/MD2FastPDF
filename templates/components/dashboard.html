@@ -19,4 +19,15 @@
     <div id="stats-container">
         {% include 'components/stats_grid.html' %}
     </div>
+
+    <div id="services-status-container"
+        hx-get="/services/status"
+        hx-trigger="load"
+        hx-target="this"
+        hx-swap="innerHTML">
+        <div class="glass-panel p-6 col-span-1 md:col-span-2 tracking-widest uppercase opacity-40 flex items-center space-x-3">
+            <i class="fa fa-microchip fa-spin text-(--neon-cyan)"></i>
+            <span class="text-xs text-zinc-400">PROBING_BACKEND_SERVICES...</span>
+        </div>
+    </div>
 </div>
