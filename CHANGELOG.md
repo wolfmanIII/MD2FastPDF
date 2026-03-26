@@ -1,6 +1,15 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [4.7.4] - ORACLE TIMEOUT HARDENING (2026-03-26)
+Fix timeout e messaggi di errore Oracle per distinguere server irraggiungibile da inferenza lenta.
+
+### Fixed
+- **Oracle timeout**: `httpx.AsyncClient` ora usa timeout granulari — `connect=5s`, `read=600s`, `write=30s`, `pool=5s`. In precedenza `timeout=120.0` impostava anche il read timeout a 120s, causando `NEURAL_CORE_UNREACHABLE` su GPU lente o documenti lunghi.
+- **Errore fuorviante**: `httpx.TimeoutException` catturava anche `ReadTimeout` riportandolo come `NEURAL_CORE_UNREACHABLE`. Ora separato: `ConnectError`/`ConnectTimeout` → `NEURAL_CORE_UNREACHABLE`, tutti gli altri timeout → `NEURAL_INFERENCE_TIMEOUT`.
+
+---
+
 ## [4.7.3] - DOCS & ROADMAP UPDATE (2026-03-26)
 Aggiornamento documentazione al ciclo corrente e pianificazione AEGIS CHRONOS.
 

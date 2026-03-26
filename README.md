@@ -1,5 +1,5 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
-**Versione 4.7.3** // DOCS & ROADMAP UPDATE
+**Versione 4.7.4** // ORACLE TIMEOUT HARDENING
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.

@@ -53,7 +53,8 @@ class OracleClient:
         self.url = url or os.getenv("OLLAMA_URL", "")
         self.model = model or os.getenv("ORACLE_MODEL", "qwen2.5-coder:7b")
         self.client = httpx.AsyncClient(
-            timeout=120.0, # Increased for deep synthesis
+            # connect/pool timeout strict, read timeout generous for slow GPUs
+            timeout=httpx.Timeout(connect=5.0, read=600.0, write=30.0, pool=5.0),
             limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
         )
 
@@ -119,8 +120,10 @@ class OracleClient:
                     "stream": False
                 }
             )
-        except (httpx.ConnectTimeout, httpx.ConnectError, httpx.TimeoutException) as exc:
+        except (httpx.ConnectTimeout, httpx.ConnectError) as exc:
             raise OracleError("NEURAL_CORE_UNREACHABLE") from exc
+        except httpx.TimeoutException as exc:
+            raise OracleError("NEURAL_INFERENCE_TIMEOUT") from exc
 
         if response.status_code != 200:
             raise OracleError(f"SYNTHESIS_OFFLINE: {response.status_code}")
@@ -143,8 +146,10 @@ class OracleClient:
                     "stream": False
                 }
             )
-        except (httpx.ConnectTimeout, httpx.ConnectError, httpx.TimeoutException) as exc:
+        except (httpx.ConnectTimeout, httpx.ConnectError) as exc:
             raise OracleError("NEURAL_CORE_UNREACHABLE") from exc
+        except httpx.TimeoutException as exc:
+            raise OracleError("NEURAL_INFERENCE_TIMEOUT") from exc
 
         if response.status_code != 200:
             raise OracleError(f"INTELLIGENCE_LINK_FAILED: {response.status_code}")
