@@ -24,35 +24,44 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.2] - AEGIS CHRONOS (Versionamento Visivo)
+### [4.2] - AEGIS RENDER (Mermaid Image Export) [PRIORITY]
+**Obiettivo**: Estrazione e export dei diagrammi Mermaid come immagini standalone dal documento.
+- **SVG Export**: Rendering lato server del codice Mermaid in SVG tramite `mermaid-js` headless (via Gotenberg o Node subprocess).
+- **PNG Rasterization**: Conversione SVG→PNG a risoluzione configurabile per embed in documenti tecnici.
+- **Bulk Extract**: Estrazione di tutti i blocchi Mermaid presenti nel documento in un archivio `.zip`.
+- **Inline Inject**: Opzione per sostituire il blocco ` ```mermaid ` nel buffer con il tag `![diagram](path)` dell'immagine generata.
+
+---
+
+### [4.3] - AEGIS CHRONOS (Versionamento Visivo)
 **Obiettivo**: Integrazione profonda con i protocolli di controllo della versione.
 - **Git Terminal UI**: Pannello dedicato per commit, push e sync Git direttamente dall'interfaccia.
 - **Visual Diff Cockpit**: Confronto grafico tra buffer corrente e ultimo stato archiviato (Git Diff).
 
 ---
 
-### [4.3] - AEGIS BLUEPRINT (Technical Templating)
+### [4.4] - AEGIS BLUEPRINT (Technical Templating)
 **Obiettivo**: Standardizzazione della produzione documentale industriale.
 - **Galeria Blueprint**: Inserimento istantaneo di template (Missions, Tech Specs, Logs).
 - **Variable Injection**: Sostituzione dinamica di segnaposto nel Markdown prima dell'export PDF.
 
 ---
 
-### [4.4] - AEGIS MULTI-LINK (Efficiency Multi-Tasking)
+### [4.5] - AEGIS MULTI-LINK (Efficiency Multi-Tasking)
 **Obiettivo**: Gestione simultanea di più flussi informativi.
 - **Tabbed Workspace**: Interfaccia a schede HTMX per l'editing simultaneo di più documenti.
 - **Split Pane Sync**: Trascinamento e sincronizzazione di sezioni tra diversi documenti aperti.
 
 ---
 
-### [4.5] - AEGIS GUARD (Local Security Protocol)
+### [4.6] - AEGIS GUARD (Local Security Protocol)
 **Obiettivo**: Blindatura dei dati locali e gestione dell'accesso in rete.
 - **Buffer Encryption**: Cifratura simmetrica dei documenti sensibili a livello di filesystem.
 - **Network Gateway UI**: Strumenti per la gestione della visibilità della stazione nella rete WiFi locale.
 
 ---
 
-### [4.6] - AEGIS STABILITY (System Integrity)
+### [4.7] - AEGIS STABILITY (System Integrity)
 **Obiettivo**: Rafforzamento della robustezza del codice e della diagnostica in tempo reale.
 - **Centralized Exception Handling**: Implementazione di un gestore centralizzato delle eccezioni custom (`logic/exceptions.py`) per una telemetria ultra-precisa dei guasti direttamente nell'HUD operativo.
 
