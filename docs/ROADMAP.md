@@ -33,10 +33,16 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.3] - AEGIS CHRONOS (Versionamento Visivo)
-**Obiettivo**: Integrazione profonda con i protocolli di controllo della versione.
-- **Git Terminal UI**: Pannello dedicato per commit, push e sync Git direttamente dall'interfaccia.
-- **Visual Diff Cockpit**: Confronto grafico tra buffer corrente e ultimo stato archiviato (Git Diff).
+### [4.3] - AEGIS CHRONOS (Versionamento Narrativo) [PLANNED]
+**Obiettivo**: Strato di versionamento leggero e non invasivo per archivi narrativi (scenari RPG, documentazione tecnica). Modulo **opt-in**: attivo solo se la root selezionata contiene già un repo Git. Non crea repo, non tocca remoti, non esegue mai operazioni distruttive.
+- **Detect automatico**: `git rev-parse --git-dir` sulla root — se assente, pannello in stato `GIT_REPO_NOT_DETECTED` con istruzioni init.
+- **Branch indicator**: visualizzazione del branch corrente nell'editor e nella dashboard.
+- **Snapshot manuale**: bottone `COMMIT_SNAPSHOT` in toolbar — esegue `git add <file> && git commit` sul solo file aperto.
+- **Auto-snapshot**: configurabile da Uplink Config (ogni N salvataggi o X minuti), disabilitato di default.
+- **File history**: lista commit che toccano il documento aperto (`git log --oneline -- <file>`).
+- **Diff viewer a due colonne**: versione storica (sx) vs versione corrente (dx), con highlighting righe modificate.
+- **Inject nel buffer**: bottone per appendere un blocco della versione storica al buffer dell'editor corrente.
+- **Piano dettagliato**: `docs/piano-aegis-chronos.md`.
 
 ---
 

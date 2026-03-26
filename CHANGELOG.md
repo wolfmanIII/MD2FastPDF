@@ -1,6 +1,18 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [4.7.3] - DOCS & ROADMAP UPDATE (2026-03-26)
+Aggiornamento documentazione al ciclo corrente e pianificazione AEGIS CHRONOS.
+
+### Added
+- **`docs/piano-aegis-chronos.md`**: Piano dettagliato per la fase [4.3] — versionamento narrativo Git opt-in con requisiti funzionali, architettura, fasi di sviluppo e vincoli espliciti.
+
+### Changed
+- **`docs/ROADMAP.md`**: [4.3] AEGIS CHRONOS ridefinito — scope ristretto a operazioni safe (no push/pull/merge), modulo opt-in solo se repo Git già presente, aggiunto link al piano dettagliato.
+- **`docs/Stato-dell-Arte.md`**: Aggiornato dalla v4.0 alla v4.7.2 — documentate tutte le funzionalità implementate nei cicli 4.1–4.7 (Render Engine, Oracle resilience, Dashboard telemetry, Uplink Config, UX).
+
+---
+
 ## [4.7.2] - DASHBOARD LAYOUT REFINEMENT (2026-03-26)
 Riorganizzazione del cockpit dashboard e separazione dei modelli Ollama per categoria.
 
