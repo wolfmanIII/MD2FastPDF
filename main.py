@@ -9,6 +9,7 @@ from logic.oracle import oracle as neural_oracle
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # AEGIS_BOOT: Initializing persistent resources
+    await neural_oracle.probe_url()
     yield
     # AEGIS_SHUTDOWN: Graceful connection cleanup
     await gotenberg.shutdown()

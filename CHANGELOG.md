@@ -1,6 +1,17 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [4.7.1] - ORACLE RESILIENCE PATCH (2026-03-26)
+Hardening del layer neurale contro timeout di connessione e supporto multi-endpoint per ambienti multi-macchina.
+
+### Added
+- **Oracle Multi-Endpoint Probe**: `OracleClient.probe_url()` testa in sequenza `localhost:11434` e `172.31.112.1:11434` all'avvio e blocca l'URL sul primo endpoint attivo (timeout 2s per probe). Sovrascrivibile via `OLLAMA_URL`.
+
+### Fixed
+- **Oracle ConnectTimeout**: `generate_syntax()` e `summarize()` ora wrappano `httpx.ConnectTimeout`, `httpx.ConnectError` e `httpx.TimeoutException` in `OracleError("NEURAL_CORE_UNREACHABLE")` invece di propagare l'eccezione non gestita fino all'ASGI layer.
+
+---
+
 ## [4.7.0] - AEGIS RENDER & COCKPIT REFINEMENT (2026-03-26)
 Completamento del modulo di export Mermaid, ottimizzazione del cockpit editoriale e introduzione del pannello di telemetria backend.
 

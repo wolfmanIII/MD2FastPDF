@@ -41,16 +41,41 @@ class PromptTemplates:
         "- Language: Use the same language as the provided context."
     )
 
+_OLLAMA_FALLBACK_URLS: list[str] = [
+    "http://localhost:11434",
+    "http://172.31.112.1:11434",
+]
+
 class OracleClient:
     """Industrial Client for the Neural Layer (Ollama)."""
-    
+
     def __init__(self, url: Optional[str] = None, model: Optional[str] = None):
-        self.url = url or os.getenv("OLLAMA_URL", "http://172.31.112.1:11434")
+        self.url = url or os.getenv("OLLAMA_URL", "")
         self.model = model or os.getenv("ORACLE_MODEL", "qwen2.5-coder:7b")
         self.client = httpx.AsyncClient(
             timeout=120.0, # Increased for deep synthesis
             limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
         )
+
+    async def probe_url(self) -> None:
+        """Probes known Ollama endpoints and locks onto the first responding one."""
+        if self.url:
+            return  # Explicitly configured via env — trust it
+        candidates = _OLLAMA_FALLBACK_URLS
+        probe_client = httpx.AsyncClient(timeout=2.0)
+        try:
+            for candidate in candidates:
+                try:
+                    r = await probe_client.get(f"{candidate}/api/tags")
+                    if r.status_code == 200:
+                        self.url = candidate
+                        return
+                except (httpx.ConnectError, httpx.ConnectTimeout, httpx.TimeoutException):
+                    continue
+            # None responded — default to localhost, errors will surface at call time
+            self.url = _OLLAMA_FALLBACK_URLS[0]
+        finally:
+            await probe_client.aclose()
 
     async def shutdown(self):
         await self.client.aclose()
@@ -84,19 +109,22 @@ class OracleClient:
 
     async def generate_syntax(self, description: str) -> str:
         """Produces Mermaid syntax from natural language inputs."""
-        response = await self.client.post(
-            f"{self.url}/api/generate",
-            json={
-                "model": self.model,
-                "prompt": description,
-                "system": PromptTemplates.MERMAID_SYSTEM,
-                "stream": False
-            }
-        )
-        
+        try:
+            response = await self.client.post(
+                f"{self.url}/api/generate",
+                json={
+                    "model": self.model,
+                    "prompt": description,
+                    "system": PromptTemplates.MERMAID_SYSTEM,
+                    "stream": False
+                }
+            )
+        except (httpx.ConnectTimeout, httpx.ConnectError, httpx.TimeoutException) as exc:
+            raise OracleError("NEURAL_CORE_UNREACHABLE") from exc
+
         if response.status_code != 200:
             raise OracleError(f"SYNTHESIS_OFFLINE: {response.status_code}")
-        
+
         try:
             data = response.json()
             return data.get("response", "").strip()
@@ -105,19 +133,22 @@ class OracleClient:
 
     async def summarize(self, content: str) -> str:
         """Condenses archives into high-density insights."""
-        response = await self.client.post(
-            f"{self.url}/api/generate",
-            json={
-                "model": self.model,
-                "prompt": content,
-                "system": PromptTemplates.SUMMARIZE_SYSTEM,
-                "stream": False
-            }
-        )
-        
+        try:
+            response = await self.client.post(
+                f"{self.url}/api/generate",
+                json={
+                    "model": self.model,
+                    "prompt": content,
+                    "system": PromptTemplates.SUMMARIZE_SYSTEM,
+                    "stream": False
+                }
+            )
+        except (httpx.ConnectTimeout, httpx.ConnectError, httpx.TimeoutException) as exc:
+            raise OracleError("NEURAL_CORE_UNREACHABLE") from exc
+
         if response.status_code != 200:
             raise OracleError(f"INTELLIGENCE_LINK_FAILED: {response.status_code}")
-        
+
         try:
             data = response.json()
             return data.get("response", "").strip()

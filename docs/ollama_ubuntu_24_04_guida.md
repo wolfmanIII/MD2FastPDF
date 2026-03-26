@@ -317,7 +317,43 @@ sudo systemctl restart ollama
 
 ---
 
-## 10. Riepilogo backend per tipo di GPU
+## 10. Integrazione con SC-ARCHIVE
+
+### 10.1 Configurazione endpoint Ollama
+
+SC-ARCHIVE esegue una **probe automatica** all'avvio per rilevare l'endpoint attivo. Gli URL testati in sequenza sono:
+
+1. `http://localhost:11434`
+2. `http://172.31.112.1:11434` (gateway WSL2)
+
+Il primo endpoint che risponde viene usato per tutta la sessione.
+
+Per forzare un endpoint specifico (sovrascrive la probe), imposta la variabile d'ambiente prima di avviare:
+
+```bash
+OLLAMA_URL=http://localhost:11434 ./bin/launch.sh
+```
+
+Oppure aggiungila all'override del servizio o al `.env` locale.
+
+---
+
+### 10.2 Troubleshooting: `NEURAL_CORE_UNREACHABLE`
+
+Se l'Oracle restituisce questo errore:
+
+1. Verifica che Ollama sia in esecuzione: `systemctl status ollama`
+2. Testa manualmente gli endpoint:
+   ```bash
+   curl http://localhost:11434/api/tags
+   curl http://172.31.112.1:11434/api/tags
+   ```
+3. Se nessuno risponde, avvia il servizio: `sudo systemctl start ollama`
+4. Se usi un IP diverso (es. altra macchina in rete), imposta `OLLAMA_URL` esplicitamente.
+
+---
+
+## 11. Riepilogo backend per tipo di GPU
 
 | Tipo GPU  | Backend |
 |-----------|---------------------|
