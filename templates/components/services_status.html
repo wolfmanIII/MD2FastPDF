@@ -1,51 +1,70 @@
-<div id="services-status"
-    class="glass-panel p-6 glass-panel-hover overflow-hidden relative col-span-1 md:col-span-2 tracking-widest uppercase"
+<div id="services-status" class="contents"
     hx-get="/services/status" hx-trigger="every 30s" hx-swap="outerHTML" hx-target="this">
-    <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-(--neon-cyan)/5 rounded-full blur-2xl pointer-events-none"></div>
-    <h3 class="text-sm font-bold neon-text mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2">
-        {% with class="w-4 h-4" %}{% include 'icons/radar.html' %}{% endwith %}
-        <span>BACKEND_SERVICES // STATUS</span>
-    </h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- GOTENBERG -->
+
+    <!-- GOTENBERG -->
+    <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative tracking-widest uppercase">
+        <div class="absolute -right-10 -top-10 w-32 h-32 bg-(--neon-cyan)/5 rounded-full blur-2xl pointer-events-none"></div>
+        <h3 class="text-sm font-bold neon-text mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2">
+            {% with class="w-4 h-4" %}{% include 'icons/cube.html' %}{% endwith %}
+            <span>RENDER_ENGINE // GOTENBERG</span>
+        </h3>
         <div class="space-y-3">
             <div class="flex items-center justify-between text-sm">
-                <span class="text-zinc-100">RENDER_ENGINE // GOTENBERG:</span>
+                <span class="text-zinc-100">STATUS:</span>
                 <span class="font-bold text-xs {% if gotenberg_ok %}neon-text animate-pulse{% else %}text-red-400{% endif %}">
                     {{ gotenberg_status }}
                 </span>
             </div>
             <div class="flex items-center justify-between text-sm">
                 <span class="text-zinc-100">ENDPOINT:</span>
-                <span class="text-zinc-400 font-mono text-[11px]">{{ gotenberg_url if gotenberg_url else 'localhost:3000' }}</span>
+                <span class="text-zinc-400 font-mono text-[11px]">{{ gotenberg_url }}</span>
             </div>
             <div class="flex items-center justify-between text-sm">
                 <span class="text-zinc-100">FUNCTION:</span>
                 <span class="text-zinc-400 text-[11px]">PDF_RENDER // IMG_RENDER</span>
             </div>
         </div>
-        <!-- OLLAMA -->
+    </div>
+
+    <!-- OLLAMA -->
+    <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative tracking-widest uppercase">
+        <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-(--neon-cyan)/5 rounded-full blur-2xl pointer-events-none"></div>
+        <h3 class="text-sm font-bold neon-text mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2">
+            {% with class="w-4 h-4 aegis-radar-spin" %}{% include 'icons/radar.html' %}{% endwith %}
+            <span>NEURAL_CORE // OLLAMA</span>
+        </h3>
         <div class="space-y-3">
             <div class="flex items-center justify-between text-sm">
-                <span class="text-zinc-100">NEURAL_CORE // OLLAMA:</span>
+                <span class="text-zinc-100">STATUS:</span>
                 <span class="font-bold text-xs {% if ollama_ok %}neon-text animate-pulse{% else %}text-red-400{% endif %}">
                     {{ ollama_status }}
                 </span>
             </div>
             <div class="flex items-center justify-between text-sm">
                 <span class="text-zinc-100">ENDPOINT:</span>
-                <span class="text-zinc-400 font-mono text-[11px]">{{ ollama_url if ollama_url else 'localhost:11434' }}</span>
+                <span class="text-zinc-400 font-mono text-[11px]">{{ ollama_url }}</span>
             </div>
             <div class="flex items-start justify-between text-sm">
-                <span class="text-zinc-100 shrink-0">LOADED_MODELS:</span>
+                <span class="text-zinc-100 shrink-0">CHAT_MODELS:</span>
                 <span class="text-zinc-400 text-[11px] text-right font-mono">
-                    {% if ollama_models %}
-                        {% for m in ollama_models %}{{ m }}{% if not loop.last %} // {% endif %}{% endfor %}
+                    {% if ollama_chat_models %}
+                        {% for m in ollama_chat_models %}{{ m }}{% if not loop.last %} // {% endif %}{% endfor %}
                     {% else %}
-                        NO_MODELS_DETECTED
+                        NONE
+                    {% endif %}
+                </span>
+            </div>
+            <div class="flex items-start justify-between text-sm">
+                <span class="text-zinc-100 shrink-0">EMBED_MODELS:</span>
+                <span class="text-zinc-400 text-[11px] text-right font-mono">
+                    {% if ollama_embed_models %}
+                        {% for m in ollama_embed_models %}{{ m }}{% if not loop.last %} // {% endif %}{% endfor %}
+                    {% else %}
+                        NONE
                     {% endif %}
                 </span>
             </div>
         </div>
     </div>
+
 </div>

@@ -21,13 +21,65 @@
     </div>
 
     <div id="services-status-container"
+        class="grid grid-cols-1 md:grid-cols-2 gap-6"
         hx-get="/services/status"
         hx-trigger="load"
         hx-target="this"
         hx-swap="innerHTML">
-        <div class="glass-panel p-6 col-span-1 md:col-span-2 tracking-widest uppercase opacity-40 flex items-center space-x-3">
+        <div class="glass-panel p-6 tracking-widest uppercase opacity-40 flex items-center space-x-3 col-span-2">
             <i class="fa fa-microchip fa-spin text-(--neon-cyan)"></i>
             <span class="text-xs text-zinc-400">PROBING_BACKEND_SERVICES...</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 tracking-widest uppercase">
+        <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative min-h-[200px]">
+            <h3 class="text-sm font-bold neon-text mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2">
+                {% with class="w-4 h-4" %}{% include 'icons/cube.html' %}{% endwith %}
+                <span>RECENT_FRAGMENTS</span>
+            </h3>
+            <div class="space-y-2">
+                {% for file in recent_files %}
+                <a href="/editor?path={{ file.path }}"
+                   hx-get="/editor?path={{ file.path }}" hx-target="#aegis-view-core" hx-push-url="true"
+                   class="flex items-center justify-between text-xs group transition-all cursor-pointer hover:bg-(--neon-cyan)/5 p-1 rounded-sm no-underline">
+                    <span class="text-zinc-100 group-hover:neon-text transition-colors">>> {{ file.name }}</span>
+                    <span class="text-zinc-100 font-mono text-[11px]">MOD_TS: {{ file.mtime_str }}</span>
+                </a>
+                {% else %}
+                <div class="text-xs text-zinc-100 italic">NO_RECENT_ACTIVITY_DETECTED</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative min-h-[200px]">
+            <h3 class="text-sm font-bold neon-text mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2">
+                {% with class="w-4 h-4" %}{% include 'icons/assets.html' %}{% endwith %}
+                <span>STORAGE_NODE</span>
+            </h3>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-zinc-100">ARCHIVE_SIZE:</span>
+                    <span class="neon-text">{{ storage.total_size }}</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-zinc-100">FRAGMENT_COUNT:</span>
+                    <span class="neon-text">{{ storage.file_count }}</span>
+                </div>
+                <div class="flex flex-col space-y-1">
+                    <div class="flex justify-between text-xs text-zinc-200 uppercase">
+                        <span>DENSITY_CAPACITY</span>
+                        <span>{{ storage.usage_percent|round(1) }}%</span>
+                    </div>
+                    <div class="w-full h-1 bg-black border border-(--glass-border) overflow-hidden">
+                        <div class="h-full neon-bg transition-all duration-1000"
+                            style="--w: {{ storage.usage_percent }}%; width: var(--w);"></div>
+                    </div>
+                </div>
+                <p class="text-xs text-zinc-100 mt-2 uppercase tracking-wide">
+                    CAUTION: MONITOR DATA DENSITY TO ENSURE ARCHIVE INTEGRITY.
+                </p>
+            </div>
         </div>
     </div>
 </div>

@@ -34,13 +34,18 @@ async def services_status(request: Request):
             ollama_status = "ONLINE" if ollama_ok else "DEGRADED"
             if ollama_ok:
                 data = r.json()
-                ollama_models = [m["name"] for m in data.get("models", [])]
+                all_models = [m["name"] for m in data.get("models", [])]
+                _EMBED_KEYWORDS = ("embed", "bge", "minilm", "e5-", "gte-", "rerank")
+                ollama_chat_models = [m for m in all_models if not any(k in m.lower() for k in _EMBED_KEYWORDS)]
+                ollama_embed_models = [m for m in all_models if any(k in m.lower() for k in _EMBED_KEYWORDS)]
             else:
-                ollama_models = []
+                ollama_chat_models = []
+                ollama_embed_models = []
         except Exception:
             ollama_ok = False
             ollama_status = "OFFLINE"
-            ollama_models = []
+            ollama_chat_models = []
+            ollama_embed_models = []
 
     context = {
         "request": request,
@@ -49,7 +54,8 @@ async def services_status(request: Request):
         "gotenberg_url": GOTENBERG_URL,
         "ollama_status": ollama_status,
         "ollama_ok": ollama_ok,
-        "ollama_models": ollama_models,
+        "ollama_chat_models": ollama_chat_models,
+        "ollama_embed_models": ollama_embed_models,
         "ollama_url": OLLAMA_URL,
     }
     return templates.TemplateResponse(request=request, name="components/services_status.html", context=context)

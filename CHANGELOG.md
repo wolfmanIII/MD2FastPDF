@@ -1,6 +1,17 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [4.7.2] - DASHBOARD LAYOUT REFINEMENT (2026-03-26)
+Riorganizzazione del cockpit dashboard e separazione dei modelli Ollama per categoria.
+
+### Changed
+- **Dashboard Panel Order**: Nuovo ordine — SYSTEM_STATUS + TERMINAL_MATRIX → GOTENBERG + OLLAMA → RECENT_FRAGMENTS + STORAGE_NODE.
+- **Services Status — Two Panels**: GOTENBERG e OLLAMA ora sono `glass-panel` separati affiancati invece di un unico pannello diviso internamente.
+- **Ollama Model Categorization**: I modelli Ollama sono ora classificati in `CHAT_MODELS` e `EMBED_MODELS` tramite keyword matching (`embed`, `bge`, `minilm`, `e5-`, `gte-`, `rerank`).
+- **Stats Grid Cleanup**: `RECENT_FRAGMENTS` e `STORAGE_NODE` rimossi da `stats_grid.html` e gestiti direttamente da `dashboard.html` per controllo esplicito dell'ordine.
+
+---
+
 ## [4.7.1] - ORACLE RESILIENCE PATCH (2026-03-26)
 Hardening del layer neurale contro timeout di connessione e supporto multi-endpoint per ambienti multi-macchina.
 
