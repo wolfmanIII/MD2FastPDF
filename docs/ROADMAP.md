@@ -33,7 +33,18 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.3] - AEGIS CHRONOS (Versionamento Narrativo) [PLANNED]
+### [4.3] - AEGIS FILETREE (Sidebar Albero Directory nell'Editor) [PLANNED]
+**Obiettivo**: Sidebar collassabile nell'editor che mostra l'albero completo della root selezionata, con navigazione lazy e highlight del file attivo. Esclusiva della view editor — nessun impatto su dashboard o file browser.
+- **Lazy expand**: le cartelle caricano i figli solo al click — nessun render ricorsivo totale.
+- **Navigazione**: click su `.md` carica il file nell'editor; altri formati si aprono in nuova scheda.
+- **Toggle collassabile**: stato persistito in `localStorage`, bottone `«` / `»`.
+- **Fullscreen safe**: la sidebar è sorella del container editor, non genitore — nessun conflitto con i fix fullscreen esistenti.
+- **Highlight file attivo**: il documento aperto è evidenziato nell'albero.
+- **Piano dettagliato**: `docs/piano-aegis-filetree.md`.
+
+---
+
+### [4.4] - AEGIS CHRONOS (Versionamento Narrativo) [PLANNED]
 **Obiettivo**: Strato di versionamento leggero e non invasivo per archivi narrativi (scenari RPG, documentazione tecnica). Modulo **opt-in**: attivo solo se la root selezionata contiene già un repo Git. Non crea repo, non tocca remoti, non esegue mai operazioni distruttive.
 - **Detect automatico**: `git rev-parse --git-dir` sulla root — se assente, pannello in stato `GIT_REPO_NOT_DETECTED` con istruzioni init.
 - **Branch indicator**: visualizzazione del branch corrente nell'editor e nella dashboard.
@@ -48,28 +59,28 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.4] - AEGIS BLUEPRINT (Technical Templating)
+### [4.5] - AEGIS BLUEPRINT (Technical Templating)
 **Obiettivo**: Standardizzazione della produzione documentale industriale.
 - **Galeria Blueprint**: Inserimento istantaneo di template (Missions, Tech Specs, Logs).
 - **Variable Injection**: Sostituzione dinamica di segnaposto nel Markdown prima dell'export PDF.
 
 ---
 
-### [4.5] - AEGIS MULTI-LINK (Efficiency Multi-Tasking)
+### [4.6] - AEGIS MULTI-LINK (Efficiency Multi-Tasking)
 **Obiettivo**: Gestione simultanea di più flussi informativi.
 - **Tabbed Workspace**: Interfaccia a schede HTMX per l'editing simultaneo di più documenti.
 - **Split Pane Sync**: Trascinamento e sincronizzazione di sezioni tra diversi documenti aperti.
 
 ---
 
-### [4.6] - AEGIS GUARD (Local Security Protocol)
+### [4.7] - AEGIS GUARD (Local Security Protocol)
 **Obiettivo**: Blindatura dei dati locali e gestione dell'accesso in rete.
 - **Buffer Encryption**: Cifratura simmetrica dei documenti sensibili a livello di filesystem.
 - **Network Gateway UI**: Strumenti per la gestione della visibilità della stazione nella rete WiFi locale.
 
 ---
 
-### [4.7] - AEGIS STABILITY (System Integrity)
+### [4.8] - AEGIS STABILITY (System Integrity)
 **Obiettivo**: Rafforzamento della robustezza del codice e della diagnostica in tempo reale.
 - **Centralized Exception Handling**: Implementazione di un gestore centralizzato delle eccezioni custom (`logic/exceptions.py`) per una telemetria ultra-precisa dei guasti direttamente nell'HUD operativo.
 
