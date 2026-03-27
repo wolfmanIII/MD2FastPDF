@@ -42,6 +42,8 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 - **File history**: lista commit che toccano il documento aperto (`git log --oneline -- <file>`).
 - **Diff viewer a due colonne**: versione storica (sx) vs versione corrente (dx), con highlighting righe modificate.
 - **Inject nel buffer**: bottone per appendere un blocco della versione storica al buffer dell'editor corrente.
+- **Pull safe**: `git pull --ff-only` — rifiutato se la storia è divergente, nessun merge automatico.
+- **Push safe**: `git push` standard — rifiutato se il remote è ahead, mai `--force`. Credenziali delegate al SO.
 - **Piano dettagliato**: `docs/piano-aegis-chronos.md`.
 
 ---
