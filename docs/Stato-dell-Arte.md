@@ -1,6 +1,6 @@
 # Stato del Progetto: SC-ARCHIVE
-**Stato Attuale**: Op_Ready / Versione 4.7.2
-**Ultimo Aggiornamento**: 26 Marzo 2026
+**Stato Attuale**: Op_Ready / Versione 4.8.0
+**Ultimo Aggiornamento**: 27 Marzo 2026
 
 ---
 
@@ -19,6 +19,16 @@
 - Evidenziatura sintassi in preview (Highlight.js), Mermaid.js per diagrammi interattivi.
 - **Fullscreen Breakthrough**: bypass automatico dei filtri `backdrop-filter` genitori per fullscreen nativo.
 - **Native Multi-Tab**: Ctrl+Click su qualsiasi link apre in nuova scheda.
+
+### 1.2b Aegis Filetree [4.3] — COMPLETED
+- **Sidebar albero directory**: colonna sinistra collassabile (260px) esclusiva della view editor.
+- **Lazy expand**: cartelle caricano i figli via HTMX solo al click — nessun render ricorsivo totale.
+- **Toggle `«`/`»`**: stato collasso persistito in `localStorage`.
+- **Highlight file attivo**: documento aperto evidenziato con bordo sinistro cyan.
+- **State persistence navigazione**: path espansi salvati in `localStorage` e ripristinati via `htmx:afterSettle` dopo ogni caricamento file.
+- **Fullscreen safe**: sidebar nascosta automaticamente in fullscreen EasyMDE (CSS condizionale su `.aegis-fullscreen-active`).
+- **Palette coerente**: dir `neon-text` + drop-shadow cyan, `.md` `neon-text`, `.pdf` icona `text-red-400`, `.html` icona `text-amber-400`.
+- **Icone SVG outline**: `folder.html` (chiusa) / `folder-open.html` (aperta) — `fill="none"`, stroke puro, identici al file browser.
 
 ### 1.3 Esportazione PDF (Aegis Engine)
 - Integrazione Gotenberg (Docker) per rendering Chromium professionale.
@@ -77,12 +87,13 @@
 
 | Fase | Codice | Stato | Obiettivo |
 |---|---|---|---|
-| [4.3] | AEGIS CHRONOS | Planned | Versionamento narrativo Git opt-in (diff, snapshot, inject) |
-| [4.4] | AEGIS BLUEPRINT | Planned | Template gallery + Variable Injection |
-| [4.5] | AEGIS MULTI-LINK | Planned | Tabbed Workspace + Split Pane |
-| [4.6] | AEGIS GUARD | Planned | Buffer Encryption + Network Gateway UI |
-| [4.7] | AEGIS STABILITY | Planned | Centralized Exception Handling |
+| [4.3] | AEGIS FILETREE | **COMPLETED** | Sidebar albero directory lazy nell'editor |
+| [4.4] | AEGIS CHRONOS | Planned | Versionamento narrativo Git opt-in (diff, snapshot, inject) |
+| [4.5] | AEGIS BLUEPRINT | Planned | Template gallery + Variable Injection |
+| [4.6] | AEGIS MULTI-LINK | Planned | Tabbed Workspace + Split Pane |
+| [4.7] | AEGIS GUARD | Planned | Buffer Encryption + Network Gateway UI |
+| [4.8] | AEGIS STABILITY | Planned | Centralized Exception Handling |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v4.7.2 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v4.8.0 — DEPLOYMENT_ACTIVE.*

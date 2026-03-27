@@ -25,6 +25,10 @@
         .tooltip, .tooltip:before, .tooltip:after {
             z-index: 99999 !important;
         }
+        /* Hide filetree toggle in fullscreen — tooltip z-index beats EasyMDE */
+        #editor-easymde-root.aegis-fullscreen-active #aegis-filetree-toggle-wrap {
+            display: none !important;
+        }
         /* Top-level escape for the shell */
         body:has(.aegis-fullscreen-active) main {
             overflow: visible !important;
@@ -34,10 +38,16 @@
     </style>
 
     <!-- Row 1: Status & Context -->
-    <div class="glass-panel px-6 py-3 flex items-center justify-between border-b-0 rounded-b-none shrink-0"
+    <div class="glass-panel px-4 py-3 flex items-center justify-between border-b-0 rounded-b-none shrink-0"
         style="background: rgba(20, 20, 25, 0.8) !important; margin-bottom: 0.5rem !important;">
-        <div
-            class="flex items-center space-x-3 text-xs uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden grow">
+        <div class="flex items-center space-x-3 text-xs uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden grow">
+            <div id="aegis-filetree-toggle-wrap" class="tooltip tooltip-bottom shrink-0" data-tip="Toggle Archive Tree">
+                <button onclick="aegisTreeToggleSidebar()"
+                    class="w-6 h-6 flex items-center justify-center rounded-sm hover:bg-(--neon-cyan)/10 transition-colors cursor-pointer border-none bg-transparent">
+                    <i id="aegis-filetree-icon" class="fa fa-folder-tree text-(--neon-cyan) text-[11px]"></i>
+                </button>
+            </div>
+            <span class="text-zinc-600">|</span>
             <span class="font-bold neon-text shrink-0">SYS_LINK //</span>
             <div class="flex items-center space-x-2 text-zinc-100 truncate">
                 <a href="/" hx-get="/" hx-target="#aegis-view-core" hx-push-url="true"
@@ -63,10 +73,25 @@
         </div>
     </div>
 
-    <!-- Main Editor -->
-    <div class="grow flex flex-col min-w-0 min-h-0 overflow-hidden glass-panel"
+    <!-- Main Editor Row -->
+    <div class="grow flex min-w-0 min-h-0 overflow-hidden glass-panel"
         style="width: 100% !important; background: rgba(15, 23, 42, 0.5) !important; border-top: none !important; border-radius: 0 0 4px 4px !important;">
-        <form id="editor-form" class="grow flex flex-col w-full overflow-hidden relative m-0">
+
+        <!-- FILETREE SIDEBAR -->
+        <div id="aegis-filetree"
+            style="width: 260px; min-width: 0; flex-shrink: 0; overflow: hidden; border-right: 1px solid var(--glass-border); transition: width 0.2s ease;">
+            <div id="aegis-filetree-inner"
+                hx-get="/tree?active={{ path }}"
+                hx-trigger="load"
+                hx-target="this"
+                hx-swap="innerHTML"
+                class="h-full overflow-y-auto overflow-x-hidden">
+                <div class="p-3 text-[10px] text-zinc-600 tracking-widest animate-pulse uppercase">SCANNING_ARCHIVE...</div>
+            </div>
+        </div>
+
+        <!-- EDITOR FORM -->
+        <form id="editor-form" class="grow flex flex-col min-w-0 overflow-hidden relative m-0">
             <input type="hidden" name="path" value="{{ path }}">
             <textarea name="content" id="easymde-editor">{{ content }}</textarea>
         </form>
@@ -290,6 +315,72 @@
             cm.on("cursorActivity", () => {
                 if (!isFetching) window.clearAegisGhost();
             });
+
+            // AEGIS_FILETREE: Sidebar toggle with localStorage persistence
+            (function () {
+                const sidebar = document.getElementById('aegis-filetree');
+                const icon = document.getElementById('aegis-filetree-icon');
+                const collapsed = localStorage.getItem('aegis-filetree-collapsed') === 'true';
+                if (collapsed) {
+                    sidebar.style.width = '0px';
+                    if (icon) icon.style.opacity = '0.3';
+                }
+
+                window.aegisTreeToggleSidebar = function () {
+                    const isCollapsed = sidebar.style.width === '0px';
+                    sidebar.style.width = isCollapsed ? '260px' : '0px';
+                    if (icon) icon.style.opacity = isCollapsed ? '1' : '0.3';
+                    localStorage.setItem('aegis-filetree-collapsed', isCollapsed ? 'false' : 'true');
+                };
+
+                function _saveTreeState() {
+                    const expanded = [];
+                    document.querySelectorAll('#aegis-filetree .filetree-dir').forEach(dir => {
+                        const children = dir.querySelector('.filetree-children');
+                        if (dir.dataset.loaded === 'true' && !children.classList.contains('hidden')) {
+                            expanded.push(dir.dataset.path);
+                        }
+                    });
+                    localStorage.setItem('aegis-filetree-expanded', JSON.stringify(expanded));
+                }
+
+                window.aegisTreeToggle = function (btn) {
+                    const dir = btn.closest('.filetree-dir');
+                    const children = dir.querySelector('.filetree-children');
+                    const iconClosed = btn.querySelector('.folder-icon-closed');
+                    const iconOpen = btn.querySelector('.folder-icon-open');
+                    const loaded = dir.dataset.loaded === 'true';
+
+                    if (!loaded) {
+                        htmx.ajax('GET', '/tree/expand?path=' + encodeURIComponent(dir.dataset.path), {
+                            target: children,
+                            swap: 'innerHTML'
+                        });
+                        dir.dataset.loaded = 'true';
+                        children.classList.remove('hidden');
+                        iconClosed.classList.add('hidden');
+                        iconOpen.classList.remove('hidden');
+                    } else {
+                        const isHidden = children.classList.toggle('hidden');
+                        iconClosed.classList.toggle('hidden', !isHidden);
+                        iconOpen.classList.toggle('hidden', isHidden);
+                    }
+                    _saveTreeState();
+                };
+
+                // AEGIS_FILETREE_RESTORE: After any filetree HTMX settle, re-expand dirs saved in localStorage
+                const _toExpand = JSON.parse(localStorage.getItem('aegis-filetree-expanded') || '[]');
+                document.body.addEventListener('htmx:afterSettle', function (evt) {
+                    if (!evt.detail.target.closest('#aegis-filetree')) return;
+                    _toExpand.forEach(path => {
+                        const dir = document.querySelector(`#aegis-filetree .filetree-dir[data-path="${path}"]`);
+                        if (dir && dir.dataset.loaded === 'false') {
+                            window.aegisTreeToggle(dir.querySelector('button'));
+                        }
+                    });
+                });
+
+            })();
 
             // AEGIS_PREVIEW_VISUALS: Watch for preview toggle
             const originalTogglePreview = easyMDE.togglePreview;

@@ -1,6 +1,31 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [4.8.0] - AEGIS FILETREE (2026-03-27)
+Sidebar albero directory nell'editor con navigazione lazy, persistenza stato e palette colori coerente col file browser.
+
+### Added
+- **Sidebar albero directory**: colonna sinistra collassabile nell'editor (`#aegis-filetree`, larghezza 260px) con toggle `«`/`»` persistito in `localStorage`.
+- **Lazy expand**: le cartelle caricano i figli via `GET /tree/expand?path=` solo al click — nessun render ricorsivo totale.
+- **Highlight file attivo**: il documento aperto è evidenziato nell'albero con bordo sinistro cyan.
+- **State persistence**: path espansi salvati in `localStorage['aegis-filetree-expanded']` e ripristinati dopo ogni navigazione HTMX via `htmx:afterSettle`.
+- **`GET /tree?active=`** in `routes/archive.py`: root level + active_path per la sidebar.
+- **`GET /tree/expand?path=&active=`** in `routes/archive.py`: figli di una cartella.
+- **`templates/components/filetree_sidebar.html`**: header `ARCHIVE_TREE` + lazy load root.
+- **`templates/components/filetree_node.html`**: nodi dir/file con routing corretto per `.md`, `.pdf`, `.html`, altri.
+- **`templates/icons/folder-open.html`**: SVG outline open folder (stroke only, `fill="none"`) per la transizione icona.
+
+### Changed
+- **Icone cartella**: `fa-solid fa-folder-closed` → `fa-solid fa-folder-open` al toggle espansione (via swap JS su `.folder-icon-closed`/`.folder-icon-open`).
+- **Palette filetree**: allineata al file browser — dir `neon-text` + drop-shadow cyan, `.md` `neon-text`, `.pdf` icona `text-red-400`, `.html` icona `text-amber-400`, altri `text-zinc-100`.
+- **Fullscreen safe**: bottone toggle sidebar nascosto con `display: none !important` durante la modalità fullscreen EasyMDE (`aegis-fullscreen-active`).
+
+### Fixed
+- **Reset albero alla navigazione**: lo stato espanso viene salvato/ripristinato via `localStorage` — la navigazione tra file non azzera l'albero.
+- **Toggle sidebar in fullscreen**: il bottone `#aegis-filetree-toggle-wrap` è escluso dalla viewport fullscreen tramite CSS condizionale.
+
+---
+
 ## [4.7.4] - ORACLE TIMEOUT HARDENING (2026-03-26)
 Fix timeout e messaggi di errore Oracle per distinguere server irraggiungibile da inferenza lenta.
 

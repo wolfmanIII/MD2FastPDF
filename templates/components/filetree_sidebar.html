@@ -1,0 +1,9 @@
+<div class="flex flex-col h-full overflow-hidden">
+    <div class="px-3 py-2 border-b border-(--glass-border) flex items-center justify-between shrink-0">
+        <span class="text-[10px] font-bold neon-text tracking-[0.3em] uppercase">ARCHIVE_TREE</span>
+        <i class="fa fa-folder-tree text-(--neon-cyan) text-[11px] opacity-60"></i>
+    </div>
+    <div class="grow overflow-y-auto overflow-x-hidden py-1 space-y-0.5 px-2">
+        {% with active_path=active_path %}{% include 'components/filetree_node.html' %}{% endwith %}
+    </div>
+</div>

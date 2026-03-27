@@ -7,6 +7,7 @@ from logic.files import (
     list_directory_contents, create_new_file, delete_file, rename_file, search_files
 )
 
+
 # AEGIS_ARCHIVE_ROUTER: Operational file management
 router = APIRouter(tags=["Aegis Archive"])
 
@@ -124,6 +125,29 @@ async def perform_rename(request: Request, path: str = Form(...), new_name: str 
             status_code=400
         )
     return await list_files(request, parent_dir)
+
+
+@router.get("/tree", response_class=HTMLResponse)
+async def file_tree_root(request: Request, active: str = ""):
+    """Returns the filetree sidebar content (root level, lazy-loaded)."""
+    items = await list_directory_contents(".")
+    return templates.TemplateResponse(request=request, name="components/filetree_sidebar.html", context={
+        "request": request,
+        "items": items,
+        "active_path": active,
+    })
+
+
+@router.get("/tree/expand", response_class=HTMLResponse)
+async def file_tree_expand(request: Request, path: str = ".", active: str = ""):
+    """Returns child nodes for a directory (lazy expand)."""
+    items = await list_directory_contents(path)
+    return templates.TemplateResponse(request=request, name="components/filetree_node.html", context={
+        "request": request,
+        "items": items,
+        "parent_path": path,
+        "active_path": active,
+    })
 
 
 @router.post("/delete", response_class=HTMLResponse)

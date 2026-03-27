@@ -1,5 +1,6 @@
 # AEGIS FILETREE // Piano di Implementazione
 **Feature standalone — Sidebar albero directory nell'editor**
+**Stato**: COMPLETED — v4.8.0 (2026-03-27)
 
 ---
 
