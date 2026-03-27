@@ -97,6 +97,14 @@
         </form>
     </div>
 
+    <!-- AEGIS_NEURAL_SCAN_OVERLAY: Top-level fixed elevation -->
+    <div id="editor-scan-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center z-[9999] rounded-sm border border-(--neon-cyan)/30 shadow-[inset_0_0_50px_rgba(0,240,255,0.1)]" style="display: none;">
+        <div class="flex flex-col items-center space-y-4">
+            <i class="fa fa-microchip fa-spin text-4xl text-(--neon-cyan) drop-shadow-[0_0_15px_rgba(0,240,255,0.8)]"></i>
+            <p class="text-[11px] tracking-[0.4em] font-bold text-white animate-pulse uppercase">NEURAL_DECRYPTION_IN_PROGRESS</p>
+        </div>
+    </div>
+
     <script>
         (function () {
             const root = document.getElementById('editor-easymde-root');
@@ -130,9 +138,25 @@
                     "link", "image", "table", "|",
                     "preview", "side-by-side", "fullscreen", "|",
                     {
+                        name: "aegis-oracle-scan",
+                        action: () => {
+                            const content = easyMDE.value();
+                            document.getElementById('editor-scan-overlay').style.display = 'flex';
+                            htmx.ajax('POST', '/api/oracle/summarize', {
+                                target: '#modal-container',
+                                values: { content: content },
+                                swap: 'innerHTML'
+                            }).then(() => {
+                                document.getElementById('editor-scan-overlay').style.display = 'none';
+                            });
+                        },
+                        className: "fa fa-microchip",
+                        title: "Neural Scan (summarize document)"
+                    },
+                    {
                         name: "aegis-mermaid",
                         action: () => htmx.ajax('GET', '/api/oracle/mermaid-modal', { target: '#modal-container' }),
-                        className: "fa fa-microchip",
+                        className: "fa-solid fa-sitemap",
                         title: "Mermaid Synthesis (Aegis Oracle)"
                     },
                     {
@@ -455,7 +479,7 @@
             setTimeout(() => {
                 const toolbar = root.querySelector('.editor-toolbar');
                 if (toolbar) {
-                    const opIcons = ['fa-floppy-disk', 'fa-file-pdf', 'fa-cog', 'fa-microchip', 'fa-image', 'fa-file-zipper', 'fa-columns', 'fa-arrows-alt'];
+                    const opIcons = ['fa-floppy-disk', 'fa-file-pdf', 'fa-cog', 'fa-sitemap', 'fa-microchip', 'fa-image', 'fa-file-zipper', 'fa-columns', 'fa-arrows-alt'];
                     toolbar.querySelectorAll('button').forEach(btn => {
                         const icon = btn.querySelector('i');
                         if (icon && opIcons.some(cls => icon.classList.contains(cls))) {

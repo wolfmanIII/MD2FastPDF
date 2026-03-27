@@ -17,6 +17,9 @@ class PromptTemplates:
         "Output ONLY the Mermaid code block content. "
         "Do not include markdown code fences (```). "
         "Do not include any introductions, explanations, or conversational filler. "
+        "CRITICAL RULES: "
+        "- ALWAYS use double quotes around node labels: e.g. A[\"Label (Info)\"] "
+        "- This is mandatory for multi-word labels or those containing brackets/commas. "
         "If you cannot generate a diagram, output 'ERROR: SYNTHESIS_FAILURE'."
     )
     
