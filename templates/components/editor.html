@@ -82,7 +82,7 @@
             style="width: 260px; min-width: 0; flex-shrink: 0; overflow: hidden; border-right: 1px solid var(--glass-border); transition: width 0.2s ease;">
             <div id="aegis-filetree-inner"
                 hx-get="/tree?active={{ path }}"
-                hx-trigger="load"
+                hx-trigger="load delay:50ms"
                 hx-target="this"
                 hx-swap="innerHTML"
                 class="h-full overflow-y-auto overflow-x-hidden">
@@ -333,14 +333,14 @@
                     localStorage.setItem('aegis-filetree-collapsed', isCollapsed ? 'false' : 'true');
                 };
 
-                function _saveTreeState() {
-                    const expanded = [];
-                    document.querySelectorAll('#aegis-filetree .filetree-dir').forEach(dir => {
-                        const children = dir.querySelector('.filetree-children');
-                        if (dir.dataset.loaded === 'true' && !children.classList.contains('hidden')) {
-                            expanded.push(dir.dataset.path);
-                        }
-                    });
+                function _updateTreeState(path, isExpanded) {
+                    const expanded = JSON.parse(localStorage.getItem('aegis-filetree-expanded') || '[]');
+                    if (isExpanded && !expanded.includes(path)) {
+                        expanded.push(path);
+                    } else if (!isExpanded) {
+                        const idx = expanded.indexOf(path);
+                        if (idx > -1) expanded.splice(idx, 1);
+                    }
                     localStorage.setItem('aegis-filetree-expanded', JSON.stringify(expanded));
                 }
 
@@ -352,7 +352,7 @@
                     const loaded = dir.dataset.loaded === 'true';
 
                     if (!loaded) {
-                        htmx.ajax('GET', '/tree/expand?path=' + encodeURIComponent(dir.dataset.path), {
+                        htmx.ajax('GET', '/tree/expand?path=' + encodeURIComponent(dir.dataset.path) + '&active={{ path }}', {
                             target: children,
                             swap: 'innerHTML'
                         });
@@ -360,25 +360,66 @@
                         children.classList.remove('hidden');
                         iconClosed.classList.add('hidden');
                         iconOpen.classList.remove('hidden');
+                        _updateTreeState(dir.dataset.path, true);
                     } else {
                         const isHidden = children.classList.toggle('hidden');
                         iconClosed.classList.toggle('hidden', !isHidden);
                         iconOpen.classList.toggle('hidden', isHidden);
+                        _updateTreeState(dir.dataset.path, !isHidden);
                     }
-                    _saveTreeState();
                 };
 
-                // AEGIS_FILETREE_RESTORE: After any filetree HTMX settle, re-expand dirs saved in localStorage
-                const _toExpand = JSON.parse(localStorage.getItem('aegis-filetree-expanded') || '[]');
-                document.body.addEventListener('htmx:afterSettle', function (evt) {
-                    if (!evt.detail.target.closest('#aegis-filetree')) return;
-                    _toExpand.forEach(path => {
+                // AEGIS_FILETREE_SEED: Ensure active path is expanded in state
+                (function() {
+                    const activePath = "{{ path }}";
+                    const segments = activePath.split('/');
+                    if (segments.length > 1) {
+                        const expanded = JSON.parse(localStorage.getItem('aegis-filetree-expanded') || '[]');
+                        let current = "";
+                        let modified = false;
+                        for (let i = 0; i < segments.length - 1; i++) {
+                            current = current ? `${current}/${segments[i]}` : segments[i];
+                            if (!expanded.includes(current)) {
+                                expanded.push(current);
+                                modified = true;
+                            }
+                        }
+                        if (modified) {
+                            localStorage.setItem('aegis-filetree-expanded', JSON.stringify(expanded));
+                        }
+                    }
+                })();
+
+                // AEGIS_FILETREE_RESTORE: Persistent expansion logic
+                if (window._aegisTreeRestoreBound) {
+                    document.body.removeEventListener('htmx:afterSettle', window._aegisTreeRestoreBound);
+                }
+                
+                window._aegisTreeRestoreBound = function (evt) {
+                    const target = evt.detail.target;
+                    if (!target.closest('#aegis-filetree')) return;
+                    
+                    const expanded = JSON.parse(localStorage.getItem('aegis-filetree-expanded') || '[]');
+                    // Use a more aggressive lookup for deep path settlement
+                    expanded.forEach(path => {
                         const dir = document.querySelector(`#aegis-filetree .filetree-dir[data-path="${path}"]`);
                         if (dir && dir.dataset.loaded === 'false') {
-                            window.aegisTreeToggle(dir.querySelector('button'));
+                            const btn = dir.querySelector('button');
+                            if (btn) window.aegisTreeToggle(btn);
                         }
                     });
-                });
+
+                    // AEGIS_VIEWPORT_SYNC: Scroll active file into view
+                    setTimeout(() => {
+                        const activeFile = document.querySelector('#aegis-filetree [data-aegis-active="true"]');
+                        if (activeFile) {
+                            console.log("AEGIS_SIDEBAR // SCROLL_SYNC // SUCCESS");
+                            activeFile.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                        }
+                    }, 150);
+                };
+                
+                document.body.addEventListener('htmx:afterSettle', window._aegisTreeRestoreBound);
 
             })();
 
@@ -388,6 +429,11 @@
                 originalTogglePreview.apply(this, arguments);
                 if (this.isPreviewActive()) {
                     setTimeout(renderAegisVisuals, 50);
+                    // AEGIS_TOOLBAR_SYNC_PREVIEW: Force re-enable operational controllers
+                    root.querySelectorAll('.editor-toolbar button.aegis-op-btn').forEach(btn => {
+                        btn.disabled = false;
+                        btn.classList.remove('disabled');
+                    });
                 }
             };
 
@@ -409,7 +455,12 @@
             setTimeout(() => {
                 const toolbar = root.querySelector('.editor-toolbar');
                 if (toolbar) {
+                    const opIcons = ['fa-floppy-disk', 'fa-file-pdf', 'fa-cog', 'fa-microchip', 'fa-image', 'fa-file-zipper', 'fa-columns', 'fa-arrows-alt'];
                     toolbar.querySelectorAll('button').forEach(btn => {
+                        const icon = btn.querySelector('i');
+                        if (icon && opIcons.some(cls => icon.classList.contains(cls))) {
+                            btn.classList.add('aegis-op-btn');
+                        }
                         const title = btn.getAttribute('title');
                         if (title && !btn.parentNode.classList.contains('tooltip')) {
                             const wrap = document.createElement('span');
@@ -459,6 +510,13 @@
             color: var(--neon-cyan) !important;
             border: 1px solid rgba(125, 211, 252, 0.3) !important;
             box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+        }
+
+        /* AEGIS_TOOLBAR_OP_PERSISTENCE: Operational buttons remain active in preview */
+        .editor-toolbar button.aegis-op-btn {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            cursor: pointer !important;
         }
 
         .CodeMirror {

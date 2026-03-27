@@ -17,6 +17,7 @@
                hx-target="#aegis-view-core"
                hx-push-url="true"
                data-tree-path="{{ item.path }}"
+               {% if active_path == item.path %}data-aegis-active="true"{% endif %}
                class="filetree-file flex items-center gap-2 px-2 py-1 text-[11px] tracking-widest uppercase no-underline font-bold
                       {% if active_path == item.path %}text-(--neon-cyan) border-l-2 border-(--neon-cyan) pl-1.5{% else %}neon-text{% endif %}
                       hover:bg-(--neon-cyan)/5 transition-colors rounded-sm">
@@ -24,8 +25,8 @@
                 <span class="truncate">{{ item.name }}</span>
             </a>
         {% elif ext == 'pdf' %}
-            <a href="/pdf/preview?path={{ item.path }}"
-               hx-get="/pdf/preview?path={{ item.path }}"
+            <a href="/pdf/view?path={{ item.path }}"
+               hx-get="/pdf/view?path={{ item.path }}"
                hx-target="#aegis-view-core"
                hx-push-url="true"
                class="filetree-file flex items-center gap-2 px-2 py-1 text-[11px] tracking-widest uppercase no-underline font-bold text-zinc-300 hover:text-zinc-100 hover:bg-(--neon-cyan)/5 transition-colors rounded-sm">
@@ -33,13 +34,16 @@
                 <span class="truncate">{{ item.name }}</span>
             </a>
         {% elif ext == 'html' %}
-            <a href="/editor?path={{ item.path }}" target="_blank"
+            <a href="/html/view?path={{ item.path }}" target="_blank"
                class="filetree-file flex items-center gap-2 px-2 py-1 text-[11px] tracking-widest uppercase no-underline font-bold text-zinc-300 hover:text-zinc-100 hover:bg-(--neon-cyan)/5 transition-colors rounded-sm">
                 <i class="fa fa-file-code text-[13px] shrink-0 text-amber-400"></i>
                 <span class="truncate">{{ item.name }}</span>
             </a>
         {% else %}
-            <a href="/editor?path={{ item.path }}" target="_blank"
+            <a href="/editor?path={{ item.path }}"
+               hx-get="/editor?path={{ item.path }}"
+               hx-target="#aegis-view-core"
+               hx-push-url="true"
                class="filetree-file flex items-center gap-2 px-2 py-1 text-[11px] tracking-widest uppercase no-underline font-bold text-zinc-300 hover:text-zinc-100 hover:bg-(--neon-cyan)/5 transition-colors rounded-sm">
                 <i class="fa fa-file-code text-[13px] shrink-0 text-zinc-100"></i>
                 <span class="truncate">{{ item.name }}</span>
