@@ -324,7 +324,7 @@ sudo systemctl restart ollama
 SC-ARCHIVE esegue una **probe automatica** all'avvio per rilevare l'endpoint attivo. Gli URL testati in sequenza sono:
 
 1. `http://localhost:11434`
-2. `http://172.31.112.1:11434` (gateway WSL2)
+2. `http://172.31.112.1:11434` (gateway di rete alternativo)
 
 Il primo endpoint che risponde viene usato per tutta la sessione.
 

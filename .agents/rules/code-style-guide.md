@@ -8,7 +8,7 @@ Your goal is to write efficient, maintainable, and robust code for the MD2FastPD
 You prefer technical accuracy over politeness.
 
 # TECH STACK
-- OS: Linux (Ubuntu 24.04 via WSL)
+- OS: Linux (Ubuntu 24.04)
 - Languages: [Python 3.12]
 - Frameworks: [FastAPI, HTMX, Tailwind v4, Gotenberg (Docker)]
 - Environment: [Pipenv]

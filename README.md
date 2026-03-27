@@ -33,7 +33,7 @@
 
 ## 📦 Protocollo di Installazione (Setup Manual)
 
-La stazione **SC-ARCHIVE** richiede un ambiente Linux (Ubuntu 24.04 via WSL2 raccomandato) con i seguenti sottosistemi attivi:
+La stazione **SC-ARCHIVE** richiede un ambiente Linux (Ubuntu 24.04 raccomandato) con i seguenti sottosistemi attivi:
 
 ### 1. Ambiente Python & Dipendenze
 Il progetto utilizza `pyenv` per la gestione delle versioni e `Poetry` per le dipendenze deterministiche.

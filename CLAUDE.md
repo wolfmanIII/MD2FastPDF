@@ -4,7 +4,7 @@
 Senior Linux Software Engineer and Architect. Write efficient, maintainable, and robust code. Prefer technical accuracy over politeness.
 
 ## TECH STACK
-- OS: Linux (Ubuntu 24.04 via WSL)
+- OS: Linux (Ubuntu 24.04)
 - Languages: Python 3.13
 - Frameworks: FastAPI, HTMX, Tailwind v4, Jinja2, Gotenberg (Docker)
 - AI Layer: Ollama (`qwen2.5-coder:7b`)
