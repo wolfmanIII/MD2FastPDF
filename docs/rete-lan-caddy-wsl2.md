@@ -53,10 +53,15 @@ $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -RunLevel Highest
 Register-ScheduledTask -TaskName "WSL2 PortProxy SC-ARCHIVE" -Action $action -Trigger $trigger -Principal $principal
 ```
 
-Verifica:
+Verifica del portproxy:
 
 ```powershell
 netsh interface portproxy show all
+```
+
+Verifica se il task é attivo:
+```powershell
+Get-ScheduledTask -TaskName "WSL2 PortProxy SC-ARCHIVE"
 ```
 
 ---
