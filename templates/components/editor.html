@@ -1,6 +1,6 @@
 <div id="editor-easymde-root"
     style="width: 100% !important; height: 85vh !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; min-width: 0 !important; background: transparent !important;">
-    
+
     <style>
         /* AEGIS_FULLSCREEN_FIX: Release parent containers and KILL filters that trap position:fixed */
         #editor-easymde-root.aegis-fullscreen-active,
@@ -13,6 +13,7 @@
             filter: none !important;
             transform: none !important;
         }
+
         .EasyMDEContainer.editor-fullscreen {
             z-index: 8999 !important;
             position: fixed !important;
@@ -21,14 +22,19 @@
             width: 100vw !important;
             height: 100vh !important;
         }
+
         /* AEGIS_TOOLTIP_PRIORITY: Absolute dominance for operational hints */
-        .tooltip, .tooltip:before, .tooltip:after {
+        .tooltip,
+        .tooltip:before,
+        .tooltip:after {
             z-index: 99999 !important;
         }
+
         /* Hide filetree toggle in fullscreen — tooltip z-index beats EasyMDE */
         #editor-easymde-root.aegis-fullscreen-active #aegis-filetree-toggle-wrap {
             display: none !important;
         }
+
         /* Top-level escape for the shell */
         body:has(.aegis-fullscreen-active) main {
             overflow: visible !important;
@@ -40,7 +46,8 @@
     <!-- Row 1: Status & Context -->
     <div class="glass-panel px-4 py-3 flex items-center justify-between border-b-0 rounded-b-none shrink-0"
         style="background: rgba(20, 20, 25, 0.8) !important; margin-bottom: 0.5rem !important;">
-        <div class="flex items-center space-x-3 text-xs uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden grow">
+        <div
+            class="flex items-center space-x-3 text-xs uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden grow">
             <div id="aegis-filetree-toggle-wrap" class="tooltip tooltip-bottom shrink-0" data-tip="Toggle Archive Tree">
                 <button onclick="aegisTreeToggleSidebar()"
                     class="w-6 h-6 flex items-center justify-center rounded-sm hover:bg-(--neon-cyan)/10 transition-colors cursor-pointer border-none bg-transparent">
@@ -54,7 +61,8 @@
                     class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0 no-underline">DASHBOARD</a>
                 <span class="opacity-100 text-zinc-200 shrink-0">/</span>
                 {% for crumb in breadcrumbs %}
-                <a href="/files?path={{ crumb.path }}" hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true"
+                <a href="/files?path={{ crumb.path }}" hx-get="/files?path={{ crumb.path }}"
+                    hx-target="#aegis-view-core" hx-push-url="true"
                     class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0 no-underline">{{
                     crumb.name }}</a>
                 <span class="opacity-100 text-zinc-200 shrink-0">/</span>
@@ -80,13 +88,10 @@
         <!-- FILETREE SIDEBAR -->
         <div id="aegis-filetree"
             style="width: 260px; min-width: 0; flex-shrink: 0; overflow: hidden; border-right: 1px solid var(--glass-border); transition: width 0.2s ease;">
-            <div id="aegis-filetree-inner"
-                hx-get="/tree?active={{ path }}"
-                hx-trigger="load delay:50ms"
-                hx-target="this"
-                hx-swap="innerHTML"
-                class="h-full overflow-y-auto overflow-x-hidden">
-                <div class="p-3 text-[10px] text-zinc-600 tracking-widest animate-pulse uppercase">SCANNING_ARCHIVE...</div>
+            <div id="aegis-filetree-inner" hx-get="/tree?active={{ path }}" hx-trigger="load delay:50ms"
+                hx-target="this" hx-swap="innerHTML" class="h-full overflow-y-auto overflow-x-hidden">
+                <div class="p-3 text-[10px] text-zinc-600 tracking-widest animate-pulse uppercase">SCANNING_ARCHIVE...
+                </div>
             </div>
         </div>
 
@@ -98,10 +103,14 @@
     </div>
 
     <!-- AEGIS_NEURAL_SCAN_OVERLAY: Top-level fixed elevation -->
-    <div id="editor-scan-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center z-[9999] rounded-sm border border-(--neon-cyan)/30 shadow-[inset_0_0_50px_rgba(0,240,255,0.1)]" style="display: none;">
+    <div id="editor-scan-overlay"
+        class="fixed inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center z-[9999] rounded-sm border border-(--neon-cyan)/30 shadow-[inset_0_0_50px_rgba(0,240,255,0.1)]"
+        style="display: none;">
         <div class="flex flex-col items-center space-y-4">
-            <i class="fa fa-microchip fa-spin text-4xl text-(--neon-cyan) drop-shadow-[0_0_15px_rgba(0,240,255,0.8)]"></i>
-            <p class="text-[11px] tracking-[0.4em] font-bold text-white animate-pulse uppercase">NEURAL_DECRYPTION_IN_PROGRESS</p>
+            <i
+                class="fa fa-microchip fa-spin text-4xl text-(--neon-cyan) drop-shadow-[0_0_15px_rgba(0,240,255,0.8)]"></i>
+            <p class="text-[11px] tracking-[0.4em] font-bold text-white animate-pulse uppercase">
+                NEURAL_DECRYPTION_IN_PROGRESS</p>
         </div>
     </div>
 
@@ -212,13 +221,13 @@
 
             // Direct override of core functions to bypass event lag/failure
             const originalToggleFS = easyMDE.toggleFullScreen;
-            easyMDE.toggleFullScreen = function() {
+            easyMDE.toggleFullScreen = function () {
                 originalToggleFS.apply(this, arguments);
                 syncHUD();
             };
 
             const originalToggleSide = easyMDE.toggleSideBySide;
-            easyMDE.toggleSideBySide = function() {
+            easyMDE.toggleSideBySide = function () {
                 originalToggleSide.apply(this, arguments);
                 syncHUD();
                 setTimeout(renderAegisVisuals, 100);
@@ -394,7 +403,7 @@
                 };
 
                 // AEGIS_FILETREE_SEED: Ensure active path is expanded in state
-                (function() {
+                (function () {
                     const activePath = "{{ path }}";
                     const segments = activePath.split('/');
                     if (segments.length > 1) {
@@ -418,11 +427,11 @@
                 if (window._aegisTreeRestoreBound) {
                     document.body.removeEventListener('htmx:afterSettle', window._aegisTreeRestoreBound);
                 }
-                
+
                 window._aegisTreeRestoreBound = function (evt) {
                     const target = evt.detail.target;
                     if (!target.closest('#aegis-filetree')) return;
-                    
+
                     const expanded = JSON.parse(localStorage.getItem('aegis-filetree-expanded') || '[]');
                     // Use a more aggressive lookup for deep path settlement
                     expanded.forEach(path => {
@@ -442,7 +451,7 @@
                         }
                     }, 150);
                 };
-                
+
                 document.body.addEventListener('htmx:afterSettle', window._aegisTreeRestoreBound);
 
             })();
@@ -711,22 +720,86 @@
 
         .CodeMirror-fullscreen,
         /* AEGIS_PREVIEW_AESTHETIC: Deep Slate/Industrial styles for Markdown preview */
-        .editor-preview, .editor-preview-side {
-            background: rgba(15, 23, 42, 0.98) !important; 
+        .editor-preview,
+        .editor-preview-side {
+            background: rgba(15, 23, 42, 0.98) !important;
             color: #f8fafc !important;
             font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
             padding: 3rem !important;
             box-shadow: inset 0 0 100px rgba(167, 139, 250, 0.05) !important;
         }
-        .editor-preview h1, .editor-preview-side h1 { border-bottom: 1px solid rgba(167, 139, 250, 0.3) !important; color: #a78bfa !important; padding-bottom: 0.5rem !important; margin-bottom: 1.5rem !important; }
-        .editor-preview h2, .editor-preview-side h2 { color: #818cf8 !important; margin-top: 2rem !important; }
-        .editor-preview blockquote, .editor-preview-side blockquote { border-left: 4px solid #a78bfa !important; background: rgba(167, 139, 250, 0.05) !important; padding: 1rem !important; font-style: italic !important; }
-        .editor-preview code, .editor-preview-side code { background: rgba(0, 0, 0, 0.3) !important; color: #f472b6 !important; border-radius: 4px !important; padding: 0.2rem 0.4rem !important; border: 1px solid rgba(255, 255, 255, 0.05) !important; }
-        .editor-preview pre code, .editor-preview-side pre code { background: transparent !important; border: none !important; color: #e4e4e7 !important; }
-        .editor-preview pre, .editor-preview-side pre { background: rgba(0, 0, 0, 0.4) !important; border: 1px solid rgba(255, 255, 255, 0.05) !important; border-radius: 4px !important; padding: 1.5rem !important; overflow-x: auto !important; }
-        .editor-preview table, .editor-preview-side table { width: 100% !important; border-collapse: collapse !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; margin: 1.5rem 0 !important; }
-        .editor-preview th, .editor-preview-side th { background: rgba(167, 139, 250, 0.1) !important; padding: 0.75rem !important; text-align: left !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; font-size: 0.8rem !important; }
-        .editor-preview td, .editor-preview-side td { padding: 0.75rem !important; border: 1px solid rgba(255, 255, 255, 0.05) !important; font-size: 0.9rem !important; }
+
+        .editor-preview h1,
+        .editor-preview-side h1 {
+            border-bottom: 1px solid rgba(167, 139, 250, 0.3) !important;
+            color: #a78bfa !important;
+            padding-bottom: 0.5rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+
+        .editor-preview h2,
+        .editor-preview-side h2 {
+            color: #818cf8 !important;
+            margin-top: 2rem !important;
+        }
+
+        .editor-preview blockquote,
+        .editor-preview-side blockquote {
+            border-left: 4px solid #a78bfa !important;
+            background: rgba(167, 139, 250, 0.05) !important;
+            padding: 1rem !important;
+            font-style: italic !important;
+        }
+
+        .editor-preview code,
+        .editor-preview-side code {
+            background: rgba(0, 0, 0, 0.3) !important;
+            color: #f472b6 !important;
+            border-radius: 4px !important;
+            padding: 0.2rem 0.4rem !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .editor-preview pre code,
+        .editor-preview-side pre code {
+            background: transparent !important;
+            border: none !important;
+            color: #e4e4e7 !important;
+        }
+
+        .editor-preview pre,
+        .editor-preview-side pre {
+            background: rgba(0, 0, 0, 0.4) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-radius: 4px !important;
+            padding: 1.5rem !important;
+            overflow-x: auto !important;
+        }
+
+        .editor-preview table,
+        .editor-preview-side table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            margin: 1.5rem 0 !important;
+        }
+
+        .editor-preview th,
+        .editor-preview-side th {
+            background: rgba(167, 139, 250, 0.1) !important;
+            padding: 0.75rem !important;
+            text-align: left !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            font-size: 0.8rem !important;
+        }
+
+        .editor-preview td,
+        .editor-preview-side td {
+            padding: 0.75rem !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            font-size: 0.9rem !important;
+        }
+
         .editor-toolbar.fullscreen,
         .editor-preview-side.editor-preview-active-side {
             z-index: 99999 !important;
@@ -747,7 +820,7 @@
             height: calc(100vh - 50px) !important;
             /* Under toolbar */
         }
-        
+
         .CodeMirror {
             background: #27272a !important;
             color: #f8fafc !important;
