@@ -13,6 +13,13 @@
         </div>
         
         <div class="p-8">
+            {% if not neural_on %}
+            <div class="bg-red-950/20 border border-red-500/30 p-4 text-[11px] text-red-500 uppercase font-bold flex items-center space-x-3 mb-6">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>SYSTEM_OFFLINE: NEURAL_LINK_PROTOCOL_DISABLED</span>
+            </div>
+            {% endif %}
+
             <p class="text-zinc-400 text-xs uppercase tracking-wide leading-relaxed mb-8">
                 Describe the logical architecture or operational flow. The Oracle will synthesize these directives into a structural vector protocol for the central buffer.
             </p>
@@ -40,8 +47,9 @@
                             class="btn btn-ghost btn-sm text-zinc-500 uppercase tracking-widest">
                         Cancel
                     </button>
+
                     <button type="button" id="synthesize-btn" 
-                        class="btn-solid text-zinc-950 font-bold h-10 px-8 transition-all uppercase tracking-widest text-[11px]"
+                        class="btn-solid text-zinc-950 font-bold h-10 px-8 transition-all uppercase tracking-widest text-[11px] {% if not neural_on %}opacity-30 grayscale pointer-events-none{% endif %}"
                         style="background-color: #a78bfa !important; border-color: #a78bfa !important;"
                         onclick="synthesizeMermaid()">
                         Initialize

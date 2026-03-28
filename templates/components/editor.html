@@ -308,14 +308,25 @@
                                     if (data.token) {
                                         ghostText += data.token;
                                         renderGhostWidget(ghostText);
+                                    } else if (data.error === "NEURAL_LINK_DISABLED") {
+                                        throw new Error("NEURAL_PROTOCOL_OFFLINE");
                                     }
-                                } catch (e) { }
+                                } catch (e) {
+                                    if (e.message === "NEURAL_PROTOCOL_OFFLINE") throw e;
+                                }
                             }
                         }
                     }
                 } catch (e) {
                     if (e.name !== 'AbortError') {
                         console.error("ORACLE_UPLINK_ERROR:", e);
+                        const notifier = document.getElementById('save-notification');
+                        if (notifier) {
+                            notifier.innerHTML = '<span class="text-red-500 neon-text-red">!! NEURAL_PROTOCOL_OFFLINE !!</span>';
+                            setTimeout(() => { 
+                                if (notifier.innerText.includes('NEURAL')) notifier.innerHTML = ''; 
+                            }, 3000);
+                        }
                     }
                 } finally {
                     isFetching = false;

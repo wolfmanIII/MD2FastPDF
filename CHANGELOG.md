@@ -1,6 +1,34 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.2.0] - AEGIS BROADCAST & CONTEXT PRECISION (2026-03-28)
+Introduzione del feedback visivo universale per lo stato del protocollo e perfezionamento della stabilità dei suggerimenti neurale.
+
+### Added
+- **Visual Alert System (Ghost-Text)**: Se il protocollo è spento, la richiesta di suggerimento attiva ora una notifica rossa nell'editor: `!! NEURAL_PROTOCOL_OFFLINE !!`.
+- **Mermaid Protocol Banner**: Il modale di sintesi mostra ora un avviso prominente e blocca le operazioni sintetiche se l'Uplink è disattivato.
+- **Context Isolation Protocol**: Racchiuso l'input neurale tra tag `[CONTEXT_START]` / `[CONTEXT_END]` per eliminare la ripetizione del testo utente (eco) nei suggerimenti.
+
+### Changed
+- **Ghost-Text Stability**: Implementata logica di rilevamento errore `NEURAL_LINK_DISABLED` all'interno dello stream SSE per evitare fallimenti silenziosi.
+- **Improved Context Closure**: Aumento di `num_predict` a 500 per permettere la chiusura completa di frasi complesse nel Ghost-Text.
+- **Layout Optimization (Mermaid)**: Banner di stato riposizionato in alto nel modale per visibilità immediata.
+
+## [5.1.0] - AEGIS ISOLATION & NEURAL HARDENING (2026-03-28)
+Isolamento logico totale del backend neurale e potenziamento della resilienza delle scansioni di intelligence.
+
+### Added
+- **Protocol Hard-Stop**: Tutte le rotte neurale (`summarize`, `complete`, `mermaid`) ora rispettano rigidamente il flag `neural_link_enabled`. Se spento, il backend solleva un `NEURAL_PROTOCOL_OFFLINE` senza toccare le API esterne.
+- **Neural Scan Hardened**:
+  - Finestra di contesto elevata a 16.384 token per processare documenti di grande dimensione.
+  - Utilizzo di tag strutturali (`[SOURCE_DOCUMENT_START]`) per isolare il contenuto dal prompt operativo.
+  - Temperatura di scansione calibrata a 0.2 per massima precisione tecnica.
+- **Surgical HTML Cleanup**: Sistema di filtraggio per rimuovere tag `div` allucinati dal modello che causavano la rottura del layout HUD.
+- **Dashboard Protocol Awareness**: Il pannello telemetria ora mostra lo stato `PROTOCOL_OFFLINE` ed evita probe inutili verso Ollama.
+
+### Changed
+- **Ollama Probe Optimization**: La Dashboard e il modale Settings rilevano il protocollo disattivato e annullano preventivamente la scansione dei modelli per migliorare le performance della UI.
+
 ## [5.0.0] - AEGIS PERSISTENCE & CENTRALIZED UPLINK (2026-03-28)
 Centralizzazione totale della configurazione in `config/settings.json`, rinfresco industriale della UI e telemetria dashboard ripristinata.
 

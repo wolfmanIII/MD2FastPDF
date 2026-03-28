@@ -1,5 +1,5 @@
 # Stato del Progetto: SC-ARCHIVE
-**Stato Attuale**: Op_Ready / Versione 5.0.0
+**Stato Attuale**: Op_Ready / Versione 5.2.0
 **Ultimo Aggiornamento**: 28 Marzo 2026
 
 ---
@@ -46,9 +46,10 @@
 - **Ghost-Text (Neural Hint)**: completamento predittivo on-demand (300 token), accettazione via TAB.
 - **Mermaid Synthesis**: generazione diagrammi da linguaggio naturale via Ollama (Modello consigliato: `qwen2.5-coder:7b`).
 - **Aegis Intelligence Scan (Hardened)**:
-    *   **Context Expansion**: Finestra di contesto elevata a 16.384 token per analisi di documenti densi.
-    *   **Prompt Delimiters**: Utilizzo di tag strutturali (`[SOURCE_DOCUMENT_START]`) per isolare il contenuto e prevenire drift interpretativo.
+    *   **Context Precision**: Sistema di isolamento `[CONTEXT_START]` per il Ghost-Text, eliminando la ripetizione del testo utente e garantendo la chiusura delle frasi tronche.
     *   **Surgical Sanitization**: Filtro attivo su `div` allucinati dal modello per proteggere la stabilità del layout HUD.
+    *   **Protocol Feedback**: Notifiche visive immediate (`!! NEURAL_PROTOCOL_OFFLINE !!`) e banner informativi nei modali se il Neural Link è spento.
+    *   **Protocol Hard-Stop**: Isolamento totale del backend; se disattivato, il sistema non effettua probe o chiamate esterne.
 - **Multi-endpoint probe**: rileva automaticamente Ollama su `localhost:11434` o `172.31.112.1:11434`. Persistenza via `settings.json`.
 - **Resilienza ConnectTimeout**: errori di connessione gestiti come `OracleError` — mai propagati all'ASGI layer.
 
@@ -102,4 +103,4 @@
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.0.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.2.0 — DEPLOYMENT_ACTIVE.*

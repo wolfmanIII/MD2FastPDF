@@ -1,5 +1,5 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
-**Versione 5.0.0** // AEGIS PERSISTENCE
+**Versione 5.2.0** // AEGIS TOTAL CONTROL
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -22,10 +22,11 @@
 - **DaisyUI Tooltips**: Indicatori di funzione ad alta priorità (`z-index: 500+`) coerenti con la stratigrafia industriale.
 - **Aegis Render Engine**: Export PNG singolo e ZIP bulk dei diagrammi Mermaid direttamente da file `.md` o dalla toolbar dell'editor.
 - **Backend Services Status**: Due pannelli dashboard separati per Gotenberg e Ollama con telemetria real-time (stato, endpoint, modelli chat/embedding).
-- **Aegis Oracle (Neural Synthesis)**:
-    *   **Ghost-Text (On-Demand)**: Suggerimenti di completamento predittivo (300 tokens) con logica di conclusione frase e supporto per accettazione via [TAB].
-    *   **Neural Scan (Auto-Summary)**: Analisi neurale istantanea con Wide-HUD (1200px) e Scan-Overlay protettivo.
-    *   **Mermaid Synthesis**: Conversione "Pensiero-Diagramma" via input naturale.
+- **Aegis Oracle (Precision v5.2.0)**:
+    *   **Context Isolation**: Utilizzo di delimitatori `[CONTEXT_START]` per il Ghost-Text, eliminando il fenomeno dell'"eco" e garantendo il completamento delle frasi.
+    *   **Broadcast Offline Protocol**: Il sistema comunica lo stato disattivato tramite alert pulsanti (`!! NEURAL_PROTOCOL_OFFLINE !!`) e banner informativi nel modale Mermaid.
+    *   **Hardened Scans**: Finestra di contesto a 16.384 token e temperatura 0.3 per riepiloghi tecnici ad alta precisione.
+    *   **Surgical Sanitization**: Sanitizzazione chirurgica delle allucinazioni HTML per preservare la struttura HUD.
 - **Aegis Uplink Config (v5.0.0)**: Terminale di configurazione centralizzato per la gestione dei parametri operativi (Ollama, Gotenberg, Neural Models) con persistenza locale in `config/settings.json`.
 - **Aegis Industrial UI**: Standardizzazione globale di tutti i campi input, select e textarea con estetica terminale pura, dimensioni ottimizzate (12px) e rimozione dei bordi framework.
 - **Neural Model Intelligence**: Filtro automatico dei modelli Ollama per escludere i motori di embedding dai menu di chat e sintesi.

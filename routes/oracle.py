@@ -20,7 +20,13 @@ async def get_mermaid_modal(request: Request):
     """
     AEGIS_MODAL: Returns the mermaid synthesis fragment.
     """
-    return templates.TemplateResponse(request=request, name="components/oracle_mermaid_modal.html", context={})
+    from logic.settings import settings as app_settings
+    neural_on = app_settings.get("neural_link_enabled", True)
+    return templates.TemplateResponse(
+        request=request, 
+        name="components/oracle_mermaid_modal.html", 
+        context={"neural_on": neural_on}
+    )
 
 class PromptRequest(BaseModel):
     prompt: str
@@ -49,9 +55,9 @@ async def oracle_complete(request: PromptRequest):
     async def event_generator():
         # Inject tactical constraints for Ghost-Text
         async for token in oracle.stream_completion(
-            request.prompt, 
+            f"[CONTEXT_START]\n{request.prompt}\n[CONTEXT_END]\n[TASK]: Continue correctly from the end of the context.", 
             system=PromptTemplates.GHOST_SYSTEM,
-            options={"num_predict": 300, "temperature": 0.4} # AEGIS_BUFF: Increased capacity for full phrase completions
+            options={"num_predict": 500, "temperature": 0.3} # AEGIS_BUFF: Extra space for full sentence closures
         ):
             # SSE format: data: <payload>\n\n
             yield f"data: {json.dumps({'token': token})}\n\n"

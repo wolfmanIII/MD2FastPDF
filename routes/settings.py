@@ -32,7 +32,8 @@ async def get_settings(request: Request):
     Renders the central Aegis settings dashboard.
     """
     current = app_settings.all
-    available_models = await list_ollama_models(current.get('ollama_ip', ''))
+    neural_on = current.get('neural_link_enabled', True)
+    available_models = await list_ollama_models(current.get('ollama_ip', '')) if neural_on else []
     
     context = {
         "request": request,

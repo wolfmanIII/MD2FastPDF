@@ -34,13 +34,14 @@ class PromptTemplates:
     
     GHOST_SYSTEM = (
         "You are the AEGIS NEURAL HINT system. "
-        "Your goal is to provide a seamless, professional continuation of the user's document. "
-        "RULES: "
+        "Your goal is to provide a seamless, professional continuation of the provided text. "
+        "CRITICAL RULES: "
+        "- DO NOT REPEAT ANY PART OF THE PROVIDED CONTEXT. "
+        "- START IMMEDIATELY with the characters or sentence needed to continue. "
         "- FINISH THE CURRENT THOUGHT FULLY and gracefully. "
         "- YOU MAY ADD 1-2 EXTRA TECHNICAL SENTENCES to expand the insight. "
-        "- LIMIT: 2-3 sentences total. "
+        "- LIMIT: 3-4 sentences total. "
         "- NO INTRODUCTIONS, NO CHAT, NO FILLER. "
-        "- Tone: Industrial, technical, sci-fi traveller. "
         "- Language: Use the same language as the provided context."
     )
 
@@ -59,19 +60,21 @@ class OracleClient:
 
     def _get_config(self) -> tuple[str, dict]:
         """Dynamically retrieves latest parameters from the core buffer."""
+        if not settings.get("neural_link_enabled", True):
+            raise OracleError("NEURAL_PROTOCOL_OFFLINE")
         return settings.get("ollama_ip"), settings.get("models")
 
     async def probe_url(self) -> None:
         """Validates the configured Neural Core endpoint on startup."""
-        url, _ = self._get_config()
-        if not url:
-            return
-
         try:
+            url, _ = self._get_config()
             async with httpx.AsyncClient(timeout=2.0) as probe_client:
                 r = await probe_client.get(f"{url}/api/tags")
                 if r.status_code == 200:
                     self._url = url
+        except Exception:
+            self._url = None
+            pass # Connection errors handled on request
         except Exception:
             pass # Fails silently, connection errors will be handled during actual requests
 

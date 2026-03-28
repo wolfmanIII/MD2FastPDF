@@ -15,8 +15,10 @@ async def services_status(request: Request):
     """
     Probes Gotenberg and Ollama health endpoints and returns a status fragment.
     """
-    ollama_url = settings.get("ollama_ip")
-    gotenberg_url = settings.get("gotenberg_ip")
+    from logic.settings import settings as app_settings
+    ollama_url = app_settings.get("ollama_ip")
+    gotenberg_url = app_settings.get("gotenberg_ip")
+    neural_on = app_settings.get("neural_link_enabled", True)
 
     async with httpx.AsyncClient(timeout=3.0) as client:
         # Gotenberg: GET /health
@@ -29,24 +31,30 @@ async def services_status(request: Request):
             gotenberg_status = "OFFLINE"
 
         # Ollama: GET /api/tags
-        try:
-            r = await client.get(f"{ollama_url}/api/tags")
-            ollama_ok = r.status_code == 200
-            ollama_status = "ONLINE" if ollama_ok else "DEGRADED"
-            if ollama_ok:
-                data = r.json()
-                all_models = [m["name"] for m in data.get("models", [])]
-                _EMBED_KEYWORDS = ("embed", "bge", "minilm", "e5-", "gte-", "rerank")
-                ollama_chat_models = [m for m in all_models if not any(k in m.lower() for k in _EMBED_KEYWORDS)]
-                ollama_embed_models = [m for m in all_models if any(k in m.lower() for k in _EMBED_KEYWORDS)]
-            else:
-                ollama_chat_models = []
-                ollama_embed_models = []
-        except Exception:
+        if not neural_on:
             ollama_ok = False
-            ollama_status = "OFFLINE"
+            ollama_status = "PROTOCOL_OFFLINE"
             ollama_chat_models = []
             ollama_embed_models = []
+        else:
+            try:
+                r = await client.get(f"{ollama_url}/api/tags")
+                ollama_ok = r.status_code == 200
+                ollama_status = "ONLINE" if ollama_ok else "DEGRADED"
+                if ollama_ok:
+                    data = r.json()
+                    all_models = [m["name"] for m in data.get("models", [])]
+                    _EMBED_KEYWORDS = ("embed", "bge", "minilm", "e5-", "gte-", "rerank")
+                    ollama_chat_models = [m for m in all_models if not any(k in m.lower() for k in _EMBED_KEYWORDS)]
+                    ollama_embed_models = [m for m in all_models if any(k in m.lower() for k in _EMBED_KEYWORDS)]
+                else:
+                    ollama_chat_models = []
+                    ollama_embed_models = []
+            except Exception:
+                ollama_ok = False
+                ollama_status = "OFFLINE"
+                ollama_chat_models = []
+                ollama_embed_models = []
 
     context = {
         "request": request,
