@@ -199,14 +199,8 @@
                         className: "fa fa-file-pdf",
                         title: "Print Document (PDF)"
                     },
-                    {
-                        name: "aegis-config",
-                        action: () => htmx.ajax('GET', '/neural-settings', { target: '#modal-container' }),
-                        className: "fa fa-cog",
-                        title: "Uplink Settings (Aegis Oracle)"
-                    },
                     "guide"
-                ],
+],
                 theme: "dark"
             });
             window.aegisEditor = easyMDE;

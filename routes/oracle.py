@@ -38,7 +38,14 @@ async def oracle_complete(request: PromptRequest):
     AEGIS_SSE_STREAM: Real-time neural completions for the editor.
     """
     from logic.oracle import oracle, PromptTemplates
+    from logic.settings import settings as app_settings
     
+    # AEGIS_LOCKOUT: Prevent unauthorized uplink if protocol disabled
+    if not app_settings.get("neural_link_enabled", True):
+        async def disabled_generator():
+            yield "data: " + json.dumps({"token": "", "error": "NEURAL_LINK_DISABLED"}) + "\n\n"
+        return StreamingResponse(disabled_generator(), media_type="text/event-stream")
+
     async def event_generator():
         # Inject tactical constraints for Ghost-Text
         async for token in oracle.stream_completion(
@@ -79,6 +86,21 @@ async def oracle_summarize(request: Request, content: Optional[str] = Form(None)
 
     summary_markdown = await summarize_document(content)
     
+    # AEGIS_SURGICAL_CLEAN: Strip potential hallucinated div tags that break layout
+    if summary_markdown:
+        summary_markdown = summary_markdown.replace("</div>", "").replace("<div>", "")
+
+    # Check for neural engine errors or empty responses
+    if not summary_markdown or summary_markdown.startswith("ERROR:"):
+        return templates.TemplateResponse(
+            request=request, 
+            name="components/oracle_summary_hud.html", 
+            context={
+                "summary_html": f"<div class='text-red-400 font-bold'>NEURAL_SCAN_FAILURE // {summary_markdown}</div>",
+                "status": "AEGIS_RECOVERY_FAILED"
+            }
+        )
+
     # Pre-render markdown to HTML safely
     summary_html = markdown.markdown(
         summary_markdown,
@@ -92,6 +114,6 @@ async def oracle_summarize(request: Request, content: Optional[str] = Form(None)
         name="components/oracle_summary_hud.html", 
         context={
             "summary_html": summary_html,
-            "status": "AEGIS_RECOVERY_COMPLETE"
+            "status": "AEGIS_SCAN_STABLE"
         }
     )

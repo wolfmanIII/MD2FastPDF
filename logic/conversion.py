@@ -40,21 +40,26 @@ CLEANER = bleach.Cleaner(
     }
 )
 
+from logic.settings import settings
+
 class GotenbergClient:
     """Industrial Client for Gotenberg PDF Engine (Aegis Optimus)."""
     
-    def __init__(self, url: Optional[str] = None):
-        self.url = url or os.getenv("GOTENBERG_URL", "http://localhost:3000")
+    def __init__(self):
         self.client = httpx.AsyncClient(
             timeout=60.0, 
             limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
         )
+
+    def _get_url(self) -> str:
+        return settings.get("gotenberg_ip", "http://localhost:3000")
 
     async def shutdown(self):
         await self.client.aclose()
 
     async def render_pdf(self, markdown_content: str, filename: str, show_header_footer: bool = False) -> bytes:
         """Converts markdown to PDF with sanitization and industrial styling."""
+        url = self._get_url()
         raw_html = markdown.markdown(
             markdown_content,
             extensions=['fenced_code', 'tables', 'attr_list']
@@ -79,7 +84,7 @@ class GotenbergClient:
             files["header.html"] = ("header.html", header_html.encode("utf-8"), "text/html")
 
         response = await self.client.post(
-            f"{self.url}/forms/chromium/convert/html",
+            f"{url}/forms/chromium/convert/html",
             data=data,
             files=files
         )

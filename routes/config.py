@@ -48,9 +48,4 @@ async def select_root(request: Request, path: str = Form("")):
     }
     return templates.TemplateResponse(request=request, name="components/file_list.html", context=context)
 
-@router.get("/neural-settings", response_class=HTMLResponse)
-async def neural_settings(request: Request):
-    """
-    Returns the Aegis Oracle configuration modal.
-    """
-    return templates.TemplateResponse(request=request, name="components/neural_config.html", context={"request": request})
+

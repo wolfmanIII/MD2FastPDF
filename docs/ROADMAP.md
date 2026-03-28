@@ -46,6 +46,15 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
+---
+
+### [4.9] - AEGIS CENTRALIZED UPLINK (Centralized Settings & Industrial UI) [COMPLETED]
+**Obiettivo**: Consolidamento della configurazione e standardizzazione estetica totale.
+- **Settings Manager**: Transizione da variabili ENV a `settings.json` persistente. ✓
+- **Industrial Form Standard**: Unificazione globale dello stile input/select via `base.html` (12px, borderless, mono). ✓
+- **Neural Filtering**: Esclusione automatica modelli di embedding dai selettori operativi. ✓
+- **Reactive Dashboard**: Refresh automatico telemetria e stato servizi via HTMX. ✓
+
 ### [4.4] - AEGIS CHRONOS (Versionamento Narrativo) [PLANNED — NEXT]
 **Obiettivo**: Strato di versionamento leggero e non invasivo per archivi narrativi (scenari RPG, documentazione tecnica). Modulo **opt-in**: attivo solo se la root selezionata contiene già un repo Git. Non crea repo, non tocca remoti, non esegue mai operazioni distruttive.
 - **Detect automatico**: `git rev-parse --git-dir` sulla root — se assente, pannello in stato `GIT_REPO_NOT_DETECTED` con istruzioni init.

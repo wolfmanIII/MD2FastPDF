@@ -9,7 +9,8 @@
                 class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0 no-underline">DASHBOARD</a>
             <span class="opacity-100 text-zinc-200 shrink-0">/</span>
             {% for crumb in breadcrumbs %}
-            <a href="/files?path={{ crumb.path }}" hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core" hx-push-url="true"
+            <a href="/files?path={{ crumb.path }}" hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core"
+                hx-push-url="true"
                 class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0 no-underline">{{
                 crumb.name }}</a>
             <span class="opacity-100 text-zinc-200 shrink-0">/</span>
@@ -26,13 +27,13 @@
 
     <!-- SEPARATE SEARCH ROW -->
     <div class="mb-6 relative z-10">
-        <label class="input input-bordered w-full flex items-center border-zinc-800 focus-within:border-zinc-600" style="background:rgba(0,0,0,0.4);">
-            <span class="text-[11px] tracking-[0.3em] font-bold text-(--neon-cyan) shrink-0">SCAN_QUERY //&nbsp;</span>
-            <input type="text" name="q" placeholder="AWAITING_INPUT..."
-                value="{{ query if query else '' }}"
-                class="grow font-mono text-[11px] tracking-widest"
-                hx-get="/files/search" hx-trigger="keyup changed delay:500ms, search" hx-target="#results-grid"
-                hx-swap="outerHTML" hx-push-url="false">
+        <label class="input input-bordered w-full flex items-center border-zinc-800 focus-within:border-zinc-600"
+            style="background:rgba(0,0,0,0.4);">
+            <span class="text-[11px] tracking-[0.3em] font-bold text-(--neon-cyan) shrink-0">SCAN_QUERY //</span>
+            <input type="text" name="q" placeholder="AWAITING_INPUT..." value="{{ query if query else '' }}"
+                class="grow font-mono text-[11px] tracking-widest" hx-get="/files/search"
+                hx-trigger="keyup changed delay:500ms, search" hx-target="#results-grid" hx-swap="outerHTML"
+                hx-push-url="false">
         </label>
     </div>
 

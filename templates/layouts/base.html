@@ -171,6 +171,25 @@
             backdrop-filter: blur(0px) !important;
             transition: all 0.25s ease-in;
         }
+        /* AEGIS INDUSTRIAL INPUTS: Standardizing the UI across all modules */
+        input[type="text"], input[type="password"], input[type="email"], input[type="url"], textarea, select, .input, .select, .textarea {
+            background-color: rgba(0, 0, 0, 0.6) !important;
+            border: none !important;
+            color: var(--neon-cyan) !important;
+            font-family: 'Roboto Mono', monospace !important;
+            padding: 0.5rem 0.75rem !important;
+            font-size: 12px !important;
+            border-radius: 2px !important;
+            transition: all 0.2s ease-in-out !important;
+            outline: none !important;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus, .input:focus, .select:focus, .textarea:focus {
+            border-color: var(--neon-cyan) !important;
+            box-shadow: 0 0 10px rgba(125, 211, 252, 0.3) !important;
+            background-color: rgba(0, 0, 0, 0.8) !important;
+        }
+
         /* Mermaid Visual Protocol */
         .mermaid { margin: 1.5rem 0 !important; border-radius: 8px !important; display: flex !important; justify-content: center !important; overflow: hidden !important; background: transparent !important; }
         .mermaid:not([data-processed="true"]) { opacity: 0; height: 0; overflow: hidden; }

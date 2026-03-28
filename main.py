@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from logic.templates import templates
-from routes import core, archive, editor, pdf, config, oracle, render
+from routes import core, archive, editor, pdf, config, oracle, render, settings
 from logic.conversion import gotenberg
 from logic.oracle import oracle as neural_oracle
 
@@ -35,6 +35,7 @@ app.include_router(pdf.router)       # Conversion Pipeline
 app.include_router(config.router)    # Workspace Config
 app.include_router(oracle.router)    # Neural Interface (Aegis Oracle)
 app.include_router(render.router)    # Mermaid Render Pipeline
+app.include_router(settings.router)  # Operational Parameters
 
 # AEGIS_INIT_READY: Server configuration complete.
 # Start via bin/launch.sh to initialize Tailwind and Uvicorn logic.

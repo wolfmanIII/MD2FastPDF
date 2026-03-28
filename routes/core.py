@@ -3,11 +3,9 @@ from fastapi.responses import HTMLResponse
 import psutil
 import httpx
 import os
+from logic.settings import settings
 from logic.templates import templates
 from logic.files import get_recent_files, get_storage_stats, get_project_root
-
-GOTENBERG_URL: str = os.getenv("GOTENBERG_URL", "http://localhost:3000")
-OLLAMA_URL: str = os.getenv("OLLAMA_URL", "http://localhost:11434")
 
 # AEGIS_CORE_ROUTER: Central dashboard and system telemetry
 router = APIRouter(tags=["Aegis Core"])
@@ -17,10 +15,13 @@ async def services_status(request: Request):
     """
     Probes Gotenberg and Ollama health endpoints and returns a status fragment.
     """
+    ollama_url = settings.get("ollama_ip")
+    gotenberg_url = settings.get("gotenberg_ip")
+
     async with httpx.AsyncClient(timeout=3.0) as client:
         # Gotenberg: GET /health
         try:
-            r = await client.get(f"{GOTENBERG_URL}/health")
+            r = await client.get(f"{gotenberg_url}/health")
             gotenberg_ok = r.status_code == 200
             gotenberg_status = "ONLINE" if gotenberg_ok else "DEGRADED"
         except Exception:
@@ -29,7 +30,7 @@ async def services_status(request: Request):
 
         # Ollama: GET /api/tags
         try:
-            r = await client.get(f"{OLLAMA_URL}/api/tags")
+            r = await client.get(f"{ollama_url}/api/tags")
             ollama_ok = r.status_code == 200
             ollama_status = "ONLINE" if ollama_ok else "DEGRADED"
             if ollama_ok:
@@ -51,14 +52,31 @@ async def services_status(request: Request):
         "request": request,
         "gotenberg_status": gotenberg_status,
         "gotenberg_ok": gotenberg_ok,
-        "gotenberg_url": GOTENBERG_URL,
+        "gotenberg_url": gotenberg_url,
         "ollama_status": ollama_status,
         "ollama_ok": ollama_ok,
         "ollama_chat_models": ollama_chat_models,
         "ollama_embed_models": ollama_embed_models,
-        "ollama_url": OLLAMA_URL,
+        "ollama_url": ollama_url,
     }
     return templates.TemplateResponse(request=request, name="components/services_status.html", context=context)
+@router.get("/stats", response_class=HTMLResponse)
+async def get_stats(request: Request):
+    """
+    Returns the real-time system statistics fragment for HTMX polling.
+    """
+    memory = psutil.virtual_memory()
+    cpu_usage = psutil.cpu_percent()
+    
+    context = {
+        "request": request,
+        "memory_usage": memory.percent,
+        "cpu_usage": cpu_usage,
+        "api_gateway": "CONNECTED",
+        "root_name": get_project_root().name if get_project_root().name else "SYS_HOME",
+        "full_root": str(get_project_root()),
+    }
+    return templates.TemplateResponse(request=request, name="components/stats_grid.html", context=context)
 
 
 @router.get("/", response_class=HTMLResponse)

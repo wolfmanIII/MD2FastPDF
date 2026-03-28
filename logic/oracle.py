@@ -25,10 +25,10 @@ class PromptTemplates:
     
     SUMMARIZE_SYSTEM = (
         "You are the AEGIS INTELLIGENCE EXTRACTOR. "
-        "Summarize the provided Markdown document into a high-density, technical brief. "
+        "Summarize the provided Archive ([SOURCE_DOCUMENT]) into a high-density, technical brief. "
         "Use bullet points. Focus on key technical specifications and operational data. "
         "Tone: Industrial, concise, sci-fi traveller. "
-        "Language: Match the language of the source document. "
+        "Language: Use the same language as the provided source document. "
         "Output ONLY the summary in Markdown format. No filler."
     )
     
@@ -44,80 +44,71 @@ class PromptTemplates:
         "- Language: Use the same language as the provided context."
     )
 
-_OLLAMA_FALLBACK_URLS: list[str] = [
-    "http://localhost:11434",
-    "http://172.31.112.1:11434",
-]
+from logic.settings import settings
 
 class OracleClient:
     """Industrial Client for the Neural Layer (Ollama)."""
 
-    def __init__(self, url: Optional[str] = None, model: Optional[str] = None):
-        self.url = url or os.getenv("OLLAMA_URL", "")
-        self.model = model or os.getenv("ORACLE_MODEL", "qwen2.5-coder:7b")
+    def __init__(self):
+        self._url = None
+        self._models = {}
         self.client = httpx.AsyncClient(
-            # connect/pool timeout strict, read timeout generous for slow GPUs
             timeout=httpx.Timeout(connect=5.0, read=600.0, write=30.0, pool=5.0),
             limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
         )
 
+    def _get_config(self) -> tuple[str, dict]:
+        """Dynamically retrieves latest parameters from the core buffer."""
+        return settings.get("ollama_ip"), settings.get("models")
+
     async def probe_url(self) -> None:
-        """Probes known Ollama endpoints and locks onto the first responding one."""
-        if self.url:
-            return  # Explicitly configured via env — trust it
-        candidates = _OLLAMA_FALLBACK_URLS
-        probe_client = httpx.AsyncClient(timeout=2.0)
+        """Validates the configured Neural Core endpoint on startup."""
+        url, _ = self._get_config()
+        if not url:
+            return
+
         try:
-            for candidate in candidates:
-                try:
-                    r = await probe_client.get(f"{candidate}/api/tags")
-                    if r.status_code == 200:
-                        self.url = candidate
-                        return
-                except (httpx.ConnectError, httpx.ConnectTimeout, httpx.TimeoutException):
-                    continue
-            # None responded — default to localhost, errors will surface at call time
-            self.url = _OLLAMA_FALLBACK_URLS[0]
-        finally:
-            await probe_client.aclose()
+            async with httpx.AsyncClient(timeout=2.0) as probe_client:
+                r = await probe_client.get(f"{url}/api/tags")
+                if r.status_code == 200:
+                    self._url = url
+        except Exception:
+            pass # Fails silently, connection errors will be handled during actual requests
 
     async def shutdown(self):
         await self.client.aclose()
 
     async def stream_completion(self, prompt: str, system: Optional[str] = None, options: Optional[dict] = None) -> AsyncGenerator[str, None]:
-        """Streams neural completion tokens to the caller."""
+        """Streams neural completion tokens using hint model."""
+        url, models = self._get_config()
         payload = {
-            "model": self.model,
+            "model": models.get("neural_hint"),
             "prompt": prompt,
             "stream": True
         }
-        if system:
-            payload["system"] = system
-        if options:
-            payload["options"] = options
+        if system: payload["system"] = system
+        if options: payload["options"] = options
 
         try:
-            async with self.client.stream("POST", f"{self.url}/api/generate", json=payload) as response:
+            async with self.client.stream("POST", f"{url}/api/generate", json=payload) as response:
                 if response.status_code != 200:
                     raise OracleError(f"NEURAL_LINK_FAILED: {response.status_code}")
-
                 async for line in response.aiter_lines():
                     if not line: continue
                     data = json.loads(line)
-                    if token := data.get("response"):
-                        yield token
-                    if data.get("done"):
-                        break
+                    if token := data.get("response"): yield token
+                    if data.get("done"): break
         except Exception as e:
             yield f"ERROR_NEURAL_UPLINK: {str(e)}"
 
     async def generate_syntax(self, description: str) -> str:
-        """Produces Mermaid syntax from natural language inputs."""
+        """Produces Mermaid syntax from synthesis model."""
+        url, models = self._get_config()
         try:
             response = await self.client.post(
-                f"{self.url}/api/generate",
+                f"{url}/api/generate",
                 json={
-                    "model": self.model,
+                    "model": models.get("mermaid_synthesis"),
                     "prompt": description,
                     "system": PromptTemplates.MERMAID_SYSTEM,
                     "stream": False
@@ -132,21 +123,26 @@ class OracleClient:
             raise OracleError(f"SYNTHESIS_OFFLINE: {response.status_code}")
 
         try:
-            data = response.json()
-            return data.get("response", "").strip()
+            return response.json().get("response", "").strip()
         except Exception:
             raise OracleError("DATA_CORRUPTION")
 
     async def summarize(self, content: str) -> str:
-        """Condenses archives into high-density insights."""
+        """Condenses archives using scan model."""
+        url, models = self._get_config()
         try:
             response = await self.client.post(
-                f"{self.url}/api/generate",
+                f"{url}/api/generate",
                 json={
-                    "model": self.model,
-                    "prompt": content,
+                    "model": models.get("neural_scan"),
+                    "prompt": f"[SOURCE_DOCUMENT_START]\n---\n{content}\n---\n[SOURCE_DOCUMENT_END]\n[TASK]: Perform full intelligence scan and provide technical summary.",
                     "system": PromptTemplates.SUMMARIZE_SYSTEM,
-                    "stream": False
+                    "stream": False,
+                    "options": {
+                        "num_ctx": 16384,
+                        "num_predict": 1000,
+                        "temperature": 0.2
+                    }
                 }
             )
         except (httpx.ConnectTimeout, httpx.ConnectError) as exc:
@@ -158,8 +154,7 @@ class OracleClient:
             raise OracleError(f"INTELLIGENCE_LINK_FAILED: {response.status_code}")
 
         try:
-            data = response.json()
-            return data.get("response", "").strip()
+            return response.json().get("response", "").strip()
         except Exception:
             raise OracleError("BUFFER_OVERFLOW")
 

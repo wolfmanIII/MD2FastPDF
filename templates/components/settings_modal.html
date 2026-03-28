@@ -1,0 +1,116 @@
+<div id="settings-modal" class="modal modal-open">
+    <div class="glass-panel p-10 max-w-6xl w-11/12 mx-auto relative shadow-[0_0_50px_rgba(0,0,0,0.8)] rounded-sm">
+
+        <!-- Header Industrial -->
+        <div class="flex items-center justify-between border-b border-white/5 pb-4 mb-8">
+            <h3 class="font-bold text-xl neon-text tracking-[0.3em] uppercase flex items-center space-x-3">
+                <i class="fa fa-sliders-h text-sm"></i>
+                <span>CORE_ECOSYSTEM // SETTINGS_TERMINAL</span>
+            </h3>
+            <button type="button" onclick="document.getElementById('settings-modal').remove()"
+                class="text-zinc-500 hover:neon-text transition-all text-2xl border-none bg-transparent cursor-pointer">&times;</button>
+        </div>
+
+        <form hx-post="/settings/save" hx-target="#save-notification" class="space-y-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+
+                <!-- OPERATIONAL STATE -->
+                <div class="space-y-6">
+                    <h4 class="text-[8px] font-bold text-zinc-500 uppercase tracking-[0.4em] mb-4">SYSTEM_STATUS:</h4>
+                    <div class="space-y-4 bg-black/40 p-6 border border-white/5 rounded-sm">
+                        <label class="flex items-center justify-between cursor-pointer group">
+                            <span class="text-zinc-300 uppercase text-xs tracking-widest group-hover:neon-text transition-colors">Neural Link Protocol</span>
+                            <input type="checkbox" name="neural_link_enabled" id="neural-link-toggle"
+                                {% if settings.neural_link_enabled %}checked{% endif %} value="true"
+                                onchange="updateNeuralUI(this.checked)"
+                                class="w-10 h-5 bg-zinc-800 border border-zinc-700 checked:bg-(--neon-cyan) appearance-none cursor-pointer rounded-full transition-all">
+                        </label>
+                        <div class="h-px bg-white/5 w-full my-2"></div>
+                        <label class="flex items-center justify-between cursor-pointer group">
+                            <span class="text-zinc-300 uppercase text-xs tracking-widest group-hover:neon-text transition-colors">PDF Branded Output</span>
+                            <input type="checkbox" name="pdf_branding_enabled" 
+                                {% if settings.pdf_branding_enabled %}checked{% endif %} value="true"
+                                class="w-10 h-5 bg-zinc-800 border border-zinc-700 checked:bg-(--neon-cyan) appearance-none cursor-pointer rounded-full transition-all">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- ENDPOINTS -->
+                <div class="space-y-4 text-left">
+                    <h4 class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.4em] mb-4">UPLINK_COORDINATES:</h4>
+                    <div class="space-y-6 bg-black/40 p-6 border border-white/5 rounded-sm">
+                        <div class="space-y-2 neural-dependent transition-all duration-300">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">Ollama Gateway</label>
+                            <input type="text" name="ollama_ip" value="{{ settings.ollama_ip }}"
+                                class="w-full bg-black/60 text-xs font-mono text-(--neon-cyan) focus:outline-none focus:border-(--neon-cyan)/50 rounded-sm">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">Gotenberg Server</label>
+                            <input type="text" name="gotenberg_ip" value="{{ settings.gotenberg_ip }}"
+                                class="w-full bg-black/60 text-xs font-mono text-(--neon-cyan) focus:outline-none focus:border-(--neon-cyan)/50 rounded-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODELS -->
+                <div class="space-y-4 text-left lg:col-span-2 neural-dependent transition-all duration-300">
+                    <h4 class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.4em] mb-4">NEURAL_DEVICES_SELECTION:</h4>
+                    <div class="space-y-6 bg-black/40 p-6 border border-white/5 rounded-sm">
+                        <div class="space-y-2">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">Neural Hint Device</label>
+                            <select name="model_neural_hint" class="w-full bg-black/60 text-xs font-mono text-(--neon-cyan) focus:outline-none rounded-sm">
+                                {% for m in available_models %}<option value="{{ m }}" class="bg-zinc-900 text-white" {% if settings.models.neural_hint==m %}selected{% endif %}>{{ m|upper }}</option>{% endfor %}
+                                {% if settings.models.neural_hint not in available_models %}<option value="{{ settings.models.neural_hint }}" class="bg-zinc-900 text-white" selected>[OFFLINE_FALLBACK] // {{ settings.models.neural_hint|upper }}</option>{% endif %}
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">Neural Scan Device</label>
+                            <select name="model_neural_scan" class="w-full bg-black/60 text-xs font-mono text-(--neon-cyan) focus:outline-none rounded-sm">
+                                {% for m in available_models %}<option value="{{ m }}" class="bg-zinc-900 text-white" {% if settings.models.neural_scan==m %}selected{% endif %}>{{ m|upper }}</option>{% endfor %}
+                                {% if settings.models.neural_scan not in available_models %}<option value="{{ settings.models.neural_scan }}" class="bg-zinc-900 text-white" selected>[OFFLINE_FALLBACK] // {{ settings.models.neural_scan|upper }}</option>{% endif %}
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">Mermaid Synthesis Device</label>
+                            <select name="model_mermaid_synthesis" class="w-full bg-black/60 text-xs font-mono text-(--neon-cyan) focus:outline-none rounded-sm">
+                                {% for m in available_models %}<option value="{{ m }}" class="bg-zinc-900 text-white" {% if settings.models.mermaid_synthesis==m %}selected{% endif %}>{{ m|upper }}</option>{% endfor %}
+                                {% if settings.models.mermaid_synthesis not in available_models %}<option value="{{ settings.models.mermaid_synthesis }}" class="bg-zinc-900 text-white" selected>[OFFLINE_FALLBACK] // {{ settings.models.mermaid_synthesis|upper }}</option>{% endif %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-action border-t border-white/5 pt-8 flex justify-between items-center">
+                <div id="save-notification" class="text-[11px] font-mono neon-text animate-pulse"></div>
+                <div class="flex items-center space-x-6">
+                    <button type="button" onclick="document.getElementById('settings-modal').remove()" class="btn-ghost">CANCEL</button>
+                    <button type="submit" class="btn-solid min-w-[200px]">UPDATE_ECOSYSTEM</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function updateNeuralUI(enabled) {
+            const dependents = document.querySelectorAll('.neural-dependent');
+            dependents.forEach(el => {
+                if (enabled) {
+                    el.classList.remove('opacity-30', 'pointer-events-none', 'grayscale');
+                } else {
+                    el.classList.add('opacity-30', 'pointer-events-none', 'grayscale');
+                }
+            });
+        }
+        // Run once on load to sync initial state
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('neural-link-toggle');
+            if (toggle) updateNeuralUI(toggle.checked);
+        });
+        // HTMX fallback for partial loads
+        setTimeout(() => {
+            const toggle = document.getElementById('neural-link-toggle');
+            if (toggle) updateNeuralUI(toggle.checked);
+        }, 50);
+    </script>
+</div>

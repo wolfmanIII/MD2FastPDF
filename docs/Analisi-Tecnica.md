@@ -1,10 +1,15 @@
 # Analisi Tecnica: SC-ARCHIVE
 **Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
 **Nome Tecnico Interno**: MD2FastPDF
-**Data**: 21 Marzo 2026
+**Data**: 28 Marzo 2026
 
 ## 1. Architettura di Sistema
 L'applicazione segue un modello di sviluppo asincrono basato su FastAPI, orientato al basso consumo di risorse e alla modularità dei componenti, con un'estetica "Spacecraft Computer".
+
+### 1.1 Persistenza e Configurazione (`logic/settings.py`)
+- **JSON Store**: Utilizzo di `config/settings.json` come sorgente unica di verità.
+- **Dynamic Uplink**: Le coordinate dei servizi (Ollama, Gotenberg) e le preferenze IA sono caricate all'avvio e modificabili a runtime via terminale Settings.
+- **Aggiornamento Reattivo**: Implementazione di trigger HTMX (`settings-updated`) per la sincronizzazione immediata della dashboard post-modifica.
 
 ### 1.1 Backend (Python / FastAPI)
 - **FastAPI**: Cuore del sistema per la gestione delle rotte e della logica asincrona.

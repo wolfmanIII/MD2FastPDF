@@ -1,5 +1,5 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
-**Versione 4.8.0** // AEGIS FILETREE
+**Versione 5.0.0** // AEGIS PERSISTENCE
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -26,10 +26,11 @@
     *   **Ghost-Text (On-Demand)**: Suggerimenti di completamento predittivo (300 tokens) con logica di conclusione frase e supporto per accettazione via [TAB].
     *   **Neural Scan (Auto-Summary)**: Analisi neurale istantanea con Wide-HUD (1200px) e Scan-Overlay protettivo.
     *   **Mermaid Synthesis**: Conversione "Pensiero-Diagramma" via input naturale.
-- **Aegis Uplink Config**: Pannello di configurazione globale per la gestione del link neurale e del branding PDF persistito localmente.
-- **Global PDF Branding**: Esportazione PDF automatizzata con testata e piè di pagina SC-ARCHIVE (configurabile).
-- **Global Discovery**: Search engine integrato per file `.md`, `.html`, e `.pdf`.
-- **File Operations**: Gestione completa del buffer (Create, Rename, Delete) con navigazione `UP_DIRECTORY`.
+- **Aegis Uplink Config (v5.0.0)**: Terminale di configurazione centralizzato per la gestione dei parametri operativi (Ollama, Gotenberg, Neural Models) con persistenza locale in `config/settings.json`.
+- **Aegis Industrial UI**: Standardizzazione globale di tutti i campi input, select e textarea con estetica terminale pura, dimensioni ottimizzate (12px) e rimozione dei bordi framework.
+- **Neural Model Intelligence**: Filtro automatico dei modelli Ollama per escludere i motori di embedding dai menu di chat e sintesi.
+- **Dashboard Telemetry 2.0**: Monitoraggio real-time di CPU e Memoria via HTMX (`/stats`) e aggiornamento automatico dello stato servizi al salvataggio della configurazione.
+- **Global PDF Branding**: Esportazione PDF automatizzata con testata e piè di pagina SC-ARCHIVE (configurabile via Uplink).
 
 ## 📦 Protocollo di Installazione (Setup Manual)
 

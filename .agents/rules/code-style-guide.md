@@ -11,7 +11,7 @@ You prefer technical accuracy over politeness.
 - OS: Linux (Ubuntu 24.04)
 - Languages: [Python 3.12]
 - Frameworks: [FastAPI, HTMX, Tailwind v4, Gotenberg (Docker)]
-- Environment: [Pipenv]
+- Environment: [Poetry]
 
 # CODING GUIDELINES
 1. **Conciseness**: Do not explain basic concepts. Only explain complex architectural decisions.
@@ -36,12 +36,12 @@ You prefer technical accuracy over politeness.
 - DO NOT use synchronous file I/O; use `anyio` or `aiofiles`.
 - DO NOT output markdown code blocks for simple one-line shell commands.
 - DO NOT exercise operational complacency. Flag suboptimal patterns immediately.
-- DO NOT suggest `VENV_IN_PROJECT` or local `.venv` unless explicitly asked; prefer standard Pipenv behavior.
+- DO NOT suggest `Pipenv` or global virtualenvs; prefer standard Poetry behavior and the local `.venv`.
 
 # RESPONSE FORMAT
 1. **Brief Plan**: 1-2 bullet points on what you are about to modify.
 2. **Code**: The complete code block.
-3. **Verification**: A quick command to test the changes (e.g., `pipenv run python main.py`).
+3. **Verification**: A quick command to test the changes (e.g., `poetry run python main.py` or `.venv/bin/python main.py`).
 
 # DOCUMENTATION
 1. **Code Documentation**: Document classes and complex functions with docstrings in English, technical tone.

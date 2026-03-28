@@ -5,6 +5,10 @@
             <p class="text-zinc-500 text-sm mt-1">SPACECRAFT DOCUMENTATION MANAGEMENT SYSTEM</p>
         </div>
         <div class="flex items-center space-x-4">
+            <button hx-get="/settings" hx-target="#modal-container"
+                class="btn-ghost text-[10px] rounded-sm focus:outline-none">
+                SETTINGS
+            </button>
             <button hx-get="/root-picker" hx-target="#modal-container"
                 class="btn-ghost text-[10px] rounded-sm focus:outline-none">
                 SET_ARCHIVE
@@ -20,12 +24,8 @@
         {% include 'components/stats_grid.html' %}
     </div>
 
-    <div id="services-status-container"
-        class="grid grid-cols-1 md:grid-cols-2 gap-6"
-        hx-get="/services/status"
-        hx-trigger="load"
-        hx-target="this"
-        hx-swap="innerHTML">
+    <div id="services-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-6" hx-get="/services/status"
+        hx-trigger="load, settings-updated from:body" hx-target="this" hx-swap="innerHTML">
         <div class="glass-panel p-6 tracking-widest uppercase opacity-40 flex items-center space-x-3 col-span-2">
             <i class="fa fa-microchip fa-spin text-(--neon-cyan)"></i>
             <span class="text-xs text-zinc-400">PROBING_BACKEND_SERVICES...</span>
@@ -34,15 +34,16 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 tracking-widest uppercase">
         <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative min-h-[200px]">
-            <h3 class="text-sm font-bold neon-text mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2">
+            <h3
+                class="text-sm font-bold neon-text mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2">
                 {% with class="w-4 h-4" %}{% include 'icons/cube.html' %}{% endwith %}
                 <span>RECENT_FRAGMENTS</span>
             </h3>
             <div class="space-y-2">
                 {% for file in recent_files %}
-                <a href="/editor?path={{ file.path }}"
-                   hx-get="/editor?path={{ file.path }}" hx-target="#aegis-view-core" hx-push-url="true"
-                   class="flex items-center justify-between text-xs group transition-all cursor-pointer hover:bg-(--neon-cyan)/5 p-1 rounded-sm no-underline">
+                <a href="/editor?path={{ file.path }}" hx-get="/editor?path={{ file.path }}"
+                    hx-target="#aegis-view-core" hx-push-url="true"
+                    class="flex items-center justify-between text-xs group transition-all cursor-pointer hover:bg-(--neon-cyan)/5 p-1 rounded-sm no-underline">
                     <span class="text-zinc-100 group-hover:neon-text transition-colors">>> {{ file.name }}</span>
                     <span class="text-zinc-100 font-mono text-[11px]">MOD_TS: {{ file.mtime_str }}</span>
                 </a>
@@ -53,7 +54,8 @@
         </div>
 
         <div class="glass-panel p-6 glass-panel-hover overflow-hidden relative min-h-[200px]">
-            <h3 class="text-sm font-bold neon-text mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2">
+            <h3
+                class="text-sm font-bold neon-text mb-4 border-b border-(--glass-border) pb-2 flex items-center space-x-2">
                 {% with class="w-4 h-4" %}{% include 'icons/assets.html' %}{% endwith %}
                 <span>STORAGE_NODE</span>
             </h3>

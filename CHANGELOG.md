@@ -1,6 +1,25 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.0.0] - AEGIS PERSISTENCE & CENTRALIZED UPLINK (2026-03-28)
+Centralizzazione totale della configurazione in `config/settings.json`, rinfresco industriale della UI e telemetria dashboard ripristinata.
+
+### Added
+- **Settings Persistence**: Introduzione di `logic/settings.py` e `config/settings.json`. Tutti i parametri (Ollama IP, Gotenberg IP, Modelli IA, Flags) sono ora persistenti tra i riavvii.
+- **Dashboard Telemetry**: Ripristinata la rotta `/stats` in `routes/core.py`. La dashboard ora aggiorna CPU, RAM e stato root ogni 30s.
+- **Reactive Refresh**: Al salvataggio dei settings, il pannello `services-status-container` della dashboard si aggiorna via HTMX (`HX-Trigger: settings-updated`).
+- **Neural Filtering**: I modelli Ollama sono ora filtrati per escludere motori di embedding (`embed`, `bge`, `nomic`, ecc.) dai menu di selezione chat/sintesi.
+
+### Changed
+- **Aegis Industrial Style**: Standardizzazione globale in `base.html` per tutti i campi `input`, `select` e `textarea`.
+  - Font: `Roboto Mono` 12px.
+  - Padding: `0.5rem 0.75rem`.
+  - Bordi: rimossi (`border: none`) in favore di background scuri integrati.
+- **Settings Modal Layout**: Riorganizzazione Gestalt del modale. Tighten label-input spacing e aumento gap inter-blocco per eliminare ambiguità visiva.
+- **Uplink logic**: Migrazione di tutte le rotte e servizi all'utilizzo del `SettingsManager` invece delle variabili d'ambiente.
+
+---
+
 ## [4.8.0] - AEGIS FILETREE (2026-03-27)
 Sidebar albero directory nell'editor con navigazione lazy, persistenza stato e palette colori coerente col file browser.
 

@@ -1,6 +1,6 @@
 # Stato del Progetto: SC-ARCHIVE
-**Stato Attuale**: Op_Ready / Versione 4.8.0
-**Ultimo Aggiornamento**: 27 Marzo 2026
+**Stato Attuale**: Op_Ready / Versione 5.0.0
+**Ultimo Aggiornamento**: 28 Marzo 2026
 
 ---
 
@@ -44,9 +44,12 @@
 
 ### 1.5 Neural Interface — AEGIS ORACLE
 - **Ghost-Text (Neural Hint)**: completamento predittivo on-demand (300 token), accettazione via TAB.
-- **Mermaid Synthesis**: generazione diagrammi da linguaggio naturale via Ollama.
-- **Auto-Summarization**: riepilogo contestuale del documento con Wide-HUD (1200px) e scan-overlay.
-- **Multi-endpoint probe**: rileva automaticamente Ollama su `localhost:11434` o `172.31.112.1:11434` all'avvio. Sovrascrivibile via `OLLAMA_URL`.
+- **Mermaid Synthesis**: generazione diagrammi da linguaggio naturale via Ollama (Modello consigliato: `qwen2.5-coder:7b`).
+- **Aegis Intelligence Scan (Hardened)**:
+    *   **Context Expansion**: Finestra di contesto elevata a 16.384 token per analisi di documenti densi.
+    *   **Prompt Delimiters**: Utilizzo di tag strutturali (`[SOURCE_DOCUMENT_START]`) per isolare il contenuto e prevenire drift interpretativo.
+    *   **Surgical Sanitization**: Filtro attivo su `div` allucinati dal modello per proteggere la stabilità del layout HUD.
+- **Multi-endpoint probe**: rileva automaticamente Ollama su `localhost:11434` o `172.31.112.1:11434`. Persistenza via `settings.json`.
 - **Resilienza ConnectTimeout**: errori di connessione gestiti come `OracleError` — mai propagati all'ASGI layer.
 
 ### 1.6 Dashboard & Telemetria
@@ -57,9 +60,12 @@
 - **STORAGE_NODE**: dimensione archivio, conteggio file, percentuale utilizzo disco.
 - Ordine pannelli: System → Backend Services → Recent/Storage.
 
-### 1.7 Aegis Uplink Config
-- Configurazione globale persistita in `config.json`: branding PDF, URL Ollama, modello Oracle.
-- Pannello modale accessibile da toolbar editor e dashboard.
+### 1.7 Aegis Uplink Config (v5.0.0)
+- **Centralized Persistence**: Gestione totale dei parametri operativi in `config/settings.json` (Ollama, Gotenberg, Modelli IA, Flags).
+- **Reactive Refresh**: Aggiornamento automatico della Dashboard via HTMX al salvataggio della configurazione (`HX-Trigger: settings-updated`).
+- **Industrial Form Standard**: Unificazione globale dello stile input/select via `base.html` (12px, borderless, mono, focus neon).
+- **Conditional Logic**: Disattivazione visiva e funzionale dei campi dipendenti (Ollama/Models) quando il `Neural Link` è spento.
+- **Data Loss Prevention**: Logica di merge per preservare i parametri salvati anche quando i campi sono inattivi nella UI.
 
 ### 1.8 UX & Sicurezza
 - Transizioni `scan-in` / `soft-exit` su tutte le modali.
@@ -96,4 +102,4 @@
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v4.8.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.0.0 — DEPLOYMENT_ACTIVE.*
