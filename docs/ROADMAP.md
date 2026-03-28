@@ -46,16 +46,25 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
----
-
-### [4.9] - AEGIS CENTRALIZED UPLINK (Centralized Settings & Industrial UI) [COMPLETED]
+### [4.4] - AEGIS CENTRALIZED UPLINK (Centralized Settings & Industrial UI) [COMPLETED]
 **Obiettivo**: Consolidamento della configurazione e standardizzazione estetica totale.
-- **Settings Manager**: Transizione da variabili ENV a `settings.json` persistente. ✓
+- **Settings Manager**: Transizione da variabili ENV a `config/settings.json` persistente. ✓
 - **Industrial Form Standard**: Unificazione globale dello stile input/select via `base.html` (12px, borderless, mono). ✓
 - **Neural Filtering**: Esclusione automatica modelli di embedding dai selettori operativi. ✓
 - **Reactive Dashboard**: Refresh automatico telemetria e stato servizi via HTMX. ✓
 
-### [4.4] - AEGIS CHRONOS (Versionamento Narrativo) [PLANNED — NEXT]
+---
+
+### [4.5] - AEGIS HARDENING (SOLID & CSP Compliance) [COMPLETED]
+**Obiettivo**: Conformità architetturale SOLID su tutto il codebase Python e CSP compliance per penetration test.
+- **SOLID full-stack**: Protocol types, DI constructor, mutation hook registry, async I/O su tutti i moduli. ✓
+- **CSP Ready**: eliminati tutti gli `style=` inline da template e route. `style-src 'self'` senza `unsafe-inline`. ✓
+- **CSS extraction**: `editor-aegis.css`, `pdf-industrial.css`, `pdf-preview.css` come file statici dedicati. ✓
+- **Package restructure**: `config/` promosso a package Python, `logic/__init__.py` aggiunto. ✓
+
+---
+
+### [4.6] - AEGIS CHRONOS (Versionamento Narrativo) [PLANNED — NEXT]
 **Obiettivo**: Strato di versionamento leggero e non invasivo per archivi narrativi (scenari RPG, documentazione tecnica). Modulo **opt-in**: attivo solo se la root selezionata contiene già un repo Git. Non crea repo, non tocca remoti, non esegue mai operazioni distruttive.
 - **Detect automatico**: `git rev-parse --git-dir` sulla root — se assente, pannello in stato `GIT_REPO_NOT_DETECTED` con istruzioni init.
 - **Branch indicator**: visualizzazione del branch corrente nell'editor e nella dashboard.
@@ -70,28 +79,21 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.5] - AEGIS BLUEPRINT (Technical Templating)
+### [4.7] - AEGIS BLUEPRINT (Technical Templating) [PLANNED]
 **Obiettivo**: Standardizzazione della produzione documentale industriale.
-- **Galeria Blueprint**: Inserimento istantaneo di template (Missions, Tech Specs, Logs).
+- **Galleria Blueprint**: Inserimento istantaneo di template (Missions, Tech Specs, Logs).
 - **Variable Injection**: Sostituzione dinamica di segnaposto nel Markdown prima dell'export PDF.
 
 ---
 
-### [4.6] - AEGIS MULTI-LINK (Efficiency Multi-Tasking)
-**Obiettivo**: Gestione simultanea di più flussi informativi.
-- **Tabbed Workspace**: Interfaccia a schede HTMX per l'editing simultaneo di più documenti.
-- **Split Pane Sync**: Trascinamento e sincronizzazione di sezioni tra diversi documenti aperti.
-
----
-
-### [4.7] - AEGIS GUARD (Local Security Protocol)
+### [4.8] - AEGIS GUARD (Local Security Protocol) [PLANNED]
 **Obiettivo**: Blindatura dei dati locali e gestione dell'accesso in rete.
 - **Buffer Encryption**: Cifratura simmetrica dei documenti sensibili a livello di filesystem.
 - **Network Gateway UI**: Strumenti per la gestione della visibilità della stazione nella rete WiFi locale.
 
 ---
 
-### [4.8] - AEGIS STABILITY (System Integrity)
+### [4.9] - AEGIS STABILITY (System Integrity) [PLANNED]
 **Obiettivo**: Rafforzamento della robustezza del codice e della diagnostica in tempo reale.
 - **Centralized Exception Handling**: Implementazione di un gestore centralizzato delle eccezioni custom (`logic/exceptions.py`) per una telemetria ultra-precisa dei guasti direttamente nell'HUD operativo.
 
