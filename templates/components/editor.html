@@ -1,11 +1,9 @@
-<div id="editor-easymde-root"
-    style="width: 100% !important; height: 85vh !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; min-width: 0 !important; background: transparent !important;">
+<div id="editor-easymde-root">
 
     <link rel="stylesheet" href="/static/css/editor-aegis.css">
 
     <!-- Row 1: Status & Context -->
-    <div class="glass-panel px-4 py-3 flex items-center justify-between border-b-0 rounded-b-none shrink-0"
-        style="background: rgba(20, 20, 25, 0.8) !important; margin-bottom: 0.5rem !important;">
+    <div class="aegis-editor-header glass-panel px-4 py-3 flex items-center justify-between border-b-0 rounded-b-none shrink-0">
         <div
             class="flex items-center space-x-3 text-xs uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden grow">
             <div id="aegis-filetree-toggle-wrap" class="tooltip tooltip-bottom shrink-0" data-tip="Toggle Archive Tree">
@@ -42,12 +40,10 @@
     </div>
 
     <!-- Main Editor Row -->
-    <div class="grow flex min-w-0 min-h-0 overflow-hidden glass-panel"
-        style="width: 100% !important; background: rgba(15, 23, 42, 0.5) !important; border-top: none !important; border-radius: 0 0 4px 4px !important;">
+    <div class="aegis-editor-main grow flex min-w-0 min-h-0 overflow-hidden glass-panel">
 
         <!-- FILETREE SIDEBAR -->
-        <div id="aegis-filetree"
-            style="width: 260px; min-width: 0; flex-shrink: 0; overflow: hidden; border-right: 1px solid var(--glass-border); transition: width 0.2s ease;">
+        <div id="aegis-filetree">
             <div id="aegis-filetree-inner" hx-get="/tree?active={{ path }}" hx-trigger="load delay:50ms"
                 hx-target="this" hx-swap="innerHTML" class="h-full overflow-y-auto overflow-x-hidden">
                 <div class="p-3 text-[10px] text-zinc-600 tracking-widest animate-pulse uppercase">SCANNING_ARCHIVE...
@@ -64,8 +60,7 @@
 
     <!-- AEGIS_NEURAL_SCAN_OVERLAY: Top-level fixed elevation -->
     <div id="editor-scan-overlay"
-        class="fixed inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center z-[9999] rounded-sm border border-(--neon-cyan)/30 shadow-[inset_0_0_50px_rgba(0,240,255,0.1)]"
-        style="display: none;">
+        class="fixed inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center z-9999 rounded-sm border border-(--neon-cyan)/30 shadow-[inset_0_0_50px_rgba(0,240,255,0.1)]">
         <div class="flex flex-col items-center space-y-4">
             <i
                 class="fa fa-microchip fa-spin text-4xl text-(--neon-cyan) drop-shadow-[0_0_15px_rgba(0,240,255,0.8)]"></i>
