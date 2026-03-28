@@ -1,5 +1,5 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
-**Versione 5.2.0** // AEGIS TOTAL CONTROL
+**Versione 5.3.0** // AEGIS SOLID & CSP
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -77,9 +77,12 @@ Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
 
 ## 📂 Struttura del Progetto
 - `main.py`: Punto di convergenza dei router Aegis.
-- `logic/`: Logica di business (File management, Conversion, Oracle).
+- `logic/`: Logica di business (File management, Conversion, Oracle, Render).
+- `routes/`: APIRouter modules (core, archive, editor, pdf, config, oracle).
+- `config/`: Package Python — `settings.py` (SettingsManager) + `settings.json` (store persistente).
 - `templates/components/`: Frammenti HTML/HTMX industriali.
-- `static/css/`: Sorgenti e output del design system Aegis.
+- `templates/layouts/`: Layout base (`base.html`).
+- `static/css/`: Design system Aegis — `output.css`, `editor-aegis.css`, `pdf-industrial.css`, `pdf-preview.css`.
 - `docs/`: Database di documentazione operativa e tecnica.
 
 ---

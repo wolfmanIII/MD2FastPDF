@@ -1,5 +1,5 @@
 # Stato del Progetto: SC-ARCHIVE
-**Stato Attuale**: Op_Ready / Versione 5.2.0
+**Stato Attuale**: Op_Ready / Versione 5.3.0
 **Ultimo Aggiornamento**: 28 Marzo 2026
 
 ---
@@ -35,6 +35,7 @@
 - **HUD_PRINT Toggle**: header/footer branded SC-ARCHIVE (modalità HUD) o solo numero di pagina (slim).
 - **Global PDF Branding**: testata e piè di pagina configurabili da Uplink Config, persistiti localmente.
 - Sanitizzazione XSS via `bleach` sulla pipeline di conversione.
+- **Industrial PDF CSS**: stylesheet `static/css/pdf-industrial.css` caricato a module init — nessun CSS inline nel codice Python.
 
 ### 1.4 Aegis Render Engine (Mermaid Image Export)
 - **PNG Export**: rendering del singolo blocco Mermaid in PNG via Gotenberg (screenshot headless).
@@ -61,18 +62,19 @@
 - **STORAGE_NODE**: dimensione archivio, conteggio file, percentuale utilizzo disco.
 - Ordine pannelli: System → Backend Services → Recent/Storage.
 
-### 1.7 Aegis Uplink Config (v5.0.0)
-- **Centralized Persistence**: Gestione totale dei parametri operativi in `config/settings.json` (Ollama, Gotenberg, Modelli IA, Flags).
+### 1.7 Aegis Uplink Config
+- **Centralized Persistence**: Gestione totale dei parametri operativi in `config/settings.json` (Ollama, Gotenberg, Modelli IA, Flags). Modulo: `config/settings.py`.
 - **Reactive Refresh**: Aggiornamento automatico della Dashboard via HTMX al salvataggio della configurazione (`HX-Trigger: settings-updated`).
 - **Industrial Form Standard**: Unificazione globale dello stile input/select via `base.html` (12px, borderless, mono, focus neon).
 - **Conditional Logic**: Disattivazione visiva e funzionale dei campi dipendenti (Ollama/Models) quando il `Neural Link` è spento.
 - **Data Loss Prevention**: Logica di merge per preservare i parametri salvati anche quando i campi sono inattivi nella UI.
 
-### 1.8 UX & Sicurezza
+### 1.8 UX, Sicurezza & CSP Compliance
 - Transizioni `scan-in` / `soft-exit` su tutte le modali.
 - Sanitizzazione path obbligatoria (prevenzione `../`), sanitizzazione Markdown (XSS via `bleach`).
 - DaisyUI tooltip su tutti i controlli azione (z-index stratificato).
-- `btn-neon` custom class con `!important` per override DaisyUI su bottoni cyan.
+- **CSP Ready**: eliminati tutti gli attributi `style=` inline dai template e dagli snippet HTML generati dai route. Solo 2 eccezioni strutturali (valori dinamici Jinja2: `--w: {{ value }}%`).
+- CSS estratti in file statici dedicati (`editor-aegis.css`, `pdf-industrial.css`, `pdf-preview.css`).
 
 ---
 
@@ -87,6 +89,14 @@
 | AI Layer | Ollama locale (`qwen2.5-coder:7b`), GPU offload Pascal-class |
 | Render Engine | Gotenberg screenshot headless per PNG Mermaid |
 | Environment | Poetry + pyenv (Python 3.13) |
+
+### Package Structure
+```
+logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, templates.py
+routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle
+config/         __init__.py + settings.py (SettingsManager) + settings.json
+static/css/     output.css, editor-aegis.css, pdf-industrial.css, pdf-preview.css, main.css
+```
 
 ---
 
@@ -103,4 +113,4 @@
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.2.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.3.0 — DEPLOYMENT_ACTIVE.*

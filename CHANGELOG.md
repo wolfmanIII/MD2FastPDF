@@ -1,6 +1,35 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.3.0] - SOLID COMPLIANCE & CSP HARDENING (2026-03-28)
+Refactoring architetturale completo per conformità SOLID e rimozione totale degli attributi `style=` inline per CSP compliance.
+
+### Changed — Architettura
+- **`logic/settings.py` → `config/settings.py`**: il modulo di configurazione è co-locato con `config/settings.json`. `config/` è ora un package Python con `__init__.py`. Aggiornati tutti i 6 punti di import.
+- **`logic/__init__.py`**: aggiunto per dichiarazione esplicita del package (coerenza con `routes/` e `config/`).
+- **`routes/__init__.py`**: estratta `build_breadcrumbs(path)` utility — eliminata la triplicazione in `archive`, `editor`, `pdf`.
+
+### Changed — SOLID Refactoring (`logic/`)
+- **`logic/conversion.py`**: introdotti Protocol `PageScaffolding`, `RendererProtocol`, `HtmlBuilderProtocol`; dataclass `DetailedScaffolding`, `MinimalScaffolding`; classi `MarkdownRenderer`, `PdfHtmlBuilder`. `GotenbergClient` accetta `url_provider: Callable`, `renderer`, `builder` via DI. Aggiunto `health_check()`.
+- **`logic/oracle.py`**: `_EMBEDDING_KEYWORDS: frozenset` a livello modulo; `OracleClient.__init__` accetta `cfg: SettingsManager` (DI); aggiunti `service_status()` e `list_models()`.
+- **`logic/files.py`**: introdotto registro mutation hook (`register_mutation_hook`, `_notify_mutation`) per invertire la dipendenza `FileManager` → `StorageCache`; `os.scandir` e `os.walk` offloaded via `anyio.to_thread.run_sync`; `get_recent()` spostato in `DirectoryLister`.
+- **`logic/settings.py`**: `save()` e `set()` async con `anyio.open_file`; aggiunto `batch_update()` per scrittura singola su disco; `_save_sync()` esplicito per startup.
+- **`routes/core.py`**: `services_status()` delega a `gotenberg.health_check()` e `oracle.service_status()`; estratto `_system_context()`.
+- **`routes/pdf.py`**: estratto `_resolve_pdf_bytes()` async helper.
+- **`routes/settings.py`**: `save_settings()` usa `batch_update()` — singola scrittura disco; `list_ollama_models()` rimosso (spostato in `OracleClient.list_models()`).
+
+### Changed — CSS Architecture
+- **`static/css/pdf-industrial.css`**: estratto da costante `INDUSTRIAL_CSS` in `logic/conversion.py`. Caricato una volta al module init via `Path.read_text()`.
+- **`static/css/editor-aegis.css`**: estratti i due blocchi `<style>` da `templates/components/editor.html`.
+- **`static/css/pdf-preview.css`**: nuovo file per tooltip override, overflow, `#pdf-iframe`, `.aegis-pdf-content`.
+
+### Fixed — CSP Compliance
+- **Eliminati tutti gli attributi `style=` inline** dai template (9 file) e dagli snippet HTML generati dai route (`routes/archive.py`, `routes/editor.py`).
+- Nuove classi CSS in `main.css`: `.aegis-input-bg`, `.btn-violet`, `.aegis-hud-modal`, `#mermaid-error`.
+- Nuove classi in `editor-aegis.css`: `#editor-pure-root`, `#pure-editor-input`, `.aegis-panel-bg`, `#editor-easymde-root`, `#aegis-filetree`, `#editor-scan-overlay`, `.aegis-editor-header`, `.aegis-editor-main`.
+- Rimangono 2 soli `style=` intenzionali (valori CSS dinamici Jinja2: `--w: {{ value }}%` in `dashboard.html` e `stats_grid.html`).
+- I `style=` in `logic/conversion.py` (header/footer Gotenberg) sono strutturalmente necessari: Gotenberg non ha accesso ai file statici dell'app.
+
 ## [5.2.0] - AEGIS BROADCAST & CONTEXT PRECISION (2026-03-28)
 Introduzione del feedback visivo universale per lo stato del protocollo e perfezionamento della stabilità dei suggerimenti neurale.
 
