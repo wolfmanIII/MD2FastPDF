@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse, JSONResponse, HTMLResponse, Red
 from typing import Optional
 from pydantic import BaseModel
 from logic.oracle import generate_completion, generate_mermaid, summarize_document, oracle, PromptTemplates
-from logic.settings import settings as app_settings
+from config.settings import settings as app_settings
 from logic.templates import templates
 from logic.conversion import MarkdownRenderer
 from logic.files import get_project_root

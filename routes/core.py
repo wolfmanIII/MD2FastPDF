@@ -1,7 +1,7 @@
 import psutil
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-from logic.settings import settings
+from config.settings import settings
 from logic.templates import templates
 from logic.files import get_recent_files, get_storage_stats, get_project_root
 from logic.conversion import gotenberg

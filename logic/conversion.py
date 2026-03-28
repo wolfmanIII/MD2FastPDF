@@ -6,7 +6,7 @@ from typing import Optional, Callable, Protocol
 
 import markdown
 
-from logic.settings import settings
+from config.settings import settings
 
 # AEGIS_PERFORMANCE_LAYER: Load industrial PDF stylesheet once at module init
 _CSS_PATH = Path(__file__).parent.parent / "static" / "css" / "pdf-industrial.css"

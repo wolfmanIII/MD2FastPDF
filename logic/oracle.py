@@ -2,7 +2,7 @@ import httpx
 import json
 from typing import AsyncGenerator, Optional
 
-from logic.settings import SettingsManager, settings
+from config.settings import SettingsManager, settings
 
 # AEGIS_ORACLE_PROTOCOL: Tactical Neural Interface
 _EMBEDDING_KEYWORDS: frozenset[str] = frozenset([

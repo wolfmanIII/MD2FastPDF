@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Form, Response
 from fastapi.responses import HTMLResponse
 from logic.templates import templates
-from logic.settings import settings as app_settings
+from config.settings import settings as app_settings
 from logic.oracle import oracle as neural_oracle
 from typing import List
 

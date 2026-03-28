@@ -6,7 +6,7 @@ from typing import Optional
 from logic.templates import templates
 from logic.files import read_file_content, read_file_bytes
 from logic.conversion import convert_markdown_to_pdf
-from logic.settings import settings as app_settings
+from config.settings import settings as app_settings
 from routes import build_breadcrumbs
 
 # AEGIS_CONVERSION_ROUTER: PDF and HTML processing pipeline
