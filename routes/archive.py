@@ -73,7 +73,7 @@ async def create_new_file_route(request: Request, path: str = Form("."), filenam
         await create_new_file(path, filename)
     except HTTPException as e:
         return HTMLResponse(
-            content=f'<div class="text-[var(--neon-cyan)] font-bold text-[10px] tracking-widest uppercase mt-4" style="text-shadow: var(--neon-glow);">SYSTEM_ERROR // {e.detail}</div>',
+            content=f'<div class="neon-text font-bold text-[10px] tracking-widest uppercase mt-4">SYSTEM_ERROR // {e.detail}</div>',
             status_code=400
         )
         
