@@ -67,17 +67,26 @@ async def render_mermaid_png(code: str, client: Optional[httpx.AsyncClient] = No
             await _client.aclose()
 
 
-async def render_mermaid_zip(content: str, base_name: str) -> bytes:
+async def render_mermaid_zip(
+    content: str,
+    base_name: str,
+    client: Optional[httpx.AsyncClient] = None,
+) -> bytes:
     """Render all Mermaid blocks in a document and package them as a ZIP archive."""
     blocks = extract_mermaid_blocks(content)
     if not blocks:
         raise ValueError("NO_MERMAID_BLOCKS_FOUND")
 
     buf = io.BytesIO()
-    async with httpx.AsyncClient(timeout=30.0) as client:
+    _owned = client is None
+    _client = client or httpx.AsyncClient(timeout=30.0)
+    try:
         with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
             for i, code in enumerate(blocks, 1):
-                png = await render_mermaid_png(code, client)
+                png = await render_mermaid_png(code, _client)
                 zf.writestr(f"{base_name}_diagram_{i:02d}.png", png)
+    finally:
+        if _owned:
+            await _client.aclose()
 
     return buf.getvalue()

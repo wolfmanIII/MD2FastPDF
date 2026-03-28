@@ -1,14 +1,15 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from logic.templates import templates
 from routes import core, archive, editor, pdf, config, oracle, render, settings
 from logic.conversion import gotenberg
 from logic.oracle import oracle as neural_oracle
+from logic.files import StorageCache, register_mutation_hook
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # AEGIS_BOOT: Initializing persistent resources
+    register_mutation_hook(StorageCache.invalidate)
     await neural_oracle.probe_url()
     yield
     # AEGIS_SHUTDOWN: Graceful connection cleanup

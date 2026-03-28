@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
-import os
 from pathlib import Path
 from logic.templates import templates
 from logic.files import read_file_content, write_file_content
+from routes import build_breadcrumbs
 
 # AEGIS_EDITOR_ROUTER: Code and buffer management
 router = APIRouter(tags=["Aegis Editor"])
@@ -14,27 +14,12 @@ async def get_editor(request: Request, path: str):
     Returns the editor fragment (EasyMDE/Pure).
     """
     content = await read_file_content(path)
-    
-    # Breadcrumbs
-    parent_path = str(Path(path).parent)
-    parts = parent_path.split(os.sep) if parent_path != "." else []
-    breadcrumbs = [{"name": "ROOT", "path": "."}]
-    accumulated_path = []
-    
-    for part in parts:
-        if part and part != ".":
-            accumulated_path.append(part)
-            breadcrumbs.append({
-                "name": part.upper(),
-                "path": os.sep.join(accumulated_path)
-            })
-
     context = {
         "request": request,
         "content": content,
         "path": path,
         "filename": Path(path).name,
-        "breadcrumbs": breadcrumbs,
+        "breadcrumbs": build_breadcrumbs(str(Path(path).parent)),
         "component_template": "components/editor.html"
     }
 

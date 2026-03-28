@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Union, Optional, Set
+from typing import List, Dict, Union, Optional, Set, Callable
 import anyio
 from fastapi import HTTPException
 
@@ -14,9 +14,22 @@ CACHE_TTL: int = 60  # Seconds
 # Global state for the active project root
 _CURRENT_ROOT: Path = Path(__file__).parent.parent.resolve()
 
+# Mutation hook registry — inverted dependency for cache invalidation
+_mutation_hooks: list[Callable[[], None]] = []
+
+def register_mutation_hook(fn: Callable[[], None]) -> None:
+    """Registers a callback invoked after any write/delete/rename operation."""
+    if fn not in _mutation_hooks:
+        _mutation_hooks.append(fn)
+
+def _notify_mutation() -> None:
+    for hook in _mutation_hooks:
+        hook()
+
+
 class PathSanitizer:
     """Handles path security and validation for the Aegis Archive."""
-    
+
     @staticmethod
     def get_root() -> Path:
         return _CURRENT_ROOT
@@ -29,7 +42,7 @@ class PathSanitizer:
         if not str(resolved).startswith(str(Path.home().resolve())):
             raise HTTPException(status_code=403, detail="ACCESS_DENIED: Root must be within HOME")
         _CURRENT_ROOT = resolved
-        StorageCache.invalidate()
+        _notify_mutation()
 
     @staticmethod
     def resolve_and_sanitize(relative_path: str) -> Path:
@@ -37,16 +50,16 @@ class PathSanitizer:
         root = PathSanitizer.get_root()
         try:
             requested_path = (root / relative_path.strip("/")).resolve()
-            
+
             # Traversal Check
             if not str(requested_path).startswith(str(root)):
                 raise HTTPException(status_code=403, detail="ACCESS_DENIED: Path outside active root")
-            
+
             # Hidden Path Check
             parts = requested_path.relative_to(root).parts
             if any(part.startswith(".") for part in parts):
                 raise HTTPException(status_code=403, detail="ACCESS_DENIED: Hidden path access forbidden")
-                
+
             return requested_path
         except HTTPException:
             raise
@@ -61,53 +74,57 @@ class DirectoryLister:
         """Lists directories in HOME specifically for the root picker."""
         home = Path.home().resolve()
         target = (home / relative_path.strip("/")).resolve()
-        
+
         if not str(target).startswith(str(home)):
             target = home
 
-        dirs = []
-        try:
-            for entry in os.scandir(target):
-                if entry.is_dir() and not entry.name.startswith("."):
-                    dirs.append({
-                        "name": entry.name,
-                        "path": str((target / entry.name).relative_to(home))
-                    })
-        except PermissionError as e:
-            raise HTTPException(status_code=403, detail="ACCESS_DENIED: Directory non leggibile") from e
-        
-        return sorted(dirs, key=lambda x: x["name"].lower())
+        def _scan():
+            dirs = []
+            try:
+                for entry in os.scandir(target):
+                    if entry.is_dir() and not entry.name.startswith("."):
+                        dirs.append({
+                            "name": entry.name,
+                            "path": str((target / entry.name).relative_to(home))
+                        })
+            except PermissionError as e:
+                raise HTTPException(status_code=403, detail="ACCESS_DENIED: Directory non leggibile") from e
+            return sorted(dirs, key=lambda x: x["name"].lower())
+
+        return await anyio.to_thread.run_sync(_scan)
 
     @staticmethod
     async def list_contents(relative_path: str = ".") -> List[Dict[str, Union[str, bool]]]:
         """Lists allowed files and directories in the project root."""
         target_path = PathSanitizer.resolve_and_sanitize(relative_path)
-        
+
         if not target_path.is_dir():
             raise HTTPException(status_code=404, detail="DIRECTORY_NOT_FOUND")
 
-        items = []
-        try:
-            for entry in os.scandir(target_path):
-                if entry.name.startswith(".") or entry.name in SKIP_DIRS:
-                    continue
-                    
-                if entry.is_dir():
-                    items.append({
-                        "name": entry.name,
-                        "is_dir": True,
-                        "path": str(Path(relative_path) / entry.name)
-                    })
-                elif any(entry.name.lower().endswith(ext) for ext in ALLOWED_EXTENSIONS):
-                    items.append({
-                        "name": entry.name,
-                        "is_dir": False,
-                        "path": str(Path(relative_path) / entry.name)
-                    })
-        except PermissionError:
-            raise HTTPException(status_code=403, detail="PERMISSION_DENIED")
+        def _scan():
+            items = []
+            try:
+                for entry in os.scandir(target_path):
+                    if entry.name.startswith(".") or entry.name in SKIP_DIRS:
+                        continue
 
-        return sorted(items, key=lambda x: (not x["is_dir"], x["name"].lower()))
+                    if entry.is_dir():
+                        items.append({
+                            "name": entry.name,
+                            "is_dir": True,
+                            "path": str(Path(relative_path) / entry.name)
+                        })
+                    elif any(entry.name.lower().endswith(ext) for ext in ALLOWED_EXTENSIONS):
+                        items.append({
+                            "name": entry.name,
+                            "is_dir": False,
+                            "path": str(Path(relative_path) / entry.name)
+                        })
+            except PermissionError:
+                raise HTTPException(status_code=403, detail="PERMISSION_DENIED")
+            return sorted(items, key=lambda x: (not x["is_dir"], x["name"].lower()))
+
+        return await anyio.to_thread.run_sync(_scan)
 
     @staticmethod
     async def search(query: str) -> List[Dict[str, Union[str, bool]]]:
@@ -132,6 +149,32 @@ class DirectoryLister:
             return sorted(results, key=lambda x: x["name"].lower())
 
         return await anyio.to_thread.run_sync(_scan)
+
+    @staticmethod
+    async def get_recent(limit: int = 5) -> List[Dict[str, Union[str, float]]]:
+        """Returns the most recently modified allowed files in the archive."""
+        def _scan():
+            files = []
+            root = PathSanitizer.get_root()
+            for r, dirs, filenames in os.walk(root):
+                dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith(".")]
+                for filename in filenames:
+                    if any(filename.lower().endswith(ext) for ext in ALLOWED_EXTENSIONS) and not filename.startswith("."):
+                        file_path = Path(r) / filename
+                        try:
+                            mtime = file_path.stat().st_mtime
+                            files.append({
+                                "name": filename,
+                                "path": str(file_path.relative_to(root)),
+                                "mtime": mtime,
+                                "mtime_str": datetime.fromtimestamp(mtime).strftime("%d-%m %H:%M")
+                            })
+                        except (FileNotFoundError, PermissionError):
+                            continue
+            return sorted(files, key=lambda x: x["mtime"], reverse=True)[:limit]
+
+        return await anyio.to_thread.run_sync(_scan)
+
 
 class FileManager:
     """Primary file operation unit for Aegis Archives."""
@@ -168,18 +211,18 @@ class FileManager:
         filename = filename.strip()
         if not filename:
             raise HTTPException(status_code=400, detail="FILENAME_REQUIRED")
-            
+
         if not any(filename.lower().endswith(ext) for ext in TEXT_EXTENSIONS):
             filename += ".md"
-            
+
         file_path = PathSanitizer.resolve_and_sanitize(os.path.join(relative_dir, filename))
         if file_path.exists():
             raise HTTPException(status_code=400, detail="FILE_ALREADY_EXISTS")
-            
+
         async with await anyio.open_file(file_path, mode="w", encoding="utf-8") as f:
             await f.write("")
-        
-        StorageCache.invalidate()
+
+        _notify_mutation()
         return str(Path(relative_dir) / filename)
 
     @staticmethod
@@ -203,7 +246,7 @@ class FileManager:
             raise HTTPException(status_code=400, detail="FILE_ALREADY_EXISTS")
 
         await anyio.to_thread.run_sync(lambda: old_path.rename(new_path))
-        StorageCache.invalidate()
+        _notify_mutation()
         return str(Path(relative_path).parent / new_name)
 
     @staticmethod
@@ -211,9 +254,9 @@ class FileManager:
         path = PathSanitizer.resolve_and_sanitize(relative_path)
         if not path.is_file() or not any(str(path).lower().endswith(ext) for ext in ALLOWED_EXTENSIONS):
             raise HTTPException(status_code=400, detail="INVALID_FILE_TYPE")
-            
+
         await anyio.to_thread.run_sync(os.remove, str(path))
-        StorageCache.invalidate()
+        _notify_mutation()
 
 class StorageCache:
     """In-memory telemetry cache for archive statistics."""
@@ -242,11 +285,11 @@ class StorageCache:
                             count += 1
                         except (FileNotFoundError, PermissionError):
                             continue
-            
+
             size_str = f"{total_size} B" if total_size < 1024 else \
                        f"{total_size/1024:.1f} KB" if total_size < 1024**2 else \
                        f"{total_size/1024**2:.1f} MB"
-                
+
             return {
                 "total_size": size_str,
                 "file_count": count,
@@ -258,29 +301,6 @@ class StorageCache:
         cls._cache["timestamp"] = now
         return data
 
-    @staticmethod
-    async def get_recent(limit: int = 5) -> List[Dict[str, Union[str, float]]]:
-        def _scan():
-            files = []
-            root = PathSanitizer.get_root()
-            for r, dirs, filenames in os.walk(root):
-                dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith(".")]
-                for filename in filenames:
-                    if any(filename.lower().endswith(ext) for ext in ALLOWED_EXTENSIONS) and not filename.startswith("."):
-                        file_path = Path(r) / filename
-                        try:
-                            mtime = file_path.stat().st_mtime
-                            files.append({
-                                "name": filename,
-                                "path": str(file_path.relative_to(root)),
-                                "mtime": mtime,
-                                "mtime_str": datetime.fromtimestamp(mtime).strftime("%d-%m %H:%M")
-                            })
-                        except (FileNotFoundError, PermissionError):
-                            continue
-            return sorted(files, key=lambda x: x["mtime"], reverse=True)[:limit]
-
-        return await anyio.to_thread.run_sync(_scan)
 
 # --- Legacy Compatibility Layer (Aegis Backward Sync) ---
 def get_project_root() -> Path: return PathSanitizer.get_root()
@@ -294,6 +314,6 @@ async def write_file_content(p, c): await FileManager.write_text(p, c)
 async def create_new_file(d, f): return await FileManager.create(d, f)
 async def rename_file(p, n): return await FileManager.rename(p, n)
 async def delete_file(p): await FileManager.delete(p)
-async def get_recent_files(l=5): return await StorageCache.get_recent(l)
+async def get_recent_files(l=5): return await DirectoryLister.get_recent(l)
 async def get_storage_stats(): return await StorageCache.get_stats()
 async def search_files(q): return await DirectoryLister.search(q)

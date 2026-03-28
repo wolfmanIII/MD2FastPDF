@@ -1,5 +1,5 @@
 import json
-import os
+import anyio
 from pathlib import Path
 from typing import Any, Dict
 
@@ -27,13 +27,13 @@ class SettingsManager:
         self.load()
 
     def load(self):
-        """Loads settings from the filesystem or initializes defaults."""
+        """Loads settings from the filesystem or initializes defaults. Sync — startup only."""
         if not CONFIG_DIR.exists():
             CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
         if not SETTINGS_FILE.exists():
             self._settings = DEFAULT_SETTINGS.copy()
-            self.save()
+            self._save_sync()
         else:
             try:
                 with open(SETTINGS_FILE, "r") as f:
@@ -43,19 +43,30 @@ class SettingsManager:
                     self._settings.update(file_data)
             except (json.JSONDecodeError, IOError):
                 self._settings = DEFAULT_SETTINGS.copy()
-                self.save()
+                self._save_sync()
 
-    def save(self):
-        """Persists current state to config/settings.json."""
+    def _save_sync(self):
+        """Sync write used exclusively during startup (load). Do not call from async context."""
         with open(SETTINGS_FILE, "w") as f:
             json.dump(self._settings, f, indent=4)
+
+    async def save(self):
+        """Persists current state to config/settings.json asynchronously."""
+        data = json.dumps(self._settings, indent=4)
+        async with await anyio.open_file(SETTINGS_FILE, "w") as f:
+            await f.write(data)
 
     def get(self, key: str, default: Any = None) -> Any:
         return self._settings.get(key, default)
 
-    def set(self, key: str, value: Any):
+    async def set(self, key: str, value: Any) -> None:
         self._settings[key] = value
-        self.save()
+        await self.save()
+
+    async def batch_update(self, updates: Dict[str, Any]) -> None:
+        """Applies multiple key updates and persists once."""
+        self._settings.update(updates)
+        await self.save()
 
     @property
     def all(self) -> Dict[str, Any]:

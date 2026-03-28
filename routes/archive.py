@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse
-import os
 from pathlib import Path
 from logic.templates import templates
 from logic.files import (
     list_directory_contents, create_new_file, delete_file, rename_file, search_files
 )
+from routes import build_breadcrumbs
 
 
 # AEGIS_ARCHIVE_ROUTER: Operational file management
@@ -17,25 +17,11 @@ async def list_files(request: Request, path: str = "."):
     Returns the file list fragment for a given path.
     """
     items = await list_directory_contents(path)
-    
-    # Breadcrumb Generation
-    parts = path.split(os.sep) if path != "." else []
-    breadcrumbs = [{"name": "ROOT", "path": "."}]
-    accumulated_path = []
-    
-    for part in parts:
-        if part and part != ".":
-            accumulated_path.append(part)
-            breadcrumbs.append({
-                "name": part.upper(),
-                "path": os.sep.join(accumulated_path)
-            })
-    
     context = {
         "request": request,
         "items": items,
         "current_path": path,
-        "breadcrumbs": breadcrumbs,
+        "breadcrumbs": build_breadcrumbs(path),
         "component_template": "components/file_list.html"
     }
 

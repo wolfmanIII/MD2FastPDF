@@ -1,9 +1,11 @@
 import httpx
-import anyio
-import os
 import bleach
-from typing import Optional, Dict
+from dataclasses import dataclass
+from typing import Optional, Callable, Protocol
+
 import markdown
+
+from logic.settings import settings
 
 # AEGIS_PERFORMANCE_LAYER: Industrial PDF assets
 INDUSTRIAL_CSS = """
@@ -29,7 +31,7 @@ img { max-width: 100%; height: auto; border-radius: 4px; margin: 1rem 0; }
 
 CLEANER = bleach.Cleaner(
     tags={
-        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'code', 'table', 
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'code', 'table',
         'thead', 'tbody', 'tr', 'td', 'th', 'img', 'br', 'hr', 'blockquote',
         'ul', 'ol', 'li', 'em', 'strong', 'del', 'a', 'div', 'span'
     },
@@ -40,92 +42,88 @@ CLEANER = bleach.Cleaner(
     }
 )
 
-from logic.settings import settings
 
-class GotenbergClient:
-    """Industrial Client for Gotenberg PDF Engine (Aegis Optimus)."""
-    
-    def __init__(self):
-        self.client = httpx.AsyncClient(
-            timeout=60.0, 
-            limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
-        )
+class PageScaffolding(Protocol):
+    """Defines PDF page header and footer HTML fragments."""
+    @property
+    def header(self) -> str: ...
+    @property
+    def footer(self) -> str: ...
 
-    def _get_url(self) -> str:
-        return settings.get("gotenberg_ip", "http://localhost:3000")
 
-    async def shutdown(self):
-        await self.client.aclose()
+class RendererProtocol(Protocol):
+    """Converts raw Markdown content to sanitized HTML."""
+    def render(self, content: str) -> str: ...
 
-    async def render_pdf(self, markdown_content: str, filename: str, show_header_footer: bool = False) -> bytes:
-        """Converts markdown to PDF with sanitization and industrial styling."""
-        url = self._get_url()
+
+class HtmlBuilderProtocol(Protocol):
+    """Wraps an HTML body fragment into a complete HTML document."""
+    def wrap(self, html_body: str) -> str: ...
+
+
+@dataclass
+class DetailedScaffolding:
+    """Full branded header and footer for high-detail PDF output."""
+    filename_display: str
+
+    @property
+    def header(self) -> str:
+        return f"""
+        <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in;">
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: left; color: #64748b;">SC-ARCHIVE // {self.filename_display}</td>
+                    <td style="text-align: right; color: #64748b;">AEGIS // SECURED</td>
+                </tr>
+            </table>
+        </div>
+        """
+
+    @property
+    def footer(self) -> str:
+        return """
+        <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in; color: #64748b;">
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: left;">OS_CORE_v2.0 // SC-ARCHIVE_PROTOCOL</td>
+                    <td style="text-align: right;">PAGE <span class="pageNumber"></span> / <span class="totalPages"></span></td>
+                </tr>
+            </table>
+        </div>
+        """
+
+
+class MinimalScaffolding:
+    """Page-number-only footer for unbranded PDF output."""
+
+    @property
+    def header(self) -> str:
+        return ""
+
+    @property
+    def footer(self) -> str:
+        return """
+        <div style="width: 100%; font-size: 8px; font-family: monospace; margin: 0 0.5in; color: #64748b; text-align: right;">
+            <span class="pageNumber"></span> / <span class="totalPages"></span>
+        </div>
+        """
+
+
+class MarkdownRenderer:
+    """Converts Markdown source to sanitized HTML."""
+
+    def render(self, content: str) -> str:
         raw_html = markdown.markdown(
-            markdown_content,
+            content,
             extensions=['fenced_code', 'tables', 'attr_list']
         )
-        html_body = CLEANER.clean(raw_html)
-        _name = filename if len(filename) < 40 else filename[:37] + "..."
+        return CLEANER.clean(raw_html)
 
-        header_html, footer_html = self._get_scaffolding(_name, show_header_footer)
-        full_html = self._wrap_body(html_body)
 
-        data = {
-            "marginTop": "0.75", "marginBottom": "0.75", "marginLeft": "0.5", "marginRight": "0.5",
-            "paperWidth": "8.27", "paperHeight": "11.69", "scale": "1.0",
-            "printBackground": "true", "waitDelay": "5s"
-        }
+class PdfHtmlBuilder:
+    """Assembles the final HTML document for Gotenberg rendering."""
 
-        files = {
-            "index.html": ("index.html", full_html.encode("utf-8"), "text/html"),
-            "footer.html": ("footer.html", footer_html.encode("utf-8"), "text/html"),
-        }
-        if show_header_footer:
-            files["header.html"] = ("header.html", header_html.encode("utf-8"), "text/html")
-
-        response = await self.client.post(
-            f"{url}/forms/chromium/convert/html",
-            data=data,
-            files=files
-        )
-
-        if response.status_code != 200:
-            raise Exception(f"GOTENBERG_ERROR: {response.text}")
-
-        return response.content
-
-    def _get_scaffolding(self, filename_display: str, high_detail: bool):
-        if high_detail:
-            header = f"""
-            <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in;">
-                <table style="width: 100%;">
-                    <tr>
-                        <td style="text-align: left; color: #64748b;">SC-ARCHIVE // {filename_display}</td>
-                        <td style="text-align: right; color: #64748b;">AEGIS // SECURED</td>
-                    </tr>
-                </table>
-            </div>
-            """
-            footer = """
-            <div style="width: 100%; font-size: 8px; font-family: monospace; text-transform: uppercase; margin: 0 0.5in; color: #64748b;">
-                <table style="width: 100%;">
-                    <tr>
-                        <td style="text-align: left;">OS_CORE_v2.0 // SC-ARCHIVE_PROTOCOL</td>
-                        <td style="text-align: right;">PAGE <span class="pageNumber"></span> / <span class="totalPages"></span></td>
-                    </tr>
-                </table>
-            </div>
-            """
-        else:
-            header = ""
-            footer = """
-            <div style="width: 100%; font-size: 8px; font-family: monospace; margin: 0 0.5in; color: #64748b; text-align: right;">
-                <span class="pageNumber"></span> / <span class="totalPages"></span>
-            </div>
-            """
-        return header, footer
-
-    def _wrap_body(self, html_body: str) -> str:
+    def wrap(self, html_body: str) -> str:
         return f"""
         <!DOCTYPE html>
         <html>
@@ -158,8 +156,75 @@ class GotenbergClient:
         </html>
         """
 
+
+class GotenbergClient:
+    """Industrial HTTP gateway for the Gotenberg PDF Engine (Aegis Optimus)."""
+
+    def __init__(
+        self,
+        url_provider: Callable[[], str],
+        renderer: Optional[RendererProtocol] = None,
+        builder: Optional[HtmlBuilderProtocol] = None,
+    ):
+        self._url_provider = url_provider
+        self._renderer = renderer or MarkdownRenderer()
+        self._builder = builder or PdfHtmlBuilder()
+        self.client = httpx.AsyncClient(
+            timeout=60.0,
+            limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
+        )
+
+    async def shutdown(self):
+        await self.client.aclose()
+
+    async def health_check(self) -> tuple[bool, str]:
+        """Probes Gotenberg /health endpoint. Returns (ok, status_string)."""
+        url = self._url_provider()
+        try:
+            r = await self.client.get(f"{url}/health", timeout=3.0)
+            ok = r.status_code == 200
+            return ok, "ONLINE" if ok else "DEGRADED"
+        except Exception:
+            return False, "OFFLINE"
+
+    async def render_pdf(self, markdown_content: str, filename: str, show_header_footer: bool = False) -> bytes:
+        """Converts markdown to PDF with sanitization and industrial styling."""
+        url = self._url_provider()
+        html_body = self._renderer.render(markdown_content)
+        _name = filename if len(filename) < 40 else filename[:37] + "..."
+
+        scaffolding: PageScaffolding = DetailedScaffolding(_name) if show_header_footer else MinimalScaffolding()
+        full_html = self._builder.wrap(html_body)
+
+        data = {
+            "marginTop": "0.75", "marginBottom": "0.75", "marginLeft": "0.5", "marginRight": "0.5",
+            "paperWidth": "8.27", "paperHeight": "11.69", "scale": "1.0",
+            "printBackground": "true", "waitDelay": "5s"
+        }
+
+        files = {
+            "index.html": ("index.html", full_html.encode("utf-8"), "text/html"),
+            "footer.html": ("footer.html", scaffolding.footer.encode("utf-8"), "text/html"),
+        }
+        if show_header_footer:
+            files["header.html"] = ("header.html", scaffolding.header.encode("utf-8"), "text/html")
+
+        response = await self.client.post(
+            f"{url}/forms/chromium/convert/html",
+            data=data,
+            files=files
+        )
+
+        if response.status_code != 200:
+            raise Exception(f"GOTENBERG_ERROR: {response.text}")
+
+        return response.content
+
+
 # Global instance for app lifecycle management
-gotenberg = GotenbergClient()
+gotenberg = GotenbergClient(
+    url_provider=lambda: settings.get("gotenberg_ip", "http://localhost:3000"),
+)
 
 # Legacy Compatibility Entry Point
 async def convert_markdown_to_pdf(markdown_content: str, filename: str, show_header_footer: bool = False) -> bytes:

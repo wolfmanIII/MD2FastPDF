@@ -1,16 +1,22 @@
 import httpx
-import os
 import json
 from typing import AsyncGenerator, Optional
 
+from logic.settings import SettingsManager, settings
+
 # AEGIS_ORACLE_PROTOCOL: Tactical Neural Interface
+_EMBEDDING_KEYWORDS: frozenset[str] = frozenset([
+    "embed", "bge", "nomic", "m3", "snowflake", "arctic", "mxbai",
+    "minilm", "e5-", "gte-", "rerank",
+])
+
 class OracleError(Exception):
     """Base exception for Aegis Oracle failures."""
     pass
 
 class PromptTemplates:
     """Centralized prompt vault for tactical consistency."""
-    
+
     MERMAID_SYSTEM = (
         "You are the AEGIS NEURAL SYNTHESIZER. "
         "Convert the user's description into valid Mermaid.js syntax. "
@@ -22,7 +28,7 @@ class PromptTemplates:
         "- This is mandatory for multi-word labels or those containing brackets/commas. "
         "If you cannot generate a diagram, output 'ERROR: SYNTHESIS_FAILURE'."
     )
-    
+
     SUMMARIZE_SYSTEM = (
         "You are the AEGIS INTELLIGENCE EXTRACTOR. "
         "Summarize the provided Archive ([SOURCE_DOCUMENT]) into a high-density, technical brief. "
@@ -31,7 +37,7 @@ class PromptTemplates:
         "Language: Use the same language as the provided source document. "
         "Output ONLY the summary in Markdown format. No filler."
     )
-    
+
     GHOST_SYSTEM = (
         "You are the AEGIS NEURAL HINT system. "
         "Your goal is to provide a seamless, professional continuation of the provided text. "
@@ -45,14 +51,12 @@ class PromptTemplates:
         "- Language: Use the same language as the provided context."
     )
 
-from logic.settings import settings
 
 class OracleClient:
     """Industrial Client for the Neural Layer (Ollama)."""
 
-    def __init__(self):
-        self._url = None
-        self._models = {}
+    def __init__(self, cfg: SettingsManager):
+        self._cfg = cfg
         self.client = httpx.AsyncClient(
             timeout=httpx.Timeout(connect=5.0, read=600.0, write=30.0, pool=5.0),
             limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
@@ -60,26 +64,48 @@ class OracleClient:
 
     def _get_config(self) -> tuple[str, dict]:
         """Dynamically retrieves latest parameters from the core buffer."""
-        if not settings.get("neural_link_enabled", True):
+        if not self._cfg.get("neural_link_enabled", True):
             raise OracleError("NEURAL_PROTOCOL_OFFLINE")
-        return settings.get("ollama_ip"), settings.get("models")
+        return self._cfg.get("ollama_ip"), self._cfg.get("models")
 
     async def probe_url(self) -> None:
         """Validates the configured Neural Core endpoint on startup."""
         try:
             url, _ = self._get_config()
-            async with httpx.AsyncClient(timeout=2.0) as probe_client:
-                r = await probe_client.get(f"{url}/api/tags")
-                if r.status_code == 200:
-                    self._url = url
+            await self.client.get(f"{url}/api/tags", timeout=2.0)
         except Exception:
-            self._url = None
-            pass # Connection errors handled on request
-        except Exception:
-            pass # Fails silently, connection errors will be handled during actual requests
+            pass  # Connection errors handled on request
 
     async def shutdown(self):
         await self.client.aclose()
+
+    async def service_status(self) -> dict:
+        """Returns Ollama connectivity status and model lists categorized by type."""
+        if not self._cfg.get("neural_link_enabled", True):
+            return {"ok": False, "status": "PROTOCOL_OFFLINE", "chat_models": [], "embed_models": []}
+        url = self._cfg.get("ollama_ip", "")
+        try:
+            r = await self.client.get(f"{url}/api/tags", timeout=2.0)
+            if r.status_code == 200:
+                all_models = [m["name"] for m in r.json().get("models", [])]
+                chat = [m for m in all_models if not any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
+                embed = [m for m in all_models if any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
+                return {"ok": True, "status": "ONLINE", "chat_models": chat, "embed_models": embed}
+            return {"ok": False, "status": "DEGRADED", "chat_models": [], "embed_models": []}
+        except Exception:
+            return {"ok": False, "status": "OFFLINE", "chat_models": [], "embed_models": []}
+
+    async def list_models(self) -> list[str]:
+        """Probes Ollama for available inference models, excluding embedding-only variants."""
+        url = self._cfg.get("ollama_ip", "")
+        try:
+            r = await self.client.get(f"{url}/api/tags", timeout=2.0)
+            if r.status_code == 200:
+                all_models = [m["name"] for m in r.json().get("models", [])]
+                return [m for m in all_models if not any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
+        except Exception:
+            pass
+        return []
 
     async def stream_completion(self, prompt: str, system: Optional[str] = None, options: Optional[dict] = None) -> AsyncGenerator[str, None]:
         """Streams neural completion tokens using hint model."""
@@ -157,12 +183,14 @@ class OracleClient:
             raise OracleError(f"INTELLIGENCE_LINK_FAILED: {response.status_code}")
 
         try:
-            return response.json().get("response", "").strip()
+            result = response.json().get("response", "").strip()
+            # Strip hallucinated HTML wrapper tags that break downstream rendering
+            return result.replace("</div>", "").replace("<div>", "")
         except Exception:
             raise OracleError("BUFFER_OVERFLOW")
 
 # Global instance for app lifecycle management
-oracle = OracleClient()
+oracle = OracleClient(settings)
 
 # Legacy Compatibility Wrappers
 async def generate_completion(p, s=None):
