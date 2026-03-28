@@ -1,17 +1,11 @@
-<div class="grow flex flex-col h-[85vh] glass-panel relative tracking-widest uppercase" style="overflow: visible !important;">
-    <style>
-        /* AEGIS_TOOLTIP_OVERRIDE: Force tooltips above PDF context */
-        .aegis-pdf-header .tooltip::before,
-        .aegis-pdf-header .tooltip::after {
-            z-index: 9999 !important;
-        }
-    </style>
+<link rel="stylesheet" href="/static/css/pdf-preview.css">
+<div class="aegis-pdf-root grow flex flex-col h-[85vh] glass-panel relative tracking-widest uppercase">
     <!-- Header -->
-    <div class="flex items-center justify-between px-4 py-3 neon-border-b shrink-0 relative z-50 bg-black/40 aegis-pdf-header" style="overflow: visible !important;">
-        <div class="flex items-center space-x-2 text-[10px] uppercase overflow-x-auto no-scrollbar" style="overflow: visible !important;">
+    <div class="aegis-pdf-header flex items-center justify-between px-4 py-3 neon-border-b shrink-0 relative z-50 bg-black/40">
+        <div class="flex items-center space-x-2 text-[10px] uppercase overflow-x-auto no-scrollbar">
             <span class="font-bold shrink-0 text-zinc-100">MODE_PREVIEW //</span>
             {% for crumb in breadcrumbs %}
-            <a href="/files?path={{ crumb.path }}" hx-get="/files?path={{ crumb.path }}" 
+            <a href="/files?path={{ crumb.path }}" hx-get="/files?path={{ crumb.path }}"
                     hx-target="#aegis-view-core" hx-push-url="true"
                     class="text-zinc-100 hover:text-white transition-colors whitespace-nowrap px-2 py-0.5 rounded-sm bg-white/5 no-underline">
                 {{ crumb.name }}
@@ -20,7 +14,7 @@
             {% endfor %}
             <span class="neon-text font-bold whitespace-nowrap drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]">{{ filename }}</span>
         </div>
-        <div class="flex items-center space-x-1" style="overflow: visible !important;">
+        <div class="flex items-center space-x-1">
             <a id="pdf-download-link" href="/pdf/download?path={{ path }}" target="_blank"
                class="btn-ghost text-[10px] rounded-sm flex items-center space-x-2 no-underline tooltip tooltip-top"
                data-tip="Scarica Documento Certificato">
@@ -46,7 +40,7 @@
     </div>
 
     <!-- PDF Viewer -->
-    <div class="grow relative z-10 p-6 flex items-center justify-center bg-zinc-950/20" style="height: 80vh !important;">
+    <div class="aegis-pdf-content grow relative z-10 p-6 flex items-center justify-center bg-zinc-950/20">
         <!-- Aegis Loader Overlay -->
         <div id="aegis-pdf-loader" class="absolute inset-0 flex flex-col items-center justify-center z-20 space-y-6 pointer-events-none transition-opacity duration-500 bg-zinc-950/80">
             <div class="relative w-16 h-16">
@@ -65,7 +59,6 @@
 
         <iframe id="pdf-iframe" src="/pdf/preview?path={{ path }}#view=FitH"
                 class="w-full h-full neon-border shadow-[0_0_30px_rgba(0,240,255,0.2)] rounded-sm bg-zinc-900 absolute inset-0 z-10"
-                style="height: 100% !important; min-height: 100% !important; border: 1px solid rgba(0,240,255,0.2) !important;"
                 onload="document.getElementById('aegis-pdf-loader').style.opacity='0'; setTimeout(()=>document.getElementById('aegis-pdf-loader').style.display='none', 500)">
         </iframe>
     </div>
@@ -74,7 +67,7 @@
     <script>
         (function() {
             const isBrandingEnabled = localStorage.getItem('aegis_pdf_branding') === 'true';
-            
+
             if (isBrandingEnabled) {
                 // Auto-inject header_footer parameter on load if global preference is active
                 const hf = '&header_footer=true';

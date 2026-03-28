@@ -3,12 +3,12 @@
         
         <!-- Standard Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-black/40">
-            <h3 class="font-bold text-lg tracking-widest uppercase flex items-center space-x-3" style="color: #a78bfa !important;">
+            <h3 class="font-bold text-lg tracking-widest uppercase flex items-center space-x-3 text-violet-400">
                 <i class="fa fa-microchip"></i>
                 <span>Neural Synthesis</span>
             </h3>
             <button onclick="closeAegisModal('oracle-mermaid-modal')" class="text-zinc-500 hover:text-white transition-colors">
-                <span style="font-size: 24px !important;">&times;</span>
+                <span class="text-2xl">&times;</span>
             </button>
         </div>
         
@@ -31,11 +31,10 @@
                 </label>
                 <textarea id="mermaid-description" 
                     placeholder="Ex: Sequence diagram where AEGIS requests data from CORE-TRANSIT..."
-                    class="textarea textarea-bordered w-full h-56 border-zinc-800 text-zinc-100 focus:border-[#a78bfa] leading-relaxed resize-none p-6 text-sm"
-                    style="background:rgba(0,0,0,0.4);"></textarea>
+                    class="aegis-input-bg textarea textarea-bordered w-full h-56 border-zinc-800 text-zinc-100 focus:border-[#a78bfa] leading-relaxed resize-none p-6 text-sm"></textarea>
             </div>
             
-            <div id="mermaid-error" class="mt-6 bg-red-950/20 border border-red-500/30 p-5 text-[11px] text-red-500 uppercase font-bold flex items-center space-x-3" style="display: none;">
+            <div id="mermaid-error" class="mt-6 bg-red-950/20 border border-red-500/30 p-5 text-[11px] text-red-500 uppercase font-bold flex items-center space-x-3">
                 <i class="fa-solid fa-triangle-exclamation"></i>
                 <span id="error-message-text"></span>
             </div>
@@ -49,8 +48,7 @@
                     </button>
 
                     <button type="button" id="synthesize-btn" 
-                        class="btn-solid text-zinc-950 font-bold h-10 px-8 transition-all uppercase tracking-widest text-[11px] {% if not neural_on %}opacity-30 grayscale pointer-events-none{% endif %}"
-                        style="background-color: #a78bfa !important; border-color: #a78bfa !important;"
+                        class="btn-violet btn-solid font-bold h-10 px-8 transition-all uppercase tracking-widest text-[11px] {% if not neural_on %}opacity-30 grayscale pointer-events-none{% endif %}"
                         onclick="synthesizeMermaid()">
                         Initialize
                     </button>

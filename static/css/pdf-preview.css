@@ -1,0 +1,24 @@
+/* AEGIS_TOOLTIP_OVERRIDE: Force tooltips above PDF context */
+.aegis-pdf-header .tooltip::before,
+.aegis-pdf-header .tooltip::after {
+    z-index: 9999 !important;
+}
+
+/* PDF viewer root and header need visible overflow for tooltips */
+.aegis-pdf-root,
+.aegis-pdf-header,
+.aegis-pdf-header > div {
+    overflow: visible !important;
+}
+
+/* PDF content area */
+.aegis-pdf-content {
+    height: 80vh !important;
+}
+
+/* PDF iframe fills content area */
+#pdf-iframe {
+    height: 100% !important;
+    min-height: 100% !important;
+    border: 1px solid rgba(0, 240, 255, 0.2) !important;
+}

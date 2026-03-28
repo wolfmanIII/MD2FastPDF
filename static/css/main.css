@@ -22,3 +22,23 @@
 .accent-glow {
     @apply shadow-[0_0_15px_rgba(139,92,246,0.3)];
 }
+
+/* Aegis CSP-safe utility classes — replaces inline style= attributes */
+.aegis-input-bg {
+    background: rgba(0, 0, 0, 0.4) !important;
+}
+
+.btn-violet {
+    background-color: #a78bfa !important;
+    border-color: #a78bfa !important;
+    color: #000 !important;
+}
+
+.aegis-hud-modal {
+    max-width: 90% !important;
+    width: 1200px !important;
+}
+
+#mermaid-error {
+    display: none;
+}
