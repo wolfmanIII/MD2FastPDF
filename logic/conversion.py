@@ -1,33 +1,16 @@
 import httpx
 import bleach
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional, Callable, Protocol
 
 import markdown
 
 from logic.settings import settings
 
-# AEGIS_PERFORMANCE_LAYER: Industrial PDF assets
-INDUSTRIAL_CSS = """
-@page { size: A4; margin: 2cm; }
-body { font-family: 'Inter', -apple-system, sans-serif; color: #000000; line-height: 1.6; margin: 1cm; padding: 0; width: calc(100% - 2cm); }
-h1 { font-size: 24pt; color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 10pt; margin-top: 30pt; }
-h2 { font-size: 18pt; color: #111827; margin-top: 25pt; border-bottom: 1px solid #e5e7eb; }
-p { font-size: 11pt; margin-bottom: 12pt; text-align: justify; }
-ul, ol { margin-bottom: 12pt; padding-left: 20pt; }
-ul { list-style-type: disc; }
-ol { list-style-type: decimal; }
-li { margin-bottom: 4pt; font-size: 11pt; }
-code { font-family: 'Roboto Mono', monospace; background: #f3f4f6; color: #1f2937; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
-pre { background: #f8fafc; color: #334155; padding: 1rem; border-radius: 4px; border: 1px solid #e2e8f0; overflow-x: auto; font-size: 0.85em; }
-pre code { background: transparent; padding: 0; color: inherit; border: none; }
-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9em; }
-th, td { border: 1px solid #cbd5e1; padding: 0.75rem; text-align: left; }
-th { background: #f1f5f9; font-weight: 600; color: #0f172a; }
-blockquote { border-left: 4px solid #cbd5e1; padding-left: 1rem; color: #475569; font-style: italic; margin-left: 0; }
-img { max-width: 100%; height: auto; border-radius: 4px; margin: 1rem 0; }
-.mermaid { background: white; padding: 1rem; border-radius: 8px; margin: 1.5rem 0; text-align: center; border: 1px solid #e2e8f0; }
-"""
+# AEGIS_PERFORMANCE_LAYER: Load industrial PDF stylesheet once at module init
+_CSS_PATH = Path(__file__).parent.parent / "static" / "css" / "pdf-industrial.css"
+INDUSTRIAL_CSS: str = _CSS_PATH.read_text(encoding="utf-8")
 
 CLEANER = bleach.Cleaner(
     tags={
