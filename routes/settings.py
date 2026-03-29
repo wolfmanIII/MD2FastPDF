@@ -1,16 +1,26 @@
-from fastapi import APIRouter, Request, Form, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Form, Response
 from fastapi.responses import HTMLResponse
 from logic.templates import templates
 from config.settings import settings as app_settings
 from logic.oracle import oracle as neural_oracle
-from typing import List
 
 # AEGIS_SETTINGS_ROUTER: Operational environment configuration
 router = APIRouter(tags=["Aegis Settings"])
 
 
+def _is_admin(request: Request) -> bool:
+    """FastAPI dependency: resolves admin status from session."""
+    return request.session.get("username") == "admin"
+
+
+def _require_admin(is_admin: bool = Depends(_is_admin)) -> None:
+    """FastAPI dependency: raises 403 if caller is not admin."""
+    if not is_admin:
+        raise HTTPException(status_code=403)
+
+
 @router.get("/settings", response_class=HTMLResponse)
-async def get_settings(request: Request):
+async def get_settings(request: Request, is_admin: bool = Depends(_is_admin)):
     """
     Renders the central Aegis settings dashboard.
     Model list is deferred to /settings/models to avoid blocking on Ollama.
@@ -18,21 +28,18 @@ async def get_settings(request: Request):
     context = {
         "request": request,
         "settings": app_settings.all,
-        "is_admin": request.session.get("username") == "admin",
+        "is_admin": is_admin,
     }
     return templates.TemplateResponse(request=request, name="components/settings_modal.html", context=context)
 
 
-@router.get("/settings/models", response_class=HTMLResponse)
+@router.get("/settings/models", response_class=HTMLResponse, dependencies=[Depends(_require_admin)])
 async def get_settings_models(request: Request):
     """
     Lazy-loaded fragment: probes Ollama for available models and returns the model select inputs.
     Decoupled from the main settings modal render to prevent blocking on slow/unavailable Ollama.
-    Admin-only: non-admin users receive a read-only fallback fragment.
+    Admin-only: enforced via _require_admin dependency.
     """
-    if request.session.get("username") != "admin":
-        return HTMLResponse(status_code=403, content="")
-
     current = app_settings.all
     neural_on = current.get('neural_link_enabled', True)
     available_models = await neural_oracle.list_models() if neural_on else []
@@ -47,6 +54,7 @@ async def get_settings_models(request: Request):
 @router.post("/settings/save", response_class=HTMLResponse)
 async def save_settings(
     request: Request,
+    is_admin: bool = Depends(_is_admin),
     neural_link_enabled: bool = Form(False),
     pdf_branding_enabled: bool = Form(False),
     ollama_ip: str = Form(""),
@@ -57,8 +65,8 @@ async def save_settings(
 ):
     """
     Persists updated operational parameters with data-loss prevention.
+    Admin-gated fields (IPs, models) are ignored when caller is not admin.
     """
-    is_admin = request.session.get("username") == "admin"
 
     updates = {
         "neural_link_enabled": neural_link_enabled,

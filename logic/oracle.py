@@ -76,33 +76,42 @@ class OracleClient:
     async def shutdown(self):
         await self.client.aclose()
 
+    async def _fetch_all_models(self, url: str) -> list[str] | None:
+        """
+        Fetches raw model name list from Ollama /api/tags.
+        Returns list[str] on HTTP 200, None on non-200 response.
+        Raises on network/connection errors (caller maps to OFFLINE).
+        """
+        r = await self.client.get(f"{url}/api/tags", timeout=2.0)
+        if r.status_code == 200:
+            return [m["name"] for m in r.json().get("models", [])]
+        return None
+
     async def service_status(self) -> dict:
         """Returns Ollama connectivity status and model lists categorized by type."""
         if not self._cfg.get("neural_link_enabled", True):
             return {"ok": False, "status": "PROTOCOL_OFFLINE", "chat_models": [], "embed_models": []}
         url = self._cfg.get("ollama_ip", "")
         try:
-            r = await self.client.get(f"{url}/api/tags", timeout=2.0)
-            if r.status_code == 200:
-                all_models = [m["name"] for m in r.json().get("models", [])]
-                chat = [m for m in all_models if not any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
-                embed = [m for m in all_models if any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
-                return {"ok": True, "status": "ONLINE", "chat_models": chat, "embed_models": embed}
-            return {"ok": False, "status": "DEGRADED", "chat_models": [], "embed_models": []}
+            all_models = await self._fetch_all_models(url)
         except Exception:
             return {"ok": False, "status": "OFFLINE", "chat_models": [], "embed_models": []}
+        if all_models is None:
+            return {"ok": False, "status": "DEGRADED", "chat_models": [], "embed_models": []}
+        chat = [m for m in all_models if not any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
+        embed = [m for m in all_models if any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
+        return {"ok": True, "status": "ONLINE", "chat_models": chat, "embed_models": embed}
 
     async def list_models(self) -> list[str]:
         """Probes Ollama for available inference models, excluding embedding-only variants."""
         url = self._cfg.get("ollama_ip", "")
         try:
-            r = await self.client.get(f"{url}/api/tags", timeout=2.0)
-            if r.status_code == 200:
-                all_models = [m["name"] for m in r.json().get("models", [])]
-                return [m for m in all_models if not any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
+            all_models = await self._fetch_all_models(url)
         except Exception:
-            pass
-        return []
+            return []
+        if all_models is None:
+            return []
+        return [m for m in all_models if not any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
 
     async def stream_completion(self, prompt: str, system: Optional[str] = None, options: Optional[dict] = None) -> AsyncGenerator[str, None]:
         """Streams neural completion tokens using hint model."""
