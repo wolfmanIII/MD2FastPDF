@@ -1,12 +1,13 @@
 """
 AEGIS_IDENTITY_ROUTER: Login, logout, and session management endpoints.
 """
-from fastapi import APIRouter, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Depends, Form, Request
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
 from logic.auth import auth_service
 from logic.exceptions import AuthError
 from logic.templates import templates
+from routes.deps import get_current_user
 
 # AEGIS_AUTH_ROUTER: Identity and session control
 router = APIRouter(tags=["Aegis Auth"])
@@ -40,3 +41,33 @@ async def logout(request: Request):
     """Clears the session and redirects to the login page."""
     request.session.clear()
     return RedirectResponse(url="/login", status_code=302)
+
+
+@router.post("/auth/password", response_class=HTMLResponse)
+async def change_password(
+    request: Request,
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    username: str = Depends(get_current_user),
+):
+    """Changes the password for the currently authenticated user."""
+    try:
+        auth_service.authenticate(username, current_password)
+    except AuthError:
+        return HTMLResponse(
+            '<div id="pw-notification" class="text-xs font-mono text-red-400 animate-pulse">'
+            '!! CURRENT_PASSWORD_INVALID !!'
+            '</div>'
+        )
+    if len(new_password) < 4:
+        return HTMLResponse(
+            '<div id="pw-notification" class="text-xs font-mono text-red-400 animate-pulse">'
+            '!! PASSWORD_TOO_SHORT: MIN 4 CHARS !!'
+            '</div>'
+        )
+    await auth_service.change_password(username, new_password)
+    return HTMLResponse(
+        '<div id="pw-notification" class="text-xs font-mono text-green-400 animate-pulse">'
+        '>> ACCESS_KEY_ROTATED // RE-LOGIN_REQUIRED'
+        '</div>'
+    )

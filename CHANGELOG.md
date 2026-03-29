@@ -1,6 +1,32 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.5.0] - AEGIS IDENTITY: MULTI-USER AUTH & WORKSPACE ISOLATION (2026-03-29)
+Implementazione del sistema di autenticazione multi-utente con isolamento workspace per-sessione. Ogni operatore ha credenziali proprie e una cartella di lavoro dedicata.
+
+### Added
+- **`logic/auth.py`**: `UserStore` (registro persistente in `config/users.json` con hash bcrypt) + `AuthService` (autenticazione, creazione utenti, gestione workspace).
+- **`logic/exceptions.py`**: `AuthError` (401) aggiunta alla gerarchia domain exceptions.
+- **`routes/auth.py`**: `GET /login`, `POST /login`, `POST /logout`, `POST /auth/password` (cambio password autenticato).
+- **`routes/deps.py`**: dependency `get_current_user` per route che necessitano dell'username corrente.
+- **`templates/layouts/login.html`**: pagina login standalone con tema Aegis industriale.
+- **`bin/create_user.sh`**: script CLI per creare nuovi utenti (`./bin/create_user.sh <username> <password>`).
+
+### Changed
+- **`logic/files.py`**: `_CURRENT_ROOT` globale → `ContextVar _REQUEST_ROOT` — ogni request ASGI ha il proprio root isolato, zero contaminazione tra sessioni concorrenti.
+- **`main.py`**: `SessionMiddleware` (cookie firmato, 24h TTL) + `auth_middleware` HTTP che verifica la sessione e lega il workspace via ContextVar prima del dispatch. Versione → `5.5.0`.
+- **`routes/config.py`**: `select_root` persiste il nuovo workspace in `config/users.json` per l'utente corrente.
+- **`config/settings.py`**: aggiunto `workspace_base` (default: `~/sc-archive/`) ai parametri operativi.
+- **`templates/layouts/base.html`**: navbar mostra username corrente e pulsante `// LOGOUT`.
+- **`templates/components/settings_modal.html`**: sezione `OPERATOR_ACCESS_KEY` per il cambio password in-app, riorganizzazione layout con spaziatura ottimizzata.
+
+### Bootstrap
+- Al primo avvio, se `config/users.json` è assente, viene creato automaticamente l'utente `admin` con password `admin` e workspace `~/sc-archive/admin/`.
+- Password di default override tramite `export AEGIS_ADMIN_PASSWORD="..."` prima del primo avvio.
+- Cambio password obbligatorio al primo accesso tramite Settings → OPERATOR_ACCESS_KEY.
+
+---
+
 ## [5.4.0] - AEGIS STABILITY: CENTRALIZED EXCEPTION HANDLING (2026-03-29)
 Implementazione del gestore centralizzato delle eccezioni di dominio. Business logic completamente disaccoppiata da FastAPI: nessun `HTTPException` nei moduli `logic/`. Telemetria strutturata dei guasti nel log operativo.
 

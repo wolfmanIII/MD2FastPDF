@@ -36,17 +36,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# 1. Middleware (order matters: session before auth)
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=os.getenv("AEGIS_SECRET_KEY", "aegis-dev-secret-change-in-production"),
-    session_cookie="aegis_session",
-    max_age=86400,        # 24h
-    https_only=False,     # LAN HTTP — set True when TLS is active
-    same_site="lax",
-)
-
-
+# 1. Middleware (order matters: last add_middleware = outermost = runs first)
+# auth_middleware is registered first so SessionMiddleware wraps it (runs before it)
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
     """Guards all routes. Binds per-user workspace root via ContextVar before dispatch."""
@@ -69,6 +60,16 @@ async def auth_middleware(request: Request, call_next):
 
     return await call_next(request)
 
+
+# SessionMiddleware added last = outermost = populates request.session before auth_middleware
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("AEGIS_SECRET_KEY", "aegis-dev-secret-change-in-production"),
+    session_cookie="aegis_session",
+    max_age=86400,        # 24h
+    https_only=False,     # LAN HTTP — set True when TLS is active
+    same_site="lax",
+)
 
 # 2. Centralized Exception Handlers (Aegis Stability Protocol)
 @app.exception_handler(AegisError)

@@ -1,5 +1,5 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
-**Versione 5.4.0** // AEGIS STABILITY
+**Versione 5.5.0** // AEGIS IDENTITY
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -32,6 +32,31 @@
 - **Neural Model Intelligence**: Filtro automatico dei modelli Ollama per escludere i motori di embedding dai menu di chat e sintesi.
 - **Dashboard Telemetry 2.0**: Monitoraggio real-time di CPU e Memoria via HTMX (`/stats`) e aggiornamento automatico dello stato servizi al salvataggio della configurazione.
 - **Global PDF Branding**: Esportazione PDF automatizzata con testata e piè di pagina SC-ARCHIVE (configurabile via Uplink).
+
+## 🔐 Primo Accesso (Inizializzazione Operatore)
+
+Al **primo avvio**, SC-ARCHIVE crea automaticamente l'utente `admin` con password di default `admin` e il workspace in `~/sc-archive/admin/`.
+
+**Sequenza obbligatoria al primo accesso:**
+
+1. Avvia la stazione: `./bin/launch.sh`
+2. Apri il browser su `http://localhost:8000`
+3. Effettua il login con `admin` / `admin`
+4. Apri **Settings** (icona ingranaggio) → sezione **OPERATOR_ACCESS_KEY**
+5. Inserisci `admin` in "Current Key" e la nuova password in "New Key"
+6. Clicca **ROTATE_KEY** — da questo momento userai la nuova password
+
+> [!TIP]
+> Per scegliere una password di default diversa da `admin` **prima** del primo avvio (quando `config/users.json` non esiste ancora), esporta la variabile d'ambiente prima di lanciare:
+> ```bash
+> export AEGIS_ADMIN_PASSWORD="la-tua-password"
+> ./bin/launch.sh
+> ```
+> Se `config/users.json` esiste già, questa variabile non ha effetto — usa Settings per cambiare la password.
+
+**Workspace:** ogni utente ha una cartella dedicata in `~/sc-archive/<username>/`. Puoi puntare a qualsiasi altra cartella tramite il **Root Picker** nella dashboard — la scelta viene salvata e ripristinata ad ogni login.
+
+---
 
 ## 📦 Protocollo di Installazione (Setup Manual)
 

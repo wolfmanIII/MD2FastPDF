@@ -1,6 +1,6 @@
 # Stato del Progetto: SC-ARCHIVE
-**Stato Attuale**: Op_Ready / Versione 5.3.0
-**Ultimo Aggiornamento**: 28 Marzo 2026
+**Stato Attuale**: Op_Ready / Versione 5.5.0
+**Ultimo Aggiornamento**: 29 Marzo 2026
 
 ---
 
@@ -69,6 +69,20 @@
 - **Conditional Logic**: Disattivazione visiva e funzionale dei campi dipendenti (Ollama/Models) quando il `Neural Link` è spento.
 - **Data Loss Prevention**: Logica di merge per preservare i parametri salvati anche quando i campi sono inattivi nella UI.
 
+### 1.9 AEGIS IDENTITY — Autenticazione Multi-Utente [4.10]
+- **Login Page**: pagina `templates/layouts/login.html` standalone con tema Aegis Industrial.
+- **Session Auth**: `SessionMiddleware` (starlette/itsdangerous) con cookie firmato; `auth_middleware` verifica la sessione e blocca ogni path non-pubblico con redirect a `/login`.
+- **HTMX-aware redirect**: header `HX-Redirect` per le richieste HTMX, `302` per le normali.
+- **Per-User Workspace Isolation**: `ContextVar[Path]` (`_REQUEST_ROOT`) in `logic/files.py` — ogni request async riceve il root dell'utente autenticato senza refactoring delle firme.
+- **UserStore + AuthService**: separazione SOLID — `UserStore` gestisce `config/users.json`, `AuthService` espone autenticazione, creazione utente, cambio password, aggiornamento root.
+- **Password Hashing**: `bcrypt` (cost factor 12) per tutti gli hash.
+- **Admin Bootstrap**: al primo avvio, se `users.json` è vuoto, viene creato `admin` con password `admin` (sovrascrivibile via `AEGIS_ADMIN_PASSWORD` env var).
+- **OPERATOR_ACCESS_KEY**: sezione nella Settings modal (`POST /auth/password`) per cambio password autenticato.
+- **Root Picker persistente**: la selezione root viene salvata per-utente in `users.json` via `POST /config/select-root`.
+- **Navbar**: username corrente e pulsante `// LOGOUT` visibili in ogni pagina autenticata.
+- **CLI create_user**: `bin/create_user.sh <username> <password>` per provisioning operatori via terminale.
+- **AuthError**: `logic/exceptions.py` — sottoclasse di `AegisError` con `status_code=401`.
+
 ### 1.8 UX, Sicurezza & CSP Compliance
 - Transizioni `scan-in` / `soft-exit` su tutte le modali.
 - Sanitizzazione path obbligatoria (prevenzione `../`), sanitizzazione Markdown (XSS via `bleach`).
@@ -92,10 +106,11 @@
 
 ### Package Structure
 ```
-logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, templates.py
-routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle
-config/         __init__.py + settings.py (SettingsManager) + settings.json
+logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, templates.py, auth.py, exceptions.py
+routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, auth, deps
+config/         __init__.py + settings.py (SettingsManager) + settings.json + users.json
 static/css/     output.css, editor-aegis.css, pdf-industrial.css, pdf-preview.css, main.css
+bin/            launch.sh, create_user.sh
 ```
 
 ---
@@ -105,12 +120,14 @@ static/css/     output.css, editor-aegis.css, pdf-industrial.css, pdf-preview.cs
 | Fase | Codice | Stato | Obiettivo |
 |---|---|---|---|
 | [4.3] | AEGIS FILETREE | **COMPLETED** | Sidebar albero directory lazy nell'editor |
+| [4.8] | AEGIS STABILITY | **COMPLETED** | Centralized Exception Handling (`AegisError`, `@app.exception_handler`) |
+| [4.9] | AEGIS STABILITY+ | **COMPLETED** | Registrazione `@app.exception_handler(AegisError)` in `main.py` |
+| [4.10] | AEGIS IDENTITY | **COMPLETED** | Multi-user auth, workspace isolation, login, logout, password change |
 | [4.4] | AEGIS CHRONOS | Planned | Versionamento narrativo Git opt-in (diff, snapshot, inject) |
 | [4.5] | AEGIS BLUEPRINT | Planned | Template gallery + Variable Injection |
 | [4.6] | AEGIS MULTI-LINK | Planned | Tabbed Workspace + Split Pane |
 | [4.7] | AEGIS GUARD | Planned | Buffer Encryption + Network Gateway UI |
-| [4.8] | AEGIS STABILITY | Planned | Centralized Exception Handling |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.3.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.5.0 — DEPLOYMENT_ACTIVE.*

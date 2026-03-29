@@ -134,6 +134,14 @@ class AuthService:
         """Persists a new workspace root for the given user."""
         await self._store.update_root(username, str(new_root))
 
+    async def change_password(self, username: str, new_password: str) -> None:
+        """Replaces the stored password hash for the given user."""
+        record = self._store.get(username)
+        if not record:
+            raise AuthError(f"USER_NOT_FOUND: {username}")
+        record.password_hash = self._hash(new_password)
+        await self._store.save_user(record)
+
     def bootstrap_admin(self) -> None:
         """Creates the admin user on first run if no users exist."""
         if self._store.is_empty():

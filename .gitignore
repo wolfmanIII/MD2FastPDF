@@ -45,3 +45,6 @@ tailwindcss
 # OS
 .DS_Store
 Thumbs.db
+
+# Runtime data (sensitive — generated on first run)
+config/users.json
