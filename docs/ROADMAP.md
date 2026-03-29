@@ -101,4 +101,17 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
+### [4.10] - AEGIS IDENTITY (Multi-User Auth & Workspace Isolation) [PLANNED]
+**Obiettivo**: Accesso autenticato stile JupyterHub — ogni utente ha la propria sessione e workspace isolato (cartella home).
+- **Login page**: form username/password con tema industriale Aegis. Redirect automatico se sessione non attiva.
+- **Session middleware**: `itsdangerous` via `starlette-sessions` — cookie firmato, TTL configurabile da Uplink.
+- **Password storage**: `config/users.json` con hash `bcrypt`. Nessuna dipendenza da database esterno.
+- **Per-user workspace**: ogni utente mappato a una cartella dedicata (es. `~/sc-archive/<username>/`). `PathSanitizer.get_root()` diventa dipendenza per-request invece che stato globale del modulo.
+- **Session isolation**: `StorageCache` e mutation hooks keyed per utente — nessuna contaminazione tra sessioni concorrenti.
+- **FastAPI auth dependency**: `Depends(require_auth)` applicato a tutti i router — un solo punto di enforcement.
+- **Logout**: endpoint dedicato con invalidazione cookie.
+- **Admin bootstrap**: primo avvio crea utente `admin` con password da env/config se `users.json` è assente.
+
+---
+
 **(I flussi operativi futuri sono stati ricalibrati. Aegis Oracle promosso a priorità assoluta [4.0] del ciclo operativo corrente.)** 🚀🌑
