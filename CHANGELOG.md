@@ -1,6 +1,25 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.4.0] - AEGIS STABILITY: CENTRALIZED EXCEPTION HANDLING (2026-03-29)
+Implementazione del gestore centralizzato delle eccezioni di dominio. Business logic completamente disaccoppiata da FastAPI: nessun `HTTPException` nei moduli `logic/`. Telemetria strutturata dei guasti nel log operativo.
+
+### Added
+- **`logic/exceptions.py`**: Gerarchia di eccezioni di dominio con `status_code` integrato.
+  - `AegisError` — base class (`status_code=500`)
+  - `AccessDeniedError` (403), `NotFoundError` (404), `InvalidPathError` (400), `InvalidFileTypeError` (400), `FileConflictError` (400), `FilenameRequiredError` (400)
+  - `ConversionError` (502), `OracleError` (502), `RenderError` (502)
+
+### Changed
+- **`main.py`**: Registrato `@app.exception_handler(AegisError)` — traduce tutte le eccezioni di dominio in `JSONResponse` con `status_code` e `detail` corretti. Logging strutturato via `logging.getLogger("aegis.core")`. Versione bumped a `5.4.0`.
+- **`logic/files.py`**: Tutti i `raise HTTPException(...)` sostituiti con eccezioni di dominio (`AccessDeniedError`, `NotFoundError`, `InvalidPathError`, `InvalidFileTypeError`, `FileConflictError`, `FilenameRequiredError`). Rimosso `from fastapi import HTTPException`.
+- **`logic/oracle.py`**: `OracleError` locale rimossa. Importata da `logic.exceptions`.
+- **`logic/conversion.py`**: `raise Exception(f"GOTENBERG_ERROR: ...")` → `raise ConversionError(...)`. Importata da `logic.exceptions`.
+- **`logic/render.py`**: `raise ValueError("NO_MERMAID_BLOCKS_FOUND")` → `raise RenderError(...)`. Importata da `logic.exceptions`.
+- **`routes/render.py`**: Rimosso il wrapper `try/except ValueError` intorno a `render_mermaid_zip` — gestione delegata all'handler globale.
+
+---
+
 ## [5.3.0] - SOLID COMPLIANCE & CSP HARDENING (2026-03-28)
 Refactoring architetturale completo per conformità SOLID e rimozione totale degli attributi `style=` inline per CSP compliance.
 

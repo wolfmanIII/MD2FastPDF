@@ -6,6 +6,8 @@ from typing import Optional
 
 import httpx
 
+from logic.exceptions import RenderError
+
 # AEGIS_RENDER_PROTOCOL: Mermaid diagram extraction and PNG rasterization via Gotenberg
 MERMAID_BLOCK_RE = re.compile(r"```mermaid\s*\n(.*?)\n```", re.DOTALL)
 GOTENBERG_URL: str = os.getenv("GOTENBERG_URL", "http://localhost:3000")
@@ -75,7 +77,7 @@ async def render_mermaid_zip(
     """Render all Mermaid blocks in a document and package them as a ZIP archive."""
     blocks = extract_mermaid_blocks(content)
     if not blocks:
-        raise ValueError("NO_MERMAID_BLOCKS_FOUND")
+        raise RenderError("NO_MERMAID_BLOCKS_FOUND")
 
     buf = io.BytesIO()
     _owned = client is None

@@ -3,16 +3,13 @@ import json
 from typing import AsyncGenerator, Optional
 
 from config.settings import SettingsManager, settings
+from logic.exceptions import OracleError
 
 # AEGIS_ORACLE_PROTOCOL: Tactical Neural Interface
 _EMBEDDING_KEYWORDS: frozenset[str] = frozenset([
     "embed", "bge", "nomic", "m3", "snowflake", "arctic", "mxbai",
     "minilm", "e5-", "gte-", "rerank",
 ])
-
-class OracleError(Exception):
-    """Base exception for Aegis Oracle failures."""
-    pass
 
 class PromptTemplates:
     """Centralized prompt vault for tactical consistency."""

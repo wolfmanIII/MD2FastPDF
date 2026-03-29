@@ -1,10 +1,15 @@
+import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from routes import core, archive, editor, pdf, config, oracle, render, settings
 from logic.conversion import gotenberg
 from logic.oracle import oracle as neural_oracle
 from logic.files import StorageCache, register_mutation_hook
+from logic.exceptions import AegisError
+
+logger = logging.getLogger("aegis.core")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -20,9 +25,19 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="SC-ARCHIVE", 
     description="Space Craft Archive Management System // Aegis Class",
-    version="4.8.0",
+    version="5.4.0",
     lifespan=lifespan
 )
+
+# 3. Centralized Exception Handlers (Aegis Stability Protocol)
+@app.exception_handler(AegisError)
+async def aegis_error_handler(request: Request, exc: AegisError) -> JSONResponse:
+    """Translates domain exceptions to structured HTTP responses with logging."""
+    logger.warning("AEGIS_FAULT [%s] %s — %s %s", exc.status_code, exc.detail, request.method, request.url.path)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
 
 # 1. Static and Template Configuration
 app.mount("/static", StaticFiles(directory="static"), name="static")

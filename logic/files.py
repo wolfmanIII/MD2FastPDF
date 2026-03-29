@@ -3,7 +3,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Union, Optional, Set, Callable
 import anyio
-from fastapi import HTTPException
+
+from logic.exceptions import (
+    AegisError, AccessDeniedError, NotFoundError, InvalidPathError,
+    InvalidFileTypeError, FileConflictError, FilenameRequiredError,
+)
 
 # AEGIS_ARCHIVE_PROTOCOL: Centralized Constants
 ALLOWED_EXTENSIONS: Set[str] = {".md", ".html", ".pdf"}
@@ -40,7 +44,7 @@ class PathSanitizer:
         resolved = Path(new_path).resolve()
         # Security: Always resolve and ensure it's within Path.home()
         if not str(resolved).startswith(str(Path.home().resolve())):
-            raise HTTPException(status_code=403, detail="ACCESS_DENIED: Root must be within HOME")
+            raise AccessDeniedError("ACCESS_DENIED: Root must be within HOME")
         _CURRENT_ROOT = resolved
         _notify_mutation()
 
@@ -53,18 +57,19 @@ class PathSanitizer:
 
             # Traversal Check
             if not str(requested_path).startswith(str(root)):
-                raise HTTPException(status_code=403, detail="ACCESS_DENIED: Path outside active root")
+                raise AccessDeniedError("ACCESS_DENIED: Path outside active root")
 
             # Hidden Path Check
             parts = requested_path.relative_to(root).parts
             if any(part.startswith(".") for part in parts):
-                raise HTTPException(status_code=403, detail="ACCESS_DENIED: Hidden path access forbidden")
+                raise AccessDeniedError("ACCESS_DENIED: Hidden path access forbidden")
 
             return requested_path
-        except HTTPException:
+        except AegisError:
             raise
         except Exception:
-            raise HTTPException(status_code=400, detail="INVALID_PATH_FORMAT")
+            raise InvalidPathError()
+
 
 class DirectoryLister:
     """Tactical directory scanning and filtering."""
@@ -88,7 +93,7 @@ class DirectoryLister:
                             "path": str((target / entry.name).relative_to(home))
                         })
             except PermissionError as e:
-                raise HTTPException(status_code=403, detail="ACCESS_DENIED: Directory non leggibile") from e
+                raise AccessDeniedError("ACCESS_DENIED: Directory non leggibile") from e
             return sorted(dirs, key=lambda x: x["name"].lower())
 
         return await anyio.to_thread.run_sync(_scan)
@@ -99,7 +104,7 @@ class DirectoryLister:
         target_path = PathSanitizer.resolve_and_sanitize(relative_path)
 
         if not target_path.is_dir():
-            raise HTTPException(status_code=404, detail="DIRECTORY_NOT_FOUND")
+            raise NotFoundError("DIRECTORY_NOT_FOUND")
 
         def _scan():
             items = []
@@ -121,7 +126,7 @@ class DirectoryLister:
                             "path": str(Path(relative_path) / entry.name)
                         })
             except PermissionError:
-                raise HTTPException(status_code=403, detail="PERMISSION_DENIED")
+                raise AccessDeniedError("PERMISSION_DENIED")
             return sorted(items, key=lambda x: (not x["is_dir"], x["name"].lower()))
 
         return await anyio.to_thread.run_sync(_scan)
@@ -183,7 +188,7 @@ class FileManager:
     async def read_text(relative_path: str) -> str:
         path = PathSanitizer.resolve_and_sanitize(relative_path)
         if not path.is_file() or not any(str(path).lower().endswith(ext) for ext in TEXT_EXTENSIONS):
-            raise HTTPException(status_code=404, detail="FILE_NOT_FOUND_OR_NOT_TEXT")
+            raise NotFoundError("FILE_NOT_FOUND_OR_NOT_TEXT")
 
         async with await anyio.open_file(path, mode="r", encoding="utf-8") as f:
             return await f.read()
@@ -192,7 +197,7 @@ class FileManager:
     async def read_bytes(relative_path: str) -> bytes:
         path = PathSanitizer.resolve_and_sanitize(relative_path)
         if not path.is_file():
-            raise HTTPException(status_code=404, detail="FILE_NOT_FOUND")
+            raise NotFoundError("FILE_NOT_FOUND")
 
         async with await anyio.open_file(path, mode="rb") as f:
             return await f.read()
@@ -201,7 +206,7 @@ class FileManager:
     async def write_text(relative_path: str, content: str):
         path = PathSanitizer.resolve_and_sanitize(relative_path)
         if not any(str(path).lower().endswith(ext) for ext in TEXT_EXTENSIONS):
-            raise HTTPException(status_code=400, detail="INVALID_FILE_TYPE")
+            raise InvalidFileTypeError()
 
         async with await anyio.open_file(path, mode="w", encoding="utf-8") as f:
             await f.write(content)
@@ -210,14 +215,14 @@ class FileManager:
     async def create(relative_dir: str, filename: str) -> str:
         filename = filename.strip()
         if not filename:
-            raise HTTPException(status_code=400, detail="FILENAME_REQUIRED")
+            raise FilenameRequiredError()
 
         if not any(filename.lower().endswith(ext) for ext in TEXT_EXTENSIONS):
             filename += ".md"
 
         file_path = PathSanitizer.resolve_and_sanitize(os.path.join(relative_dir, filename))
         if file_path.exists():
-            raise HTTPException(status_code=400, detail="FILE_ALREADY_EXISTS")
+            raise FileConflictError()
 
         async with await anyio.open_file(file_path, mode="w", encoding="utf-8") as f:
             await f.write("")
@@ -229,11 +234,11 @@ class FileManager:
     async def rename(relative_path: str, new_name: str) -> str:
         new_name = new_name.strip()
         if not new_name:
-            raise HTTPException(status_code=400, detail="FILENAME_REQUIRED")
+            raise FilenameRequiredError()
 
         old_path = PathSanitizer.resolve_and_sanitize(relative_path)
         if not old_path.is_file():
-            raise HTTPException(status_code=404, detail="FILE_NOT_FOUND")
+            raise NotFoundError("FILE_NOT_FOUND")
 
         if not Path(new_name).suffix:
             new_name += old_path.suffix
@@ -243,7 +248,7 @@ class FileManager:
         PathSanitizer.resolve_and_sanitize(str(new_path.relative_to(PathSanitizer.get_root())))
 
         if new_path.exists():
-            raise HTTPException(status_code=400, detail="FILE_ALREADY_EXISTS")
+            raise FileConflictError()
 
         await anyio.to_thread.run_sync(lambda: old_path.rename(new_path))
         _notify_mutation()
@@ -253,7 +258,7 @@ class FileManager:
     async def delete(relative_path: str):
         path = PathSanitizer.resolve_and_sanitize(relative_path)
         if not path.is_file() or not any(str(path).lower().endswith(ext) for ext in ALLOWED_EXTENSIONS):
-            raise HTTPException(status_code=400, detail="INVALID_FILE_TYPE")
+            raise InvalidFileTypeError()
 
         await anyio.to_thread.run_sync(os.remove, str(path))
         _notify_mutation()

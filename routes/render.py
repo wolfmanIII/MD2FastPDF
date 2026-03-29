@@ -40,10 +40,7 @@ async def mermaid_bulk(path: str = Query(...)):
     """Render all Mermaid blocks from a document and return as ZIP archive."""
     content = await read_file_content(path)
     base_name = Path(path).stem
-    try:
-        zip_bytes = await render_mermaid_zip(content, base_name)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
+    zip_bytes = await render_mermaid_zip(content, base_name)
     return Response(
         content=zip_bytes,
         media_type="application/zip",

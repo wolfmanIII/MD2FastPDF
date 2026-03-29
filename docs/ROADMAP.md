@@ -93,9 +93,11 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.9] - AEGIS STABILITY (System Integrity) [PLANNED]
+### [4.9] - AEGIS STABILITY (System Integrity) [COMPLETED]
 **Obiettivo**: Rafforzamento della robustezza del codice e della diagnostica in tempo reale.
-- **Centralized Exception Handling**: Implementazione di un gestore centralizzato delle eccezioni custom (`logic/exceptions.py`) per una telemetria ultra-precisa dei guasti direttamente nell'HUD operativo.
+- **Centralized Exception Handling**: Gerarchia `AegisError` in `logic/exceptions.py` con `status_code` integrato. Business logic completamente disaccoppiata da FastAPI — nessun `HTTPException` nei moduli `logic/`. ✓
+- **Global FastAPI Handler**: `@app.exception_handler(AegisError)` in `main.py` traduce ogni eccezione di dominio in `JSONResponse` con logging strutturato. ✓
+- **Domain Exception Migration**: Tutti i `raise HTTPException` nei moduli `logic/` rimpiazzati con eccezioni tipizzate (`AccessDeniedError`, `NotFoundError`, `ConversionError`, `OracleError`, `RenderError`, ecc.). ✓
 
 ---
 

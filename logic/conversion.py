@@ -7,6 +7,7 @@ from typing import Optional, Callable, Protocol
 import markdown
 
 from config.settings import settings
+from logic.exceptions import ConversionError
 
 # AEGIS_PERFORMANCE_LAYER: Load industrial PDF stylesheet once at module init
 _CSS_PATH = Path(__file__).parent.parent / "static" / "css" / "pdf-industrial.css"
@@ -199,7 +200,7 @@ class GotenbergClient:
         )
 
         if response.status_code != 200:
-            raise Exception(f"GOTENBERG_ERROR: {response.text}")
+            raise ConversionError(f"GOTENBERG_ERROR: {response.text}")
 
         return response.content
 
