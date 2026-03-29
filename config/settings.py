@@ -42,6 +42,11 @@ class SettingsManager:
                     # Merge with defaults to ensure all keys exist
                     self._settings = DEFAULT_SETTINGS.copy()
                     self._settings.update(file_data)
+                    # Expand ~ and $HOME in path-like settings
+                    if "workspace_base" in self._settings:
+                        self._settings["workspace_base"] = str(
+                            Path(self._settings["workspace_base"]).expanduser()
+                        )
             except (json.JSONDecodeError, IOError):
                 self._settings = DEFAULT_SETTINGS.copy()
                 self._save_sync()

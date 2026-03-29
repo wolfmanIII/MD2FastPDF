@@ -3,7 +3,7 @@
     "pdf_branding_enabled": false,
     "ollama_ip": "http://172.31.112.1:11434",
     "gotenberg_ip": "http://localhost:3000",
-    "workspace_base": "/home/wolfman/sc-archive",
+    "workspace_base": "~/sc-archive",
     "models": {
         "neural_hint": "llama3.2:latest",
         "neural_scan": "llama3.2:latest",
