@@ -1,5 +1,5 @@
 # Stato del Progetto: SC-ARCHIVE
-**Stato Attuale**: Op_Ready / Versione 5.5.1
+**Stato Attuale**: Op_Ready / Versione 5.5.1 → 5.6.0 in pianificazione
 **Ultimo Aggiornamento**: 29 Marzo 2026
 
 ---
@@ -85,6 +85,15 @@
 - **UserStoreProtocol**: `Protocol` `@runtime_checkable` — `AuthService` dipende dall'astrazione, non dalla classe concreta (DIP). `UserStore.get()`, `save_user()`, `update_root()` completamente asincroni via `_aload()`.
 - **Workspace Security**: `routes/config.py` — utenti non-admin confinati a `~/sc-archive/<username>`: `_user_allowed_base()` calcola il subtree consentito; `select_root` valida ogni selezione; `root_picker` blocca la navigazione al di sopra del workspace.
 
+### 1.10 AEGIS COMMS — Sistema di Messaggistica [5.0] (PLANNED)
+- **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root utente. Admin: `~/comms/`. Utenti: `~/sc-archive/{user}/comms/`. Creazione automatica alla registrazione.
+- **Formato**: file `.md` con frontmatter (id, from, to, subject, timestamp, read). Filename: `{timestamp}_{id8}_{slug}.md`. Parsing `re` stdlib — zero dipendenze aggiuntive.
+- **Invio**: dual-write su `outbound/` sender + `inbound/` recipient. Cross-workspace write con path assoluti (bypass `PathSanitizer`) + security assertion su `Path.home()`.
+- **Broadcast GM**: admin trasmette a `ALL` — copia individuale in ogni `inbound/` (read/unread per-utente indipendente).
+- **Bozze**: `staging/` — editabili, promovibili a trasmissione. Draft pre-fill in compose modal.
+- **Unread badge**: navbar HTMX-polled ogni 30s. Invisibile se count = 0.
+- **UI**: hub tabbato (`RECEPTION_ARRAY` / `OUTBOUND_LOG` / `STAGING_BUFFER`), compose modal con recipient dropdown, message reader con Markdown renderizzato via filtro Jinja2 `render_md`.
+
 ### 1.8 UX, Sicurezza & CSP Compliance
 - Transizioni `scan-in` / `soft-exit` su tutte le modali.
 - Sanitizzazione path obbligatoria (prevenzione `../`), sanitizzazione Markdown (XSS via `bleach`).
@@ -125,9 +134,9 @@ bin/            launch.sh, create_user.sh
 | [4.8] | AEGIS STABILITY | **COMPLETED** | Centralized Exception Handling (`AegisError`, `@app.exception_handler`) |
 | [4.9] | AEGIS STABILITY+ | **COMPLETED** | Registrazione `@app.exception_handler(AegisError)` in `main.py` |
 | [4.10] | AEGIS IDENTITY | **COMPLETED** | Multi-user auth, workspace isolation, login, logout, password change |
-| [4.4] | AEGIS CHRONOS | Planned | Versionamento narrativo Git opt-in (diff, snapshot, inject) |
+| [5.0] | AEGIS COMMS | **Planned — Next** | Messaggistica multi-utente, broadcast GM, draft, unread badge |
+| [4.6] | AEGIS CHRONOS | Planned | Versionamento narrativo Git opt-in (diff, snapshot, inject) |
 | [4.5] | AEGIS BLUEPRINT | Planned | Template gallery + Variable Injection |
-| [4.6] | AEGIS MULTI-LINK | Planned | Tabbed Workspace + Split Pane |
 | [4.7] | AEGIS GUARD | Planned | Buffer Encryption + Network Gateway UI |
 
 ---

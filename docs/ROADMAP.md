@@ -64,7 +64,20 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.6] - AEGIS CHRONOS (Versionamento Narrativo) [PLANNED — NEXT]
+### [5.0] - AEGIS COMMS (Sistema di Messaggistica Multi-Utente) [PLANNED — NEXT]
+**Obiettivo**: Canale di comunicazione sicuro tra utenti e admin (GM/Referee). Filesystem-based, nessun database.
+- **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root di ogni utente (admin: `~/comms/`, utenti: `~/sc-archive/{user}/comms/`). Auto-creazione alla registrazione utente.
+- **Formato messaggi**: file `.md` con frontmatter (id, from, to, subject, timestamp, read). Parsing stdlib `re` — nessuna dipendenza aggiuntiva.
+- **Flusso invio**: dual-write — copia in `outbound/` del sender + copia in `inbound/` del recipient. Cross-workspace write con path assoluti validati.
+- **Broadcast GM**: admin può trasmettere a tutti gli operatori (`to: ALL`). Una copia per utente in `inbound/` (tracking read/unread indipendente).
+- **Draft management**: bozze in `staging/` — editabili, promuovibili a trasmissione con un click.
+- **Unread badge**: contatore nella navbar, HTMX-polled ogni 30s (`GET /comms/unread-count`).
+- **UI**: hub tabbato (RECEPTION_ARRAY / OUTBOUND_LOG / STAGING_BUFFER), modale composizione, reader con Markdown renderizzato, azioni inline (PURGE / RESPOND).
+- **Piano dettagliato**: `docs/piano-aegis-comms.md`.
+
+---
+
+### [4.6] - AEGIS CHRONOS (Versionamento Narrativo) [PLANNED]
 **Obiettivo**: Strato di versionamento leggero e non invasivo per archivi narrativi (scenari RPG, documentazione tecnica). Modulo **opt-in**: attivo solo se la root selezionata contiene già un repo Git. Non crea repo, non tocca remoti, non esegue mai operazioni distruttive.
 - **Detect automatico**: `git rev-parse --git-dir` sulla root — se assente, pannello in stato `GIT_REPO_NOT_DETECTED` con istruzioni init.
 - **Branch indicator**: visualizzazione del branch corrente nell'editor e nella dashboard.
