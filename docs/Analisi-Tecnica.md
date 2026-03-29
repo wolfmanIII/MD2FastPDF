@@ -1,76 +1,162 @@
 # Analisi Tecnica: SC-ARCHIVE
 **Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
 **Nome Tecnico Interno**: MD2FastPDF
-**Data**: 28 Marzo 2026
+**Data**: 29 Marzo 2026
+**Versione**: 5.5.1
 
 ## 1. Architettura di Sistema
-L'applicazione segue un modello di sviluppo asincrono basato su FastAPI, orientato al basso consumo di risorse e alla modularità dei componenti, con un'estetica "Spacecraft Computer".
+
+L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-request tramite `ContextVar`. Ogni utente autenticato opera su un workspace filesystem dedicato; lo stato di sessione è gestito server-side tramite cookie firmato (`SessionMiddleware`).
 
 ### 1.1 Persistenza e Configurazione (`config/settings.py`)
-- **JSON Store**: `config/settings.json` come sorgente unica di verità. Il modulo `config/settings.py` (package Python `config/`) è co-locato con il suo store.
-- **SettingsManager**: classe con `get()`, `set()` async, `batch_update()` (singola scrittura disco), `_save_sync()` solo per startup.
-- **Dynamic Uplink**: coordinate dei servizi (Ollama, Gotenberg) e preferenze IA caricate all'avvio e modificabili a runtime.
+- **JSON Store**: `config/settings.json` sorgente unica di verità per parametri operativi.
+- **SettingsManager**: `get()`, `set()` async, `batch_update()` (singola scrittura disco), `_save_sync()` solo per startup.
+- **Dynamic Uplink**: coordinate dei servizi (Ollama, Gotenberg), modelli IA e flag persistiti — modificabili a runtime senza restart.
 - **Aggiornamento Reattivo**: trigger HTMX (`settings-updated`) per sincronizzazione dashboard post-modifica.
 
 ### 1.2 Backend (Python / FastAPI)
-- **FastAPI**: cuore del sistema per la gestione delle rotte e della logica asincrona.
-- **Asincronia**: `asyncio` + `anyio` per I/O filesystem e richieste HTTP (Gotenberg, Ollama).
-- **Statelessness**: stato sessione gestito sul client tramite parametri di query.
-- **Jinja2**: motore di templating per il rendering server-side.
-- **SOLID Compliance**: Protocol-based abstractions in `conversion.py`; mutation hook registry in `files.py`; dependency injection via constructor in `oracle.py` e `GotenbergClient`.
+- **FastAPI**: routing, middleware stack, dependency injection via `Depends`.
+- **Middleware stack** (outer → inner): `SessionMiddleware` → `auth_middleware` (custom HTTP middleware).
+  - `auth_middleware`: verifica sessione, blocca path non pubblici, binda `_REQUEST_ROOT` ContextVar per la request corrente. HTMX-aware: emette `HX-Redirect` per richieste headless.
+- **Asincronia**: `asyncio` + `anyio` per I/O filesystem; `httpx.AsyncClient` per Gotenberg e Ollama.
+- **Jinja2**: rendering server-side con filtro custom `parent_path`.
+- **SOLID Compliance**: Protocol-based abstractions in `conversion.py`; mutation hook registry in `files.py`; DI via constructor in `oracle.py` e `GotenbergClient`; `UserStoreProtocol` runtime-checkable in `auth.py`.
 
 ### 1.3 Frontend (HTMX / Tailwind)
-- **HTMX**: aggiornamento parziale del DOM con transizioni fluide ("Aegis Transitions").
-- **Tailwind CSS v4**: sistema di styling atomico e design "Glassmorphism" industriale.
-- **EasyMDE/CodeMirror**: editor Markdown con Fullscreen e Side-by-Side.
+- **HTMX**: aggiornamento parziale del DOM. Ogni risposta è un fragment Jinja2 se `HX-Request` è presente, full-page altrimenti.
+- **Tailwind CSS v4**: design "Glassmorphism" industriale con palette Slate/Zinc e accento Neon Cyan (`#7dd3fc`).
+- **EasyMDE/CodeMirror**: editor Markdown con Fullscreen, Side-by-Side, toolbar estesa.
 - **CSP Ready**: nessun attributo `style=` inline nei template (eccetto 2 valori CSS dinamici Jinja2). CSS estratti in file statici dedicati.
 
 ### 1.4 Generazione PDF (Gotenberg)
-- **Pipeline**: MD → HTML → PDF via Gotenberg (Chromium Engine).
+- **Pipeline**: MD → HTML (sanitizzato via `bleach`) → PDF via Gotenberg (Chromium Engine).
 - **Protocol classes**: `PageScaffolding` (Protocol), `DetailedScaffolding`, `MinimalScaffolding`, `MarkdownRenderer`, `PdfHtmlBuilder` — tutti iniettabili in `GotenbergClient`.
-- **Industrial CSS**: `static/css/pdf-industrial.css` caricato una volta a module init — nessun CSS inline nel codice Python.
+- **Industrial CSS**: `static/css/pdf-industrial.css` caricato una volta a module init — zero CSS inline nel codice Python.
 - **HUD Tipografico**: testate e piè di pagina con paginazione dinamica (`{{pageNumber}}` / `{{totalPages}}`).
-- **Nota**: header/footer HTML inviati a Gotenberg contengono `style=` inline strutturali — Gotenberg opera in sandbox isolata senza accesso ai file statici dell'app.
+- **Nota**: header/footer inviati a Gotenberg contengono `style=` inline strutturali — Gotenberg opera in sandbox senza accesso ai file statici dell'app.
+
+### 1.5 Autenticazione e Workspace Isolation (`logic/auth.py`)
+- **SessionMiddleware**: cookie firmato con `AEGIS_SECRET_KEY` (24h TTL). Outer layer nel middleware stack.
+- **auth_middleware**: HTTP middleware inner — legge `request.session["username"]`, recupera root utente da `UserStore`, binda `PathSanitizer._REQUEST_ROOT` via `ContextVar`.
+- **UserStore**: persistenza `config/users.json`. Hashing `bcrypt` (cost 12). API async-first; sync variants solo per bootstrap.
+- **AuthService**: business logic (authenticate, create_user, change_password, update_user_root). Dipende da `UserStoreProtocol` (DIP).
+- **Per-user workspace**: admin → `Path.home()`; utenti → `workspace_base/{username}`. Root persistita per-utente in `users.json`.
+- **Admin bootstrap**: primo avvio crea `admin/admin` se `users.json` è vuoto. Sovrascrivibile via `AEGIS_ADMIN_PASSWORD`.
+- **ContextVar isolation**: `_REQUEST_ROOT` in `logic/files.py` — nessuna contaminazione tra sessioni concorrenti in asyncio.
+
+---
 
 ## 2. Struttura dei Package
 
 ### 2.1 `logic/` — Business Logic
-- `files.py`: `FileManager`, `DirectoryLister`, `PathSanitizer`, `StorageCache`. Mutation hook registry per invertire dipendenza verso cache. `os.scandir` offloaded via `anyio.to_thread.run_sync`.
-- `conversion.py`: `GotenbergClient` con DI; Protocol types per scaffolding, renderer, builder; CSS caricato da file statico.
-- `oracle.py`: `OracleClient` con DI (`SettingsManager`); `_EMBEDDING_KEYWORDS` frozenset; `service_status()`, `list_models()`.
-- `render.py`: export PNG/ZIP Mermaid via Gotenberg.
-- `templates.py`: helper Jinja2.
+
+| Modulo | Classi principali | Responsabilità |
+|--------|-------------------|----------------|
+| `files.py` | `PathSanitizer`, `FileManager`, `DirectoryLister`, `StorageCache` | Filesystem I/O, path security, cache stats |
+| `conversion.py` | `GotenbergClient`, `MarkdownRenderer`, `PdfHtmlBuilder`, `DetailedScaffolding`, `MinimalScaffolding` | Pipeline MD→PDF via Gotenberg |
+| `oracle.py` | `OracleClient`, `PromptTemplates` | Integrazione Ollama (completion, synthesis, summarize) |
+| `render.py` | funzioni `render_mermaid_png`, `render_mermaid_zip` | Export PNG/ZIP Mermaid via Gotenberg screenshot |
+| `auth.py` | `AuthService`, `UserStore`, `UserRecord`, `UserStoreProtocol` | Multi-user auth, workspace isolation |
+| `templates.py` | `templates` (Jinja2Templates) | Configurazione motore template + filtri custom |
+| `exceptions.py` | `AegisError` e sottoclassi | Gerarchia eccezioni dominio (zero `HTTPException` in `logic/`) |
+
+**Gerarchia eccezioni** (`logic/exceptions.py`):
+```
+AegisError
+  ├── AccessDeniedError      (403)
+  ├── NotFoundError          (404)
+  ├── InvalidPathError       (400)
+  ├── InvalidFileTypeError   (400)
+  ├── FileConflictError      (400)
+  ├── FilenameRequiredError  (400)
+  ├── AuthError              (401)
+  ├── ConversionError        (502)
+  ├── OracleError            (502)
+  └── RenderError            (502)
+```
+`@app.exception_handler(AegisError)` in `main.py` traduce ogni eccezione in `JSONResponse` con logging strutturato.
 
 ### 2.2 `routes/` — API Routers
-- `__init__.py`: `build_breadcrumbs(path)` utility condivisa.
-- `core.py`: dashboard, stats, services status (delega a `gotenberg.health_check()` e `oracle.service_status()`).
-- `archive.py`, `editor.py`, `pdf.py`, `oracle.py`, `settings.py`, `config.py`.
+
+| Modulo | Prefix | Responsabilità |
+|--------|--------|----------------|
+| `core.py` | `/` | Dashboard, stats, services health |
+| `auth.py` | `/` | Login, logout, cambio password |
+| `archive.py` | `/` | File CRUD, search, tree navigation |
+| `editor.py` | `/` | Editor view, save |
+| `pdf.py` | `/` | PDF conversion, preview, download |
+| `config.py` | `/` | Root picker, workspace selection |
+| `oracle.py` | `/api/oracle` | Completion SSE, Mermaid synthesis, summarize |
+| `render.py` | `/render` | Mermaid PNG/ZIP export |
+| `settings.py` | `/` | Settings UI, model management |
+| `deps.py` | — | `get_current_user` dependency condivisa |
+| `__init__.py` | — | `build_breadcrumbs()` utility condivisa |
 
 ### 2.3 `config/` — Configuration Package
+
 - `settings.py`: `SettingsManager` + istanza globale `settings`.
-- `settings.json`: store persistente.
+- `settings.json`: store persistente (Ollama IP, Gotenberg IP, modelli, flags).
+- `users.json`: credenziali utenti + workspace root per-utente.
 
 ### 2.4 `static/css/` — Design System
-- `output.css`: Tailwind compiled output.
-- `editor-aegis.css`: stili EasyMDE, fullscreen fix, layout editor.
-- `pdf-industrial.css`: stylesheet documento PDF (Gotenberg).
-- `pdf-preview.css`: tooltip override, iframe, overflow per il viewer PDF.
-- `main.css`: utility classes globali (`.aegis-input-bg`, `.btn-violet`, `.btn-neon`, ecc.).
 
-### 2.5 Sistema di Icone (`templates/icons/`)
-- Componenti SVG Jinja2. Include l'icona **Holocron** come simbolo di sistema.
+| File | Scopo |
+|------|-------|
+| `output.css` | Tailwind v4 compiled output |
+| `editor-aegis.css` | Stili EasyMDE, fullscreen fix, layout editor, filetree sidebar |
+| `pdf-industrial.css` | Stylesheet documento PDF (inviato a Gotenberg) |
+| `pdf-preview.css` | Tooltip override, iframe, overflow viewer PDF |
+| `main.css` | Utility classes globali, variabili CSS custom |
 
-## 3. Interfaccia Utente (UI)
-- **Micro-animazioni**: Radar di sistema calibrato a 45s per effetto atmosferico.
-- **Modali Aegis**: transizioni `scan-in` e `soft-exit` per eliminare i flash visivi.
-- **Branding**: integrazione del logo Holocron vettoriale.
+### 2.5 `templates/`
 
-## 4. Sicurezza e Distribuzione
-- **Sanitizzazione Path**: validazione dei path rispetto alla `PROJECT_ROOT` (Anti-Traversal).
-- **Sanitizzazione Markdown**: prevenzione XSS tramite `bleach` nella pipeline di conversione.
-- **CSP Compliance**: eliminazione totale degli attributi `style=` inline da template e route. `Content-Security-Policy: style-src 'self'` applicabile senza `unsafe-inline`.
-- **Error Handling**: politica "Zero Suppression" (nessun `except: pass`) per visibilità dei guasti.
-- **Docker**: containerizzazione obbligatoria per Gotenberg.
+```
+layouts/
+  base.html       — scaffold HTML completo (nav, sidebar, modal container)
+  login.html      — pagina login standalone
+shell.html        — wrapper minimo per component_template pattern
+components/       — 21 fragment Jinja2 HTMX
+icons/            — SVG inline components
+```
 
 ---
-*Documento Tecnico Aegis Class System // v5.3.0.*
+
+## 3. Sicurezza
+
+| Livello | Meccanismo |
+|---------|-----------|
+| Autenticazione | SessionMiddleware + bcrypt (cost 12) |
+| Autorizzazione | auth_middleware + admin check per endpoint sensibili |
+| Workspace isolation | `ContextVar[Path]` per-request — impossibile accedere al workspace di un altro utente |
+| Path traversal | `PathSanitizer.resolve_and_sanitize()` — blocca `../`, path nascosti, symlink escape |
+| XSS | `bleach.Cleaner` whitelist su ogni pipeline MD→HTML |
+| CSP | Zero `style=` inline (eccetto 2 valori dinamici Jinja2) — `style-src 'self'` applicabile |
+
+---
+
+## 4. Lifespan e Servizi Esterni
+
+`main.py` usa un async context manager `@asynccontextmanager` come `lifespan`:
+
+- **Startup**: bootstrap admin, registrazione mutation hook cache, probe Ollama.
+- **Shutdown**: `gotenberg.shutdown()`, `oracle.shutdown()` — chiusura `httpx.AsyncClient`.
+
+| Servizio | Protocollo | Uso |
+|----------|-----------|-----|
+| Gotenberg | HTTP POST multipart | PDF rendering, Mermaid PNG/ZIP |
+| Ollama | HTTP POST JSON / SSE | Completion, Mermaid synthesis, summarize |
+| Tailwind CLI | Processo esterno | Compilazione CSS (solo development) |
+
+---
+
+## 5. Pattern Architetturali Chiave
+
+- **Fragment-first HTMX**: ogni route rileva `HX-Request` e restituisce fragment o full-page. Modale pattern: `hx-target="#modal-container"`. Tab/panel: `hx-target="#aegis-view-core"`.
+- **ContextVar per request isolation**: `_REQUEST_ROOT` in `logic/files.py` — bindata da `auth_middleware` prima che la route venga eseguita. Nessun parametro `root` propagato esplicitamente.
+- **Protocol-based DI**: `RendererProtocol`, `HtmlBuilderProtocol`, `PageScaffolding`, `UserStoreProtocol` — tutte le dipendenze critiche sono Protocol, non classi concrete.
+- **Mutation hook registry**: `StorageCache` si invalida via hook registrato da `main.py` — nessuna dipendenza inversa da `files.py` verso la cache.
+- **Atomic file write**: write su `.tmp` → `rename()` — nessuna lettura parziale possibile.
+
+---
+
+*Documento Tecnico Aegis Class System // v5.5.1*
