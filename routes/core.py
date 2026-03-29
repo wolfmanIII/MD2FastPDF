@@ -1,11 +1,12 @@
 import psutil
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from config.settings import settings
 from logic.templates import templates
 from logic.files import get_recent_files, get_storage_stats, get_project_root
 from logic.conversion import gotenberg
 from logic.oracle import oracle as neural_oracle
+from routes.deps import get_current_user
 
 # AEGIS_CORE_ROUTER: Central dashboard and system telemetry
 router = APIRouter(tags=["Aegis Core"])
@@ -59,7 +60,7 @@ async def get_stats(request: Request):
 
 
 @router.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
+async def read_root(request: Request, username: str = Depends(get_current_user)):
     """
     Main entry point for the MD2FastPDF application.
     Renders the industrial dashboard.
@@ -73,6 +74,7 @@ async def read_root(request: Request):
         **_system_context(),
         "recent_files": recent,
         "storage": storage,
+        "is_admin": username == "admin",
         "component_template": "components/dashboard.html",
     }
 

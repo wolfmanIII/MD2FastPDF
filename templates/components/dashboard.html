@@ -9,10 +9,12 @@
                 class="btn-ghost text-[10px] rounded-sm focus:outline-none">
                 SETTINGS
             </button>
+            {% if is_admin %}
             <button hx-get="/root-picker" hx-target="#modal-container"
                 class="btn-ghost text-[10px] rounded-sm focus:outline-none">
                 SET_ARCHIVE
             </button>
+            {% endif %}
             <a href="/files" hx-get="/files" hx-target="#aegis-view-core" hx-push-url="true"
                 class="btn-solid text-[10px] rounded-sm focus:outline-none shadow-[0_0_15px_rgba(0,240,255,0.2)] no-underline">
                 LIBRARY_ACCESS
