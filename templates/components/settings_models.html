@@ -1,0 +1,21 @@
+<div class="space-y-1">
+    <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">Neural Hint Device</label>
+    <select name="model_neural_hint" class="w-full bg-black/60 text-xs font-mono text-(--neon-cyan) focus:outline-none rounded-sm">
+        {% for m in available_models %}<option value="{{ m }}" class="bg-zinc-900 text-white" {% if settings.models.neural_hint==m %}selected{% endif %}>{{ m|upper }}</option>{% endfor %}
+        {% if settings.models.neural_hint not in available_models %}<option value="{{ settings.models.neural_hint }}" class="bg-zinc-900 text-white" selected>[OFFLINE_FALLBACK] // {{ settings.models.neural_hint|upper }}</option>{% endif %}
+    </select>
+</div>
+<div class="space-y-1">
+    <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">Neural Scan Device</label>
+    <select name="model_neural_scan" class="w-full bg-black/60 text-xs font-mono text-(--neon-cyan) focus:outline-none rounded-sm">
+        {% for m in available_models %}<option value="{{ m }}" class="bg-zinc-900 text-white" {% if settings.models.neural_scan==m %}selected{% endif %}>{{ m|upper }}</option>{% endfor %}
+        {% if settings.models.neural_scan not in available_models %}<option value="{{ settings.models.neural_scan }}" class="bg-zinc-900 text-white" selected>[OFFLINE_FALLBACK] // {{ settings.models.neural_scan|upper }}</option>{% endif %}
+    </select>
+</div>
+<div class="space-y-1">
+    <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">Mermaid Synthesis Device</label>
+    <select name="model_mermaid_synthesis" class="w-full bg-black/60 text-xs font-mono text-(--neon-cyan) focus:outline-none rounded-sm">
+        {% for m in available_models %}<option value="{{ m }}" class="bg-zinc-900 text-white" {% if settings.models.mermaid_synthesis==m %}selected{% endif %}>{{ m|upper }}</option>{% endfor %}
+        {% if settings.models.mermaid_synthesis not in available_models %}<option value="{{ settings.models.mermaid_synthesis }}" class="bg-zinc-900 text-white" selected>[OFFLINE_FALLBACK] // {{ settings.models.mermaid_synthesis|upper }}</option>{% endif %}
+    </select>
+</div>

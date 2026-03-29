@@ -13,6 +13,20 @@ router = APIRouter(tags=["Aegis Settings"])
 async def get_settings(request: Request):
     """
     Renders the central Aegis settings dashboard.
+    Model list is deferred to /settings/models to avoid blocking on Ollama.
+    """
+    context = {
+        "request": request,
+        "settings": app_settings.all,
+    }
+    return templates.TemplateResponse(request=request, name="components/settings_modal.html", context=context)
+
+
+@router.get("/settings/models", response_class=HTMLResponse)
+async def get_settings_models(request: Request):
+    """
+    Lazy-loaded fragment: probes Ollama for available models and returns the model select inputs.
+    Decoupled from the main settings modal render to prevent blocking on slow/unavailable Ollama.
     """
     current = app_settings.all
     neural_on = current.get('neural_link_enabled', True)
@@ -21,9 +35,9 @@ async def get_settings(request: Request):
     context = {
         "request": request,
         "settings": current,
-        "available_models": available_models
+        "available_models": available_models,
     }
-    return templates.TemplateResponse(request=request, name="components/settings_modal.html", context=context)
+    return templates.TemplateResponse(request=request, name="components/settings_models.html", context=context)
 
 @router.post("/settings/save", response_class=HTMLResponse)
 async def save_settings(
