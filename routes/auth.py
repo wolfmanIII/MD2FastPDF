@@ -28,7 +28,7 @@ async def login(
 ):
     """Authenticates credentials, opens a session, and redirects to the dashboard."""
     try:
-        auth_service.authenticate(username, password)
+        await auth_service.authenticate(username, password)
         request.session["username"] = username
         return RedirectResponse(url="/", status_code=302)
     except AuthError:
@@ -52,7 +52,7 @@ async def change_password(
 ):
     """Changes the password for the currently authenticated user."""
     try:
-        auth_service.authenticate(username, current_password)
+        await auth_service.authenticate(username, current_password)
     except AuthError:
         return HTMLResponse(
             '<div id="pw-notification" class="text-xs font-mono text-red-400 animate-pulse">'

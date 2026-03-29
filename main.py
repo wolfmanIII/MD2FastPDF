@@ -52,7 +52,7 @@ async def auth_middleware(request: Request, call_next):
         return RedirectResponse(url="/login", status_code=302)
 
     try:
-        user_root = auth_service.get_user_root(username)
+        user_root = await auth_service.get_user_root(username)
         PathSanitizer.bind_request_root(user_root)
     except Exception:
         request.session.clear()

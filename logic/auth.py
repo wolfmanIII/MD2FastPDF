@@ -9,10 +9,22 @@ import os
 import bcrypt
 import anyio
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Protocol, runtime_checkable
 
 from config.settings import settings
 from logic.exceptions import AuthError
+
+
+@runtime_checkable
+class UserStoreProtocol(Protocol):
+    """Abstraction over the user persistence backend."""
+
+    async def get(self, username: str) -> Optional["UserRecord"]: ...
+    def get_sync(self, username: str) -> Optional["UserRecord"]: ...
+    def is_empty(self) -> bool: ...
+    async def save_user(self, record: "UserRecord") -> None: ...
+    def save_user_sync(self, record: "UserRecord") -> None: ...
+    async def update_root(self, username: str, root: str) -> None: ...
 
 USERS_FILE = Path("config/users.json")
 
@@ -34,11 +46,23 @@ class UserStore:
     """Persistent user registry backed by config/users.json."""
 
     def _load(self) -> dict:
+        """Sync load — used only by bootstrap/CLI sync chain."""
         if not USERS_FILE.exists():
             return {}
         try:
             with open(USERS_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
+        except (json.JSONDecodeError, IOError):
+            return {}
+
+    async def _aload(self) -> dict:
+        """Async load — used by all async-context operations."""
+        p = anyio.Path(USERS_FILE)
+        if not await p.exists():
+            return {}
+        try:
+            content = await p.read_text(encoding="utf-8")
+            return json.loads(content)
         except (json.JSONDecodeError, IOError):
             return {}
 
@@ -51,21 +75,25 @@ class UserStore:
         async with await anyio.open_file(USERS_FILE, "w") as f:
             await f.write(content)
 
-    def get(self, username: str) -> Optional[UserRecord]:
+    async def get(self, username: str) -> Optional[UserRecord]:
         """Returns the UserRecord for the given username, or None if not found."""
+        entry = (await self._aload()).get(username)
+        if not entry:
+            return None
+        return UserRecord(username, entry["password_hash"], entry["root"])
+
+    def get_sync(self, username: str) -> Optional[UserRecord]:
+        """Sync variant — used only during bootstrap/CLI."""
         entry = self._load().get(username)
         if not entry:
             return None
         return UserRecord(username, entry["password_hash"], entry["root"])
 
-    def exists(self, username: str) -> bool:
-        return username in self._load()
-
     def is_empty(self) -> bool:
         return len(self._load()) == 0
 
     async def save_user(self, record: UserRecord) -> None:
-        data = self._load()
+        data = await self._aload()
         data[record.username] = record.to_dict()
         await self._save(data)
 
@@ -77,7 +105,7 @@ class UserStore:
 
     async def update_root(self, username: str, root: str) -> None:
         """Persists a new workspace root for the given user."""
-        data = self._load()
+        data = await self._aload()
         if username not in data:
             raise AuthError(f"USER_NOT_FOUND: {username}")
         data[username]["root"] = root
@@ -87,7 +115,7 @@ class UserStore:
 class AuthService:
     """Authentication and per-user workspace management."""
 
-    def __init__(self, store: UserStore):
+    def __init__(self, store: UserStoreProtocol):
         self._store = store
 
     def _hash(self, password: str) -> str:
@@ -100,9 +128,9 @@ class AuthService:
         base = Path(settings.get("workspace_base", str(Path.home() / "sc-archive")))
         return base / username
 
-    def authenticate(self, username: str, password: str) -> UserRecord:
+    async def authenticate(self, username: str, password: str) -> UserRecord:
         """Verifies credentials. Raises AuthError on failure."""
-        record = self._store.get(username)
+        record = await self._store.get(username)
         if not record or not self._verify(password, record.password_hash):
             raise AuthError("INVALID_CREDENTIALS")
         return record
@@ -123,9 +151,9 @@ class AuthService:
         self._store.save_user_sync(record)
         return record
 
-    def get_user_root(self, username: str) -> Path:
+    async def get_user_root(self, username: str) -> Path:
         """Returns the workspace root for the given user."""
-        record = self._store.get(username)
+        record = await self._store.get(username)
         if not record:
             raise AuthError(f"USER_NOT_FOUND: {username}")
         return Path(record.root)
@@ -136,7 +164,7 @@ class AuthService:
 
     async def change_password(self, username: str, new_password: str) -> None:
         """Replaces the stored password hash for the given user."""
-        record = self._store.get(username)
+        record = await self._store.get(username)
         if not record:
             raise AuthError(f"USER_NOT_FOUND: {username}")
         record.password_hash = self._hash(new_password)
