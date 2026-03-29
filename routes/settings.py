@@ -18,6 +18,7 @@ async def get_settings(request: Request):
     context = {
         "request": request,
         "settings": app_settings.all,
+        "is_admin": request.session.get("username") == "admin",
     }
     return templates.TemplateResponse(request=request, name="components/settings_modal.html", context=context)
 
@@ -27,7 +28,11 @@ async def get_settings_models(request: Request):
     """
     Lazy-loaded fragment: probes Ollama for available models and returns the model select inputs.
     Decoupled from the main settings modal render to prevent blocking on slow/unavailable Ollama.
+    Admin-only: non-admin users receive a read-only fallback fragment.
     """
+    if request.session.get("username") != "admin":
+        return HTMLResponse(status_code=403, content="")
+
     current = app_settings.all
     neural_on = current.get('neural_link_enabled', True)
     available_models = await neural_oracle.list_models() if neural_on else []
@@ -53,25 +58,28 @@ async def save_settings(
     """
     Persists updated operational parameters with data-loss prevention.
     """
+    is_admin = request.session.get("username") == "admin"
+
     updates = {
         "neural_link_enabled": neural_link_enabled,
         "pdf_branding_enabled": pdf_branding_enabled,
     }
 
-    # Update IPs only if provided to prevent overwriting with empty strings from disabled fields
-    if ollama_ip.strip():
-        updates["ollama_ip"] = ollama_ip.strip()
+    if is_admin:
+        # Update IPs only if provided to prevent overwriting with empty strings from disabled fields
+        if ollama_ip.strip():
+            updates["ollama_ip"] = ollama_ip.strip()
 
-    if gotenberg_ip.strip():
-        updates["gotenberg_ip"] = gotenberg_ip.strip()
+        if gotenberg_ip.strip():
+            updates["gotenberg_ip"] = gotenberg_ip.strip()
 
-    # Protect existing model configuration from being wiped by disabled form fields
-    current_models = app_settings.get("models", {})
-    updates["models"] = {
-        "neural_hint": model_neural_hint if model_neural_hint else current_models.get("neural_hint"),
-        "neural_scan": model_neural_scan if model_neural_scan else current_models.get("neural_scan"),
-        "mermaid_synthesis": model_mermaid_synthesis if model_mermaid_synthesis else current_models.get("mermaid_synthesis")
-    }
+        # Protect existing model configuration from being wiped by disabled form fields
+        current_models = app_settings.get("models", {})
+        updates["models"] = {
+            "neural_hint": model_neural_hint if model_neural_hint else current_models.get("neural_hint"),
+            "neural_scan": model_neural_scan if model_neural_scan else current_models.get("neural_scan"),
+            "mermaid_synthesis": model_mermaid_synthesis if model_mermaid_synthesis else current_models.get("mermaid_synthesis")
+        }
 
     await app_settings.batch_update(updates)
 
