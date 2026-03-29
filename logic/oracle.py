@@ -166,7 +166,7 @@ class OracleClient:
                     "stream": False,
                     "options": {
                         "num_ctx": 16384,
-                        "num_predict": 1000,
+                        "num_predict": 4096,
                         "temperature": 0.2
                     }
                 }
