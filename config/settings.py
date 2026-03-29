@@ -12,6 +12,7 @@ DEFAULT_SETTINGS = {
     "pdf_branding_enabled": False,
     "ollama_ip": "http://localhost:11434",
     "gotenberg_ip": "http://localhost:3000",
+    "workspace_base": str(Path.home() / "sc-archive"),
     "models": {
         "neural_hint": "llama3.2",
         "neural_scan": "llama3.2",

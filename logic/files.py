@@ -1,4 +1,5 @@
 import os
+from contextvars import ContextVar
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Union, Optional, Set, Callable
@@ -15,8 +16,9 @@ TEXT_EXTENSIONS: Set[str] = {".md", ".html"}
 SKIP_DIRS: Set[str] = {".git", ".venv", "node_modules", ".pytest_cache", "__pycache__", ".gemini"}
 CACHE_TTL: int = 60  # Seconds
 
-# Global state for the active project root
-_CURRENT_ROOT: Path = Path(__file__).parent.parent.resolve()
+# Per-request root isolation via ContextVar (AEGIS_IDENTITY_PROTOCOL)
+_DEFAULT_ROOT: Path = Path(__file__).parent.parent.resolve()
+_REQUEST_ROOT: ContextVar[Path] = ContextVar("aegis_request_root", default=_DEFAULT_ROOT)
 
 # Mutation hook registry — inverted dependency for cache invalidation
 _mutation_hooks: list[Callable[[], None]] = []
@@ -36,16 +38,22 @@ class PathSanitizer:
 
     @staticmethod
     def get_root() -> Path:
-        return _CURRENT_ROOT
+        return _REQUEST_ROOT.get()
+
+    @staticmethod
+    def bind_request_root(path: Path) -> None:
+        """Binds path as the root for the current async context (per-request isolation)."""
+        _REQUEST_ROOT.set(path)
 
     @staticmethod
     def set_root(new_path: Union[str, Path]):
-        global _CURRENT_ROOT
+        global _DEFAULT_ROOT
         resolved = Path(new_path).resolve()
         # Security: Always resolve and ensure it's within Path.home()
         if not str(resolved).startswith(str(Path.home().resolve())):
             raise AccessDeniedError("ACCESS_DENIED: Root must be within HOME")
-        _CURRENT_ROOT = resolved
+        _DEFAULT_ROOT = resolved
+        _REQUEST_ROOT.set(resolved)
         _notify_mutation()
 
     @staticmethod

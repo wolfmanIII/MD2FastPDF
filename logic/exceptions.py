@@ -52,6 +52,14 @@ class FilenameRequiredError(AegisError):
         super().__init__(detail, status_code=400)
 
 
+# --- Auth Errors ---
+
+class AuthError(AegisError):
+    """Authentication or authorization failure."""
+    def __init__(self, detail: str = "AUTH_FAILED"):
+        super().__init__(detail, status_code=401)
+
+
 # --- Conversion Errors ---
 
 class ConversionError(AegisError):

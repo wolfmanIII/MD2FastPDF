@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SC-ARCHIVE // IDENTITY VERIFICATION</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg">
+    <link rel="stylesheet" href="/static/css/output.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Roboto+Mono&family=Inconsolata:wght@200..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #7dd3fc;
+            --neon-glow: 0 0 12px rgba(125, 211, 252, 0.4);
+            --glass-bg: rgba(15, 23, 42, 0.8);
+            --glass-border: rgba(125, 211, 252, 0.25);
+        }
+        *, *::before, *::after { box-sizing: border-box !important; }
+        body {
+            background-color: #0c0e14;
+            background-image:
+                radial-gradient(circle at 50% -20%, rgba(56, 189, 248, 0.12) 0%, transparent 70%),
+                linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 48px 48px, 48px 48px;
+            background-attachment: fixed;
+            color: #f1f5f9;
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 24px -1px rgba(0,0,0,0.4);
+            border-radius: 4px;
+        }
+        .neon-text { color: var(--neon-cyan) !important; text-shadow: var(--neon-glow); }
+        .aegis-input {
+            width: 100%;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(125, 211, 252, 0.2);
+            border-radius: 4px;
+            color: #f1f5f9;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 12px;
+            padding: 0.6rem 0.75rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .aegis-input:focus { border-color: var(--neon-cyan); box-shadow: 0 0 0 1px rgba(125,211,252,0.3); }
+        .btn-login {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-family: 'Roboto Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            padding: 0.65rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-login:hover {
+            background: rgba(125, 211, 252, 0.1);
+            box-shadow: var(--neon-glow);
+        }
+        .label-mono {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+        .error-panel {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: 4px;
+            padding: 0.6rem 0.75rem;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 11px;
+            color: #fca5a5;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-panel" style="width: 100%; max-width: 380px; padding: 2.5rem 2rem;">
+
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="neon-text" style="font-size: 22px; font-weight: 700; letter-spacing: 0.15em;">
+                SC-ARCHIVE
+            </div>
+            <div class="label-mono mt-1" style="font-size: 9px; color: #64748b;">
+                AEGIS CLASS // IDENTITY VERIFICATION
+            </div>
+            <div style="margin-top: 1rem; height: 1px; background: linear-gradient(90deg, transparent, rgba(125,211,252,0.3), transparent);"></div>
+        </div>
+
+        <!-- Error -->
+        {% if error %}
+        <div class="error-panel mb-5">
+            !! {{ error }} !!
+        </div>
+        {% endif %}
+
+        <!-- Login Form -->
+        <form method="post" action="/login" autocomplete="off">
+            <div class="mb-4">
+                <div class="label-mono mb-2">OPERATOR_ID</div>
+                <input
+                    class="aegis-input"
+                    type="text"
+                    name="username"
+                    placeholder="username"
+                    autocomplete="username"
+                    autofocus
+                    required
+                />
+            </div>
+            <div class="mb-6">
+                <div class="label-mono mb-2">ACCESS_KEY</div>
+                <input
+                    class="aegis-input"
+                    type="password"
+                    name="password"
+                    placeholder="••••••••"
+                    autocomplete="current-password"
+                    required
+                />
+            </div>
+            <button type="submit" class="btn-login">
+                AUTHENTICATE //
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="text-center mt-6 label-mono" style="font-size: 9px; color: #334155;">
+            AEGIS IDENTITY PROTOCOL v1.0
+        </div>
+    </div>
+</body>
+</html>

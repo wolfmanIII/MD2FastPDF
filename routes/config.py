@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import HTMLResponse
 from pathlib import Path
+from logic.auth import auth_service
 from logic.templates import templates
 from logic.files import list_only_directories, set_project_root, list_directory_contents
+from routes.deps import get_current_user
 
 # AEGIS_CONFIG_ROUTER: System environment and workspace
 router = APIRouter(tags=["Aegis Config"])
@@ -29,13 +31,18 @@ async def root_picker(request: Request, path: str = ""):
     return templates.TemplateResponse(request=request, name="components/root_picker.html", context=context)
 
 @router.post("/root-picker/select", response_class=HTMLResponse)
-async def select_root(request: Request, path: str = Form("")):
+async def select_root(
+    request: Request,
+    path: str = Form(""),
+    username: str = Depends(get_current_user),
+):
     """
-    Applies the new workspace and reloads the archive.
+    Applies the new workspace for the current user and reloads the archive.
     """
     home = Path.home().resolve()
     new_root = home / path.strip("/")
     set_project_root(new_root)
+    await auth_service.update_user_root(username, new_root)
     
     # Internal reload of the dashboard logic for HTMX
     items = await list_directory_contents(".")

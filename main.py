@@ -1,19 +1,26 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
-from routes import core, archive, editor, pdf, config, oracle, render, settings
+from starlette.middleware.sessions import SessionMiddleware
+from routes import core, archive, editor, pdf, config, oracle, render, settings, auth
+from logic.auth import auth_service
 from logic.conversion import gotenberg
 from logic.oracle import oracle as neural_oracle
-from logic.files import StorageCache, register_mutation_hook
+from logic.files import StorageCache, register_mutation_hook, PathSanitizer
 from logic.exceptions import AegisError
 
 logger = logging.getLogger("aegis.core")
 
+# Paths exempt from authentication
+_AUTH_SKIP_PATHS: frozenset[str] = frozenset({"/login", "/logout"})
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # AEGIS_BOOT: Initializing persistent resources
+    auth_service.bootstrap_admin()
     register_mutation_hook(StorageCache.invalidate)
     await neural_oracle.probe_url()
     yield
@@ -23,13 +30,47 @@ async def lifespan(app: FastAPI):
 
 # AEGIS_ARCH_v4.1.0: SOLID Architecture Refactor
 app = FastAPI(
-    title="SC-ARCHIVE", 
+    title="SC-ARCHIVE",
     description="Space Craft Archive Management System // Aegis Class",
-    version="5.4.0",
+    version="5.5.0",
     lifespan=lifespan
 )
 
-# 3. Centralized Exception Handlers (Aegis Stability Protocol)
+# 1. Middleware (order matters: session before auth)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("AEGIS_SECRET_KEY", "aegis-dev-secret-change-in-production"),
+    session_cookie="aegis_session",
+    max_age=86400,        # 24h
+    https_only=False,     # LAN HTTP — set True when TLS is active
+    same_site="lax",
+)
+
+
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    """Guards all routes. Binds per-user workspace root via ContextVar before dispatch."""
+    path = request.url.path
+    if path in _AUTH_SKIP_PATHS or path.startswith("/static"):
+        return await call_next(request)
+
+    username = request.session.get("username")
+    if not username:
+        if request.headers.get("HX-Request"):
+            return Response(status_code=200, headers={"HX-Redirect": "/login"})
+        return RedirectResponse(url="/login", status_code=302)
+
+    try:
+        user_root = auth_service.get_user_root(username)
+        PathSanitizer.bind_request_root(user_root)
+    except Exception:
+        request.session.clear()
+        return RedirectResponse(url="/login", status_code=302)
+
+    return await call_next(request)
+
+
+# 2. Centralized Exception Handlers (Aegis Stability Protocol)
 @app.exception_handler(AegisError)
 async def aegis_error_handler(request: Request, exc: AegisError) -> JSONResponse:
     """Translates domain exceptions to structured HTTP responses with logging."""
@@ -39,11 +80,12 @@ async def aegis_error_handler(request: Request, exc: AegisError) -> JSONResponse
         content={"detail": exc.detail},
     )
 
-# 1. Static and Template Configuration
+# 3. Static and Template Configuration
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# 2. Router Convergence (APIRouter Implementation)
+# 4. Router Convergence (APIRouter Implementation)
 # Modular domain distribution as per Aegis Architecture Protocol
+app.include_router(auth.router)      # Identity & Session
 app.include_router(core.router)      # Dashboard & Telemetry
 app.include_router(archive.router)   # File Operations
 app.include_router(editor.router)    # Buffer Management
