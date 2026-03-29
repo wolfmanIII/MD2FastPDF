@@ -1,6 +1,20 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.5.1] - AEGIS IDENTITY: SOLID HARDENING & WORKSPACE SECURITY (2026-03-29)
+Rafforzamento architetturale di `logic/auth.py` e fix di sicurezza critico sul selettore workspace.
+
+### Changed — SOLID Refactoring
+- **`logic/auth.py`**: Aggiunto `UserStoreProtocol` (`@runtime_checkable`) — `AuthService.__init__` ora tipizza `store` contro l'astrazione anziché la classe concreta (DIP). Aggiunto `_aload()` async per eliminare I/O bloccante nell'event loop: `UserStore.get()`, `save_user()`, `update_root()` ora completamente asincroni. Variante `get_sync()` mantenuta per la catena bootstrap/CLI.
+- **`logic/auth.py`**: `AuthService.authenticate()`, `get_user_root()`, `change_password()` resi async — cascata obbligata dall'async `UserStore.get()`.
+- **`routes/auth.py`**: Aggiunto `await` su `auth_service.authenticate()` in `POST /login` e `POST /auth/password`.
+- **`main.py`**: Aggiunto `await` su `auth_service.get_user_root()` in `auth_middleware`.
+
+### Fixed — Security
+- **`routes/config.py`**: Gli utenti non-admin potevano chiamare `POST /root-picker/select` con un path arbitrario (es. `~/projects/`) ottenendo accesso a directory fuori dal proprio workspace. Fix: `_user_allowed_base()` ritorna `~/sc-archive/<username>` per non-admin e `Path.home()` per admin. `select_root` valida `new_root` contro `allowed_base` prima di applicarlo; `root_picker` confina la navigazione al workspace del utente e blocca la risalita al di sopra di esso.
+
+---
+
 ## [5.5.0] - AEGIS IDENTITY: MULTI-USER AUTH & WORKSPACE ISOLATION (2026-03-29)
 Implementazione del sistema di autenticazione multi-utente con isolamento workspace per-sessione. Ogni operatore ha credenziali proprie e una cartella di lavoro dedicata.
 

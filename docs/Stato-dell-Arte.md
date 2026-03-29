@@ -1,5 +1,5 @@
 # Stato del Progetto: SC-ARCHIVE
-**Stato Attuale**: Op_Ready / Versione 5.5.0
+**Stato Attuale**: Op_Ready / Versione 5.5.1
 **Ultimo Aggiornamento**: 29 Marzo 2026
 
 ---
@@ -69,7 +69,7 @@
 - **Conditional Logic**: Disattivazione visiva e funzionale dei campi dipendenti (Ollama/Models) quando il `Neural Link` è spento.
 - **Data Loss Prevention**: Logica di merge per preservare i parametri salvati anche quando i campi sono inattivi nella UI.
 
-### 1.9 AEGIS IDENTITY — Autenticazione Multi-Utente [4.10]
+### 1.9 AEGIS IDENTITY — Autenticazione Multi-Utente [4.10] (v5.5.1)
 - **Login Page**: pagina `templates/layouts/login.html` standalone con tema Aegis Industrial.
 - **Session Auth**: `SessionMiddleware` (starlette/itsdangerous) con cookie firmato; `auth_middleware` verifica la sessione e blocca ogni path non-pubblico con redirect a `/login`.
 - **HTMX-aware redirect**: header `HX-Redirect` per le richieste HTMX, `302` per le normali.
@@ -82,6 +82,8 @@
 - **Navbar**: username corrente e pulsante `// LOGOUT` visibili in ogni pagina autenticata.
 - **CLI create_user**: `bin/create_user.sh <username> <password>` per provisioning operatori via terminale.
 - **AuthError**: `logic/exceptions.py` — sottoclasse di `AegisError` con `status_code=401`.
+- **UserStoreProtocol**: `Protocol` `@runtime_checkable` — `AuthService` dipende dall'astrazione, non dalla classe concreta (DIP). `UserStore.get()`, `save_user()`, `update_root()` completamente asincroni via `_aload()`.
+- **Workspace Security**: `routes/config.py` — utenti non-admin confinati a `~/sc-archive/<username>`: `_user_allowed_base()` calcola il subtree consentito; `select_root` valida ogni selezione; `root_picker` blocca la navigazione al di sopra del workspace.
 
 ### 1.8 UX, Sicurezza & CSP Compliance
 - Transizioni `scan-in` / `soft-exit` su tutte le modali.
@@ -130,4 +132,4 @@ bin/            launch.sh, create_user.sh
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.5.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.5.1 — DEPLOYMENT_ACTIVE.*
