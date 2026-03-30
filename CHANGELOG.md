@@ -1,6 +1,16 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.5.2] - SECURITY HARDENING: SESSION KEY & WORKSPACE ROOT (2026-03-30)
+
+### Fixed
+- **`logic/auth.py`**: `_default_root()` usa sempre `Path.home() / "sc-archive" / username` — rimossa dipendenza da `settings.get("workspace_base")`. Rimossa l'importazione di `settings` da `auth.py`.
+- **`config/settings.json`**: rimosso `workspace_base` hardcoded (`/home/spacewolf/sc-archive`) che causava workspace errato per utenti diversi.
+- **`main.py`**: `AEGIS_SECRET_KEY` ora obbligatoria via `os.environ["AEGIS_SECRET_KEY"]` — nessun fallback debole in produzione; l'app crasha all'avvio se la variabile non è presente.
+- **`bin/launch.sh`**: generazione e persistenza automatica della session key in `~/.config/sc-archive/session.key` (permessi `600`). Riuso tra riavvii, reset manuale con cancellazione del file.
+
+---
+
 ## [5.5.1] - AEGIS IDENTITY: SOLID HARDENING & WORKSPACE SECURITY (2026-03-29)
 Rafforzamento architetturale di `logic/auth.py` e fix di sicurezza critico sul selettore workspace.
 

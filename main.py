@@ -64,7 +64,7 @@ async def auth_middleware(request: Request, call_next):
 # SessionMiddleware added last = outermost = populates request.session before auth_middleware
 app.add_middleware(
     SessionMiddleware,
-    secret_key=os.getenv("AEGIS_SECRET_KEY", "aegis-dev-secret-change-in-production"),
+    secret_key=os.environ["AEGIS_SECRET_KEY"],
     session_cookie="aegis_session",
     max_age=86400,        # 24h
     https_only=False,     # LAN HTTP — set True when TLS is active

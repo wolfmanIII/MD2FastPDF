@@ -1,6 +1,6 @@
 # Stato del Progetto: SC-ARCHIVE
-**Stato Attuale**: Op_Ready / Versione 5.5.1 → 5.6.0 in pianificazione
-**Ultimo Aggiornamento**: 29 Marzo 2026
+**Stato Attuale**: Op_Ready / Versione 5.5.2
+**Ultimo Aggiornamento**: 30 Marzo 2026
 
 ---
 
@@ -84,6 +84,8 @@
 - **AuthError**: `logic/exceptions.py` — sottoclasse di `AegisError` con `status_code=401`.
 - **UserStoreProtocol**: `Protocol` `@runtime_checkable` — `AuthService` dipende dall'astrazione, non dalla classe concreta (DIP). `UserStore.get()`, `save_user()`, `update_root()` completamente asincroni via `_aload()`.
 - **Workspace Security**: `routes/config.py` — utenti non-admin confinati a `~/sc-archive/<username>`: `_user_allowed_base()` calcola il subtree consentito; `select_root` valida ogni selezione; `root_picker` blocca la navigazione al di sopra del workspace.
+- **Workspace root dinamico**: `_default_root()` usa sempre `Path.home() / "sc-archive" / username` — mai path assoluti hardcoded in `settings.json`.
+- **Session Key sicura**: `AEGIS_SECRET_KEY` obbligatoria (nessun fallback). Generata da `bin/launch.sh` via `openssl rand -hex 32` e persistita in `~/.config/sc-archive/session.key` (permessi `600`). Reset sessioni: cancellare il file.
 
 ### 1.10 AEGIS COMMS — Sistema di Messaggistica [5.0] (PLANNED)
 - **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root utente. Admin: `~/comms/`. Utenti: `~/sc-archive/{user}/comms/`. Creazione automatica alla registrazione.
