@@ -28,6 +28,38 @@ class UserStoreProtocol(Protocol):
 _CONFIG_DIR = Path.home() / ".config" / "sc-archive"
 _CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 USERS_FILE = _CONFIG_DIR / "users.json"
+_LEGACY_USERS_FILE = Path("config/users.json")
+
+
+def _migrate_legacy_users() -> None:
+    """Merge users from legacy config/users.json into the new location.
+
+    Runs at module load. Legacy entries win over bootstrap-generated entries
+    (e.g. a bare admin created by bootstrap_admin). Removes legacy file after merge.
+    """
+    if not _LEGACY_USERS_FILE.exists():
+        return
+    try:
+        with open(_LEGACY_USERS_FILE, "r", encoding="utf-8") as f:
+            legacy: dict = json.load(f)
+    except (json.JSONDecodeError, IOError):
+        return
+    if not legacy:
+        return
+    current: dict = {}
+    if USERS_FILE.exists():
+        try:
+            with open(USERS_FILE, "r", encoding="utf-8") as f:
+                current = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            current = {}
+    merged = {**current, **legacy}  # legacy entries overwrite bootstrap placeholders
+    with open(USERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(merged, f, indent=4)
+    _LEGACY_USERS_FILE.unlink()
+
+
+_migrate_legacy_users()
 
 
 class UserRecord:

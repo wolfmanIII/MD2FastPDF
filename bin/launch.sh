@@ -11,15 +11,6 @@ echo "--- STARTING MD2FastPDF INDUSTRIAL TERMINAL ---"
 # Start Tailwind watcher in background
 ./tailwindcss -i static/css/main.css -o static/css/output.css --watch &
 
-# Migrate users.json from legacy repo location if needed
-LEGACY_USERS="$(dirname "$0")/../config/users.json"
-TARGET_USERS="$HOME/.config/sc-archive/users.json"
-if [ -f "$LEGACY_USERS" ] && [ ! -f "$TARGET_USERS" ]; then
-    mkdir -p "$(dirname "$TARGET_USERS")"
-    mv "$LEGACY_USERS" "$TARGET_USERS"
-    echo "AEGIS_IDENTITY: users.json migrated to $TARGET_USERS"
-fi
-
 # Load or generate persistent session key
 KEY_FILE="$HOME/.config/sc-archive/session.key"
 if [ ! -f "$KEY_FILE" ]; then
