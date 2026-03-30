@@ -11,7 +11,6 @@ import anyio
 from pathlib import Path
 from typing import Optional, Protocol, runtime_checkable
 
-from config.settings import settings
 from logic.exceptions import AuthError
 
 
@@ -125,8 +124,7 @@ class AuthService:
         return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
     def _default_root(self, username: str) -> Path:
-        base = Path(settings.get("workspace_base", str(Path.home() / "sc-archive")))
-        return base / username
+        return Path.home() / "sc-archive" / username
 
     async def authenticate(self, username: str, password: str) -> UserRecord:
         """Verifies credentials. Raises AuthError on failure."""

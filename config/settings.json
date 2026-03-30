@@ -3,8 +3,7 @@
     "pdf_branding_enabled": false,
     "ollama_ip": "http://localhost:11434",
     "gotenberg_ip": "http://localhost:3000",
-    "workspace_base": "/home/spacewolf/sc-archive",
-    "models": {
+"models": {
         "neural_hint": "llama3.2:latest",
         "neural_scan": "llama3.2:latest",
         "mermaid_synthesis": "qwen2.5-coder:latest"
