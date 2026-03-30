@@ -1,7 +1,7 @@
 """
 AEGIS_IDENTITY_PROTOCOL: Multi-user authentication and workspace isolation.
 
-UserStore: persistent registry backed by config/users.json.
+UserStore: persistent registry backed by ~/.config/sc-archive/users.json.
 AuthService: credential verification, user creation, workspace management.
 """
 import json
@@ -25,7 +25,9 @@ class UserStoreProtocol(Protocol):
     def save_user_sync(self, record: "UserRecord") -> None: ...
     async def update_root(self, username: str, root: str) -> None: ...
 
-USERS_FILE = Path("config/users.json")
+_CONFIG_DIR = Path.home() / ".config" / "sc-archive"
+_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+USERS_FILE = _CONFIG_DIR / "users.json"
 
 
 class UserRecord:
