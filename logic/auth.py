@@ -16,14 +16,21 @@ from logic.exceptions import AuthError
 
 @runtime_checkable
 class UserStoreProtocol(Protocol):
-    """Abstraction over the user persistence backend."""
+    """Async abstraction over the user persistence backend. Used by AuthService."""
 
     async def get(self, username: str) -> Optional["UserRecord"]: ...
-    def get_sync(self, username: str) -> Optional["UserRecord"]: ...
     def is_empty(self) -> bool: ...
     async def save_user(self, record: "UserRecord") -> None: ...
-    def save_user_sync(self, record: "UserRecord") -> None: ...
     async def update_root(self, username: str, root: str) -> None: ...
+
+
+@runtime_checkable
+class SyncUserStoreProtocol(Protocol):
+    """Sync abstraction — used only by bootstrap/CLI paths."""
+
+    def get_sync(self, username: str) -> Optional["UserRecord"]: ...
+    def is_empty(self) -> bool: ...
+    def save_user_sync(self, record: "UserRecord") -> None: ...
 
 _CONFIG_DIR = Path.home() / ".config" / "sc-archive"
 _CONFIG_DIR.mkdir(parents=True, exist_ok=True)
@@ -76,7 +83,7 @@ class UserRecord:
 
 
 class UserStore:
-    """Persistent user registry backed by config/users.json."""
+    """Persistent user registry backed by ~/.config/sc-archive/users.json."""
 
     def _load(self) -> dict:
         """Sync load — used only by bootstrap/CLI sync chain."""
@@ -148,8 +155,9 @@ class UserStore:
 class AuthService:
     """Authentication and per-user workspace management."""
 
-    def __init__(self, store: UserStoreProtocol):
+    def __init__(self, store: UserStoreProtocol, sync_store: SyncUserStoreProtocol):
         self._store = store
+        self._sync_store = sync_store
 
     def _hash(self, password: str) -> str:
         return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -180,7 +188,7 @@ class AuthService:
         root = self._default_root(username)
         root.mkdir(parents=True, exist_ok=True)
         record = UserRecord(username, self._hash(password), str(root))
-        self._store.save_user_sync(record)
+        self._sync_store.save_user_sync(record)
         return record
 
     async def get_user_root(self, username: str) -> Path:
@@ -204,10 +212,10 @@ class AuthService:
 
     def bootstrap_admin(self) -> None:
         """Creates the admin user on first run if no users exist."""
-        if self._store.is_empty():
+        if self._sync_store.is_empty():
             password = os.getenv("AEGIS_ADMIN_PASSWORD", "admin")
             self.create_user_sync("admin", password)
 
 
 _store = UserStore()
-auth_service = AuthService(_store)
+auth_service = AuthService(_store, _store)

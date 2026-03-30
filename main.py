@@ -54,7 +54,7 @@ async def auth_middleware(request: Request, call_next):
     try:
         user_root = await auth_service.get_user_root(username)
         PathSanitizer.bind_request_root(user_root)
-    except Exception:
+    except AegisError:
         request.session.clear()
         return RedirectResponse(url="/login", status_code=302)
 
