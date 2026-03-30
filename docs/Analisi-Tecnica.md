@@ -1,20 +1,23 @@
 # Analisi Tecnica: SC-ARCHIVE
-**Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
-**Nome Tecnico Interno**: MD2FastPDF
-**Data**: 29 Marzo 2026
-**Versione**: 5.5.1
+
+- **Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
+- **Nome Tecnico Interno**: MD2FastPDF
+- **Data**: 29 Marzo 2026
+- **Versione**: 5.5.1
 
 ## 1. Architettura di Sistema
 
 L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-request tramite `ContextVar`. Ogni utente autenticato opera su un workspace filesystem dedicato; lo stato di sessione è gestito server-side tramite cookie firmato (`SessionMiddleware`).
 
 ### 1.1 Persistenza e Configurazione (`config/settings.py`)
+
 - **JSON Store**: `config/settings.json` sorgente unica di verità per parametri operativi.
 - **SettingsManager**: `get()`, `set()` async, `batch_update()` (singola scrittura disco), `_save_sync()` solo per startup.
 - **Dynamic Uplink**: coordinate dei servizi (Ollama, Gotenberg), modelli IA e flag persistiti — modificabili a runtime senza restart.
 - **Aggiornamento Reattivo**: trigger HTMX (`settings-updated`) per sincronizzazione dashboard post-modifica.
 
 ### 1.2 Backend (Python / FastAPI)
+
 - **FastAPI**: routing, middleware stack, dependency injection via `Depends`.
 - **Middleware stack** (outer → inner): `SessionMiddleware` → `auth_middleware` (custom HTTP middleware).
   - `auth_middleware`: verifica sessione, blocca path non pubblici, binda `_REQUEST_ROOT` ContextVar per la request corrente. HTMX-aware: emette `HX-Redirect` per richieste headless.
@@ -23,12 +26,14 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 - **SOLID Compliance**: Protocol-based abstractions in `conversion.py`; mutation hook registry in `files.py`; DI via constructor in `oracle.py` e `GotenbergClient`; `UserStoreProtocol` runtime-checkable in `auth.py`.
 
 ### 1.3 Frontend (HTMX / Tailwind)
+
 - **HTMX**: aggiornamento parziale del DOM. Ogni risposta è un fragment Jinja2 se `HX-Request` è presente, full-page altrimenti.
 - **Tailwind CSS v4**: design "Glassmorphism" industriale con palette Slate/Zinc e accento Neon Cyan (`#7dd3fc`).
 - **EasyMDE/CodeMirror**: editor Markdown con Fullscreen, Side-by-Side, toolbar estesa.
 - **CSP Ready**: nessun attributo `style=` inline nei template (eccetto 2 valori CSS dinamici Jinja2). CSS estratti in file statici dedicati.
 
 ### 1.4 Generazione PDF (Gotenberg)
+
 - **Pipeline**: MD → HTML (sanitizzato via `bleach`) → PDF via Gotenberg (Chromium Engine).
 - **Protocol classes**: `PageScaffolding` (Protocol), `DetailedScaffolding`, `MinimalScaffolding`, `MarkdownRenderer`, `PdfHtmlBuilder` — tutti iniettabili in `GotenbergClient`.
 - **Industrial CSS**: `static/css/pdf-industrial.css` caricato una volta a module init — zero CSS inline nel codice Python.
@@ -36,6 +41,7 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 - **Nota**: header/footer inviati a Gotenberg contengono `style=` inline strutturali — Gotenberg opera in sandbox senza accesso ai file statici dell'app.
 
 ### 1.5 Autenticazione e Workspace Isolation (`logic/auth.py`)
+
 - **SessionMiddleware**: cookie firmato con `AEGIS_SECRET_KEY` (24h TTL). Outer layer nel middleware stack.
 - **auth_middleware**: HTTP middleware inner — legge `request.session["username"]`, recupera root utente da `UserStore`, binda `PathSanitizer._REQUEST_ROOT` via `ContextVar`.
 - **UserStore**: persistenza `config/users.json`. Hashing `bcrypt` (cost 12). API async-first; sync variants solo per bootstrap.
@@ -61,6 +67,7 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 | `exceptions.py` | `AegisError` e sottoclassi | Gerarchia eccezioni dominio (zero `HTTPException` in `logic/`) |
 
 **Gerarchia eccezioni** (`logic/exceptions.py`):
+
 ```
 AegisError
   ├── AccessDeniedError      (403)
@@ -74,6 +81,7 @@ AegisError
   ├── OracleError            (502)
   └── RenderError            (502)
 ```
+
 `@app.exception_handler(AegisError)` in `main.py` traduce ogni eccezione in `JSONResponse` con logging strutturato.
 
 ### 2.2 `routes/` — API Routers
