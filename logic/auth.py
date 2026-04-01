@@ -71,15 +71,20 @@ _migrate_legacy_users()
 
 class UserRecord:
     """Represents a single authenticated user entry."""
-    __slots__ = ("username", "password_hash", "root")
+    __slots__ = ("username", "password_hash", "root", "groups")
 
-    def __init__(self, username: str, password_hash: str, root: str):
+    def __init__(self, username: str, password_hash: str, root: str, groups: list[str]):
         self.username = username
         self.password_hash = password_hash
         self.root = root
+        self.groups = groups
 
     def to_dict(self) -> dict:
-        return {"password_hash": self.password_hash, "root": self.root}
+        return {
+            "password_hash": self.password_hash,
+            "root": self.root,
+            "groups": self.groups,
+        }
 
 
 class UserStore:
@@ -120,14 +125,24 @@ class UserStore:
         entry = (await self._aload()).get(username)
         if not entry:
             return None
-        return UserRecord(username, entry["password_hash"], entry["root"])
+        return UserRecord(
+            username,
+            entry["password_hash"],
+            entry["root"],
+            entry.get("groups", []),
+        )
 
     def get_sync(self, username: str) -> Optional[UserRecord]:
         """Sync variant — used only during bootstrap/CLI."""
         entry = self._load().get(username)
         if not entry:
             return None
-        return UserRecord(username, entry["password_hash"], entry["root"])
+        return UserRecord(
+            username,
+            entry["password_hash"],
+            entry["root"],
+            entry.get("groups", []),
+        )
 
     def is_empty(self) -> bool:
         return len(self._load()) == 0
@@ -179,7 +194,7 @@ class AuthService:
         """Creates a new user with hashed password and default workspace directory."""
         root = self._default_root(username)
         await anyio.to_thread.run_sync(lambda: root.mkdir(parents=True, exist_ok=True))
-        record = UserRecord(username, self._hash(password), str(root))
+        record = UserRecord(username, self._hash(password), str(root), [])
         await self._store.save_user(record)
         return record
 
@@ -187,7 +202,7 @@ class AuthService:
         """Sync variant — used only during bootstrap."""
         root = self._default_root(username)
         root.mkdir(parents=True, exist_ok=True)
-        record = UserRecord(username, self._hash(password), str(root))
+        record = UserRecord(username, self._hash(password), str(root), [])
         self._sync_store.save_user_sync(record)
         return record
 
