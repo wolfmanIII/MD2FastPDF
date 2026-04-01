@@ -29,7 +29,7 @@
       {% endif %}
 
       <div class="flex flex-col gap-2">
-        <label class="text-zinc-400 text-[10px] font-mono uppercase tracking-widest">FACTION_ASSIGNMENT</label>
+        <label class="text-zinc-400 text-[10px] font-mono uppercase tracking-widest">TEAM_ASSIGNMENT</label>
         {% if groups %}
         <div class="flex flex-wrap gap-3">
           {% for g in groups %}
@@ -42,7 +42,7 @@
           {% endfor %}
         </div>
         {% else %}
-        <span class="text-zinc-600 text-[10px] font-mono uppercase">NO_FACTIONS_DEFINED</span>
+        <span class="text-zinc-600 text-[10px] font-mono uppercase">NO_TEAMS_DEFINED</span>
         {% endif %}
       </div>
 

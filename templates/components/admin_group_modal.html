@@ -2,7 +2,7 @@
   <div class="modal-box glass-panel border-(--neon-cyan)/30 max-w-sm flex flex-col gap-5">
 
     <div class="flex items-center justify-between">
-      <span class="neon-text font-mono text-sm uppercase tracking-widest">// ESTABLISH_FACTION</span>
+      <span class="neon-text font-mono text-sm uppercase tracking-widest">// ESTABLISH_TEAM</span>
       <button onclick="closeAegisModal('admin-group-modal')"
               class="text-zinc-500 hover:text-red-400 font-mono text-xs bg-transparent border-none cursor-pointer">✕</button>
     </div>
@@ -13,7 +13,7 @@
       hx-on::after-request="closeAegisModal('admin-group-modal')"
       class="flex flex-col gap-4">
       <div class="flex flex-col gap-1">
-        <label class="text-zinc-400 text-[10px] font-mono uppercase tracking-widest">FACTION_DESIGNATION</label>
+        <label class="text-zinc-400 text-[10px] font-mono uppercase tracking-widest">TEAM_DESIGNATION</label>
         <input type="text" name="group_name" required autocomplete="off"
                class="bg-zinc-900 border border-zinc-700 text-zinc-100 font-mono text-sm px-3 py-2 focus:outline-none focus:border-(--neon-cyan)">
       </div>
