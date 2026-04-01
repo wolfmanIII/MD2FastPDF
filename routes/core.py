@@ -74,7 +74,7 @@ async def read_root(request: Request, username: str = Depends(get_current_user))
         **_system_context(),
         "recent_files": recent,
         "storage": storage,
-        "is_admin": username == "admin",
+        "is_admin": request.session.get("is_admin", False),
         "component_template": "components/dashboard.html",
     }
 

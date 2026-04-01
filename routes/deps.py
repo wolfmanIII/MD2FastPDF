@@ -13,6 +13,8 @@ def get_current_user(request: Request) -> str:
 
 async def require_admin(username: str = Depends(get_current_user)) -> str:
     """Raises HTTP 403 if the current user does not have the 'admin' group."""
+    if not username:
+        raise HTTPException(status_code=403, detail="FORBIDDEN")
     record = await auth_service.get_user(username)
     if not record or "admin" not in record.groups:
         raise HTTPException(status_code=403, detail="FORBIDDEN")

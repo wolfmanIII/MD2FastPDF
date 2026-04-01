@@ -1,26 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Form, Response
+from fastapi import APIRouter, Depends, Request, Form, Response
 from fastapi.responses import HTMLResponse
 from logic.templates import templates
 from config.settings import settings as app_settings
 from logic.oracle import oracle as neural_oracle
+from routes.deps import require_admin
 
 # AEGIS_SETTINGS_ROUTER: Operational environment configuration
 router = APIRouter(tags=["Aegis Settings"])
 
 
-def _is_admin(request: Request) -> bool:
-    """FastAPI dependency: resolves admin status from session."""
-    return request.session.get("username") == "admin"
-
-
-def _require_admin(is_admin: bool = Depends(_is_admin)) -> None:
-    """FastAPI dependency: raises 403 if caller is not admin."""
-    if not is_admin:
-        raise HTTPException(status_code=403)
-
-
 @router.get("/settings", response_class=HTMLResponse)
-async def get_settings(request: Request, is_admin: bool = Depends(_is_admin)):
+async def get_settings(request: Request):
     """
     Renders the central Aegis settings dashboard.
     Model list is deferred to /settings/models to avoid blocking on Ollama.
@@ -28,12 +18,12 @@ async def get_settings(request: Request, is_admin: bool = Depends(_is_admin)):
     context = {
         "request": request,
         "settings": app_settings.all,
-        "is_admin": is_admin,
+        "is_admin": request.session.get("is_admin", False),
     }
     return templates.TemplateResponse(request=request, name="components/settings_modal.html", context=context)
 
 
-@router.get("/settings/models", response_class=HTMLResponse, dependencies=[Depends(_require_admin)])
+@router.get("/settings/models", response_class=HTMLResponse, dependencies=[Depends(require_admin)])
 async def get_settings_models(request: Request):
     """
     Lazy-loaded fragment: probes Ollama for available models and returns the model select inputs.
@@ -54,7 +44,6 @@ async def get_settings_models(request: Request):
 @router.post("/settings/save", response_class=HTMLResponse)
 async def save_settings(
     request: Request,
-    is_admin: bool = Depends(_is_admin),
     neural_link_enabled: bool = Form(False),
     pdf_branding_enabled: bool = Form(False),
     ollama_ip: str = Form(""),
@@ -68,6 +57,7 @@ async def save_settings(
     Admin-gated fields (IPs, models) are ignored when caller is not admin.
     """
 
+    is_admin: bool = request.session.get("is_admin", False)
     updates = {
         "neural_link_enabled": neural_link_enabled,
         "pdf_branding_enabled": pdf_branding_enabled,
