@@ -22,6 +22,9 @@ class UserStoreProtocol(Protocol):
     def is_empty(self) -> bool: ...
     async def save_user(self, record: "UserRecord") -> None: ...
     async def update_root(self, username: str, root: str) -> None: ...
+    async def list_users(self) -> list["UserRecord"]: ...
+    async def update_groups(self, username: str, groups: list[str]) -> None: ...
+    async def delete_user(self, username: str) -> None: ...
 
 
 @runtime_checkable
@@ -168,6 +171,30 @@ class UserStore:
         if username not in data:
             raise AuthError(f"USER_NOT_FOUND: {username}")
         data[username]["root"] = root
+        await self._save(data)
+
+    async def list_users(self) -> list[UserRecord]:
+        """Returns all registered users as UserRecord list."""
+        data = await self._aload()
+        return [
+            self._build_record(u, d)
+            for u, d in data.items()
+        ]
+
+    async def update_groups(self, username: str, groups: list[str]) -> None:
+        """Replaces the groups list for the given user."""
+        data = await self._aload()
+        if username not in data:
+            raise AuthError(f"USER_NOT_FOUND: {username}")
+        data[username]["groups"] = groups
+        await self._save(data)
+
+    async def delete_user(self, username: str) -> None:
+        """Removes the user entry. Does not delete filesystem workspace."""
+        data = await self._aload()
+        if username not in data:
+            raise AuthError(f"USER_NOT_FOUND: {username}")
+        del data[username]
         await self._save(data)
 
 
