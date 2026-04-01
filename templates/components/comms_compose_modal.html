@@ -9,7 +9,7 @@
         </div>
 
         <form hx-post="/comms/send" hx-target="#comms-content-panel"
-              hx-on::after-request="closeAegisModal('comms-compose-modal')"
+              hx-on::after-request="if(event.detail.elt === this) closeAegisModal('comms-compose-modal')"
               class="space-y-4">
 
             <!-- Recipients -->
