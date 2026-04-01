@@ -22,6 +22,7 @@ class UserStoreProtocol(Protocol):
     def is_empty(self) -> bool: ...
     async def save_user(self, record: "UserRecord") -> None: ...
     async def update_root(self, username: str, root: str) -> None: ...
+    async def list_usernames(self) -> list[str]: ...
     async def list_users(self) -> list["UserRecord"]: ...
     async def update_groups(self, username: str, groups: list[str]) -> None: ...
     async def delete_user(self, username: str) -> None: ...
@@ -257,6 +258,14 @@ class UserStore:
         data[username]["root"] = root
         await self._save(data)
 
+    async def list_usernames(self) -> list[str]:
+        """Returns all registered usernames."""
+        return list((await self._aload()).keys())
+
+    def list_usernames_sync(self) -> list[str]:
+        """Sync variant — for bootstrap/CLI paths."""
+        return list(self._load().keys())
+
     async def list_users(self) -> list[UserRecord]:
         """Returns all registered users as UserRecord list."""
         data = await self._aload()
@@ -311,6 +320,8 @@ class AuthService:
         await anyio.to_thread.run_sync(lambda: root.mkdir(parents=True, exist_ok=True))
         record = UserRecord(username, self._hash(password), str(root), groups or [])
         await self._store.save_user(record)
+        from logic.comms import comms_manager  # local import: avoids circular dep
+        await comms_manager.create_comms_folders(username)
         return record
 
     def create_user_sync(self, username: str, password: str, groups: list[str] | None = None) -> UserRecord:
@@ -319,6 +330,8 @@ class AuthService:
         root.mkdir(parents=True, exist_ok=True)
         record = UserRecord(username, self._hash(password), str(root), groups or [])
         self._sync_store.save_user_sync(record)
+        from logic.comms import comms_manager  # local import: avoids circular dep
+        comms_manager.create_comms_folders_sync(username)
         return record
 
     async def get_user_root(self, username: str) -> Path:
