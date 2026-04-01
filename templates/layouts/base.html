@@ -241,6 +241,16 @@
                 <span class="text-zinc-700">|</span>
                 <span class="neon-text flex items-center space-x-2"><span class="w-2 h-2 rounded-full neon-bg animate-pulse"></span><span>SYS_ACTIVE</span></span>
                 <span class="text-zinc-700">|</span>
+                <a href="/comms" hx-get="/comms" hx-push-url="true"
+                    class="text-zinc-400 hover:neon-text transition-colors cursor-pointer no-underline flex items-center space-x-1">
+                    <span>COMMS</span>
+                    <span id="comms-unread-badge"
+                          hx-get="/comms/unread-count"
+                          hx-trigger="load, every 30s"
+                          hx-swap="outerHTML">
+                    </span>
+                </a>
+                <span class="text-zinc-700">|</span>
                 {% if request.session.get("is_admin") %}
                 <a href="/admin" hx-get="/admin" hx-push-url="true"
                    class="text-zinc-400 hover:neon-text transition-colors cursor-pointer no-underline">SYS_ADMIN</a>
@@ -273,7 +283,8 @@
     </footer>
 
     <div id="modal-container"></div>
-    
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col items-end space-y-2 pointer-events-none"></div>
+
     <!-- Global HTMX Indicator (Top bar) -->
     <div id="htmx-indicator" class="htmx-indicator fixed top-0 left-0 w-full h-0.5 bg-(--neon-cyan) z-9999 opacity-0 pointer-events-none transition-opacity duration-300 shadow-[0_0_10px_rgba(0,240,255,1)]"></div>
 
