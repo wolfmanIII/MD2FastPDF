@@ -232,15 +232,19 @@ class CommsManager:
             body=body,
             filename=filename,
         )
-        await self._write_message_file(self._outbound(sender) / filename, record)
         recipients = self._expand_recipients(recipient_str, all_usernames, sender)
         home = Path.home().resolve()
+        inbound_paths: list[tuple[str, Path]] = []
         for recipient in recipients:
             inbound_path = self._inbound(recipient) / filename
             if not str(inbound_path.resolve()).startswith(str(home)):
                 raise AccessDeniedError(
                     f"COMMS: Recipient path outside home boundary: {recipient}"
                 )
+            inbound_paths.append((recipient, inbound_path))
+        # All paths validated — write outbound, then each inbound
+        await self._write_message_file(self._outbound(sender) / filename, record)
+        for recipient, inbound_path in inbound_paths:
             await self.ensure_comms_folders(recipient)
             await self._write_message_file(inbound_path, record)
         return record
