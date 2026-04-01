@@ -1,0 +1,33 @@
+<div id="admin-group-modal" class="modal modal-open">
+  <div class="modal-box glass-panel border-(--neon-cyan)/30 max-w-sm flex flex-col gap-5">
+
+    <div class="flex items-center justify-between">
+      <span class="neon-text font-mono text-sm uppercase tracking-widest">// ESTABLISH_FACTION</span>
+      <button onclick="closeAegisModal('admin-group-modal')"
+              class="text-zinc-500 hover:text-red-400 font-mono text-xs bg-transparent border-none cursor-pointer">✕</button>
+    </div>
+
+    <form
+      hx-post="/admin/groups/create"
+      hx-target="#admin-content-panel"
+      hx-on::after-request="closeAegisModal('admin-group-modal')"
+      class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1">
+        <label class="text-zinc-400 text-[10px] font-mono uppercase tracking-widest">FACTION_DESIGNATION</label>
+        <input type="text" name="group_name" required autocomplete="off"
+               class="bg-zinc-900 border border-zinc-700 text-zinc-100 font-mono text-sm px-3 py-2 focus:outline-none focus:border-(--neon-cyan)">
+      </div>
+      <div class="flex justify-end">
+        <button type="button" onclick="closeAegisModal('admin-group-modal')"
+                class="text-xs font-mono uppercase tracking-widest px-3 py-1.5 border border-zinc-700 hover:border-red-400 hover:text-red-400 transition-colors cursor-pointer bg-transparent mr-2">
+          ABORT
+        </button>
+        <button type="submit"
+                class="text-xs font-mono uppercase tracking-widest px-4 py-1.5 border border-zinc-700 hover:border-(--neon-cyan) hover:neon-text transition-colors cursor-pointer bg-transparent">
+          ESTABLISH //
+        </button>
+      </div>
+    </form>
+  </div>
+  <div class="modal-backdrop" onclick="closeAegisModal('admin-group-modal')"></div>
+</div>

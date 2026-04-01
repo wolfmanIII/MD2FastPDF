@@ -1,0 +1,42 @@
+<div class="flex flex-col gap-4">
+  <div class="flex justify-between items-center">
+    <span class="text-zinc-400 text-xs font-mono uppercase tracking-widest">
+      FACTION_INDEX // {{ groups | length }} FACTIONS
+    </span>
+    <button
+      hx-get="/admin/groups/create"
+      hx-target="#modal-container"
+      class="text-xs font-mono uppercase tracking-widest px-3 py-1.5 border border-zinc-700 hover:border-(--neon-cyan) hover:neon-text transition-colors cursor-pointer bg-transparent">
+      + ESTABLISH //
+    </button>
+  </div>
+
+  {% if error is defined and error %}
+  <p class="text-red-400 text-xs font-mono uppercase tracking-widest animate-pulse">!! {{ error }}</p>
+  {% endif %}
+
+  <div class="flex flex-col gap-2">
+    {% for g in groups %}
+    {% set member_count = group_members.get(g, 0) %}
+    <div class="glass-panel p-4 flex items-center justify-between gap-4">
+      <div class="flex flex-col gap-1">
+        <span class="neon-text font-mono text-sm">{{ g | upper }}</span>
+        <span class="text-zinc-500 text-[10px] font-mono uppercase tracking-widest">
+          {{ member_count }} PERSONNEL
+        </span>
+      </div>
+      {% if member_count == 0 %}
+      <button
+        hx-post="/admin/groups/{{ g }}/delete"
+        hx-target="#admin-content-panel"
+        hx-confirm="DISSOLVE FACTION {{ g | upper }}?"
+        class="text-xs font-mono uppercase tracking-widest px-2 py-1 border border-zinc-700 hover:border-red-400 hover:text-red-400 transition-colors cursor-pointer bg-transparent">
+        DISSOLVE
+      </button>
+      {% else %}
+      <span class="text-zinc-600 text-[10px] font-mono uppercase tracking-widest">ACTIVE</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>

@@ -1,0 +1,22 @@
+<div class="flex flex-col gap-6 w-full">
+  <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+    <span class="neon-text font-mono text-lg uppercase tracking-widest">// SYS_ADMIN</span>
+    <div class="flex gap-2">
+      <button
+        hx-get="/admin/users"
+        hx-target="#admin-content-panel"
+        class="text-xs font-mono uppercase tracking-widest px-3 py-1.5 border border-zinc-700 hover:border-(--neon-cyan) hover:neon-text transition-colors cursor-pointer bg-transparent">
+        CREW_REGISTRY
+      </button>
+      <button
+        hx-get="/admin/groups"
+        hx-target="#admin-content-panel"
+        class="text-xs font-mono uppercase tracking-widest px-3 py-1.5 border border-zinc-700 hover:border-(--neon-cyan) hover:neon-text transition-colors cursor-pointer bg-transparent">
+        FACTION_INDEX
+      </button>
+    </div>
+  </div>
+  <div id="admin-content-panel">
+    {% include 'components/admin_user_list.html' %}
+  </div>
+</div>

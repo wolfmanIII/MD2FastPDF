@@ -1,0 +1,51 @@
+<div class="flex flex-col gap-4">
+  <div class="flex justify-between items-center">
+    <span class="text-zinc-400 text-xs font-mono uppercase tracking-widest">
+      CREW_REGISTRY // {{ users | length }} PERSONNEL
+    </span>
+    <button
+      hx-get="/admin/users/create"
+      hx-target="#modal-container"
+      class="text-xs font-mono uppercase tracking-widest px-3 py-1.5 border border-zinc-700 hover:border-(--neon-cyan) hover:neon-text transition-colors cursor-pointer bg-transparent">
+      + ENLIST //
+    </button>
+  </div>
+
+  {% if error is defined and error %}
+  <p class="text-red-400 text-xs font-mono uppercase tracking-widest animate-pulse">!! {{ error }}</p>
+  {% endif %}
+
+  <div class="flex flex-col gap-2">
+    {% for user in users %}
+    <div class="glass-panel p-4 flex items-center justify-between gap-4">
+      <div class="flex flex-col gap-1.5 min-w-0">
+        <span class="neon-text font-mono text-sm">{{ user.username | upper }}</span>
+        <div class="flex gap-1.5 flex-wrap">
+          {% for g in user.groups %}
+          <span class="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 border border-zinc-700 text-zinc-400">{{ g }}</span>
+          {% else %}
+          <span class="text-[10px] font-mono uppercase text-zinc-600">NO_FACTION</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="flex gap-2 shrink-0">
+        <button
+          hx-get="/admin/users/{{ user.username }}/edit"
+          hx-target="#modal-container"
+          class="text-xs font-mono uppercase tracking-widest px-2 py-1 border border-zinc-700 hover:border-(--neon-cyan) hover:neon-text transition-colors cursor-pointer bg-transparent">
+          MODIFY
+        </button>
+        {% if user.username != "admin" %}
+        <button
+          hx-post="/admin/users/{{ user.username }}/delete"
+          hx-target="#admin-content-panel"
+          hx-confirm="PURGE {{ user.username | upper }} FROM REGISTRY?"
+          class="text-xs font-mono uppercase tracking-widest px-2 py-1 border border-zinc-700 hover:border-red-400 hover:text-red-400 transition-colors cursor-pointer bg-transparent">
+          PURGE
+        </button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
