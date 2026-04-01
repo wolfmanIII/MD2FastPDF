@@ -3,6 +3,8 @@
       data-count="{{ count }}"
       hx-get="/comms/unread-count"
       hx-trigger="every 30s"
+      hx-target="this"
+      hx-push-url="false"
       hx-swap="outerHTML">
     {% if count > 0 %}{{ count }}{% endif %}
     <script>

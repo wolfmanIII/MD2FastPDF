@@ -247,6 +247,8 @@
                     <span id="comms-unread-badge"
                           hx-get="/comms/unread-count"
                           hx-trigger="load, every 30s"
+                          hx-target="this"
+                          hx-push-url="false"
                           hx-swap="outerHTML">
                     </span>
                 </a>
