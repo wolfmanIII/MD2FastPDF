@@ -1,6 +1,6 @@
 # Stato del Progetto: SC-ARCHIVE
-**Stato Attuale**: Op_Ready / Versione 5.5.2
-**Ultimo Aggiornamento**: 30 Marzo 2026
+**Stato Attuale**: Op_Ready / Versione 5.6.0
+**Ultimo Aggiornamento**: 1 Aprile 2026
 
 ---
 
@@ -136,11 +136,11 @@ bin/            launch.sh, create_user.sh
 | [4.8] | AEGIS STABILITY | **COMPLETED** | Centralized Exception Handling (`AegisError`, `@app.exception_handler`) |
 | [4.9] | AEGIS STABILITY+ | **COMPLETED** | Registrazione `@app.exception_handler(AegisError)` in `main.py` |
 | [4.10] | AEGIS IDENTITY | **COMPLETED** | Multi-user auth, workspace isolation, login, logout, password change |
-| [5.0] | AEGIS COMMS | **Planned — Next** | Messaggistica multi-utente, broadcast GM, draft, unread badge |
+| [5.0] | AEGIS COMMS | **COMPLETED** | Messaggistica multi-utente, broadcast GM, draft, unread badge |
 | [4.6] | AEGIS CHRONOS | Planned | Versionamento narrativo Git opt-in (diff, snapshot, inject) |
 | [4.5] | AEGIS BLUEPRINT | Planned | Template gallery + Variable Injection |
 | [4.7] | AEGIS GUARD | Planned | Buffer Encryption + Network Gateway UI |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.5.1 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.6.0 — DEPLOYMENT_ACTIVE.*
