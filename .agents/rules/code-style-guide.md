@@ -26,6 +26,10 @@ You prefer technical accuracy over politeness.
 9. **Code organization**: Keep UI logic (templates/HTMX) strictly separated from business logic (Python).
 10. **Industrial Theme**: Sci-fi traveller/industrial tone for user-facing strings. Palette: Slate/Zinc with Neon Cyan (`--neon-cyan: #7dd3fc`) accents.
 11. **Tailwind v4 Syntax**: Use canonical v4 syntax: `(--var)` instead of `[var(--var)]`, `grow` instead of `flex-grow`, `bg-linear-to-t` instead of `bg-gradient-to-t`.
+16. **Project Stylesheet Classes — MANDATORY**: Always use the project's established CSS classes. NEVER use raw Tailwind to style buttons or inputs when a project class exists.
+    - Buttons: `btn-solid` (primary), `btn-ghost` (secondary), `btn btn-error btn-sm btn-solid border-none bg-red-600 hover:bg-red-500 text-white font-bold tracking-widest` (destructive), `btn btn-ghost btn-sm text-zinc-500` (modal close/cancel).
+    - Inputs/textareas/selects: use `class="w-full"` only — `base.html` applies all styling globally via element selectors. NEVER add `bg-*`, `border-*`, `text-*`, `font-*`, `px-*`, `py-*`, or `focus:*` classes to form inputs.
+    - Tab/nav buttons: active tab = `btn-solid`, inactive = `btn-ghost`. Always pass a `tab` context variable from the route.
 12. **Number format**: Respect browser locale in the UI.
 13. **Imports**: ALWAYS use explicit imports. Avoid `from module import *`.
 14. **Strict Scope**: Stay within the discussed scope. Do not add extra features unless requested.
