@@ -83,3 +83,46 @@ class FrontmatterParser:
         """Converts raw string value to Python bool or stripped str."""
         stripped = raw.strip()
         return cls._BOOL_MAP.get(stripped.lower(), stripped)
+
+
+class CommsManager:
+    """Async I/O for comms operations across user workspaces.
+
+    Path resolution bypasses PathSanitizer intentionally — cross-workspace
+    writes require direct Path construction from workspace_base config.
+    """
+
+    def _workspace_root(self, username: str) -> Path:
+        """Admin maps to Path.home(). Others to workspace_base/username."""
+        if username == _ADMIN_USERNAME:
+            return Path.home().resolve()
+        base = Path(settings.get("workspace_base", str(Path.home() / "sc-archive")))
+        return (base / username).resolve()
+
+    def _comms_root(self, username: str) -> Path:
+        return self._workspace_root(username) / "comms"
+
+    def _inbound(self, username: str) -> Path:
+        return self._comms_root(username) / "inbound"
+
+    def _outbound(self, username: str) -> Path:
+        return self._comms_root(username) / "outbound"
+
+    def _staging(self, username: str) -> Path:
+        return self._comms_root(username) / "staging"
+
+    def create_comms_folders_sync(self, username: str) -> None:
+        """Creates inbound/, outbound/, staging/. Sync — for bootstrap only."""
+        for sub in _COMMS_SUBFOLDERS:
+            (self._comms_root(username) / sub).mkdir(parents=True, exist_ok=True)
+
+    async def create_comms_folders(self, username: str) -> None:
+        """Async variant — called from AuthService.create_user()."""
+        for sub in _COMMS_SUBFOLDERS:
+            await anyio.Path(self._comms_root(username) / sub).mkdir(
+                parents=True, exist_ok=True
+            )
+
+    async def ensure_comms_folders(self, username: str) -> None:
+        """Idempotent — called at GET /comms entry point for existing users."""
+        await self.create_comms_folders(username)
