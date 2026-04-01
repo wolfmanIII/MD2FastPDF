@@ -90,3 +90,11 @@ class GroupError(AegisError):
     """Group management violation (already exists, has members, not found)."""
     def __init__(self, detail: str = "GROUP_ERROR"):
         super().__init__(detail, status_code=400)
+
+
+# --- Comms Errors ---
+
+class CommsError(AegisError):
+    """Comms message transmission or retrieval failure."""
+    def __init__(self, detail: str = "COMMS_ERROR"):
+        super().__init__(detail, status_code=400)
