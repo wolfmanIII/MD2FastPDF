@@ -28,6 +28,7 @@ async def comms_hub(
     context = {
         "request": request,
         "tab": tab,
+        "folder": tab,
         "messages": messages,
         "username": username,
         "title": "SC-ARCHIVE // COMMS",
