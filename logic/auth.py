@@ -305,19 +305,19 @@ class AuthService:
             raise AuthError("INVALID_CREDENTIALS")
         return record
 
-    async def create_user(self, username: str, password: str) -> UserRecord:
-        """Creates a new user with hashed password and default workspace directory."""
+    async def create_user(self, username: str, password: str, groups: list[str] | None = None) -> UserRecord:
+        """Creates a new user with hashed password, default workspace, and optional groups."""
         root = self._default_root(username)
         await anyio.to_thread.run_sync(lambda: root.mkdir(parents=True, exist_ok=True))
-        record = UserRecord(username, self._hash(password), str(root), [])
+        record = UserRecord(username, self._hash(password), str(root), groups or [])
         await self._store.save_user(record)
         return record
 
-    def create_user_sync(self, username: str, password: str) -> UserRecord:
+    def create_user_sync(self, username: str, password: str, groups: list[str] | None = None) -> UserRecord:
         """Sync variant — used only during bootstrap."""
         root = self._default_root(username)
         root.mkdir(parents=True, exist_ok=True)
-        record = UserRecord(username, self._hash(password), str(root), [])
+        record = UserRecord(username, self._hash(password), str(root), groups or [])
         self._sync_store.save_user_sync(record)
         return record
 
@@ -340,12 +340,34 @@ class AuthService:
         record.password_hash = self._hash(new_password)
         await self._store.save_user(record)
 
+    async def get_user(self, username: str) -> Optional[UserRecord]:
+        """Returns the UserRecord for username, or None if not found."""
+        return await self._store.get(username)
+
+    async def update_user_groups(self, username: str, groups: list[str]) -> None:
+        """Replaces the groups list for the given user."""
+        await self._store.update_groups(username, groups)
+
+    async def delete_user(self, username: str) -> None:
+        """Removes a user. Raises AuthError if attempting to delete 'admin'."""
+        if username == "admin":
+            raise AuthError("CANNOT_DELETE_ADMIN")
+        await self._store.delete_user(username)
+
+    async def list_users(self) -> list[UserRecord]:
+        """Returns all registered users."""
+        return await self._store.list_users()
+
     def bootstrap_admin(self) -> None:
-        """Creates the admin user on first run if no users exist."""
+        """Creates the admin user on first run if no users exist. Always ensures 'admin' group exists."""
         if self._sync_store.is_empty():
             password = os.getenv("AEGIS_ADMIN_PASSWORD", "admin")
-            self.create_user_sync("admin", password)
+            self.create_user_sync("admin", password, groups=["admin"])
+        _group_store.ensure_admin_group_sync()
 
 
 _store = UserStore()
+_group_store = GroupStore()
 auth_service = AuthService(_store, _store)
+group_store = _group_store
+user_store = _store
