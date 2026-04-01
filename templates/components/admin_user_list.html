@@ -6,7 +6,7 @@
     <button
       hx-get="/admin/users/create"
       hx-target="#modal-container"
-      class="text-xs font-mono uppercase tracking-widest px-3 py-1.5 border border-zinc-700 hover:border-(--neon-cyan) hover:neon-text transition-colors cursor-pointer bg-transparent">
+      class="btn-solid text-[10px] rounded-sm focus:outline-none">
       + ENLIST //
     </button>
   </div>
@@ -32,7 +32,7 @@
         <button
           hx-get="/admin/users/{{ user.username }}/edit"
           hx-target="#modal-container"
-          class="text-xs font-mono uppercase tracking-widest px-2 py-1 border border-zinc-700 hover:border-(--neon-cyan) hover:neon-text transition-colors cursor-pointer bg-transparent">
+          class="btn-ghost text-[10px] rounded-sm focus:outline-none">
           MODIFY
         </button>
         {% if user.username != "admin" %}
@@ -40,7 +40,7 @@
           hx-post="/admin/users/{{ user.username }}/delete"
           hx-target="#admin-content-panel"
           hx-confirm="PURGE {{ user.username | upper }} FROM REGISTRY?"
-          class="text-xs font-mono uppercase tracking-widest px-2 py-1 border border-zinc-700 hover:border-red-400 hover:text-red-400 transition-colors cursor-pointer bg-transparent">
+          class="btn btn-error btn-sm btn-solid border-none bg-red-600 hover:bg-red-500 text-white font-bold tracking-widest">
           PURGE
         </button>
         {% endif %}

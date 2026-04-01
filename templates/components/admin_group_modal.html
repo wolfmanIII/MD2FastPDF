@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between">
       <span class="neon-text font-mono text-sm uppercase tracking-widest">// ESTABLISH_TEAM</span>
       <button onclick="closeAegisModal('admin-group-modal')"
-              class="text-zinc-500 hover:text-red-400 font-mono text-xs bg-transparent border-none cursor-pointer">✕</button>
+              class="btn btn-ghost btn-sm text-zinc-500">✕</button>
     </div>
 
     <form
@@ -17,13 +17,12 @@
         <input type="text" name="group_name" required autocomplete="off"
                class="bg-zinc-900 border border-zinc-700 text-zinc-100 font-mono text-sm px-3 py-2 focus:outline-none focus:border-(--neon-cyan)">
       </div>
-      <div class="flex justify-end">
+      <div class="flex justify-end gap-2">
         <button type="button" onclick="closeAegisModal('admin-group-modal')"
-                class="text-xs font-mono uppercase tracking-widest px-3 py-1.5 border border-zinc-700 hover:border-red-400 hover:text-red-400 transition-colors cursor-pointer bg-transparent mr-2">
+                class="btn btn-ghost btn-sm text-zinc-500 uppercase tracking-widest">
           ABORT
         </button>
-        <button type="submit"
-                class="text-xs font-mono uppercase tracking-widest px-4 py-1.5 border border-zinc-700 hover:border-(--neon-cyan) hover:neon-text transition-colors cursor-pointer bg-transparent">
+        <button type="submit" class="btn-solid text-[10px] rounded-sm">
           ESTABLISH //
         </button>
       </div>
