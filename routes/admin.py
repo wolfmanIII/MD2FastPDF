@@ -2,7 +2,7 @@
 AEGIS_ADMIN_ROUTER: Admin panel — user and group management.
 All endpoints require the 'admin' group via require_admin dependency.
 """
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
 from logic.auth import auth_service, group_store, user_store
@@ -92,6 +92,8 @@ async def admin_user_edit_modal(
 ):
     """Edit user groups modal."""
     user = await auth_service.get_user(target)
+    if user is None:
+        raise HTTPException(status_code=404, detail="USER_NOT_FOUND")
     groups = await group_store.list_groups()
     return templates.TemplateResponse(
         request,
@@ -108,13 +110,17 @@ async def admin_user_edit(
     groups: list[str] = Form(default=[]),
 ):
     """Updates user groups. Returns updated user list."""
-    await auth_service.update_user_groups(target, groups)
+    error = None
+    try:
+        await auth_service.update_user_groups(target, groups)
+    except AuthError as e:
+        error = e.detail
     users = await auth_service.list_users()
     all_groups = await group_store.list_groups()
     return templates.TemplateResponse(
         request,
         "components/admin_user_list.html",
-        {"users": users, "groups": all_groups},
+        {"users": users, "groups": all_groups, "error": error},
     )
 
 
