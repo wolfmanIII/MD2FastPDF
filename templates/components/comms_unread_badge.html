@@ -1,0 +1,25 @@
+<span id="comms-unread-badge"
+      class="{% if count > 0 %}neon-bg text-[#0f172a] text-[9px] font-bold px-1.5 py-0.5 rounded-sm ml-1{% endif %}"
+      data-count="{{ count }}"
+      hx-get="/comms/unread-count"
+      hx-trigger="load, every 30s"
+      hx-swap="outerHTML">
+    {% if count > 0 %}{{ count }}{% endif %}
+    <script>
+    (function () {
+        window._commsLastCount = window._commsLastCount ?? 0;
+        const prev = window._commsLastCount;
+        const next = {{ count }};
+        window._commsLastCount = next;
+        if (next > prev) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'glass-panel border border-(--glass-border) px-4 py-3 text-[10px] neon-text tracking-widest uppercase pointer-events-auto shadow-lg';
+            toast.textContent = '▶ INCOMING_SIGNAL // NEW_TRANSMISSION_RECEIVED';
+            container.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 4000);
+        }
+    })();
+    </script>
+</span>
