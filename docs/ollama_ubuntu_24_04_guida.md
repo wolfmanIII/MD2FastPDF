@@ -1,6 +1,7 @@
 # Installazione e configurazione di Ollama come servizio su Ubuntu 24.04
 
 Questa guida spiega:
+
 - come installare Ollama come servizio systemd
 - come abilitare il supporto a Vulkan (temporaneo e permanente)
 - come scaricare i modelli (pull)
@@ -17,6 +18,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 ```
 
 Questo comando:
+
 - installa il binario in `/usr/bin/ollama`
 - crea automaticamente il servizio systemd
 - abilita l'avvio automatico
@@ -111,7 +113,7 @@ sudo systemctl show ollama | grep OLLAMA
 
 Output atteso:
 
-```
+```bash
 Environment=OLLAMA_BACKEND=vulkan OLLAMA_DEBUG=1
 ```
 
@@ -184,6 +186,7 @@ journalctl -u ollama -p err --no-pager
 ```
 
 Contiene:
+
 - modelli scaricati
 - cache
 - configurazioni
@@ -269,6 +272,7 @@ vulkaninfo | grep deviceName
 ```
 
 Se non compare la GPU:
+
 - driver non installati
 - GPU non compatibile Vulkan
 
@@ -283,6 +287,7 @@ journalctl -u ollama | grep -i "cuda"
 ```
 
 Se non compare:
+
 - driver errati
 - modulo kernel non caricato
 
@@ -344,10 +349,12 @@ Se l'Oracle restituisce questo errore:
 
 1. Verifica che Ollama sia in esecuzione: `systemctl status ollama`
 2. Testa manualmente gli endpoint:
+
    ```bash
    curl http://localhost:11434/api/tags
    curl http://172.31.112.1:11434/api/tags
    ```
+
 3. Se nessuno risponde, avvia il servizio: `sudo systemctl start ollama`
 4. Se usi un IP diverso (es. altra macchina in rete), imposta `OLLAMA_URL` esplicitamente.
 
@@ -355,11 +362,11 @@ Se l'Oracle restituisce questo errore:
 
 ## 11. Riepilogo backend per tipo di GPU
 
-| Tipo GPU  | Backend |
+| Tipo GPU  | Backend             |
 |-----------|---------------------|
-| NVIDIA    | cuda ✅              |
-| AMD       | vulkan ✅            |
-| Intel     | vulkan ✅            |
-| Nessuna   | cpu                  |
+| NVIDIA    | cuda ✅             |
+| AMD       | vulkan ✅           |
+| Intel     | vulkan ✅           |
+| Nessuna   | cpu                 |
 
 ---
