@@ -28,6 +28,7 @@ async def admin_panel(
     context = {
         "users": users,
         "groups": groups,
+        "tab": "users",
         "component_template": "components/admin_panel.html",
     }
     if request.headers.get("HX-Request"):

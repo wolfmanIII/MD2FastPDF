@@ -5,7 +5,7 @@
         <div class="flex items-center justify-between border-b border-(--glass-border) pb-3">
             <h2 class="text-sm font-bold neon-text tracking-widest uppercase">SIGNAL_COMPOSER // NEW_TRANSMISSION</h2>
             <button onclick="closeAegisModal('comms-compose-modal')"
-                class="text-zinc-500 hover:neon-text transition-colors text-xl leading-none">✕</button>
+                class="btn btn-ghost btn-sm text-zinc-500">✕</button>
         </div>
 
         <form hx-post="/comms/send" hx-target="#comms-content-panel"
@@ -17,7 +17,7 @@
                 <div class="flex items-center justify-between">
                     <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">TO:</label>
                     <button type="button" id="select-all-btn" onclick="toggleAllRecipients()"
-                        class="text-[9px] tracking-widest uppercase text-zinc-500 hover:neon-text transition-colors">
+                        class="btn-ghost text-[10px] rounded-sm focus:outline-none">
                         SELECT ALL
                     </button>
                 </div>

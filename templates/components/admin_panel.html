@@ -5,13 +5,13 @@
       <button
         hx-get="/admin/users"
         hx-target="#admin-content-panel"
-        class="btn-ghost text-[10px] rounded-sm focus:outline-none">
+        class="{% if tab == 'users' %}btn-solid{% else %}btn-ghost{% endif %} text-[10px] rounded-sm focus:outline-none">
         CREW_REGISTRY
       </button>
       <button
         hx-get="/admin/groups"
         hx-target="#admin-content-panel"
-        class="btn-ghost text-[10px] rounded-sm focus:outline-none">
+        class="{% if tab == 'groups' %}btn-solid{% else %}btn-ghost{% endif %} text-[10px] rounded-sm focus:outline-none">
         TEAM_INDEX
       </button>
     </div>
