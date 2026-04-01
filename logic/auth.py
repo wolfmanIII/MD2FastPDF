@@ -90,6 +90,20 @@ class UserRecord:
 class UserStore:
     """Persistent user registry backed by ~/.config/sc-archive/users.json."""
 
+    @staticmethod
+    def _build_record(username: str, entry: dict) -> UserRecord:
+        """Builds a UserRecord from a persisted entry dict.
+
+        Handles backwards compatibility: entries without a 'groups' key
+        default to an empty list.
+        """
+        return UserRecord(
+            username,
+            entry["password_hash"],
+            entry["root"],
+            entry.get("groups", []),
+        )
+
     def _load(self) -> dict:
         """Sync load — used only by bootstrap/CLI sync chain."""
         if not USERS_FILE.exists():
@@ -125,24 +139,14 @@ class UserStore:
         entry = (await self._aload()).get(username)
         if not entry:
             return None
-        return UserRecord(
-            username,
-            entry["password_hash"],
-            entry["root"],
-            entry.get("groups", []),
-        )
+        return self._build_record(username, entry)
 
     def get_sync(self, username: str) -> Optional[UserRecord]:
         """Sync variant — used only during bootstrap/CLI."""
         entry = self._load().get(username)
         if not entry:
             return None
-        return UserRecord(
-            username,
-            entry["password_hash"],
-            entry["root"],
-            entry.get("groups", []),
-        )
+        return self._build_record(username, entry)
 
     def is_empty(self) -> bool:
         return len(self._load()) == 0
