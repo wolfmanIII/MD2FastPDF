@@ -11,7 +11,7 @@ import anyio
 from pathlib import Path
 from typing import Optional, Protocol, runtime_checkable
 
-from logic.exceptions import AuthError
+from logic.exceptions import AuthError, GroupError
 
 
 @runtime_checkable
@@ -34,6 +34,23 @@ class SyncUserStoreProtocol(Protocol):
     def get_sync(self, username: str) -> Optional["UserRecord"]: ...
     def is_empty(self) -> bool: ...
     def save_user_sync(self, record: "UserRecord") -> None: ...
+
+
+@runtime_checkable
+class GroupStoreUserProtocol(Protocol):
+    """Minimal protocol for user store access required by GroupStore.delete_group()."""
+
+    async def list_users(self) -> list["UserRecord"]: ...
+
+
+@runtime_checkable
+class GroupStoreProtocol(Protocol):
+    """Async abstraction over the group persistence backend."""
+
+    async def list_groups(self) -> list[str]: ...
+    async def create_group(self, name: str) -> None: ...
+    async def delete_group(self, name: str, user_store: GroupStoreUserProtocol) -> None: ...
+
 
 _CONFIG_DIR = Path.home() / ".config" / "sc-archive"
 _CONFIG_DIR.mkdir(parents=True, exist_ok=True)
@@ -114,16 +131,14 @@ class GroupStore:
 
     async def create_group(self, name: str) -> None:
         """Adds a new group. Raises GroupError if name already exists."""
-        from logic.exceptions import GroupError
         data = await self._aload()
         if name in data:
             raise GroupError(f"GROUP_ALREADY_EXISTS: {name}")
         data[name] = {}
         await self._save(data)
 
-    async def delete_group(self, name: str, user_store: "UserStore") -> None:
+    async def delete_group(self, name: str, user_store: GroupStoreUserProtocol) -> None:
         """Removes a group. Raises GroupError if group has assigned users or does not exist."""
-        from logic.exceptions import GroupError
         data = await self._aload()
         if name not in data:
             raise GroupError(f"GROUP_NOT_FOUND: {name}")
