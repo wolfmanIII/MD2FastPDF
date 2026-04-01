@@ -7,13 +7,10 @@ from fastapi.responses import HTMLResponse
 
 from logic.comms import comms_manager
 from logic.auth import _store
-from logic.templates import templates
-from logic.conversion import MarkdownRenderer
+from logic.templates import templates, _render_markdown
 from routes.deps import get_current_user
 
 router = APIRouter(prefix="/comms", tags=["Aegis Comms"])
-
-_md_renderer = MarkdownRenderer()
 
 
 @router.get("", response_class=HTMLResponse)
@@ -131,7 +128,7 @@ async def preview_markdown(
     body: str = Form(default=""),
 ) -> HTMLResponse:
     """Live Markdown preview fragment for the compose modal."""
-    html = _md_renderer.render(body) if body.strip() else ""
+    html = _render_markdown(body) if body.strip() else ""
     return templates.TemplateResponse(
         request=request,
         name="components/comms_preview.html",
