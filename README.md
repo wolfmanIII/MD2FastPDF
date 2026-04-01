@@ -1,4 +1,5 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
+
 **Versione 5.5.2** // SECURITY HARDENING
 
 > [!NOTE]
@@ -69,6 +70,7 @@ Al **primo avvio**, SC-ARCHIVE crea automaticamente l'utente `admin` con passwor
 La stazione **SC-ARCHIVE** richiede un ambiente Linux (Ubuntu 24.04 raccomandato) con i seguenti sottosistemi attivi:
 
 ### 1. Ambiente Python & Dipendenze
+
 Il progetto utilizza `pyenv` per la gestione delle versioni e `Poetry` per le dipendenze deterministiche.
 ```bash
 # Seleziona la versione corretta via pyenv (scansiona .python-version)
@@ -81,19 +83,26 @@ poetry shell
 ```
 
 ### 2. Kernel di Conversione PDF (Gotenberg)
+
 La generazione PDF è delegata a un'istanza Docker di **Gotenberg**. È mandatorio che il servizio sia attivo sulla porta `3000`.
 ```bash
 # Avvio del motore di conversione
 docker run -d -p 3000:3000 gotenberg/gotenberg:8
+
+# In questo modo il container viene riavviato a meno che
+# non venga fermato manualmente
+docker run -d -p 3000:3000 --restart unless-stopped gotenberg/gotenberg:8
 ```
 
 ### 3. Strato Neurale (Ollama)
+
 L'intelligenza **Aegis Oracle** richiede Ollama in esecuzione.
 - **Installazione**: `curl -fsSL https://ollama.com/install.sh | sh`
 - **Modello Consigliato**: `ollama pull qwen2.5-coder:7b`
 - **Guida Dettagliata (Ubuntu 24.04)**: Consulta il manuale dedicato [ollama_ubuntu_24_04_guida.md](docs/ollama_ubuntu_24_04_guida.md).
 
 ### 4. Compilatore CSS (Tailwind v4)
+
 Il progetto utilizza il binario standalone di Tailwind CSS v4 per la compilazione JIT degli asset. Assicurati che il file `./tailwindcss` sia eseguibile:
 ```bash
 chmod +x tailwindcss
@@ -107,6 +116,7 @@ Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
 ```
 
 ## 📂 Struttura del Progetto
+
 - `main.py`: Punto di convergenza dei router Aegis.
 - `logic/`: Logica di business (File management, Conversion, Oracle, Render).
 - `routes/`: APIRouter modules (core, archive, editor, pdf, config, oracle).
