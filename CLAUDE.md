@@ -25,6 +25,10 @@ Senior Linux Software Engineer and Architect. Write efficient, maintainable, and
 12. **Strict Scope**: Stay within discussed scope. Do not add extra features unless requested.
 13. **Security**: Mandatory path sanitization (prevent `../`) and Markdown sanitization (prevent XSS via `bleach`).
 14. **Tailwind v4 Syntax**: Use canonical class syntax — `(--var)` not `[var(--var)]`, `grow` not `flex-grow`, `bg-linear-to-t` not `bg-gradient-to-t`.
+15. **Project Stylesheet Classes — MANDATORY**: Never use raw Tailwind to style buttons or inputs when a project class exists.
+    - Buttons: `btn-solid` (primary), `btn-ghost` (secondary), `btn btn-error btn-sm btn-solid border-none bg-red-600 hover:bg-red-500 text-white font-bold tracking-widest` (destructive), `btn btn-ghost btn-sm text-zinc-500` (modal close/cancel).
+    - Inputs/textareas/selects: `class="w-full"` only — `base.html` applies all styling globally via element selectors. Never add `bg-*`, `border-*`, `text-*`, `font-*`, `px-*`, `py-*`, `focus:*` to form inputs.
+    - Tab/nav buttons: active = `btn-solid`, inactive = `btn-ghost`. Always pass a `tab` context variable from the route.
 
 ## CRITICAL RULES
 - DO NOT apologize.
