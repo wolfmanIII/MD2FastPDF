@@ -2,7 +2,7 @@
       class="{% if count > 0 %}neon-bg text-[#0f172a] text-[9px] font-bold px-1.5 py-0.5 rounded-sm ml-1{% endif %}"
       data-count="{{ count }}"
       hx-get="/comms/unread-count"
-      hx-trigger="load, every 30s"
+      hx-trigger="every 30s"
       hx-swap="outerHTML">
     {% if count > 0 %}{{ count }}{% endif %}
     <script>
