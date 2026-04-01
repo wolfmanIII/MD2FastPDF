@@ -25,11 +25,14 @@ async def admin_panel(
     """Admin hub. Renders panel with user list as default tab."""
     users = await auth_service.list_users()
     groups = await group_store.list_groups()
-    return templates.TemplateResponse(
-        request,
-        "components/admin_panel.html",
-        {"users": users, "groups": groups},
-    )
+    context = {
+        "users": users,
+        "groups": groups,
+        "component_template": "components/admin_panel.html",
+    }
+    if request.headers.get("HX-Request"):
+        return templates.TemplateResponse(request, "components/admin_panel.html", context)
+    return templates.TemplateResponse(request, "shell.html", context)
 
 
 @router.get("/users", response_class=HTMLResponse)
