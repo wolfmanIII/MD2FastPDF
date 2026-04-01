@@ -39,6 +39,7 @@ _CONFIG_DIR = Path.home() / ".config" / "sc-archive"
 _CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 USERS_FILE = _CONFIG_DIR / "users.json"
 _LEGACY_USERS_FILE = Path("config/users.json")
+_GROUPS_FILE: Path = _CONFIG_DIR / "groups.json"
 
 
 def _migrate_legacy_users() -> None:
@@ -70,6 +71,74 @@ def _migrate_legacy_users() -> None:
 
 
 _migrate_legacy_users()
+
+
+class GroupStore:
+    """Persistent registry for available groups, backed by ~/.config/sc-archive/groups.json."""
+
+    def _load(self) -> dict:
+        if not _GROUPS_FILE.exists():
+            return {}
+        try:
+            with open(_GROUPS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError):
+            return {}
+
+    async def _aload(self) -> dict:
+        p = anyio.Path(_GROUPS_FILE)
+        if not await p.exists():
+            return {}
+        try:
+            content = await p.read_text(encoding="utf-8")
+            return json.loads(content)
+        except (json.JSONDecodeError, IOError):
+            return {}
+
+    def _save_sync(self, data: dict) -> None:
+        with open(_GROUPS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4)
+
+    async def _save(self, data: dict) -> None:
+        content = json.dumps(data, indent=4)
+        async with await anyio.open_file(_GROUPS_FILE, "w") as f:
+            await f.write(content)
+
+    def list_groups_sync(self) -> list[str]:
+        """Sync — used only in bootstrap."""
+        return list(self._load().keys())
+
+    async def list_groups(self) -> list[str]:
+        """Returns all group names in insertion order."""
+        return list((await self._aload()).keys())
+
+    async def create_group(self, name: str) -> None:
+        """Adds a new group. Raises GroupError if name already exists."""
+        from logic.exceptions import GroupError
+        data = await self._aload()
+        if name in data:
+            raise GroupError(f"GROUP_ALREADY_EXISTS: {name}")
+        data[name] = {}
+        await self._save(data)
+
+    async def delete_group(self, name: str, user_store: "UserStore") -> None:
+        """Removes a group. Raises GroupError if group has assigned users or does not exist."""
+        from logic.exceptions import GroupError
+        data = await self._aload()
+        if name not in data:
+            raise GroupError(f"GROUP_NOT_FOUND: {name}")
+        users = await user_store.list_users()
+        if any(name in u.groups for u in users):
+            raise GroupError("GROUP_HAS_MEMBERS")
+        del data[name]
+        await self._save(data)
+
+    def ensure_admin_group_sync(self) -> None:
+        """Creates the 'admin' group if absent. Sync — bootstrap only."""
+        data = self._load()
+        if "admin" not in data:
+            data["admin"] = {}
+            self._save_sync(data)
 
 
 class UserRecord:
