@@ -28,8 +28,9 @@ async def login(
 ):
     """Authenticates credentials, opens a session, and redirects to the dashboard."""
     try:
-        await auth_service.authenticate(username, password)
+        record = await auth_service.authenticate(username, password)
         request.session["username"] = username
+        request.session["is_admin"] = "admin" in record.groups
         return RedirectResponse(url="/", status_code=302)
     except AuthError:
         request.session["login_error"] = "INVALID_CREDENTIALS"
