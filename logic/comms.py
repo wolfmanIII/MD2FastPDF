@@ -126,3 +126,86 @@ class CommsManager:
     async def ensure_comms_folders(self, username: str) -> None:
         """Idempotent — called at GET /comms entry point for existing users."""
         await self.create_comms_folders(username)
+
+    @staticmethod
+    def _build_filename(timestamp: datetime, msg_id: str, subject: str) -> str:
+        """Produces: {YYYYMMDDTHHmmss}_{id[:8]}_{subject_slug}.md"""
+        ts = timestamp.strftime("%Y%m%dT%H%M%S")
+        slug = CommsManager._slugify(subject)
+        return f"{ts}_{msg_id[:8]}_{slug}.md"
+
+    @staticmethod
+    def _slugify(text: str) -> str:
+        """Lowercase ASCII slug, max 32 chars."""
+        slug = re.sub(r"[^a-z0-9]+", "_", text.lower().strip())
+        return slug[:32].strip("_") or "msg"
+
+    def _expand_recipients(
+        self, recipient_str: str, all_usernames: list[str], sender: str
+    ) -> list[str]:
+        """Expands 'ALL' to all users except sender. Otherwise splits by comma."""
+        if recipient_str.strip().upper() == "ALL":
+            return [u for u in all_usernames if u != sender]
+        return [r.strip() for r in recipient_str.split(",") if r.strip()]
+
+    async def list_folder(self, username: str, folder: str) -> list[MessageRecord]:
+        """Returns all messages in folder, sorted newest-first."""
+        folder_path = self._comms_root(username) / folder
+        if not await anyio.Path(folder_path).exists():
+            return []
+
+        def _scan() -> list[Path]:
+            return sorted(
+                [p for p in folder_path.iterdir() if p.suffix == ".md"],
+                key=lambda p: p.name,
+                reverse=True,
+            )
+
+        files = await anyio.to_thread.run_sync(_scan)
+        records: list[MessageRecord] = []
+        for f in files:
+            rec = await self._read_message_file(f)
+            if rec is not None:
+                records.append(rec)
+        return records
+
+    async def get_message(
+        self, username: str, folder: str, filename: str
+    ) -> MessageRecord:
+        """Reads a single message. Raises NotFoundError if absent."""
+        path = self._comms_root(username) / folder / filename
+        if not await anyio.Path(path).exists():
+            raise NotFoundError(f"MESSAGE_NOT_FOUND: {filename}")
+        rec = await self._read_message_file(path)
+        if rec is None:
+            raise CommsError(f"MESSAGE_PARSE_FAILED: {filename}")
+        return rec
+
+    async def count_unread(self, username: str) -> int:
+        """Returns count of unread messages in inbound/."""
+        messages = await self.list_folder(username, "inbound")
+        return sum(1 for m in messages if not m.read)
+
+    async def _read_message_file(self, path: Path) -> Optional[MessageRecord]:
+        """Reads and parses a single .md file. Returns None on failure."""
+        try:
+            content = await anyio.Path(path).read_text(encoding="utf-8")
+        except (IOError, OSError):
+            return None
+        parsed = FrontmatterParser.parse(content)
+        if parsed is None:
+            return None
+        meta, body = parsed
+        try:
+            return MessageRecord(
+                id=str(meta.get("id", "")),
+                sender=str(meta.get("from", "")),
+                recipient=str(meta.get("to", "")),
+                subject=str(meta.get("subject", "")),
+                timestamp=str(meta.get("timestamp", "")),
+                read=bool(meta.get("read", False)),
+                body=body,
+                filename=path.name,
+            )
+        except (KeyError, TypeError):
+            return None
