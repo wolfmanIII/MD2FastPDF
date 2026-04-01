@@ -1,0 +1,53 @@
+{% if notification is defined and notification %}
+<div class="text-[10px] neon-text tracking-widest mb-4 animate-pulse">{{ notification }}</div>
+{% endif %}
+
+{% if messages %}
+<div class="space-y-2">
+    {% for msg in messages %}
+    <div class="glass-panel glass-panel-hover p-4 cursor-pointer tracking-widest uppercase
+            {% if not msg.read and folder == 'inbound' %}border-l-2 border-(--neon-cyan){% endif %}"
+        hx-get="/comms/message?folder={{ folder }}&filename={{ msg.filename }}"
+        hx-target="#comms-content-panel">
+        <div class="flex items-start justify-between gap-4">
+            <div class="space-y-1 min-w-0">
+                <div class="flex items-center space-x-2">
+                    {% if not msg.read and folder == 'inbound' %}
+                    <span class="w-2 h-2 rounded-full neon-bg shrink-0 animate-pulse"></span>
+                    {% endif %}
+                    <span class="text-[11px] font-bold text-zinc-100 truncate">{{ msg.subject }}</span>
+                </div>
+                <div class="text-[10px] text-zinc-500">
+                    {% if folder == 'inbound' %}
+                    FROM: <span class="text-zinc-400">{{ msg.sender }}</span>
+                    {% elif folder == 'outbound' %}
+                    TO: <span class="text-zinc-400">{{ msg.recipient }}</span>
+                    {% else %}
+                    TO: <span class="text-zinc-400">{{ msg.recipient }}</span>
+                    <span class="text-zinc-700 ml-2">// DRAFT</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex flex-col items-end shrink-0 space-y-1">
+                <span class="text-[9px] text-zinc-600 font-mono">
+                    {{ msg.timestamp[:10] }}
+                </span>
+                {% if folder == 'staging' %}
+                <form hx-post="/comms/draft/send" hx-target="#comms-content-panel" class="m-0">
+                    <input type="hidden" name="draft_filename" value="{{ msg.filename }}">
+                    <button type="submit" onclick="event.stopPropagation()"
+                        class="text-[9px] tracking-widest uppercase neon-text hover:neon-bg hover:text-[#0f172a] border border-(--glass-border) px-2 py-0.5 rounded-sm transition-colors">
+                        TRANSMIT_BUFFERED
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="glass-panel p-12 text-center tracking-widest uppercase">
+    <p class="text-zinc-600 text-[10px]">NO_SIGNALS_DETECTED</p>
+</div>
+{% endif %}

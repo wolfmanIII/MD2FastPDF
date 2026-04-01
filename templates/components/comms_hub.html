@@ -1,0 +1,36 @@
+<div class="space-y-6">
+    <div class="flex items-center justify-between py-2 border-b border-white/5">
+        <div>
+            <h1 class="text-2xl font-bold text-zinc-100 tracking-tight">COMMS_ARRAY // SIGNAL MANAGEMENT</h1>
+            <p class="text-zinc-500 text-sm mt-1">SECURE INTER-OPERATOR COMMUNICATION PROTOCOL</p>
+        </div>
+        <button hx-get="/comms/compose" hx-target="#modal-container"
+            class="btn-ghost text-[10px] rounded-sm focus:outline-none">
+            OPEN_CHANNEL //
+        </button>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="flex space-x-1 border-b border-white/5">
+        <button hx-get="/comms/inbound" hx-target="#comms-content-panel"
+            class="text-[10px] tracking-widest uppercase px-4 py-2 transition-colors
+                {% if tab == 'inbound' %}neon-text border-b-2 border-(--neon-cyan){% else %}text-zinc-500 hover:text-zinc-300{% endif %}">
+            RECEPTION_ARRAY
+        </button>
+        <button hx-get="/comms/outbound" hx-target="#comms-content-panel"
+            class="text-[10px] tracking-widest uppercase px-4 py-2 transition-colors
+                {% if tab == 'outbound' %}neon-text border-b-2 border-(--neon-cyan){% else %}text-zinc-500 hover:text-zinc-300{% endif %}">
+            OUTBOUND_LOG
+        </button>
+        <button hx-get="/comms/staging" hx-target="#comms-content-panel"
+            class="text-[10px] tracking-widest uppercase px-4 py-2 transition-colors
+                {% if tab == 'staging' %}neon-text border-b-2 border-(--neon-cyan){% else %}text-zinc-500 hover:text-zinc-300{% endif %}">
+            STAGING_BUFFER
+        </button>
+    </div>
+
+    <!-- Content panel -->
+    <div id="comms-content-panel">
+        {% include 'components/comms_message_list.html' %}
+    </div>
+</div>
