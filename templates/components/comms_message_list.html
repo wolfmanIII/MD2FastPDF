@@ -36,7 +36,7 @@
                 <form hx-post="/comms/draft/send" hx-target="#comms-content-panel" class="m-0">
                     <input type="hidden" name="draft_filename" value="{{ msg.filename }}">
                     <button type="submit" onclick="event.stopPropagation()"
-                        class="text-[9px] tracking-widest uppercase neon-text hover:neon-bg hover:text-[#0f172a] border border-(--glass-border) px-2 py-0.5 rounded-sm transition-colors">
+                        class="btn-solid text-[10px] rounded-sm focus:outline-none">
                         TRANSMIT_BUFFERED
                     </button>
                 </form>
