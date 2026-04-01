@@ -1,9 +1,9 @@
 <div id="comms-preview-panel"
-    class="overflow-y-auto bg-black/40 border border-zinc-800 rounded-sm p-3 text-sm text-zinc-300 leading-relaxed normal-case"
-    style="height: 200px;">
+    class="overflow-y-auto bg-black/40 border border-zinc-800 rounded-sm p-3 h-[200px]
+           prose prose-invert prose-sm max-w-none text-zinc-300 leading-relaxed normal-case">
     {% if html %}
         {{ html | safe }}
     {% else %}
-        <span class="text-zinc-600 text-[10px] uppercase tracking-widest">AWAITING_INPUT...</span>
+        <span class="text-zinc-600 text-[10px] uppercase tracking-widest not-prose">AWAITING_INPUT...</span>
     {% endif %}
 </div>

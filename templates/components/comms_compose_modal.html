@@ -46,7 +46,7 @@
                 <div class="space-y-1">
                     <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">BODY:</label>
                     <textarea name="body" id="comms-body"
-                        class="w-full resize-none font-mono text-[11px]" style="height: 200px;"
+                        class="w-full resize-none font-mono text-[11px] h-[200px]"
                         placeholder="AWAITING_TRANSMISSION..."
                         hx-post="/comms/preview"
                         hx-trigger="input changed delay:300ms"
@@ -56,9 +56,9 @@
                 <div class="space-y-1">
                     <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">PREVIEW:</label>
                     <div id="comms-preview-panel"
-                        class="overflow-y-auto bg-black/40 border border-zinc-800 rounded-sm p-3 text-sm text-zinc-300 leading-relaxed normal-case"
-                        style="height: 200px;">
-                        <span class="text-zinc-600 text-[10px] uppercase tracking-widest">AWAITING_INPUT...</span>
+                        class="overflow-y-auto bg-black/40 border border-zinc-800 rounded-sm p-3 h-[200px]
+                               prose prose-invert prose-sm max-w-none text-zinc-300 leading-relaxed normal-case">
+                        <span class="text-zinc-600 text-[10px] uppercase tracking-widest not-prose">AWAITING_INPUT...</span>
                     </div>
                 </div>
             </div>
