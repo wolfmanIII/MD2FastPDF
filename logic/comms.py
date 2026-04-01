@@ -209,3 +209,129 @@ class CommsManager:
             )
         except (KeyError, TypeError):
             return None
+
+    async def send_message(
+        self,
+        sender: str,
+        recipient_str: str,
+        subject: str,
+        body: str,
+        all_usernames: list[str],
+    ) -> MessageRecord:
+        """Dual-write: sender outbound + each recipient's inbound."""
+        now = datetime.now(timezone.utc)
+        msg_id = str(uuid.uuid4())
+        filename = self._build_filename(now, msg_id, subject)
+        record = MessageRecord(
+            id=msg_id,
+            sender=sender,
+            recipient=recipient_str.strip(),
+            subject=subject,
+            timestamp=now.isoformat(),
+            read=False,
+            body=body,
+            filename=filename,
+        )
+        await self._write_message_file(self._outbound(sender) / filename, record)
+        recipients = self._expand_recipients(recipient_str, all_usernames, sender)
+        home = Path.home().resolve()
+        for recipient in recipients:
+            inbound_path = self._inbound(recipient) / filename
+            if not str(inbound_path.resolve()).startswith(str(home)):
+                raise AccessDeniedError(
+                    f"COMMS: Recipient path outside home boundary: {recipient}"
+                )
+            await self.ensure_comms_folders(recipient)
+            await self._write_message_file(inbound_path, record)
+        return record
+
+    async def mark_read(self, username: str, folder: str, filename: str) -> None:
+        """Toggles read: true in frontmatter. No-op if already read or not found."""
+        path = self._comms_root(username) / folder / filename
+        if not await anyio.Path(path).exists():
+            return
+        rec = await self._read_message_file(path)
+        if rec is None or rec.read:
+            return
+        meta = {
+            "id": rec.id,
+            "from": rec.sender,
+            "to": rec.recipient,
+            "subject": rec.subject,
+            "timestamp": rec.timestamp,
+            "read": True,
+        }
+        content = FrontmatterParser.serialize(meta, rec.body)
+        tmp = path.with_suffix(".tmp")
+        async with await anyio.open_file(tmp, "w", encoding="utf-8") as f:
+            await f.write(content)
+        await anyio.to_thread.run_sync(lambda: tmp.rename(path))
+
+    async def delete_message(
+        self, username: str, folder: str, filename: str
+    ) -> None:
+        """Permanently removes a message file."""
+        path = self._comms_root(username) / folder / filename
+        if not await anyio.Path(path).exists():
+            raise NotFoundError(f"MESSAGE_NOT_FOUND: {filename}")
+        await anyio.to_thread.run_sync(path.unlink)
+
+    async def save_draft(
+        self,
+        sender: str,
+        recipient_str: str,
+        subject: str,
+        body: str,
+        draft_filename: Optional[str] = None,
+    ) -> MessageRecord:
+        """Writes or overwrites a draft in sender's staging/."""
+        now = datetime.now(timezone.utc)
+        msg_id = str(uuid.uuid4())
+        filename = draft_filename or self._build_filename(now, msg_id, subject or "draft")
+        record = MessageRecord(
+            id=msg_id,
+            sender=sender,
+            recipient=recipient_str.strip(),
+            subject=subject,
+            timestamp=now.isoformat(),
+            read=False,
+            body=body,
+            filename=filename,
+        )
+        await self._write_message_file(self._staging(sender) / filename, record)
+        return record
+
+    async def promote_draft(
+        self, sender: str, draft_filename: str, all_usernames: list[str]
+    ) -> MessageRecord:
+        """Sends a draft: reads staging/, calls send_message(), deletes draft."""
+        path = self._staging(sender) / draft_filename
+        if not await anyio.Path(path).exists():
+            raise NotFoundError(f"DRAFT_NOT_FOUND: {draft_filename}")
+        rec = await self._read_message_file(path)
+        if rec is None:
+            raise CommsError(f"DRAFT_PARSE_FAILED: {draft_filename}")
+        sent = await self.send_message(
+            sender, rec.recipient, rec.subject, rec.body, all_usernames
+        )
+        await anyio.to_thread.run_sync(path.unlink)
+        return sent
+
+    async def _write_message_file(self, path: Path, record: MessageRecord) -> None:
+        """Atomic write: .tmp → rename. Ensures no partial reads."""
+        meta = {
+            "id": record.id,
+            "from": record.sender,
+            "to": record.recipient,
+            "subject": record.subject,
+            "timestamp": record.timestamp,
+            "read": record.read,
+        }
+        content = FrontmatterParser.serialize(meta, record.body)
+        tmp = path.with_suffix(".tmp")
+        async with await anyio.open_file(tmp, "w", encoding="utf-8") as f:
+            await f.write(content)
+        await anyio.to_thread.run_sync(lambda: tmp.rename(path))
+
+
+comms_manager = CommsManager()
