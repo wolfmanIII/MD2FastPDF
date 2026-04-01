@@ -82,3 +82,11 @@ class RenderError(AegisError):
     """Mermaid render pipeline failure."""
     def __init__(self, detail: str = "RENDER_FAILED"):
         super().__init__(detail, status_code=502)
+
+
+# --- Group Errors ---
+
+class GroupError(AegisError):
+    """Group management violation (already exists, has members, not found)."""
+    def __init__(self, detail: str = "GROUP_ERROR"):
+        super().__init__(detail, status_code=400)
