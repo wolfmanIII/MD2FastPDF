@@ -1,0 +1,85 @@
+"""
+AEGIS_COMMS_PROTOCOL: User-to-user secure message transmission system.
+
+FrontmatterParser: Parses and serializes Markdown frontmatter (no PyYAML).
+MessageRecord: Immutable value object for a single transmission.
+CommsManager: Async I/O across user workspaces. (added in subsequent tasks)
+"""
+import re
+import uuid
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Optional
+
+import anyio
+
+from config.settings import settings
+from logic.exceptions import CommsError, NotFoundError, AccessDeniedError
+
+_ADMIN_USERNAME: str = "admin"
+_COMMS_SUBFOLDERS: tuple[str, ...] = ("inbound", "outbound", "staging")
+
+
+@dataclass(frozen=True)
+class MessageRecord:
+    """Immutable representation of a single comms transmission."""
+    id: str
+    sender: str
+    recipient: str      # comma-separated usernames, or "ALL"
+    subject: str
+    timestamp: str      # ISO8601
+    read: bool
+    body: str
+    filename: str       # basename only, no path
+
+    @property
+    def recipients(self) -> list[str]:
+        """Expands recipient string into a list. Does not expand 'ALL'."""
+        return [r.strip() for r in self.recipient.split(",")]
+
+
+class FrontmatterParser:
+    """Parses and serializes Markdown YAML-lite frontmatter without external deps.
+
+    Supported scalar types: str, bool (true/false). No nested structures.
+    Returns None from parse() on malformed input — callers must handle gracefully.
+    """
+
+    _DELIMITER: str = "---"
+    _BOOL_MAP: dict[str, bool] = {"true": True, "false": False}
+
+    @classmethod
+    def parse(cls, raw: str) -> Optional[tuple[dict, str]]:
+        """Returns (meta_dict, body_str) or None if format is invalid."""
+        lines = raw.split("\n")
+        if not lines or lines[0].strip() != cls._DELIMITER:
+            return None
+        try:
+            end = lines.index(cls._DELIMITER, 1)
+        except ValueError:
+            return None
+        meta: dict = {}
+        for line in lines[1:end]:
+            m = re.match(r"^(\w+):\s*(.*)", line)
+            if m:
+                meta[m.group(1)] = cls._parse_value(m.group(2))
+        body = "\n".join(lines[end + 1:]).strip()
+        return meta, body
+
+    @classmethod
+    def serialize(cls, meta: dict, body: str) -> str:
+        """Builds the full file content from meta dict and body string."""
+        lines = [cls._DELIMITER]
+        for k, v in meta.items():
+            lines.append(f"{k}: {str(v).lower() if isinstance(v, bool) else v}")
+        lines.append(cls._DELIMITER)
+        lines.append("")
+        lines.append(body)
+        return "\n".join(lines)
+
+    @classmethod
+    def _parse_value(cls, raw: str) -> str | bool:
+        """Converts raw string value to Python bool or stripped str."""
+        stripped = raw.strip()
+        return cls._BOOL_MAP.get(stripped.lower(), stripped)
