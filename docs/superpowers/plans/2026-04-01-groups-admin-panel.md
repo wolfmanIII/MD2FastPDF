@@ -13,6 +13,7 @@
 ## Task 1: GroupError
 
 **Files:**
+
 - Modify: `logic/exceptions.py`
 
 - [ ] **Step 1: Add GroupError after RenderError**
@@ -49,6 +50,7 @@ git commit -m "feat(groups): add GroupError to exception hierarchy"
 ## Task 2: UserRecord + groups field
 
 **Files:**
+
 - Modify: `logic/auth.py`
 
 - [ ] **Step 1: Update UserRecord to include groups**
@@ -140,6 +142,7 @@ git commit -m "feat(groups): UserRecord gains groups field with backwards-compat
 ## Task 3: UserStore extensions + Protocol update
 
 **Files:**
+
 - Modify: `logic/auth.py`
 
 - [ ] **Step 1: Add list_users, update_groups, delete_user to UserStore**
@@ -220,6 +223,7 @@ git commit -m "feat(groups): UserStore gains list_users, update_groups, delete_u
 ## Task 4: GroupStore
 
 **Files:**
+
 - Modify: `logic/auth.py`
 
 - [ ] **Step 1: Add _GROUPS_FILE path constant**
@@ -334,6 +338,7 @@ git commit -m "feat(groups): add GroupStore with create/delete/list"
 ## Task 5: AuthService extensions + bootstrap update
 
 **Files:**
+
 - Modify: `logic/auth.py`
 
 - [ ] **Step 1: Update create_user and create_user_sync to accept groups**
@@ -446,6 +451,7 @@ git commit -m "feat(groups): AuthService extended — get_user, update_user_grou
 ## Task 6: require_admin dep + is_admin session
 
 **Files:**
+
 - Modify: `routes/deps.py`
 - Modify: `routes/auth.py`
 
@@ -518,6 +524,7 @@ git commit -m "feat(groups): add require_admin dep; POST /login sets is_admin in
 ## Task 7: routes/admin.py
 
 **Files:**
+
 - Create: `routes/admin.py`
 
 - [ ] **Step 1: Create routes/admin.py**
@@ -754,6 +761,7 @@ git commit -m "feat(groups): routes/admin.py — full CRUD for users and groups"
 ## Task 8: Admin templates
 
 **Files:**
+
 - Create: `templates/components/admin_panel.html`
 - Create: `templates/components/admin_user_list.html`
 - Create: `templates/components/admin_user_modal.html`
@@ -1011,6 +1019,7 @@ git commit -m "feat(groups): admin panel templates — user list, group list, mo
 ## Task 9: main.py + base.html nav link
 
 **Files:**
+
 - Modify: `main.py`
 - Modify: `templates/layouts/base.html`
 
@@ -1074,6 +1083,7 @@ git commit -m "feat(groups): register admin router; add SYS_ADMIN nav link for a
 > **Prerequisite:** Complete the AEGIS COMMS implementation plan (`docs/superpowers/plans/2026-03-30-aegis-comms.md`) before executing this task.
 
 **Files:**
+
 - Modify: `logic/comms.py`
 - Modify: `routes/comms.py`
 
@@ -1138,6 +1148,7 @@ In `CommsManager.send_message`, replace the parameter `all_usernames: list[str]`
 ```
 
 And inside the method body, replace the call:
+
 ```python
         recipients = self._expand_recipients(recipient_str, allowed_usernames, sender)
 ```

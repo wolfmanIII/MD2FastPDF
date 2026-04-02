@@ -13,6 +13,7 @@
 ## Task 1: CommsError + render_md filter
 
 **Files:**
+
 - Modify: `logic/exceptions.py`
 - Modify: `logic/templates.py`
 
@@ -84,6 +85,7 @@ git commit -m "feat(comms): add CommsError + render_md Jinja2 filter"
 ## Task 2: FrontmatterParser + MessageRecord
 
 **Files:**
+
 - Create: `logic/comms.py`
 
 - [ ] **Step 1: Create logic/comms.py with FrontmatterParser and MessageRecord**
@@ -223,6 +225,7 @@ git commit -m "feat(comms): FrontmatterParser + MessageRecord"
 ## Task 3: CommsManager — path resolution + folder lifecycle
 
 **Files:**
+
 - Modify: `logic/comms.py`
 
 - [ ] **Step 1: Append CommsManager class to logic/comms.py**
@@ -311,6 +314,7 @@ git commit -m "feat(comms): CommsManager path resolution + folder lifecycle"
 ## Task 4: CommsManager — read operations
 
 **Files:**
+
 - Modify: `logic/comms.py`
 
 - [ ] **Step 1: Add static helpers + read methods to CommsManager**
@@ -432,6 +436,7 @@ git commit -m "feat(comms): CommsManager read operations + _read_message_file"
 ## Task 5: CommsManager — write operations
 
 **Files:**
+
 - Modify: `logic/comms.py`
 
 - [ ] **Step 1: Add write methods to CommsManager**
@@ -617,6 +622,7 @@ git commit -m "feat(comms): CommsManager write operations — send, draft, mark_
 ## Task 6: logic/auth.py — list_usernames + comms folder creation
 
 **Files:**
+
 - Modify: `logic/auth.py`
 
 - [ ] **Step 1: Add list_usernames to UserStoreProtocol**
@@ -693,6 +699,7 @@ git commit -m "feat(comms): auth.py — list_usernames + auto-create comms folde
 ## Task 7: routes/comms.py
 
 **Files:**
+
 - Create: `routes/comms.py`
 
 - [ ] **Step 1: Create routes/comms.py**
@@ -956,6 +963,7 @@ git commit -m "feat(comms): routes/comms.py — all 12 endpoints"
 ## Task 8: main.py router registration + base.html
 
 **Files:**
+
 - Modify: `main.py`
 - Modify: `templates/layouts/base.html`
 
@@ -1021,6 +1029,7 @@ git commit -m "feat(comms): register router, add nav link + toast container to b
 ## Task 9: Templates — comms_hub + comms_message_list
 
 **Files:**
+
 - Create: `templates/components/comms_hub.html`
 - Create: `templates/components/comms_message_list.html`
 
@@ -1135,6 +1144,7 @@ git commit -m "feat(comms): comms_hub + comms_message_list templates"
 ## Task 10: Templates — comms_message_reader + comms_compose_modal
 
 **Files:**
+
 - Create: `templates/components/comms_message_reader.html`
 - Create: `templates/components/comms_compose_modal.html`
 
@@ -1305,6 +1315,7 @@ git commit -m "feat(comms): comms_message_reader + comms_compose_modal templates
 ## Task 11: Templates — comms_unread_badge + comms_preview
 
 **Files:**
+
 - Create: `templates/components/comms_unread_badge.html`
 - Create: `templates/components/comms_preview.html`
 
@@ -1364,6 +1375,7 @@ git commit -m "feat(comms): comms_unread_badge (toast delta) + comms_preview tem
 ## Task 12: End-to-end verification + version bump
 
 **Files:**
+
 - Modify: `main.py` (version)
 - Modify: `docs/Stato-dell-Arte.md`
 
@@ -1414,7 +1426,7 @@ git commit -m "feat(comms): AEGIS COMMS v5.6.0 complete — bump version"
 **Spec coverage:**
 
 | Spec requirement | Task |
-|---|---|
+| --- | --- |
 | Comms folders on user creation | Task 6 |
 | `ensure_comms_folders` for existing users | Task 3, Task 7 (GET /comms) |
 | FrontmatterParser (no PyYAML) | Task 2 |
