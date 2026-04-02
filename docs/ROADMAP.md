@@ -64,16 +64,28 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [5.0] - AEGIS COMMS (Sistema di Messaggistica Multi-Utente) [PLANNED — NEXT]
+### [5.0] - AEGIS COMMS (Sistema di Messaggistica Multi-Utente) [COMPLETED]
 **Obiettivo**: Canale di comunicazione sicuro tra utenti e admin (GM/Referee). Filesystem-based, nessun database.
-- **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root di ogni utente (admin: `~/comms/`, utenti: `~/sc-archive/{user}/comms/`). Auto-creazione alla registrazione utente.
-- **Formato messaggi**: file `.md` con frontmatter (id, from, to, subject, timestamp, read). Parsing stdlib `re` — nessuna dipendenza aggiuntiva.
-- **Flusso invio**: dual-write — copia in `outbound/` del sender + copia in `inbound/` del recipient. Cross-workspace write con path assoluti validati.
-- **Broadcast GM**: admin può trasmettere a tutti gli operatori (`to: ALL`). Una copia per utente in `inbound/` (tracking read/unread indipendente).
-- **Draft management**: bozze in `staging/` — editabili, promuovibili a trasmissione con un click.
-- **Unread badge**: contatore nella navbar, HTMX-polled ogni 30s (`GET /comms/unread-count`).
-- **UI**: hub tabbato (RECEPTION_ARRAY / OUTBOUND_LOG / STAGING_BUFFER), modale composizione, reader con Markdown renderizzato, azioni inline (PURGE / RESPOND).
-- **Piano dettagliato**: `docs/piano-aegis-comms.md`.
+- **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root di ogni utente (admin: `~/comms/`, utenti: `~/sc-archive/{user}/comms/`). Auto-creazione alla registrazione utente. ✓
+- **Formato messaggi**: file `.md` con frontmatter (id, from, to, subject, timestamp, read). Parsing stdlib `re` — nessuna dipendenza aggiuntiva. ✓
+- **Flusso invio**: dual-write — copia in `outbound/` del sender + copia in `inbound/` del recipient. Cross-workspace write con path assoluti validati. ✓
+- **Broadcast GM**: admin può trasmettere a tutti gli operatori raggiungibili (`to: ALL`). Una copia per utente in `inbound/` (tracking read/unread indipendente). ✓
+- **Draft management**: bozze in `staging/` — editabili, promuovibili a trasmissione con un click. ✓
+- **Unread badge**: contatore nella navbar, HTMX-polled ogni 30s (`GET /comms/unread-count`). ✓
+- **UI**: hub tabbato (RECEPTION_ARRAY / OUTBOUND_LOG / STAGING_BUFFER), modale composizione con preview Markdown live, reader con `render_md`, azioni inline (PURGE / RESPOND). ✓
+- **Documentazione**: `docs/aegis-comms.md`.
+
+---
+
+### [5.1] - AEGIS GROUPS & ADMIN PANEL [COMPLETED]
+**Obiettivo**: Sistema di gruppi utente con admin panel HTMX e messaggistica ristretta per gruppo.
+- **GroupStore**: persistenza `~/.config/sc-archive/groups.json`. CRUD asincrono. Blocca eliminazione se gruppo ha membri. ✓
+- **UserRecord.groups**: campo `list[str]` con retrocompatibilità (`groups: []` per utenti senza campo). ✓
+- **Admin promozione via gruppo**: chiunque abbia il gruppo `"admin"` ha privilegi admin — non hardcoded su username. `require_admin` FastAPI dependency. ✓
+- **Admin panel** (`/admin`): CRUD completo utenti (crea, modifica gruppi, elimina) e gruppi (crea, elimina se vuoto). Tab CREW_REGISTRY / FACTION_INDEX. ✓
+- **Nav link SYS_ADMIN**: visibile in `base.html` solo se `request.session["is_admin"]`. ✓
+- **Messaggistica filtrata**: `CommsManager.allowed_recipients()` — destinatari raggiungibili = gruppo condiviso col sender **o** gruppo `"admin"`. ✓
+- **Documentazione**: `docs/groups-admin-panel.md`.
 
 ---
 

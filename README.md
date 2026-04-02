@@ -1,6 +1,6 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
 
-**Versione 5.5.2** // SECURITY HARDENING
+**Versione 5.7.0** // GROUPS & ADMIN PANEL
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -19,6 +19,8 @@
 
 ## 🚀 Features
 
+- **Aegis Groups & Admin Panel**: Sistema di gruppi utente con admin panel HTMX (`/admin`). CRUD utenti e gruppi. Chiunque abbia il gruppo `"admin"` ha privilegi admin. Messaggistica filtrata per gruppo condiviso.
+- **Aegis COMMS**: Messaggistica filesystem-based multi-utente. Hub tabbato (RECEPTION_ARRAY / OUTBOUND_LOG / STAGING_BUFFER), compose modal con preview Markdown live, draft management, unread badge HTMX-polled ogni 30s.
 - **Aegis Filetree**: Sidebar albero directory collassabile nell'editor con navigazione lazy, highlight del file attivo e persistenza stato in `localStorage`.
 - **Aegis Slim-Tech Editor**: Interfaccia di scrittura compattata con supporto **Fullscreen Breakthrough** (bypass automatico dei filtri glass-panel).
 - **Native Multi-Tab Navigation**: Pieno supporto per apertura in nuove schede (Ctrl+Click) su Dashboard, File Grid e Breadcrumbs.
@@ -118,8 +120,8 @@ Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
 ## 📂 Struttura del Progetto
 
 - `main.py`: Punto di convergenza dei router Aegis.
-- `logic/`: Logica di business (File management, Conversion, Oracle, Render).
-- `routes/`: APIRouter modules (core, archive, editor, pdf, config, oracle).
+- `logic/`: Logica di business (File management, Conversion, Oracle, Render, Comms, Auth).
+- `routes/`: APIRouter modules (core, archive, editor, pdf, config, oracle, comms, admin).
 - `config/`: Package Python — `settings.py` (SettingsManager) + `settings.json` (store persistente).
 - `templates/components/`: Frammenti HTML/HTMX industriali.
 - `templates/layouts/`: Layout base (`base.html`).

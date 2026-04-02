@@ -1,6 +1,6 @@
 # Stato del Progetto: SC-ARCHIVE
-**Stato Attuale**: Op_Ready / Versione 5.6.0
-**Ultimo Aggiornamento**: 1 Aprile 2026
+**Stato Attuale**: Op_Ready / Versione 5.7.0
+**Ultimo Aggiornamento**: 2 Aprile 2026
 
 ---
 
@@ -87,14 +87,24 @@
 - **Workspace root dinamico**: `_default_root()` usa sempre `Path.home() / "sc-archive" / username` — mai path assoluti hardcoded in `settings.json`.
 - **Session Key sicura**: `AEGIS_SECRET_KEY` obbligatoria (nessun fallback). Generata da `bin/launch.sh` via `openssl rand -hex 32` e persistita in `~/.config/sc-archive/session.key` (permessi `600`). Reset sessioni: cancellare il file.
 
-### 1.10 AEGIS COMMS — Sistema di Messaggistica [5.0] (PLANNED)
-- **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root utente. Admin: `~/comms/`. Utenti: `~/sc-archive/{user}/comms/`. Creazione automatica alla registrazione.
-- **Formato**: file `.md` con frontmatter (id, from, to, subject, timestamp, read). Filename: `{timestamp}_{id8}_{slug}.md`. Parsing `re` stdlib — zero dipendenze aggiuntive.
-- **Invio**: dual-write su `outbound/` sender + `inbound/` recipient. Cross-workspace write con path assoluti (bypass `PathSanitizer`) + security assertion su `Path.home()`.
-- **Broadcast GM**: admin trasmette a `ALL` — copia individuale in ogni `inbound/` (read/unread per-utente indipendente).
-- **Bozze**: `staging/` — editabili, promovibili a trasmissione. Draft pre-fill in compose modal.
-- **Unread badge**: navbar HTMX-polled ogni 30s. Invisibile se count = 0.
-- **UI**: hub tabbato (`RECEPTION_ARRAY` / `OUTBOUND_LOG` / `STAGING_BUFFER`), compose modal con recipient dropdown, message reader con Markdown renderizzato via filtro Jinja2 `render_md`.
+### 1.10 AEGIS COMMS — Sistema di Messaggistica [5.0] (v5.6.0)
+- **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root utente. Admin: `~/comms/`. Utenti: `~/sc-archive/{user}/comms/`. Creazione automatica alla registrazione. ✓
+- **Formato**: file `.md` con frontmatter (id, from, to, subject, timestamp, read). Filename: `{timestamp}_{id8}_{slug}.md`. Parsing `re` stdlib — zero dipendenze aggiuntive. ✓
+- **Invio**: dual-write su `outbound/` sender + `inbound/` recipient. Cross-workspace write con path assoluti (bypass `PathSanitizer`) + security assertion su `Path.home()`. ✓
+- **Broadcast GM**: admin trasmette a `ALL` — copia individuale in ogni `inbound/` (read/unread per-utente indipendente). ✓
+- **Bozze**: `staging/` — editabili, promovibili a trasmissione. Draft pre-fill in compose modal. ✓
+- **Unread badge**: navbar HTMX-polled ogni 30s. Invisibile se count = 0. ✓
+- **UI**: hub tabbato (`RECEPTION_ARRAY` / `OUTBOUND_LOG` / `STAGING_BUFFER`), compose modal con preview Markdown live, message reader con `render_md`. ✓
+- **Documentazione**: `docs/aegis-comms.md`.
+
+### 1.11 AEGIS GROUPS & ADMIN PANEL [5.1] (v5.7.0)
+- **GroupStore**: persistenza `~/.config/sc-archive/groups.json`. CRUD asincrono — crea, lista, elimina (bloccato se ha utenti). ✓
+- **UserRecord.groups**: campo `list[str]` aggiunto con retrocompatibilità (`groups: []` per utenti senza campo). ✓
+- **Admin promozione via gruppo**: chiunque abbia `"admin"` in `groups` è admin. `require_admin` FastAPI dependency — HTTP 403 altrimenti. ✓
+- **Sessione**: `POST /login` setta `request.session["is_admin"]`. Nav link `SYS_ADMIN` visibile solo se admin. ✓
+- **Admin panel** (`/admin`): CRUD completo utenti (crea, modifica gruppi, elimina) e gruppi (crea, elimina se vuoto). Tab CREW_REGISTRY / FACTION_INDEX. ✓
+- **Messaggistica filtrata**: `CommsManager.allowed_recipients()` — destinatari = gruppo condiviso col sender **o** gruppo `"admin"`. `_expand_recipients` valida e lancia `CommsError("RECIPIENT_NOT_ALLOWED")`. ✓
+- **Documentazione**: `docs/groups-admin-panel.md`.
 
 ### 1.8 UX, Sicurezza & CSP Compliance
 - Transizioni `scan-in` / `soft-exit` su tutte le modali.
@@ -119,9 +129,10 @@
 
 ### Package Structure
 ```
-logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, templates.py, auth.py, exceptions.py
-routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, auth, deps
-config/         __init__.py + settings.py (SettingsManager) + settings.json + users.json
+logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, templates.py, auth.py, comms.py, exceptions.py
+routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, auth, comms, admin, deps
+config/         __init__.py + settings.py (SettingsManager) + settings.json
+~/.config/sc-archive/   users.json, groups.json, session.key
 static/css/     output.css, editor-aegis.css, pdf-industrial.css, pdf-preview.css, main.css
 bin/            launch.sh, create_user.sh
 ```
@@ -137,10 +148,11 @@ bin/            launch.sh, create_user.sh
 | [4.9] | AEGIS STABILITY+ | **COMPLETED** | Registrazione `@app.exception_handler(AegisError)` in `main.py` |
 | [4.10] | AEGIS IDENTITY | **COMPLETED** | Multi-user auth, workspace isolation, login, logout, password change |
 | [5.0] | AEGIS COMMS | **COMPLETED** | Messaggistica multi-utente, broadcast GM, draft, unread badge |
+| [5.1] | AEGIS GROUPS | **COMPLETED** | Gruppi utente, admin panel HTMX, messaggistica filtrata per gruppo |
 | [4.6] | AEGIS CHRONOS | Planned | Versionamento narrativo Git opt-in (diff, snapshot, inject) |
 | [4.5] | AEGIS BLUEPRINT | Planned | Template gallery + Variable Injection |
 | [4.7] | AEGIS GUARD | Planned | Buffer Encryption + Network Gateway UI |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.6.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.7.0 — DEPLOYMENT_ACTIVE.*

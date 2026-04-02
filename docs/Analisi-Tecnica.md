@@ -2,8 +2,8 @@
 
 - **Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
 - **Nome Tecnico Interno**: MD2FastPDF
-- **Data**: 29 Marzo 2026
-- **Versione**: 5.5.1
+- **Data**: 2 Aprile 2026
+- **Versione**: 5.7.0
 
 ## 1. Architettura di Sistema
 
@@ -44,10 +44,13 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 
 - **SessionMiddleware**: cookie firmato con `AEGIS_SECRET_KEY` (24h TTL). Outer layer nel middleware stack.
 - **auth_middleware**: HTTP middleware inner — legge `request.session["username"]`, recupera root utente da `UserStore`, binda `PathSanitizer._REQUEST_ROOT` via `ContextVar`.
-- **UserStore**: persistenza `config/users.json`. Hashing `bcrypt` (cost 12). API async-first; sync variants solo per bootstrap.
-- **AuthService**: business logic (authenticate, create_user, change_password, update_user_root). Dipende da `UserStoreProtocol` (DIP).
+- **UserStore**: persistenza `~/.config/sc-archive/users.json`. Hashing `bcrypt` (cost 12). API async-first; sync variants solo per bootstrap. Metodi aggiunti: `list_users()`, `update_groups()`, `delete_user()`.
+- **GroupStore**: persistenza `~/.config/sc-archive/groups.json`. CRUD gruppi asincrono. `delete_group()` riceve `UserStore` come parametro (DIP) — blocca se il gruppo ha utenti assegnati.
+- **AuthService**: business logic (authenticate, create_user, change_password, update_user_root, get_user, update_user_groups, delete_user, list_users). Dipende da `UserStoreProtocol` (DIP).
+- **UserRecord**: campi `__slots__` — `username`, `password_hash`, `root`, `groups: list[str]`. Retrocompatibilità: utenti senza `groups` in JSON letti con `groups=[]`.
 - **Per-user workspace**: admin → `Path.home()`; utenti → `workspace_base/{username}`. Root persistita per-utente in `users.json`.
-- **Admin bootstrap**: primo avvio crea `admin/admin` se `users.json` è vuoto. Sovrascrivibile via `AEGIS_ADMIN_PASSWORD`.
+- **Admin bootstrap**: primo avvio crea `admin` con `groups=["admin"]` se `users.json` è vuoto. Crea il gruppo `"admin"` in `GroupStore`. Sovrascrivibile via `AEGIS_ADMIN_PASSWORD`.
+- **require_admin** (`routes/deps.py`): FastAPI dependency — verifica `"admin" in record.groups`, altrimenti HTTP 403. `POST /login` setta `request.session["is_admin"]`.
 - **ContextVar isolation**: `_REQUEST_ROOT` in `logic/files.py` — nessuna contaminazione tra sessioni concorrenti in asyncio.
 
 ---
@@ -62,8 +65,9 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 | `conversion.py` | `GotenbergClient`, `MarkdownRenderer`, `PdfHtmlBuilder`, `DetailedScaffolding`, `MinimalScaffolding` | Pipeline MD→PDF via Gotenberg |
 | `oracle.py` | `OracleClient`, `PromptTemplates` | Integrazione Ollama (completion, synthesis, summarize) |
 | `render.py` | funzioni `render_mermaid_png`, `render_mermaid_zip` | Export PNG/ZIP Mermaid via Gotenberg screenshot |
-| `auth.py` | `AuthService`, `UserStore`, `UserRecord`, `UserStoreProtocol` | Multi-user auth, workspace isolation |
-| `templates.py` | `templates` (Jinja2Templates) | Configurazione motore template + filtri custom |
+| `auth.py` | `AuthService`, `UserStore`, `GroupStore`, `UserRecord`, `UserStoreProtocol`, `GroupStoreProtocol` | Multi-user auth, workspace isolation, group management |
+| `comms.py` | `FrontmatterParser`, `MessageRecord`, `CommsManager` | Messaggistica filesystem-based, dual-write, draft, filtraggio gruppi |
+| `templates.py` | `templates` (Jinja2Templates) | Configurazione motore template + filtri custom (`render_md`, `parent_path`) |
 | `exceptions.py` | `AegisError` e sottoclassi | Gerarchia eccezioni dominio (zero `HTTPException` in `logic/`) |
 
 **Gerarchia eccezioni** (`logic/exceptions.py`):
@@ -79,7 +83,9 @@ AegisError
   ├── AuthError              (401)
   ├── ConversionError        (502)
   ├── OracleError            (502)
-  └── RenderError            (502)
+  ├── RenderError            (502)
+  ├── CommsError             (400)
+  └── GroupError             (400)
 ```
 
 `@app.exception_handler(AegisError)` in `main.py` traduce ogni eccezione in `JSONResponse` con logging strutturato.
@@ -97,14 +103,17 @@ AegisError
 | `oracle.py` | `/api/oracle` | Completion SSE, Mermaid synthesis, summarize |
 | `render.py` | `/render` | Mermaid PNG/ZIP export |
 | `settings.py` | `/` | Settings UI, model management |
-| `deps.py` | — | `get_current_user` dependency condivisa |
+| `comms.py` | `/comms` | Hub messaggistica, compose, send, draft, unread badge |
+| `admin.py` | `/admin` | Admin panel — CRUD utenti e gruppi (require_admin) |
+| `deps.py` | — | `get_current_user`, `require_admin` dependencies condivise |
 | `__init__.py` | — | `build_breadcrumbs()` utility condivisa |
 
 ### 2.3 `config/` — Configuration Package
 
 - `settings.py`: `SettingsManager` + istanza globale `settings`.
 - `settings.json`: store persistente (Ollama IP, Gotenberg IP, modelli, flags).
-- `users.json`: credenziali utenti + workspace root per-utente.
+- `~/.config/sc-archive/users.json`: credenziali utenti + workspace root + gruppi per-utente.
+- `~/.config/sc-archive/groups.json`: registry gruppi disponibili (`group_name → {}`). Gestito da `GroupStore`.
 
 ### 2.4 `static/css/` — Design System
 
@@ -120,10 +129,10 @@ AegisError
 
 ```
 layouts/
-  base.html       — scaffold HTML completo (nav, sidebar, modal container)
+  base.html       — scaffold HTML completo (nav, sidebar, modal container, toast container)
   login.html      — pagina login standalone
 shell.html        — wrapper minimo per component_template pattern
-components/       — 21 fragment Jinja2 HTMX
+components/       — 34 fragment Jinja2 HTMX (incl. 8 comms, 5 admin)
 icons/            — SVG inline components
 ```
 
@@ -134,10 +143,12 @@ icons/            — SVG inline components
 | Livello | Meccanismo |
 |---------|-----------|
 | Autenticazione | SessionMiddleware + bcrypt (cost 12) |
-| Autorizzazione | auth_middleware + admin check per endpoint sensibili |
+| Autorizzazione | `auth_middleware` per path non-pubblici; `require_admin` dependency per `/admin` |
+| Admin promozione | Chiunque abbia `"admin"` in `UserRecord.groups` è admin — non hardcoded su username |
 | Workspace isolation | `ContextVar[Path]` per-request — impossibile accedere al workspace di un altro utente |
 | Path traversal | `PathSanitizer.resolve_and_sanitize()` — blocca `../`, path nascosti, symlink escape |
-| XSS | `bleach.Cleaner` whitelist su ogni pipeline MD→HTML |
+| COMMS cross-write | Path assoluti costruiti da `workspace_base + username`; security assertion: path sotto `Path.home()` |
+| XSS | `bleach.Cleaner` whitelist su ogni pipeline MD→HTML e corpo messaggio COMMS |
 | CSP | Zero `style=` inline (eccetto 2 valori dinamici Jinja2) — `style-src 'self'` applicabile |
 
 ---
@@ -167,4 +178,4 @@ icons/            — SVG inline components
 
 ---
 
-*Documento Tecnico Aegis Class System // v5.5.1*
+*Documento Tecnico Aegis Class System // v5.7.0*
