@@ -5,8 +5,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Form, Query, Request
 from fastapi.responses import HTMLResponse
 
-from logic.comms import comms_manager
-from logic.auth import _store
+from logic.comms import comms_manager, CommsManager
+from logic.auth import _store, auth_service
 from logic.templates import templates, _render_markdown
 from routes.deps import get_current_user
 
@@ -100,8 +100,10 @@ async def compose_form(
     username: str = Depends(get_current_user),
 ) -> HTMLResponse:
     """Compose modal. reply_to format: 'folder/filename'."""
-    all_users = await _store.list_usernames()
-    recipients = [u for u in all_users if u != username]
+    sender_record = await auth_service.get_user(username)
+    sender_groups = sender_record.groups if sender_record else []
+    all_users = await auth_service.list_users()
+    allowed = CommsManager.allowed_recipients(username, sender_groups, all_users)
     original: Optional[object] = None
     if reply_to:
         parts = reply_to.split("/", 1)
@@ -115,7 +117,7 @@ async def compose_form(
         name="components/comms_compose_modal.html",
         context={
             "request": request,
-            "recipients": recipients,
+            "recipients": allowed,
             "original": original,
             "reply_to": reply_to,
         },
@@ -144,9 +146,12 @@ async def send_message(
     body: str = Form(...),
     username: str = Depends(get_current_user),
 ) -> HTMLResponse:
-    all_users = await _store.list_usernames()
+    sender_record = await auth_service.get_user(username)
+    sender_groups = sender_record.groups if sender_record else []
+    all_users = await auth_service.list_users()
+    allowed = CommsManager.allowed_recipients(username, sender_groups, all_users)
     recipient_str = "ALL" if recipients == ["ALL"] else ",".join(recipients)
-    await comms_manager.send_message(username, recipient_str, subject, body, all_users)
+    await comms_manager.send_message(username, recipient_str, subject, body, allowed)
     messages = await comms_manager.list_folder(username, "outbound")
     return templates.TemplateResponse(
         request=request,
@@ -184,8 +189,11 @@ async def send_draft(
     draft_filename: str = Form(...),
     username: str = Depends(get_current_user),
 ) -> HTMLResponse:
-    all_users = await _store.list_usernames()
-    await comms_manager.promote_draft(username, draft_filename, all_users)
+    sender_record = await auth_service.get_user(username)
+    sender_groups = sender_record.groups if sender_record else []
+    all_users = await auth_service.list_users()
+    allowed = CommsManager.allowed_recipients(username, sender_groups, all_users)
+    await comms_manager.promote_draft(username, draft_filename, allowed)
     messages = await comms_manager.list_folder(username, "outbound")
     return templates.TemplateResponse(
         request=request,

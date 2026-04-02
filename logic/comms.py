@@ -128,6 +128,27 @@ class CommsManager:
         await self.create_comms_folders(username)
 
     @staticmethod
+    def allowed_recipients(
+        sender: str,
+        sender_groups: list[str],
+        all_users: list,
+    ) -> list[str]:
+        """Returns usernames reachable by sender.
+
+        A user is reachable if they have the 'admin' group OR share at least
+        one group with the sender. The sender is always excluded.
+        all_users accepts list[UserRecord] — typed as list to avoid circular import.
+        """
+        return [
+            u.username for u in all_users
+            if u.username != sender
+            and (
+                "admin" in u.groups
+                or any(g in sender_groups for g in u.groups)
+            )
+        ]
+
+    @staticmethod
     def _build_filename(timestamp: datetime, msg_id: str, subject: str) -> str:
         """Produces: {YYYYMMDDTHHmmss}_{id[:8]}_{subject_slug}.md"""
         ts = timestamp.strftime("%Y%m%dT%H%M%S")
@@ -141,12 +162,16 @@ class CommsManager:
         return slug[:32].strip("_") or "msg"
 
     def _expand_recipients(
-        self, recipient_str: str, all_usernames: list[str], sender: str
+        self, recipient_str: str, allowed_usernames: list[str], sender: str
     ) -> list[str]:
-        """Expands 'ALL' to all users except sender. Otherwise splits by comma."""
+        """Expands 'ALL' to allowed_usernames excluding sender. Validates explicit recipients."""
         if recipient_str.strip().upper() == "ALL":
-            return [u for u in all_usernames if u != sender]
-        return [r.strip() for r in recipient_str.split(",") if r.strip()]
+            return [u for u in allowed_usernames if u != sender]
+        chosen = [r.strip() for r in recipient_str.split(",") if r.strip()]
+        forbidden = [r for r in chosen if r not in allowed_usernames]
+        if forbidden:
+            raise CommsError(f"RECIPIENT_NOT_ALLOWED: {','.join(forbidden)}")
+        return chosen
 
     async def list_folder(self, username: str, folder: str) -> list[MessageRecord]:
         """Returns all messages in folder, sorted newest-first."""
@@ -216,7 +241,7 @@ class CommsManager:
         recipient_str: str,
         subject: str,
         body: str,
-        all_usernames: list[str],
+        allowed_usernames: list[str],
     ) -> MessageRecord:
         """Dual-write: sender outbound + each recipient's inbound."""
         now = datetime.now(timezone.utc)
@@ -232,7 +257,7 @@ class CommsManager:
             body=body,
             filename=filename,
         )
-        recipients = self._expand_recipients(recipient_str, all_usernames, sender)
+        recipients = self._expand_recipients(recipient_str, allowed_usernames, sender)
         home = Path.home().resolve()
         inbound_paths: list[tuple[str, Path]] = []
         for recipient in recipients:
@@ -306,7 +331,7 @@ class CommsManager:
         return record
 
     async def promote_draft(
-        self, sender: str, draft_filename: str, all_usernames: list[str]
+        self, sender: str, draft_filename: str, allowed_usernames: list[str]
     ) -> MessageRecord:
         """Sends a draft: reads staging/, calls send_message(), deletes draft."""
         path = self._staging(sender) / draft_filename
@@ -316,7 +341,7 @@ class CommsManager:
         if rec is None:
             raise CommsError(f"DRAFT_PARSE_FAILED: {draft_filename}")
         sent = await self.send_message(
-            sender, rec.recipient, rec.subject, rec.body, all_usernames
+            sender, rec.recipient, rec.subject, rec.body, allowed_usernames
         )
         await anyio.to_thread.run_sync(path.unlink)
         return sent
