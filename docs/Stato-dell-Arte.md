@@ -70,6 +70,7 @@
 - **Data Loss Prevention**: Logica di merge per preservare i parametri salvati anche quando i campi sono inattivi nella UI.
 
 ### 1.8 UX, Sicurezza & CSP Compliance
+
 - Transizioni `scan-in` / `soft-exit` su tutte le modali.
 - Sanitizzazione path obbligatoria (prevenzione `../`), sanitizzazione Markdown (XSS via `bleach`).
 - DaisyUI tooltip su tutti i controlli azione (z-index stratificato).
@@ -77,6 +78,7 @@
 - CSS estratti in file statici dedicati (`editor-aegis.css`, `pdf-industrial.css`, `pdf-preview.css`).
 
 ### 1.9 AEGIS IDENTITY — Autenticazione Multi-Utente [4.10] (v5.5.1)
+
 - **Login Page**: pagina `templates/layouts/login.html` standalone con tema Aegis Industrial.
 - **Session Auth**: `SessionMiddleware` (starlette/itsdangerous) con cookie firmato; `auth_middleware` verifica la sessione e blocca ogni path non-pubblico con redirect a `/login`.
 - **HTMX-aware redirect**: header `HX-Redirect` per le richieste HTMX, `302` per le normali.
@@ -90,6 +92,7 @@
 - **CLI create_user**: `bin/create_user.sh <username> <password>` per provisioning operatori via terminale.
 
 ### 1.10 AEGIS COMMS — Sistema di Messaggistica [5.0] (v5.6.0)
+
 - **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root utente. Admin: `~/comms/`. Utenti: `~/sc-archive/{user}/comms/`. Creazione automatica alla registrazione. ✓
 - **Formato**: file `.md` con frontmatter (id, from, to, subject, timestamp, read). Parsing `re` stdlib — zero dipendenze aggiuntive. ✓
 - **Invio**: dual-write su `outbound/` sender + `inbound/` recipient. Cross-workspace write con path assoluti + security assertion su `Path.home()`. ✓
@@ -100,6 +103,7 @@
 - **Prose CSS**: regole `.prose` custom in `main.css` per rendering Markdown (liste, heading, codice, tabelle) — @tailwindcss/typography non disponibile nel CLI standalone Tailwind v4. ✓
 
 ### 1.11 AEGIS GROUPS & ADMIN PANEL [5.1] (v5.7.0)
+
 - **GroupStore**: persistenza `~/.config/sc-archive/groups.json`. CRUD asincrono — crea, lista, elimina (bloccato se ha utenti). ✓
 - **UserRecord.groups**: campo `list[str]` aggiunto con retrocompatibilità. ✓
 - **Admin promozione via gruppo**: chiunque abbia `"admin"` in `groups` è admin. `require_admin` FastAPI dependency. ✓
@@ -107,6 +111,7 @@
 - **Messaggistica filtrata**: `CommsManager.allowed_recipients()` — destinatari = gruppo condiviso col sender **o** gruppo `"admin"`. ✓
 
 ### 1.12 AEGIS BLUEPRINT [4.7] (v5.8.0) — COMPLETED
+
 - **Template library app-wide**: blueprint Markdown in `blueprints/{categoria}/` nella root progetto. ✓
 - **Gallery modal**: bottone in toolbar editor (`BLUEPRINT_ARCHIVE`) apre modal con blueprint raggruppati per categoria. Click inserisce il contenuto in fondo al buffer editor (con separatore `---` se il file non è vuoto). ✓
 - **Admin management**: tab `BLUEPRINT_ARCHIVE` nel pannello SYS_ADMIN — form crea/sovrascrive blueprint, lista con PURGE per eliminazione. ✓
@@ -118,7 +123,7 @@
 ## 2. Infrastruttura Tecnica
 
 | Componente | Tecnologia |
-|---|---|
+| --- | --- |
 | Backend | FastAPI (Python 3.13) + anyio + httpx |
 | Frontend | HTMX + Tailwind v4 (standalone CLI) + DaisyUI + Jinja2 |
 | Editor | EasyMDE (CodeMirror 5) |
@@ -128,7 +133,8 @@
 | Environment | Poetry + pyenv (Python 3.13) |
 
 ### Package Structure
-```
+
+```text
 logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, templates.py, auth.py, comms.py, blueprints.py, exceptions.py
 routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, auth, comms, admin, blueprint, deps
 config/         __init__.py + settings.py (SettingsManager) + settings.json
@@ -143,7 +149,7 @@ bin/            launch.sh, create_user.sh
 ## 3. Roadmap
 
 | Fase | Codice | Stato |
-|---|---|---|
+| --- | --- | --- |
 | [4.3] | AEGIS FILETREE | **COMPLETED** |
 | [4.7] | AEGIS BLUEPRINT | **COMPLETED** |
 | [4.9] | AEGIS STABILITY | **COMPLETED** |
