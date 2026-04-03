@@ -1,7 +1,7 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.8.0
-**Ultimo Aggiornamento**: 3 Aprile 2026
+**Stato Attuale**: Op_Ready / Versione 5.9.0
+**Ultimo Aggiornamento**: 4 Aprile 2026
 
 ---
 
@@ -127,6 +127,17 @@
 - **5 template iniziali** in `blueprints/narrative/`: Session Log, NPC Profile, Planet Description, Ship Description, Location Description. ✓
 - **Path sanitization**: `BlueprintManager._sanitize()` previene traversal fuori da `blueprints/`. ✓
 
+### 1.13 AEGIS GROUP_SPACE (v5.9.0) — COMPLETED
+
+- **Workspace condiviso per gruppo**: `~/sc-archive/{group_name}/` creato automaticamente alla creazione del gruppo. Boot migration per gruppi preesistenti. ✓
+- **Modello permessi**: root del gruppo — admin R+W, membri R; `shared/` — membri R+W, admin R. Enforced a livello `logic/groupspace.py` (zero fiducia nel frontend). ✓
+- **GROUP_SPACE hub**: link in navbar, lista gruppi accessibili all'utente corrente. ✓
+- **Browser**: navigazione file nel workspace di gruppo con indicatore `READ_ONLY` / `READ_WRITE` sulla directory corrente. ✓
+- **Editor**: visualizzazione e modifica file nel workspace di gruppo. Textarea `readonly` e toolbar ridotta (no save) se l'area è in sola lettura. ✓
+- **CRUD file**: crea, elimina file — bloccato se l'utente non ha permessi di scrittura nella directory corrente. ✓
+- **Path sanitization**: `GroupSpaceManager.sanitize()` previene traversal fuori da `{workspace_base}/{group_name}/`. ✓
+- **Accesso revoca immediata**: accesso verificato a ogni request da `GroupSpaceAccess.has_access()` — la rimozione dal gruppo è effettiva alla prossima request. ✓
+
 ---
 
 ## 2. Infrastruttura Tecnica
@@ -144,8 +155,8 @@
 ### Package Structure
 
 ```text
-logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, templates.py, auth.py, comms.py, blueprints.py, exceptions.py
-routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, auth, comms, admin, blueprint, deps
+logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, templates.py, auth.py, comms.py, blueprints.py, groupspace.py, exceptions.py
+routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, auth, comms, admin, blueprint, groupspace, deps
 config/         __init__.py + settings.py (SettingsManager) + settings.json
 blueprints/     narrative/ (session-log, npc-profile, planet-description, ship-description, location-description)
 ~/.config/sc-archive/   users.json, groups.json, session.key
@@ -172,7 +183,8 @@ bin/            launch.sh, create_user.sh
 | [4.10] | AEGIS IDENTITY | **COMPLETED** |
 | [5.0] | AEGIS COMMS | **COMPLETED** |
 | [5.1] | AEGIS GROUPS & ADMIN | **COMPLETED** |
+| [5.2] | AEGIS GROUP_SPACE | **COMPLETED** |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.8.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.9.0 — DEPLOYMENT_ACTIVE.*
