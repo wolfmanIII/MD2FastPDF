@@ -3,20 +3,24 @@
     <span class="neon-text font-mono text-lg uppercase tracking-widest">// SYS_ADMIN</span>
     <div class="flex gap-2">
       <button
-        hx-get="/admin/users"
-        hx-target="#admin-content-panel"
+        hx-get="/admin?tab=users"
+        hx-push-url="true"
         class="{% if tab == 'users' %}btn-solid{% else %}btn-ghost{% endif %} text-[10px] rounded-sm focus:outline-none">
         CREW_REGISTRY
       </button>
       <button
-        hx-get="/admin/groups"
-        hx-target="#admin-content-panel"
+        hx-get="/admin?tab=groups"
+        hx-push-url="true"
         class="{% if tab == 'groups' %}btn-solid{% else %}btn-ghost{% endif %} text-[10px] rounded-sm focus:outline-none">
         TEAM_INDEX
       </button>
     </div>
   </div>
   <div id="admin-content-panel">
+    {% if tab == 'groups' %}
+    {% include 'components/admin_group_list.html' %}
+    {% else %}
     {% include 'components/admin_user_list.html' %}
+    {% endif %}
   </div>
 </div>

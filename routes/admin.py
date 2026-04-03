@@ -20,6 +20,7 @@ def _group_members(groups: list[str], users: list) -> dict[str, int]:
 @router.get("", response_class=HTMLResponse)
 async def admin_panel(
     request: Request,
+    tab: str = "users",
     username: str = Depends(require_admin),
 ):
     """Admin hub. Renders panel with user list as default tab."""
@@ -28,7 +29,8 @@ async def admin_panel(
     context = {
         "users": users,
         "groups": groups,
-        "tab": "users",
+        "group_members": _group_members(groups, users),
+        "tab": tab,
         "component_template": "components/admin_panel.html",
     }
     if request.headers.get("HX-Request"):
