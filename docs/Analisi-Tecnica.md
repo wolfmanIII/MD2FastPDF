@@ -46,7 +46,7 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 - **auth_middleware**: HTTP middleware inner — legge `request.session["username"]`, recupera root utente da `UserStore`, binda `PathSanitizer._REQUEST_ROOT` via `ContextVar`.
 - **UserStore**: persistenza `~/.config/sc-archive/users.json`. Hashing `bcrypt` (cost 12). API async-first; sync variants solo per bootstrap. Metodi aggiunti: `list_users()`, `update_groups()`, `delete_user()`.
 - **GroupStore**: persistenza `~/.config/sc-archive/groups.json`. CRUD gruppi asincrono. `delete_group()` riceve `UserStore` come parametro (DIP) — blocca se il gruppo ha utenti assegnati.
-- **AuthService**: business logic (authenticate, create_user, change_password, update_user_root, get_user, update_user_groups, delete_user, list_users). Dipende da `UserStoreProtocol` (DIP).
+- **AuthService**: business logic (authenticate, create_user, change_password, update_user_root, get_user, update_user_groups, delete_user, list_users). Dipende da `UserStoreProtocol` + `SyncGroupStoreProtocol` (DIP). Side-effect di creazione utente (es. comms folders) delegati a hook registry (`register_user_creation_hook`, `register_user_creation_sync_hook`) — nessuna dipendenza diretta su CommsManager (SRP).
 - **UserRecord**: campi `__slots__` — `username`, `password_hash`, `root`, `groups: list[str]`. Retrocompatibilità: utenti senza `groups` in JSON letti con `groups=[]`.
 - **Per-user workspace**: admin → `Path.home()`; utenti → `workspace_base/{username}`. Root persistita per-utente in `users.json`.
 - **Admin bootstrap**: primo avvio crea `admin` con `groups=["admin"]` se `users.json` è vuoto. Crea il gruppo `"admin"` in `GroupStore`. Sovrascrivibile via `AEGIS_ADMIN_PASSWORD`.
@@ -65,7 +65,7 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 | `conversion.py` | `GotenbergClient`, `MarkdownRenderer`, `PdfHtmlBuilder`, `DetailedScaffolding`, `MinimalScaffolding` | Pipeline MD→PDF via Gotenberg |
 | `oracle.py` | `OracleClient`, `PromptTemplates` | Integrazione Ollama (completion, synthesis, summarize) |
 | `render.py` | funzioni `render_mermaid_png`, `render_mermaid_zip` | Export PNG/ZIP Mermaid via Gotenberg screenshot |
-| `auth.py` | `AuthService`, `UserStore`, `GroupStore`, `UserRecord`, `UserStoreProtocol`, `GroupStoreProtocol` | Multi-user auth, workspace isolation, group management |
+| `auth.py` | `AuthService`, `UserStore`, `GroupStore`, `UserRecord`, `UserStoreProtocol`, `GroupStoreProtocol`, `SyncGroupStoreProtocol` | Multi-user auth, workspace isolation, group management, user creation hook registry |
 | `comms.py` | `FrontmatterParser`, `MessageRecord`, `CommsManager` | Messaggistica filesystem-based, dual-write, draft, filtraggio gruppi |
 | `blueprints.py` | `BlueprintManager` | Libreria template Markdown app-wide in `blueprints/`; path sanitization propria |
 | `groupspace.py` | `GroupSpaceAccess`, `GroupSpaceManager` | Workspace condivisi per gruppo; modello permessi (root: admin R+W / membri R; shared/: membri R+W / admin R) |
