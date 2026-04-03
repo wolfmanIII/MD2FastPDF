@@ -1,0 +1,23 @@
+<div id="gs-create-modal" class="modal modal-open">
+  <div class="modal-box bg-zinc-900 border border-zinc-700 max-w-md w-full rounded-none p-0">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+      <span class="neon-text font-mono text-sm uppercase tracking-widest">// NEW_ENTRY</span>
+      <button onclick="closeAegisModal('gs-create-modal')" class="btn btn-ghost btn-sm text-zinc-500">✕</button>
+    </div>
+    <form hx-post="/group-space/{{ group_name }}/create"
+          hx-target="#aegis-view-core"
+          hx-push-url="true"
+          class="p-6 space-y-4">
+      <input type="hidden" name="relative_dir" value="{{ path }}">
+      <div class="flex flex-col gap-1">
+        <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Filename</label>
+        <input type="text" name="filename" class="w-full" placeholder="filename.md" required autofocus>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="closeAegisModal('gs-create-modal')"
+                class="btn btn-ghost btn-sm text-zinc-500">ABORT //</button>
+        <button type="submit" class="btn-solid text-[10px] rounded-sm">CREATE //</button>
+      </div>
+    </form>
+  </div>
+</div>

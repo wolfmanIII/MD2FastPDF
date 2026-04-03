@@ -1,0 +1,33 @@
+<div class="flex flex-col gap-6 w-full">
+  <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+    <div>
+      <h1 class="text-2xl font-bold text-zinc-100 tracking-tight">GROUP_SPACE // SHARED WORKSPACES</h1>
+      <p class="text-zinc-500 text-sm mt-1">COLLABORATIVE ARCHIVE PROTOCOL — CREW ACCESS</p>
+    </div>
+  </div>
+
+  {% if not groups %}
+  <div class="flex flex-col items-center justify-center py-20 gap-3">
+    <p class="text-zinc-600 font-mono text-xs uppercase tracking-widest">NO_GROUP_ACCESS // CONTACT ADMIN</p>
+  </div>
+  {% else %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for group in groups %}
+    <div class="glass-panel p-6 flex flex-col gap-4 border border-zinc-800 hover:border-(--neon-cyan)/30 transition-colors">
+      <div class="flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full neon-bg animate-pulse"></div>
+        <span class="neon-text font-mono text-sm uppercase tracking-widest font-bold">{{ group }}</span>
+      </div>
+      <p class="text-zinc-500 text-[10px] font-mono uppercase tracking-widest">SHARED_WORKSPACE // ACTIVE</p>
+      <button
+        hx-get="/group-space/{{ group }}/files"
+        hx-target="#aegis-view-core"
+        hx-push-url="true"
+        class="btn-solid text-[10px] rounded-sm focus:outline-none mt-auto">
+        ENTER //
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>

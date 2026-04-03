@@ -128,6 +128,16 @@ async def groupspace_create(
     )
 
 
+@router.get("/{group_name}/create-form", response_class=HTMLResponse)
+async def groupspace_create_form(request: Request, group_name: str, path: str = ""):
+    """Returns a modal form for creating a new file in the group workspace."""
+    return templates.TemplateResponse(
+        request,
+        "components/groupspace_create_modal.html",
+        {"group_name": group_name, "path": path},
+    )
+
+
 @router.post("/{group_name}/delete", response_class=HTMLResponse)
 async def groupspace_delete(
     request: Request,

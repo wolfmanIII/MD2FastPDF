@@ -1,0 +1,105 @@
+<div class="glass-panel p-6 space-y-4 uppercase tracking-widest relative overflow-hidden">
+  <div class="absolute -left-20 top-0 w-40 h-full bg-(--neon-cyan)/5 blur-3xl pointer-events-none"></div>
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between pb-2 border-b border-zinc-800 relative z-10 gap-4">
+    <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar shrink-0">
+      <h3 class="font-bold text-zinc-100 shrink-0">GROUP_SPACE //</h3>
+      <button hx-get="/group-space" hx-target="#aegis-view-core" hx-push-url="true"
+              class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">
+        HUB
+      </button>
+      <span class="text-zinc-200 shrink-0">/</span>
+      <button hx-get="/group-space/{{ group_name }}/files" hx-target="#aegis-view-core" hx-push-url="true"
+              class="neon-text font-bold hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">
+        {{ group_name | upper }}
+      </button>
+      {% if breadcrumbs|length > 1 %}
+      {% for crumb in breadcrumbs[1:] %}
+      <span class="text-zinc-200 shrink-0">/</span>
+      <button hx-get="/group-space/{{ group_name }}/files?path={{ crumb.path }}"
+              hx-target="#aegis-view-core" hx-push-url="true"
+              class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">
+        {{ crumb.name }}
+      </button>
+      {% endfor %}
+      {% endif %}
+    </div>
+
+    <!-- Access indicator -->
+    <div class="flex items-center gap-3 shrink-0">
+      {% if read_only %}
+      <span class="text-amber-400 font-mono text-[10px] tracking-widest border border-amber-400/30 px-2 py-1">READ_ONLY</span>
+      {% else %}
+      <span class="neon-text font-mono text-[10px] tracking-widest border border-(--neon-cyan)/30 px-2 py-1">READ_WRITE</span>
+      {% if not read_only %}
+      <button hx-get="/group-space/{{ group_name }}/create-form?path={{ path }}"
+              hx-target="#modal-container"
+              class="btn-solid h-8 rounded-sm text-[10px] tracking-[0.2em] font-bold">
+        + NEW_ENTRY
+      </button>
+      {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- File list -->
+  <div class="grid grid-cols-1 gap-1 relative z-10">
+    {% if not items %}
+    <div class="flex flex-col items-center justify-center p-12 space-y-4 opacity-40">
+      <p class="text-[10px] tracking-[0.3em] font-bold">EMPTY_SECTOR // NO_DATA</p>
+    </div>
+    {% else %}
+
+    {% if path %}
+    <button hx-get="/group-space/{{ group_name }}/files?path={{ path | parent_path }}"
+            hx-target="#aegis-view-core" hx-push-url="true"
+            class="group flex items-center space-x-4 p-2 rounded-sm neon-hover-item transition-all cursor-pointer">
+      <span class="text-zinc-100 group-hover:neon-text transition-colors">
+        {% with class="w-5 h-5" %}{% include 'icons/action-back.html' %}{% endwith %}
+      </span>
+      <span class="font-bold tracking-widest text-[11px] text-zinc-400 group-hover:text-(--neon-cyan) transition-colors">.. [UP_DIRECTORY]</span>
+    </button>
+    {% endif %}
+
+    {% for item in items %}
+    <div class="group flex items-center justify-between p-2 rounded-sm neon-hover-item transition-all">
+      <button
+        {% if item.is_dir %}
+        hx-get="/group-space/{{ group_name }}/files?path={{ item.path }}"
+        {% else %}
+        hx-get="/group-space/{{ group_name }}/editor?path={{ item.path }}"
+        {% endif %}
+        hx-target="#aegis-view-core" hx-push-url="true"
+        class="flex items-center space-x-4 text-left grow cursor-pointer">
+        {% if item.is_dir %}
+        <span class="text-zinc-100 group-hover:neon-text transition-colors">
+          {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/folder.html' %}{% endwith %}
+        </span>
+        <span class="font-bold tracking-widest text-[11px] neon-text">{{ item.name }}/</span>
+        {% else %}
+        <span class="text-zinc-100 group-hover:neon-text transition-colors">
+          {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/cube.html' %}{% endwith %}
+        </span>
+        <span class="font-bold tracking-widest text-[11px]">{{ item.name }}</span>
+        {% endif %}
+      </button>
+
+      {% if not item.is_dir and not read_only %}
+      <form hx-post="/group-space/{{ group_name }}/delete"
+            hx-target="#aegis-view-core"
+            hx-confirm="PURGE {{ item.name }}?"
+            class="m-0">
+        <input type="hidden" name="path" value="{{ item.path }}">
+        <input type="hidden" name="current_dir" value="{{ path }}">
+        <button type="submit" onclick="event.stopPropagation()"
+                class="btn btn-outline btn-error btn-xs z-20">
+          {% with class="w-3 h-3" %}{% include 'icons/action-trash.html' %}{% endwith %}
+        </button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+</div>
