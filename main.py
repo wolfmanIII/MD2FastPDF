@@ -6,11 +6,17 @@ from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from routes import core, archive, editor, pdf, config, oracle, render, settings, auth, admin, comms, blueprint, groupspace
-from logic.auth import auth_service, group_store
+from logic.auth import auth_service, group_store, register_user_creation_hook, register_user_creation_sync_hook
+from logic.comms import comms_manager as _comms_manager
 from logic.conversion import gotenberg
 from logic.oracle import oracle as neural_oracle
 from logic.files import StorageCache, register_mutation_hook, PathSanitizer
 from logic.exceptions import AegisError
+
+# Register user creation side-effects (comms folder provisioning).
+# Must be at module level so hooks are active before bootstrap_admin() runs in lifespan.
+register_user_creation_hook(_comms_manager.create_comms_folders)
+register_user_creation_sync_hook(_comms_manager.create_comms_folders_sync)
 
 logger = logging.getLogger("aegis.core")
 
