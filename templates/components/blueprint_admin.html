@@ -1,0 +1,78 @@
+<div id="blueprint-admin-panel" class="flex flex-col gap-6">
+
+  {% if saved %}
+  <div class="text-[10px] font-mono uppercase tracking-widest neon-text">
+    BLUEPRINT_SAVED // TRANSMISSION_CONFIRMED
+  </div>
+  {% endif %}
+
+  <!-- Create / Edit Form -->
+  <div class="glass-panel p-6 space-y-4">
+    <span class="text-zinc-400 text-xs font-mono uppercase tracking-widest">
+      NEW_BLUEPRINT // UPLOAD_DIRECTIVE
+    </span>
+    <form hx-post="/blueprints/save"
+          hx-target="#blueprint-admin-panel"
+          hx-swap="outerHTML"
+          class="space-y-3 mt-3">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Category</label>
+          <input type="text" name="category" placeholder="narrative" class="w-full" required>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Filename</label>
+          <input type="text" name="filename" placeholder="session-log" class="w-full" required>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Content (Markdown)</label>
+        <textarea name="content" rows="12" class="w-full font-mono text-sm" placeholder="# Template Title&#10;&#10;[content]" required></textarea>
+      </div>
+      <div class="flex justify-end">
+        <button type="submit" class="btn-solid text-[10px] rounded-sm focus:outline-none">
+          TRANSMIT_BLUEPRINT //
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Existing Blueprints -->
+  {% if blueprints %}
+  <div class="space-y-4">
+    <span class="text-zinc-400 text-xs font-mono uppercase tracking-widest">
+      BLUEPRINT_INDEX // {{ blueprints | length }} ENTRIES
+    </span>
+    {% for category, items in categories.items() %}
+    <div>
+      <p class="text-zinc-600 font-mono text-[10px] uppercase tracking-widest mb-2 border-b border-zinc-800 pb-1">
+        {{ category }}
+      </p>
+      <div class="space-y-1">
+        {% for bp in items %}
+        <div class="flex items-center justify-between px-3 py-2 bg-zinc-900/50 border border-zinc-800">
+          <span class="font-mono text-xs text-zinc-300 uppercase tracking-wider">{{ bp.name }}</span>
+          <form hx-post="/blueprints/delete"
+                hx-target="#blueprint-admin-panel"
+                hx-swap="outerHTML"
+                hx-confirm="PURGE {{ bp.name }}?"
+                class="m-0">
+            <input type="hidden" name="path" value="{{ bp.path }}">
+            <button type="submit"
+                    class="btn btn-error btn-sm btn-solid border-none bg-red-600 hover:bg-red-500 text-white font-bold tracking-widest">
+              PURGE
+            </button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-zinc-600 font-mono text-[10px] uppercase tracking-widest text-center py-4">
+    NO_BLUEPRINTS_LOADED
+  </p>
+  {% endif %}
+
+</div>

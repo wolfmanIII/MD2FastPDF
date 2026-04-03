@@ -1,0 +1,61 @@
+<div id="blueprint-modal" class="modal modal-open">
+  <div class="modal-box bg-zinc-900 border border-zinc-700 max-w-2xl w-full rounded-none p-0">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+      <span class="neon-text font-mono text-sm uppercase tracking-widest">// BLUEPRINT_ARCHIVE</span>
+      <button onclick="closeAegisModal('blueprint-modal')"
+              class="btn btn-ghost btn-sm text-zinc-500">✕</button>
+    </div>
+
+    <!-- Content -->
+    <div class="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+      {% if not categories %}
+      <p class="text-zinc-500 font-mono text-xs uppercase tracking-widest text-center py-8">
+        NO_BLUEPRINTS_FOUND // ADMIN CAN LOAD TEMPLATES
+      </p>
+      {% else %}
+      {% for category, items in categories.items() %}
+      <div>
+        <p class="text-zinc-500 font-mono text-[10px] uppercase tracking-widest mb-3 border-b border-zinc-800 pb-1">
+          {{ category }}
+        </p>
+        <div class="grid grid-cols-2 gap-2">
+          {% for bp in items %}
+          <button
+            onclick="insertBlueprint('{{ bp.path }}')"
+            class="btn-ghost text-left text-[11px] font-mono uppercase tracking-widest px-4 py-3 rounded-none border border-zinc-800 hover:border-(--neon-cyan) hover:neon-text transition-all">
+            {{ bp.name }}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-3 border-t border-zinc-800 flex justify-end">
+      <button onclick="closeAegisModal('blueprint-modal')"
+              class="btn btn-ghost btn-sm text-zinc-500">ABORT //</button>
+    </div>
+  </div>
+</div>
+
+<script>
+async function insertBlueprint(path) {
+  try {
+    const res = await fetch('/blueprints/content?path=' + encodeURIComponent(path));
+    if (!res.ok) return;
+    const data = await res.json();
+    const textarea = document.getElementById('pure-editor-input');
+    if (!textarea) return;
+    const separator = textarea.value.length > 0 ? '\n\n---\n\n' : '';
+    textarea.value += separator + data.content;
+    textarea.dispatchEvent(new Event('input'));
+    closeAegisModal('blueprint-modal');
+  } catch (e) {
+    console.error('BLUEPRINT_INSERT_FAILED', e);
+  }
+}
+</script>

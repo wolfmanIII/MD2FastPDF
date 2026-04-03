@@ -14,11 +14,19 @@
         class="{% if tab == 'groups' %}btn-solid{% else %}btn-ghost{% endif %} text-[10px] rounded-sm focus:outline-none">
         TEAM_INDEX
       </button>
+      <button
+        hx-get="/admin?tab=blueprints"
+        hx-push-url="true"
+        class="{% if tab == 'blueprints' %}btn-solid{% else %}btn-ghost{% endif %} text-[10px] rounded-sm focus:outline-none">
+        BLUEPRINT_ARCHIVE
+      </button>
     </div>
   </div>
   <div id="admin-content-panel">
     {% if tab == 'groups' %}
     {% include 'components/admin_group_list.html' %}
+    {% elif tab == 'blueprints' %}
+    {% include 'components/blueprint_admin.html' %}
     {% else %}
     {% include 'components/admin_user_list.html' %}
     {% endif %}
