@@ -2,8 +2,8 @@
 
 - **Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
 - **Nome Tecnico Interno**: MD2FastPDF
-- **Data**: 2 Aprile 2026
-- **Versione**: 5.7.0
+- **Data**: 4 Aprile 2026
+- **Versione**: 5.9.0
 
 ## 1. Architettura di Sistema
 
@@ -67,6 +67,8 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 | `render.py` | funzioni `render_mermaid_png`, `render_mermaid_zip` | Export PNG/ZIP Mermaid via Gotenberg screenshot |
 | `auth.py` | `AuthService`, `UserStore`, `GroupStore`, `UserRecord`, `UserStoreProtocol`, `GroupStoreProtocol` | Multi-user auth, workspace isolation, group management |
 | `comms.py` | `FrontmatterParser`, `MessageRecord`, `CommsManager` | Messaggistica filesystem-based, dual-write, draft, filtraggio gruppi |
+| `blueprints.py` | `BlueprintManager` | Libreria template Markdown app-wide in `blueprints/`; path sanitization propria |
+| `groupspace.py` | `GroupSpaceAccess`, `GroupSpaceManager` | Workspace condivisi per gruppo; modello permessi (root: admin R+W / membri R; shared/: membri R+W / admin R) |
 | `templates.py` | `templates` (Jinja2Templates) | Configurazione motore template + filtri custom (`render_md`, `parent_path`) |
 | `exceptions.py` | `AegisError` e sottoclassi | Gerarchia eccezioni dominio (zero `HTTPException` in `logic/`) |
 
@@ -104,7 +106,9 @@ AegisError
 | `render.py` | `/render` | Mermaid PNG/ZIP export |
 | `settings.py` | `/` | Settings UI, model management |
 | `comms.py` | `/comms` | Hub messaggistica, compose, send, draft, unread badge |
-| `admin.py` | `/admin` | Admin panel — CRUD utenti e gruppi (require_admin) |
+| `admin.py` | `/admin` | Admin panel — CRUD utenti, gruppi, blueprint (require_admin) |
+| `blueprint.py` | `/blueprints` | Gallery template (tutti gli utenti), CRUD admin-only |
+| `groupspace.py` | `/group-space` | Hub gruppi, browser, editor, save, create, delete per workspace condivisi |
 | `deps.py` | — | `get_current_user`, `require_admin` dependencies condivise |
 | `__init__.py` | — | `build_breadcrumbs()` utility condivisa |
 
@@ -114,6 +118,8 @@ AegisError
 - `settings.json`: store persistente (Ollama IP, Gotenberg IP, modelli, flags).
 - `~/.config/sc-archive/users.json`: credenziali utenti + workspace root + gruppi per-utente.
 - `~/.config/sc-archive/groups.json`: registry gruppi disponibili (`group_name → {}`). Gestito da `GroupStore`.
+- `~/sc-archive/{group_name}/`: workspace filesystem per ogni gruppo. Creato automaticamente da `GroupStore.create_group()`. Contiene `shared/` (R+W membri) e root (R+W admin, R membri).
+- `blueprints/{category}/`: template Markdown app-wide. `BlueprintManager` usa root propria separata dal workspace utente.
 
 ### 2.4 `static/css/` — Design System
 
@@ -132,7 +138,7 @@ layouts/
   base.html       — scaffold HTML completo (nav, sidebar, modal container, toast container)
   login.html      — pagina login standalone
 shell.html        — wrapper minimo per component_template pattern
-components/       — 34 fragment Jinja2 HTMX (incl. 8 comms, 5 admin)
+components/       — 40 fragment Jinja2 HTMX (incl. 8 comms, 5 admin, 2 blueprint, 4 groupspace)
 icons/            — SVG inline components
 ```
 
@@ -148,6 +154,8 @@ icons/            — SVG inline components
 | Workspace isolation | `ContextVar[Path]` per-request — impossibile accedere al workspace di un altro utente |
 | Path traversal | `PathSanitizer.resolve_and_sanitize()` — blocca `../`, path nascosti, symlink escape |
 | COMMS cross-write | Path assoluti costruiti da `workspace_base + username`; security assertion: path sotto `Path.home()` |
+| GROUP_SPACE isolation | `GroupSpaceManager._sanitize()` — ogni path risolto contro `{workspace_base}/{group_name}/`; traversal bloccato |
+| GROUP_SPACE permessi | `GroupSpaceAccess.can_write()` — admin: R+W in root, R in `shared/`; membri: R in root, R+W in `shared/` |
 | XSS | `bleach.Cleaner` whitelist su ogni pipeline MD→HTML e corpo messaggio COMMS |
 | CSP | Zero `style=` inline (eccetto 2 valori dinamici Jinja2) — `style-src 'self'` applicabile |
 
@@ -157,7 +165,7 @@ icons/            — SVG inline components
 
 `main.py` usa un async context manager `@asynccontextmanager` come `lifespan`:
 
-- **Startup**: bootstrap admin, registrazione mutation hook cache, probe Ollama.
+- **Startup**: bootstrap admin, registrazione mutation hook cache, probe Ollama, provisioning workspace gruppi esistenti (`GroupStore.provision_group_dirs_sync` per ogni gruppo in `groups.json`).
 - **Shutdown**: `gotenberg.shutdown()`, `oracle.shutdown()` — chiusura `httpx.AsyncClient`.
 
 | Servizio | Protocollo | Uso |
@@ -178,4 +186,4 @@ icons/            — SVG inline components
 
 ---
 
-Documento Tecnico Aegis Class System // v5.7.0
+Documento Tecnico Aegis Class System // v5.9.0
