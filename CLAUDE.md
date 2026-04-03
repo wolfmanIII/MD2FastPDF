@@ -36,6 +36,7 @@ Senior Linux Software Engineer and Architect. Write efficient, maintainable, and
 - DO NOT hallucinate HTMX attributes or FastAPI dependencies.
 - DO NOT use synchronous file I/O — use `anyio` or `aiofiles`.
 - DO NOT add Co-Authored-By lines to git commits.
+- DO commit frequently — ogni unità logica (modulo, route, template) è un commit separato. Non accumulare grandi changeset.
 - DO NOT suggest `.venv` local setup unless explicitly asked — project uses Poetry.
 - DO NOT exercise operational complacency. Flag suboptimal patterns immediately.
 
