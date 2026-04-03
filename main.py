@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
-from routes import core, archive, editor, pdf, config, oracle, render, settings, auth, admin, comms, blueprint
+from routes import core, archive, editor, pdf, config, oracle, render, settings, auth, admin, comms, blueprint, groupspace
 from logic.auth import auth_service, group_store
 from logic.conversion import gotenberg
 from logic.oracle import oracle as neural_oracle
@@ -100,7 +100,8 @@ app.include_router(render.router)    # Mermaid Render Pipeline
 app.include_router(settings.router)  # Operational Parameters
 app.include_router(admin.router)     # Admin Panel
 app.include_router(comms.router)     # Comms Protocol
-app.include_router(blueprint.router) # Blueprint Archive
+app.include_router(blueprint.router)   # Blueprint Archive
+app.include_router(groupspace.router)  # Group Shared Workspace
 
 # AEGIS_INIT_READY: Server configuration complete.
 # Start via bin/launch.sh to initialize Tailwind and Uvicorn logic.
