@@ -60,7 +60,7 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 ### 2.1 `logic/` — Business Logic
 
 | Modulo | Classi principali | Responsabilità |
-|--------|-------------------|----------------|
+| -------- | ------------------- | ---------------- |
 | `files.py` | `PathSanitizer`, `FileManager`, `DirectoryLister`, `StorageCache` | Filesystem I/O, path security, cache stats |
 | `conversion.py` | `GotenbergClient`, `MarkdownRenderer`, `PdfHtmlBuilder`, `DetailedScaffolding`, `MinimalScaffolding` | Pipeline MD→PDF via Gotenberg |
 | `oracle.py` | `OracleClient`, `PromptTemplates` | Integrazione Ollama (completion, synthesis, summarize) |
@@ -72,7 +72,7 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 
 **Gerarchia eccezioni** (`logic/exceptions.py`):
 
-```
+```text
 AegisError
   ├── AccessDeniedError      (403)
   ├── NotFoundError          (404)
@@ -93,7 +93,7 @@ AegisError
 ### 2.2 `routes/` — API Routers
 
 | Modulo | Prefix | Responsabilità |
-|--------|--------|----------------|
+| -------- | -------- | ---------------- |
 | `core.py` | `/` | Dashboard, stats, services health |
 | `auth.py` | `/` | Login, logout, cambio password |
 | `archive.py` | `/` | File CRUD, search, tree navigation |
@@ -118,7 +118,7 @@ AegisError
 ### 2.4 `static/css/` — Design System
 
 | File | Scopo |
-|------|-------|
+| ------ | ------- |
 | `output.css` | Tailwind v4 compiled output |
 | `editor-aegis.css` | Stili EasyMDE, fullscreen fix, layout editor, filetree sidebar |
 | `pdf-industrial.css` | Stylesheet documento PDF (inviato a Gotenberg) |
@@ -127,7 +127,7 @@ AegisError
 
 ### 2.5 `templates/`
 
-```
+```text
 layouts/
   base.html       — scaffold HTML completo (nav, sidebar, modal container, toast container)
   login.html      — pagina login standalone
@@ -141,7 +141,7 @@ icons/            — SVG inline components
 ## 3. Sicurezza
 
 | Livello | Meccanismo |
-|---------|-----------|
+| --------- | ----------- |
 | Autenticazione | SessionMiddleware + bcrypt (cost 12) |
 | Autorizzazione | `auth_middleware` per path non-pubblici; `require_admin` dependency per `/admin` |
 | Admin promozione | Chiunque abbia `"admin"` in `UserRecord.groups` è admin — non hardcoded su username |
@@ -161,7 +161,7 @@ icons/            — SVG inline components
 - **Shutdown**: `gotenberg.shutdown()`, `oracle.shutdown()` — chiusura `httpx.AsyncClient`.
 
 | Servizio | Protocollo | Uso |
-|----------|-----------|-----|
+| ---------- | ----------- | ----- |
 | Gotenberg | HTTP POST multipart | PDF rendering, Mermaid PNG/ZIP |
 | Ollama | HTTP POST JSON / SSE | Completion, Mermaid synthesis, summarize |
 | Tailwind CLI | Processo esterno | Compilazione CSS (solo development) |
@@ -178,4 +178,4 @@ icons/            — SVG inline components
 
 ---
 
-*Documento Tecnico Aegis Class System // v5.7.0*
+Documento Tecnico Aegis Class System // v5.7.0
