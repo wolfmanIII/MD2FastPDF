@@ -1,9 +1,9 @@
 # Groups & Admin Panel — Documentazione
 
 **Modulo**: `SC-ARCHIVE // SYS_ADMIN`
-**Versione**: 5.7.0
+**Versione**: 5.9.0
 **Stato**: COMPLETATO
-**Data**: 2026-04-01
+**Data**: 2026-04-04
 **Dipende da**: AEGIS COMMS (v5.6.0)
 
 ---
@@ -65,14 +65,30 @@ Persiste in `~/.config/sc-archive/groups.json`.
 
 ```python
 async def list_groups() → list[str]
-async def create_group(name) → None          # GroupError("GROUP_ALREADY_EXISTS")
+async def create_group(name) → None          # GroupError("GROUP_ALREADY_EXISTS") + crea workspace
 async def delete_group(name, user_store) → None
     # GroupError("GROUP_NOT_FOUND") | GroupError("GROUP_HAS_MEMBERS")
+    # Nota: la cartella workspace NON viene eliminata (sicurezza dati)
+async def provision_group_dirs(name) → None  # crea {workspace_base}/{name}/shared/
+def provision_group_dirs_sync(name) → None   # sync — usato al boot per migrazione
 def list_groups_sync() → list[str]           # bootstrap only
-def ensure_admin_group_sync() → None         # bootstrap only
+def ensure_admin_group_sync() → None         # bootstrap only + provision_group_dirs_sync("admin")
 ```
 
 `delete_group` riceve `user_store` come parametro — nessuna dipendenza hardcoded (DIP).
+
+### Workspace provisioning
+
+`create_group()` crea automaticamente la struttura filesystem del gruppo:
+
+```
+~/sc-archive/{group_name}/
+└── shared/
+```
+
+Al boot, `main.py` chiama `provision_group_dirs_sync()` per ogni gruppo esistente in `groups.json` — garantisce la presenza delle cartelle anche per gruppi creati prima di questa feature.
+
+La cartella **non viene mai eliminata** quando un gruppo viene rimosso da `groups.json` — prevenzione perdita dati.
 
 ### `UserStore` — metodi aggiunti
 
