@@ -150,14 +150,19 @@ bin/            launch.sh, create_user.sh
 
 | Fase | Codice | Stato |
 | --- | --- | --- |
+| [4.0] | AEGIS ORACLE | **COMPLETED** |
+| [4.1] | AEGIS REFACTOR | **COMPLETED** |
+| [4.2] | AEGIS RENDER | **COMPLETED** |
 | [4.3] | AEGIS FILETREE | **COMPLETED** |
+| [4.4] | AEGIS CENTRALIZED UPLINK | **COMPLETED** |
+| [4.5] | AEGIS HARDENING | **COMPLETED** |
+| [4.6] | AEGIS CHRONOS | **CANCELLED** |
 | [4.7] | AEGIS BLUEPRINT | **COMPLETED** |
+| [4.8] | AEGIS GUARD | **CANCELLED** |
 | [4.9] | AEGIS STABILITY | **COMPLETED** |
 | [4.10] | AEGIS IDENTITY | **COMPLETED** |
 | [5.0] | AEGIS COMMS | **COMPLETED** |
 | [5.1] | AEGIS GROUPS & ADMIN | **COMPLETED** |
-| [4.6] | AEGIS CHRONOS | **CANCELLED** |
-| [4.8] | AEGIS GUARD | **CANCELLED** |
 
 ---
 
