@@ -1,6 +1,67 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.9.0] - SOLID REFACTORING: AUTH HOOKS, BLUEPRINT LOGIC, GROUPSPACE TEMPLATE (2026-04-04)
+Refactoring SOLID post-feature su moduli recentemente introdotti. Nessuna modifica funzionale.
+
+### Changed
+- **`logic/auth.py`**: `AuthService.__init__` ora accetta `sync_group_store: SyncGroupStoreProtocol` — `bootstrap_admin` usa `self._sync_group_store` anziché il globale `_group_store` (DIP fix). Aggiunto `SyncGroupStoreProtocol` (`@runtime_checkable`).
+- **`logic/auth.py`**: Rimossi gli import locali di `comms_manager` da `create_user` e `create_user_sync`. Introdotto hook registry (`_user_creation_hooks`, `_user_creation_hooks_sync`) e funzioni `register_user_creation_hook` / `register_user_creation_sync_hook` esportate (SRP fix — AuthService non conosce più CommsManager).
+- **`main.py`**: Hook comms registrati a livello di modulo (prima del lifespan) via `register_user_creation_hook` / `register_user_creation_sync_hook` — garantisce che i hook siano attivi prima di `bootstrap_admin()`.
+- **`logic/blueprints.py`**: Aggiunto `BlueprintManager.group_by_category()` come `@staticmethod` — logica di trasformazione dati spostata dal layer routes al layer logic (DIP fix).
+- **`routes/blueprint.py`**: Rimossa funzione `_group_by_category` locale; tutte le chiamate delegate a `BlueprintManager.group_by_category()`.
+- **`routes/groupspace.py`**: `groupspace_save` non restituisce più un `HTMLResponse` con HTML inline; usa `TemplateResponse` su `components/groupspace_save_confirm.html` (SRP fix).
+
+### Added
+- **`templates/components/groupspace_save_confirm.html`**: Fragment HTMX per il messaggio di conferma salvataggio nel workspace di gruppo.
+
+---
+
+## [5.8.0] - AEGIS BLUEPRINT: TEMPLATE LIBRARY (2026-04-04)
+Libreria template Markdown app-wide per documenti narrativi. Gestione admin integrata nel pannello SYS_ADMIN.
+
+### Added
+- **`logic/blueprints.py`**: `BlueprintManager` — list, read, write, delete blueprint con path sanitization (`_sanitize()` previene traversal fuori da `blueprints/`).
+- **`routes/blueprint.py`**: `GET /blueprints/modal` (gallery tutti gli utenti), `GET /blueprints/content` (contenuto raw JSON per JS), `GET /blueprints/admin` + `POST /blueprints/save` + `POST /blueprints/delete` (require_admin).
+- **`templates/components/blueprint_modal.html`**: Gallery modale raggruppata per categoria; click inserisce in fondo al buffer editor con separatore `---`.
+- **`templates/components/blueprint_admin.html`**: Form crea/sovrascrive blueprint + lista con PURGE.
+- **`blueprints/narrative/`**: 5 template iniziali — `session-log.md`, `npc-profile.md`, `planet-description.md`, `ship-description.md`, `location-description.md`.
+
+### Changed
+- **`templates/components/editor_pure.html`**: Aggiunto bottone `BLUEPRINT_ARCHIVE` in toolbar (prima del bottone Mermaid).
+- **`routes/admin.py`**: Tab `BLUEPRINT_ARCHIVE` nel pannello SYS_ADMIN; terzo tab che serve `blueprint_admin.html`.
+- **`templates/components/admin_panel.html`**: Aggiunto tab BLUEPRINT_ARCHIVE; navigazione tab tramite `/admin?tab=X` per aggiornamento corretto dello stato attivo.
+- **`main.py`**: Registrazione `blueprint.router`.
+
+---
+
+## [5.7.0] - AEGIS GROUPS & ADMIN PANEL (2026-04-04)
+Sistema di gruppi utente, admin panel HTMX completo, messaggistica filtrata per gruppo.
+
+### Added
+- **`logic/auth.py`**: `GroupStore` (persistenza `~/.config/sc-archive/groups.json`, CRUD asincrono, provisioning workspace gruppo). `GroupStoreProtocol`, `GroupStoreUserProtocol`, `SyncGroupStoreProtocol`. `UserRecord.groups: list[str]` con retrocompatibilità (`groups: []` per utenti senza campo).
+- **`routes/admin.py`**: CRUD utenti (`/admin/users/*`) e gruppi (`/admin/groups/*`) protetti da `require_admin`.
+- **`routes/deps.py`**: Dependency `require_admin` — verifica `"admin" in record.groups`, HTTP 403 altrimenti.
+- **`templates/components/admin_panel.html`**: Tab CREW_REGISTRY / TEAM_INDEX / BLUEPRINT_ARCHIVE.
+- **`templates/components/admin_user_list.html`**, **`admin_user_modal.html`**, **`admin_group_list.html`**, **`admin_group_modal.html`**: Fragment HTMX admin.
+- **`logic/groupspace.py`**: `GroupSpaceAccess` (controllo accesso e permessi R/W per area) + `GroupSpaceManager` (operazioni filesystem scoped al workspace di gruppo con enforcement permessi).
+- **`routes/groupspace.py`**: Hub, browser, editor, save, create, delete per workspace di gruppo.
+- **`templates/components/groupspace_hub.html`**, **`groupspace_browser.html`**, **`groupspace_editor.html`**, **`groupspace_create_modal.html`**, **`groupspace_save_confirm.html`**: Fragment HTMX group space.
+
+### Changed
+- **`logic/comms.py`**: `CommsManager.allowed_recipients()` — filtra destinatari per gruppo condiviso con sender o gruppo `"admin"`. `send_message()` e `promote_draft()` ricevono `allowed_usernames`.
+- **`routes/comms.py`**: Handler compose/send/draft calcolano `allowed_recipients` prima di passarli a `CommsManager`.
+- **`logic/auth.py`**: `UserStore` esteso con `list_users()`, `update_groups()`, `delete_user()`. `AuthService` esteso con `get_user()`, `update_user_groups()`, `delete_user()`, `list_users()`, `create_user(groups=[])`. Bootstrap crea admin con `groups=["admin"]`.
+- **`templates/layouts/base.html`**: Link `GROUP_SPACE` in navbar; link `SYS_ADMIN` visibile solo se `request.session["is_admin"]`.
+- **`main.py`**: Registrazione `admin.router`, `groupspace.router`. Lifespan: provisioning workspace per gruppi preesistenti via `provision_group_dirs_sync`.
+
+### Permission Model (GROUP_SPACE)
+- Root gruppo (`/{group}/`): admin R+W, membri R.
+- Shared folder (`/{group}/shared/`): membri R+W, admin R.
+- Enforced a livello `logic/groupspace.py` — zero fiducia nel frontend.
+
+---
+
 ## [5.5.2] - SECURITY HARDENING: SESSION KEY & WORKSPACE ROOT (2026-03-30)
 
 ### Fixed
