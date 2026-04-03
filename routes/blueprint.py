@@ -12,13 +12,6 @@ from routes.deps import require_admin
 router = APIRouter(prefix="/blueprints", tags=["Aegis Blueprint"])
 
 
-def _group_by_category(blueprints: list) -> dict[str, list]:
-    categories: dict[str, list] = {}
-    for bp in blueprints:
-        categories.setdefault(bp["category"], []).append(bp)
-    return categories
-
-
 @router.get("/modal", response_class=HTMLResponse)
 async def blueprint_modal(request: Request):
     """Gallery modal fragment — lists all blueprints grouped by category."""
@@ -26,7 +19,7 @@ async def blueprint_modal(request: Request):
     return templates.TemplateResponse(
         request,
         "components/blueprint_modal.html",
-        {"categories": _group_by_category(blueprints)},
+        {"categories": BlueprintManager.group_by_category(blueprints)},
     )
 
 
@@ -47,7 +40,7 @@ async def blueprint_admin(
     return templates.TemplateResponse(
         request,
         "components/blueprint_admin.html",
-        {"categories": _group_by_category(blueprints), "blueprints": blueprints},
+        {"categories": BlueprintManager.group_by_category(blueprints), "blueprints": blueprints},
     )
 
 
@@ -65,7 +58,7 @@ async def blueprint_save(
     return templates.TemplateResponse(
         request,
         "components/blueprint_admin.html",
-        {"categories": _group_by_category(blueprints), "blueprints": blueprints, "saved": True},
+        {"categories": BlueprintManager.group_by_category(blueprints), "blueprints": blueprints, "saved": True},
     )
 
 
@@ -81,5 +74,5 @@ async def blueprint_delete(
     return templates.TemplateResponse(
         request,
         "components/blueprint_admin.html",
-        {"categories": _group_by_category(blueprints), "blueprints": blueprints},
+        {"categories": BlueprintManager.group_by_category(blueprints), "blueprints": blueprints},
     )

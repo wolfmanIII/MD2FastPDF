@@ -31,6 +31,14 @@ class BlueprintManager:
         return Path(filename).stem.replace("-", " ").replace("_", " ").title()
 
     @staticmethod
+    def group_by_category(blueprints: list[dict[str, Any]]) -> dict[str, list]:
+        """Groups a flat blueprint list by category key."""
+        categories: dict[str, list] = {}
+        for bp in blueprints:
+            categories.setdefault(bp["category"], []).append(bp)
+        return categories
+
+    @staticmethod
     async def list_blueprints() -> list[dict[str, Any]]:
         """Returns all .md blueprints organized by category (subfolder name)."""
         def _scan() -> list[dict[str, Any]]:
