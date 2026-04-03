@@ -89,18 +89,9 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.6] - AEGIS CHRONOS (Versionamento Narrativo) [PLANNED]
-**Obiettivo**: Strato di versionamento leggero e non invasivo per archivi narrativi (scenari RPG, documentazione tecnica). Modulo **opt-in**: attivo solo se la root selezionata contiene già un repo Git. Non crea repo, non tocca remoti, non esegue mai operazioni distruttive.
-- **Detect automatico**: `git rev-parse --git-dir` sulla root — se assente, pannello in stato `GIT_REPO_NOT_DETECTED` con istruzioni init.
-- **Branch indicator**: visualizzazione del branch corrente nell'editor e nella dashboard.
-- **Snapshot manuale**: bottone `COMMIT_SNAPSHOT` in toolbar — esegue `git add <file> && git commit` sul solo file aperto.
-- **Auto-snapshot**: configurabile da Uplink Config (ogni N salvataggi o X minuti), disabilitato di default.
-- **File history**: lista commit che toccano il documento aperto (`git log --oneline -- <file>`).
-- **Diff viewer a due colonne**: versione storica (sx) vs versione corrente (dx), con highlighting righe modificate.
-- **Inject nel buffer**: bottone per appendere un blocco della versione storica al buffer dell'editor corrente.
-- **Pull safe**: `git pull --ff-only` — rifiutato se la storia è divergente, nessun merge automatico.
-- **Push safe**: `git push` standard — rifiutato se il remote è ahead, mai `--force`. Credenziali delegate al SO.
-- **Piano dettagliato**: `docs/piano-aegis-chronos.md`.
+### [4.6] - AEGIS CHRONOS (Versionamento Narrativo) [CANCELLED]
+**Obiettivo originale**: Strato di versionamento leggero integrato nell'editor per archivi narrativi.
+> **Rimosso dalla roadmap attiva.** Il versionamento è già gestito dall'utente via Git nel terminale. Integrare un frontend Git in SC-ARCHIVE aggiungerebbe complessità significativa (subprocess, gestione conflitti, credenziali remote) per funzionalità che un terminale gestisce meglio e con più controllo. SC-ARCHIVE non è un IDE.
 
 ---
 
