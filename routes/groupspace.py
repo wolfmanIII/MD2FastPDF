@@ -93,11 +93,7 @@ async def groupspace_save(
     username = get_current_user(request)
     user_groups = await _get_user_groups(username)
     await GroupSpaceManager.write_file(group_name, path, content, user_groups)
-    return HTMLResponse(
-        content='<span id="gs-save-msg" class="neon-text font-bold text-[10px] tracking-widest uppercase mr-3">'
-                'SYSTEM_UPDATED // SAVE_SUCCESSFUL</span>'
-                '<script>setTimeout(() => { let el = document.getElementById("gs-save-msg"); if(el) el.remove(); }, 3000);</script>'
-    )
+    return templates.TemplateResponse(request, "components/groupspace_save_confirm.html", {})
 
 
 @router.post("/{group_name}/create", response_class=HTMLResponse)
