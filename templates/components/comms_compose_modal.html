@@ -15,7 +15,7 @@
             <!-- Recipients -->
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
-                    <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">TO:</label>
+                    <label class="text-[10px] text-zinc-100 uppercase tracking-widest font-bold">TO:</label>
                     <button type="button" id="select-all-btn" onclick="toggleAllRecipients()"
                         class="btn-ghost text-[10px] rounded-sm focus:outline-none">
                         SELECT ALL
@@ -23,7 +23,7 @@
                 </div>
                 <div class="grid grid-cols-3 gap-2 max-h-28 overflow-y-auto border border-(--glass-border) rounded-sm p-3">
                     {% for r in recipients %}
-                    <label class="flex items-center space-x-2 text-[10px] text-zinc-400 tracking-widest uppercase cursor-pointer hover:text-zinc-200 transition-colors">
+                    <label class="flex items-center gap-3 text-[10px] text-zinc-100 tracking-widest uppercase cursor-pointer hover:text-white transition-colors">
                         <input type="checkbox" name="recipients" value="{{ r }}"
                             class="recipient-checkbox accent-(--neon-cyan)"
                             {% if original and r == original.sender %}checked{% endif %}>
@@ -35,7 +35,7 @@
 
             <!-- Subject -->
             <div class="space-y-1">
-                <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">SUBJECT:</label>
+                <label class="text-[10px] text-zinc-100 uppercase tracking-widest font-bold">SUBJECT:</label>
                 <input type="text" name="subject" class="w-full"
                     value="{% if original %}Re: {{ original.subject }}{% endif %}"
                     placeholder="TRANSMISSION_SUBJECT...">
@@ -44,7 +44,7 @@
             <!-- Body + Preview side-by-side -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
-                    <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">BODY:</label>
+                    <label class="text-[10px] text-zinc-100 uppercase tracking-widest font-bold">BODY:</label>
                     <textarea name="body" id="comms-body"
                         class="w-full resize-none font-mono text-[11px]" style="height: 200px;"
                         placeholder="AWAITING_TRANSMISSION..."
@@ -54,7 +54,7 @@
                         hx-swap="outerHTML"></textarea>
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">PREVIEW:</label>
+                    <label class="text-[10px] text-zinc-100 uppercase tracking-widest font-bold">PREVIEW:</label>
                     <div id="comms-preview-panel"
                         class="overflow-y-auto bg-black/40 border border-zinc-800 rounded-sm p-3 prose max-w-none normal-case"
                         style="height: 200px;">

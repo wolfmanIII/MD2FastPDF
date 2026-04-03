@@ -135,10 +135,13 @@ class CommsManager:
     ) -> list[str]:
         """Returns usernames reachable by sender.
 
-        A user is reachable if they have the 'admin' group OR share at least
-        one group with the sender. The sender is always excluded.
+        Admin (has 'admin' group): unrestricted — can reach all users.
+        Others: reachable if recipient has 'admin' group OR shares at least
+        one group with the sender. Sender is always excluded.
         all_users accepts list[UserRecord] — typed as list to avoid circular import.
         """
+        if "admin" in sender_groups:
+            return [u.username for u in all_users if u.username != sender]
         return [
             u.username for u in all_users
             if u.username != sender

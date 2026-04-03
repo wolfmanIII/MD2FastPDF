@@ -3,10 +3,10 @@
     <div class="border-b border-(--glass-border) pb-4 space-y-3">
         <h2 class="text-sm font-bold neon-text">SIGNAL_RECEIVED // DECODING</h2>
         <div class="grid grid-cols-2 gap-x-6 gap-y-1 text-[10px]">
-            <div><span class="text-zinc-500">FROM:</span> <span class="text-zinc-300 font-bold">{{ message.sender }}</span></div>
-            <div class="truncate"><span class="text-zinc-500">TO:</span> <span class="text-zinc-300">{{ message.recipient }}</span></div>
-            <div class="col-span-2"><span class="text-zinc-500">SUBJECT:</span> <span class="text-zinc-100 font-bold">{{ message.subject }}</span></div>
-            <div class="col-span-2"><span class="text-zinc-500">TIMESTAMP:</span> <span class="text-zinc-400 font-mono normal-case">{{ message.timestamp[:16] | replace("T", " ") }}</span></div>
+            <div><span class="text-zinc-100 font-bold">FROM:</span> <span class="text-zinc-100">{{ message.sender }}</span></div>
+            <div class="truncate"><span class="text-zinc-100 font-bold">TO:</span> <span class="text-zinc-100">{{ message.recipient }}</span></div>
+            <div class="col-span-2"><span class="text-zinc-100 font-bold">SUBJECT:</span> <span class="text-zinc-100">{{ message.subject }}</span></div>
+            <div class="col-span-2"><span class="text-zinc-100 font-bold">TIMESTAMP:</span> <span class="text-zinc-400 font-mono normal-case">{{ message.timestamp[:16] | replace("T", " ") }}</span></div>
         </div>
     </div>
 

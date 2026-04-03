@@ -17,19 +17,19 @@
                     {% endif %}
                     <span class="text-[11px] font-bold text-zinc-100 truncate">{{ msg.subject }}</span>
                 </div>
-                <div class="text-[10px] text-zinc-500">
+                <div class="text-[10px]">
                     {% if folder == 'inbound' %}
-                    FROM: <span class="text-zinc-400">{{ msg.sender }}</span>
+                    <span class="text-zinc-100 font-bold">FROM:</span> <span class="text-zinc-100">{{ msg.sender }}</span>
                     {% elif folder == 'outbound' %}
-                    TO: <span class="text-zinc-400">{{ msg.recipient }}</span>
+                    <span class="text-zinc-100 font-bold">TO:</span> <span class="text-zinc-100">{{ msg.recipient }}</span>
                     {% else %}
-                    TO: <span class="text-zinc-400">{{ msg.recipient }}</span>
-                    <span class="text-zinc-700 ml-2">// DRAFT</span>
+                    <span class="text-zinc-100 font-bold">TO:</span> <span class="text-zinc-100">{{ msg.recipient }}</span>
+                    <span class="text-zinc-600 ml-2">// DRAFT</span>
                     {% endif %}
                 </div>
             </div>
             <div class="flex flex-col items-end shrink-0 space-y-1">
-                <span class="text-[9px] text-zinc-600 font-mono">
+                <span class="text-[9px] text-zinc-400 font-mono">
                     {{ msg.timestamp[:10] }}
                 </span>
                 {% if folder == 'staging' %}
