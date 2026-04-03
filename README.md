@@ -1,6 +1,6 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
 
-**Versione 5.7.0** // GROUPS & ADMIN PANEL
+**Versione 5.9.0** // GROUP_SPACE & BLUEPRINT
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -19,6 +19,8 @@
 
 ## 🚀 Features
 
+- **Aegis Group_Space**: Workspace filesystem condiviso per gruppo. Modello permessi asimmetrico (admin R+W su root, membri R+W su `shared/`). Browser, editor e CRUD file integrati nella navbar.
+- **Aegis Blueprint**: Libreria template Markdown app-wide (`blueprints/`). Modal in toolbar editor per inserimento istantaneo in fondo al documento. Admin panel con gestione CRUD blueprint per categoria.
 - **Aegis Groups & Admin Panel**: Sistema di gruppi utente con admin panel HTMX (`/admin`). CRUD utenti e gruppi. Chiunque abbia il gruppo `"admin"` ha privilegi admin. Messaggistica filtrata per gruppo condiviso.
 - **Aegis COMMS**: Messaggistica filesystem-based multi-utente. Hub tabbato (RECEPTION_ARRAY / OUTBOUND_LOG / STAGING_BUFFER), compose modal con preview Markdown live, draft management, unread badge HTMX-polled ogni 30s.
 - **Aegis Filetree**: Sidebar albero directory collassabile nell'editor con navigazione lazy, highlight del file attivo e persistenza stato in `localStorage`.
@@ -120,8 +122,9 @@ Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
 ## 📂 Struttura del Progetto
 
 - `main.py`: Punto di convergenza dei router Aegis.
-- `logic/`: Logica di business (File management, Conversion, Oracle, Render, Comms, Auth).
-- `routes/`: APIRouter modules (core, archive, editor, pdf, config, oracle, comms, admin).
+- `logic/`: Logica di business (files, conversion, oracle, render, auth, comms, blueprints, groupspace).
+- `routes/`: APIRouter modules (core, archive, editor, pdf, config, oracle, comms, admin, blueprint, groupspace).
+- `blueprints/`: Template Markdown app-wide organizzati per categoria (`narrative/`, ...).
 - `config/`: Package Python — `settings.py` (SettingsManager) + `settings.json` (store persistente).
 - `templates/components/`: Frammenti HTML/HTMX industriali.
 - `templates/layouts/`: Layout base (`base.html`).

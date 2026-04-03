@@ -95,10 +95,12 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.7] - AEGIS BLUEPRINT (Technical Templating) [PLANNED]
-**Obiettivo**: Standardizzazione della produzione documentale industriale.
-- **Galleria Blueprint**: Inserimento istantaneo di template (Missions, Tech Specs, Logs).
-- **Variable Injection**: Sostituzione dinamica di segnaposto nel Markdown prima dell'export PDF.
+### [4.7] - AEGIS BLUEPRINT (Technical Templating) [COMPLETED]
+**Obiettivo**: Standardizzazione della produzione documentale industriale con libreria template app-wide.
+- **Galleria Blueprint**: Modal in toolbar editor (`BLUEPRINT_ARCHIVE`) — blueprint raggruppati per categoria. Click inserisce il contenuto in fondo al buffer editor (separatore `---` se non vuoto). ✓
+- **Admin management**: Tab `BLUEPRINT_ARCHIVE` nel pannello SYS_ADMIN — form crea/sovrascrive blueprint, lista con PURGE per eliminazione. ✓
+- **5 template iniziali**: `blueprints/narrative/` — Session Log, NPC Profile, Planet Description, Ship Description, Location Description. ✓
+- **Path sanitization**: `BlueprintManager._sanitize()` previene traversal fuori da `blueprints/`. ✓
 
 ---
 
@@ -130,6 +132,21 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 - **Root Picker persistente**: root selezionata salvata per-utente in `users.json`. ✓
 - **Navbar**: username corrente + `// LOGOUT` in ogni pagina autenticata. ✓
 - **CLI**: `bin/create_user.sh <username> <password>` per provisioning operatori. ✓
+
+---
+
+### [5.2] - AEGIS GROUP_SPACE (Workspace Condiviso per Gruppo) [COMPLETED]
+
+**Obiettivo**: Filesystem condiviso per i membri di un gruppo con modello permessi asimmetrico.
+
+- **Workspace per gruppo**: `~/sc-archive/{group_name}/` creato automaticamente alla creazione del gruppo. Boot migration per gruppi preesistenti. ✓
+- **Modello permessi**: root del gruppo — admin R+W, membri R; `shared/` — membri R+W, admin R. Enforced in `logic/groupspace.py`. ✓
+- **GROUP_SPACE hub**: link in navbar, lista gruppi accessibili all'utente corrente. ✓
+- **Browser**: navigazione file nel workspace di gruppo con indicatore `READ_ONLY` / `READ_WRITE`. ✓
+- **Editor**: visualizzazione e modifica file. Textarea `readonly` e toolbar ridotta (no save) se area in sola lettura. ✓
+- **CRUD file**: crea, elimina file — bloccato se l'utente non ha permessi di scrittura nella directory corrente. ✓
+- **Path sanitization**: `GroupSpaceManager.sanitize()` previene traversal fuori da `{workspace_base}/{group_name}/`. ✓
+- **Accesso revoca immediata**: accesso verificato a ogni request da `GroupSpaceAccess.has_access()`. ✓
 
 ---
 
