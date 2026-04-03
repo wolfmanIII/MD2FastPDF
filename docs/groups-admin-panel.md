@@ -81,7 +81,7 @@ def ensure_admin_group_sync() → None         # bootstrap only + provision_grou
 
 `create_group()` crea automaticamente la struttura filesystem del gruppo:
 
-```
+```text
 ~/sc-archive/{group_name}/
 └── shared/
 ```
@@ -131,7 +131,7 @@ async def require_admin(username: str = Depends(get_current_user)) -> str:
 Tutti protetti da `require_admin`.
 
 | Method | Path | HTMX Target | Descrizione |
-|--------|------|-------------|-------------|
+| --- | --- | --- | --- |
 | `GET` | `/admin` | `#aegis-view-core` | Panel. Default tab: users |
 | `GET` | `/admin/users` | `#admin-content-panel` | Lista utenti fragment |
 | `GET` | `/admin/users/create` | `#modal-container` | Modale creazione utente |
@@ -149,8 +149,8 @@ Tutti protetti da `require_admin`.
 ## 6. Template
 
 | File | Scopo |
-|------|-------|
-| `templates/components/admin_panel.html` | Layout — tab CREW_REGISTRY / FACTION_INDEX |
+| --- | --- |
+| `templates/components/admin_panel.html` | Layout — tab CREW_REGISTRY / TEAM_INDEX / BLUEPRINT_ARCHIVE |
 | `templates/components/admin_user_list.html` | Lista utenti con gruppi assegnati |
 | `templates/components/admin_user_modal.html` | Modale crea/modifica utente (checkbox gruppi) |
 | `templates/components/admin_group_list.html` | Lista gruppi con contatore utenti |
@@ -198,7 +198,7 @@ allowed = CommsManager.allowed_recipients(username, sender_groups, all_users)
 ## 8. SOLID compliance
 
 | Principio | Applicazione |
-|-----------|-------------|
+| --- | --- |
 | SRP | `GroupStore` solo I/O gruppi. `UserStore` solo I/O utenti. Filtraggio destinatari in `CommsManager`, non in `AuthService`. |
 | OCP | Aggiungere campi a `UserRecord` → solo `to_dict`/costruttore. Nessuna classe consumer modificata. |
 | LSP | `UserStoreProtocol` aggiornato con `list_users`, `update_groups`, `delete_user`. `UserStore` soddisfa strutturalmente. |
