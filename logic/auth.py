@@ -130,16 +130,38 @@ class GroupStore:
         """Returns all group names in insertion order."""
         return list((await self._aload()).keys())
 
+    @staticmethod
+    def _group_workspace(name: str) -> Path:
+        """Returns the absolute path for a group's shared workspace."""
+        from config.settings import settings
+        base = Path(settings.get("workspace_base", str(Path.home() / "sc-archive")))
+        return base / name
+
+    @staticmethod
+    def provision_group_dirs_sync(name: str) -> None:
+        """Creates group workspace and shared/ subfolder. Sync — safe to call at boot."""
+        root = GroupStore._group_workspace(name)
+        (root / "shared").mkdir(parents=True, exist_ok=True)
+
+    async def provision_group_dirs(self, name: str) -> None:
+        """Creates group workspace and shared/ subfolder asynchronously."""
+        root = GroupStore._group_workspace(name)
+        await anyio.to_thread.run_sync(
+            lambda: (root / "shared").mkdir(parents=True, exist_ok=True)
+        )
+
     async def create_group(self, name: str) -> None:
-        """Adds a new group. Raises GroupError if name already exists."""
+        """Adds a new group and provisions its workspace. Raises GroupError if name already exists."""
         data = await self._aload()
         if name in data:
             raise GroupError(f"GROUP_ALREADY_EXISTS: {name}")
         data[name] = {}
         await self._save(data)
+        await self.provision_group_dirs(name)
 
     async def delete_group(self, name: str, user_store: GroupStoreUserProtocol) -> None:
-        """Removes a group. Raises GroupError if group has assigned users or does not exist."""
+        """Removes a group entry. Raises GroupError if group has assigned users or does not exist.
+        The group workspace folder is intentionally preserved to prevent data loss."""
         data = await self._aload()
         if name not in data:
             raise GroupError(f"GROUP_NOT_FOUND: {name}")
@@ -150,11 +172,12 @@ class GroupStore:
         await self._save(data)
 
     def ensure_admin_group_sync(self) -> None:
-        """Creates the 'admin' group if absent. Sync — bootstrap only."""
+        """Creates the 'admin' group if absent and provisions its workspace. Sync — bootstrap only."""
         data = self._load()
         if "admin" not in data:
             data["admin"] = {}
             self._save_sync(data)
+        GroupStore.provision_group_dirs_sync("admin")
 
 
 class UserRecord:

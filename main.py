@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from routes import core, archive, editor, pdf, config, oracle, render, settings, auth, admin, comms, blueprint
-from logic.auth import auth_service
+from logic.auth import auth_service, group_store
 from logic.conversion import gotenberg
 from logic.oracle import oracle as neural_oracle
 from logic.files import StorageCache, register_mutation_hook, PathSanitizer
@@ -21,6 +21,9 @@ _AUTH_SKIP_PATHS: frozenset[str] = frozenset({"/login", "/logout"})
 async def lifespan(app: FastAPI):
     # AEGIS_BOOT: Initializing persistent resources
     auth_service.bootstrap_admin()
+    # Provision group workspaces for any existing groups missing their folder
+    for _group_name in group_store.list_groups_sync():
+        group_store.provision_group_dirs_sync(_group_name)
     register_mutation_hook(StorageCache.invalidate)
     await neural_oracle.probe_url()
     yield
