@@ -111,10 +111,9 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.8] - AEGIS GUARD (Local Security Protocol) [PLANNED]
-**Obiettivo**: Blindatura dei dati locali e gestione dell'accesso in rete.
-- **Buffer Encryption**: Cifratura simmetrica dei documenti sensibili a livello di filesystem.
-- **Network Gateway UI**: Strumenti per la gestione della visibilità della stazione nella rete WiFi locale.
+### [4.8] - AEGIS GUARD (Local Security Protocol) [CANCELLED]
+**Obiettivo originale**: Blindatura dei dati locali e gestione dell'accesso in rete.
+> **Rimosso dalla roadmap attiva.** La cifratura at-rest è incompatibile con il workflow reale di SC-ARCHIVE: i file `.md` sono tracciati su repository Git remoti (GitHub), accessibili da editor esterni e potenzialmente condivisi con altri giocatori. Cifrare i file renderebbe i diff illeggibili, bloccherebbe qualsiasi editor esterno e trasformerebbe SC-ARCHIVE in un lock-in obbligatorio — contrario agli obiettivi del progetto. La Network Gateway UI è out-of-scope per un'applicazione applicativo-layer.
 
 ---
 
