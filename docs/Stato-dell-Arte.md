@@ -1,4 +1,5 @@
 # Stato del Progetto: SC-ARCHIVE
+
 **Stato Attuale**: Op_Ready / Versione 5.8.0
 **Ultimo Aggiornamento**: 3 Aprile 2026
 
@@ -7,6 +8,7 @@
 ## 1. Funzionalità Implementate (Aegis Stack)
 
 ### 1.1 Gestione File & Discovery
+
 - Navigazione filesystem locale con breadcrumbs dinamici e root-selection modale.
 - **UP_DIRECTORY**: navigazione rapida alla directory padre nel browser file.
 - **Ricerca Globale Aegis**: motore di scansione ricorsiva per file `.md`, `.html` e `.pdf` con search bar DaisyUI integrata (`SCAN_QUERY //`).
@@ -15,12 +17,14 @@
 - **Bottoni azione sempre visibili**: tutti i controlli file (rename, delete, export Mermaid, neural scan) sempre visibili con tooltip DaisyUI.
 
 ### 1.2 Editor Markdown (Aegis Slim-Tech)
+
 - **EasyMDE** con toolbar estesa: salvataggio, export PDF, export Mermaid singolo/bulk, commit snapshot, neural hint, configurazione Uplink.
 - Evidenziatura sintassi in preview (Highlight.js), Mermaid.js per diagrammi interattivi.
 - **Fullscreen Breakthrough**: bypass automatico dei filtri `backdrop-filter` genitori per fullscreen nativo.
 - **Native Multi-Tab**: Ctrl+Click su qualsiasi link apre in nuova scheda.
 
 ### 1.2b Aegis Filetree [4.3] — COMPLETED
+
 - **Sidebar albero directory**: colonna sinistra collassabile (260px) esclusiva della view editor.
 - **Lazy expand**: cartelle caricano i figli via HTMX solo al click — nessun render ricorsivo totale.
 - **Toggle `«`/`»`**: stato collasso persistito in `localStorage`.
@@ -31,6 +35,7 @@
 - **Icone SVG outline**: `folder.html` (chiusa) / `folder-open.html` (aperta) — `fill="none"`, stroke puro, identici al file browser.
 
 ### 1.3 Esportazione PDF (Aegis Engine)
+
 - Integrazione Gotenberg (Docker) per rendering Chromium professionale.
 - **HUD_PRINT Toggle**: header/footer branded SC-ARCHIVE (modalità HUD) o solo numero di pagina (slim).
 - **Global PDF Branding**: testata e piè di pagina configurabili da Uplink Config, persistiti localmente.
@@ -38,23 +43,26 @@
 - **Industrial PDF CSS**: stylesheet `static/css/pdf-industrial.css` caricato a module init — nessun CSS inline nel codice Python.
 
 ### 1.4 Aegis Render Engine (Mermaid Image Export)
+
 - **PNG Export**: rendering del singolo blocco Mermaid in PNG via Gotenberg (screenshot headless).
 - **ZIP Bulk Export**: tutti i blocchi Mermaid del documento in un archivio `.zip`.
 - Accessibile dalla toolbar editor e dal bottone nella griglia file (per ogni `.md`).
 - Modal lista blocchi con apertura PNG in nuova scheda.
 
 ### 1.5 Neural Interface — AEGIS ORACLE
+
 - **Ghost-Text (Neural Hint)**: completamento predittivo on-demand (300 token), accettazione via TAB.
 - **Mermaid Synthesis**: generazione diagrammi da linguaggio naturale via Ollama (Modello consigliato: `qwen2.5-coder:7b`).
 - **Aegis Intelligence Scan (Hardened)**:
-    *   **Context Precision**: Sistema di isolamento `[CONTEXT_START]` per il Ghost-Text, eliminando la ripetizione del testo utente e garantendo la chiusura delle frasi tronche.
-    *   **Surgical Sanitization**: Filtro attivo su `div` allucinati dal modello per proteggere la stabilità del layout HUD.
-    *   **Protocol Feedback**: Notifiche visive immediate (`!! NEURAL_PROTOCOL_OFFLINE !!`) e banner informativi nei modali se il Neural Link è spento.
-    *   **Protocol Hard-Stop**: Isolamento totale del backend; se disattivato, il sistema non effettua probe o chiamate esterne.
+  _**Context Precision**: Sistema di isolamento `[CONTEXT_START]` per il Ghost-Text, eliminando la ripetizione del testo utente e garantendo la chiusura delle frasi tronche.
+  _**Surgical Sanitization**: Filtro attivo su `div` allucinati dal modello per proteggere la stabilità del layout HUD.
+  _**Protocol Feedback**: Notifiche visive immediate (`!! NEURAL_PROTOCOL_OFFLINE !!`) e banner informativi nei modali se il Neural Link è spento.
+  _**Protocol Hard-Stop**: Isolamento totale del backend; se disattivato, il sistema non effettua probe o chiamate esterne.
 - **Multi-endpoint probe**: rileva automaticamente Ollama su `localhost:11434` o `172.31.112.1:11434`. Persistenza via `settings.json`.
 - **Resilienza ConnectTimeout**: errori di connessione gestiti come `OracleError` — mai propagati all'ASGI layer.
 
 ### 1.6 Dashboard & Telemetria
+
 - **SYSTEM_STATUS**: CPU, memoria, root archivio, stato API gateway (refresh 30s).
 - **GOTENBERG panel**: stato, endpoint, funzione (ONLINE / DEGRADED / OFFLINE).
 - **OLLAMA panel**: stato, endpoint, modelli caricati separati per categoria (`CHAT_MODELS` / `EMBED_MODELS`).
@@ -63,6 +71,7 @@
 - Ordine pannelli: System → Backend Services → Recent/Storage.
 
 ### 1.7 Aegis Uplink Config
+
 - **Centralized Persistence**: Gestione totale dei parametri operativi in `config/settings.json` (Ollama, Gotenberg, Modelli IA, Flags). Modulo: `config/settings.py`.
 - **Reactive Refresh**: Aggiornamento automatico della Dashboard via HTMX al salvataggio della configurazione (`HX-Trigger: settings-updated`).
 - **Industrial Form Standard**: Unificazione globale dello stile input/select via `base.html` (12px, borderless, mono, focus neon).
