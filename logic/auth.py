@@ -6,12 +6,32 @@ AuthService: credential verification, user creation, workspace management.
 """
 import json
 import os
+from collections.abc import Awaitable, Callable
+
 import bcrypt
 import anyio
 from pathlib import Path
 from typing import Optional, Protocol, runtime_checkable
 
 from logic.exceptions import AuthError, GroupError
+
+
+# --- User creation hook registry ---
+# Async hooks: called by create_user (async path, e.g. admin panel)
+# Sync hooks:  called by create_user_sync (bootstrap / CLI path)
+# Register via register_user_creation_hook / register_user_creation_sync_hook in main.py
+_user_creation_hooks: list[Callable[[str], Awaitable[None]]] = []
+_user_creation_hooks_sync: list[Callable[[str], None]] = []
+
+
+def register_user_creation_hook(hook: Callable[[str], Awaitable[None]]) -> None:
+    """Registers an async callback invoked after every async user creation."""
+    _user_creation_hooks.append(hook)
+
+
+def register_user_creation_sync_hook(hook: Callable[[str], None]) -> None:
+    """Registers a sync callback invoked after every sync user creation (bootstrap/CLI)."""
+    _user_creation_hooks_sync.append(hook)
 
 
 @runtime_checkable
@@ -51,6 +71,13 @@ class GroupStoreProtocol(Protocol):
     async def list_groups(self) -> list[str]: ...
     async def create_group(self, name: str) -> None: ...
     async def delete_group(self, name: str, user_store: GroupStoreUserProtocol) -> None: ...
+
+
+@runtime_checkable
+class SyncGroupStoreProtocol(Protocol):
+    """Sync group store abstraction — bootstrap paths only."""
+
+    def ensure_admin_group_sync(self) -> None: ...
 
 
 _CONFIG_DIR = Path.home() / ".config" / "sc-archive"
@@ -317,9 +344,15 @@ class UserStore:
 class AuthService:
     """Authentication and per-user workspace management."""
 
-    def __init__(self, store: UserStoreProtocol, sync_store: SyncUserStoreProtocol):
+    def __init__(
+        self,
+        store: UserStoreProtocol,
+        sync_store: SyncUserStoreProtocol,
+        sync_group_store: SyncGroupStoreProtocol,
+    ):
         self._store = store
         self._sync_store = sync_store
+        self._sync_group_store = sync_group_store
 
     def _hash(self, password: str) -> str:
         return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -343,8 +376,8 @@ class AuthService:
         await anyio.to_thread.run_sync(lambda: root.mkdir(parents=True, exist_ok=True))
         record = UserRecord(username, self._hash(password), str(root), groups or [])
         await self._store.save_user(record)
-        from logic.comms import comms_manager  # local import: avoids circular dep
-        await comms_manager.create_comms_folders(username)
+        for hook in _user_creation_hooks:
+            await hook(username)
         return record
 
     def create_user_sync(self, username: str, password: str, groups: list[str] | None = None) -> UserRecord:
@@ -353,8 +386,8 @@ class AuthService:
         root.mkdir(parents=True, exist_ok=True)
         record = UserRecord(username, self._hash(password), str(root), groups or [])
         self._sync_store.save_user_sync(record)
-        from logic.comms import comms_manager  # local import: avoids circular dep
-        comms_manager.create_comms_folders_sync(username)
+        for hook in _user_creation_hooks_sync:
+            hook(username)
         return record
 
     async def get_user_root(self, username: str) -> Path:
@@ -399,11 +432,11 @@ class AuthService:
         if self._sync_store.is_empty():
             password = os.getenv("AEGIS_ADMIN_PASSWORD", "admin")
             self.create_user_sync("admin", password, groups=["admin"])
-        _group_store.ensure_admin_group_sync()
+        self._sync_group_store.ensure_admin_group_sync()
 
 
 _store = UserStore()
 _group_store = GroupStore()
-auth_service = AuthService(_store, _store)
+auth_service = AuthService(_store, _store, _group_store)
 group_store = _group_store
 user_store = _store
