@@ -24,6 +24,10 @@ wheels/
 .venv/
 Pipfile.lock
 
+# pytest
+.coverage
+htmlcov/
+
 # Environment
 .env
 .venv

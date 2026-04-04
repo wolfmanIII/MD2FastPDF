@@ -25,3 +25,10 @@ def patch_blueprints_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Pa
     root.mkdir()
     monkeypatch.setattr("logic.blueprints.BLUEPRINTS_ROOT", root)
     return root
+
+
+@pytest.fixture()
+def patch_comms_base(tmp_workspace: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Patches logic.comms._workspace_base to return tmp_workspace."""
+    monkeypatch.setattr("logic.comms._workspace_base", lambda: tmp_workspace)
+    return tmp_workspace
