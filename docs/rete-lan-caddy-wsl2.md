@@ -60,6 +60,7 @@ netsh interface portproxy show all
 ```
 
 Verifica se il task é attivo:
+
 ```powershell
 Get-ScheduledTask -TaskName "WSL2 PortProxy SC-ARCHIVE"
 ```
@@ -86,7 +87,7 @@ sudo nano /etc/caddy/Caddyfile
 Contenuto (sostituisce tutto):
 
 ```
-http://sc-archive.lan {
+http://sc-archive.lan:80 {
     reverse_proxy 192.168.1.11:8000
 }
 ```
@@ -124,7 +125,34 @@ ipconfig /flushdns
 
 ---
 
-## 5. Verifica
+## 5. Log del servizio
+
+### SC-ARCHIVE (WSL2 — systemd utente)
+
+```bash
+# Segui i log in tempo reale
+journalctl --user -u sc-archive.service -f
+
+# Ultime 100 righe
+journalctl --user -u sc-archive.service -n 100
+
+# Tutto lo storico
+journalctl --user -u sc-archive.service
+```
+
+### Caddy (Raspberry Pi)
+
+```bash
+# Segui i log in tempo reale
+sudo journalctl -u caddy -f
+
+# Ultime 100 righe
+sudo journalctl -u caddy -n 100
+```
+
+---
+
+## 6. Verifica
 
 ```powershell
 ping sc-archive.lan
