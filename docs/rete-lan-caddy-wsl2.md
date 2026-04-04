@@ -6,7 +6,7 @@
 
 ## Infrastruttura
 
-```
+```text
 Browser (LAN) → Raspberry Pi :80 (Caddy) → PC Windows :8000 (portproxy) → WSL2 :8000 (SC-ARCHIVE)
 ```
 
@@ -86,7 +86,7 @@ sudo nano /etc/caddy/Caddyfile
 
 Contenuto (sostituisce tutto):
 
-```
+```caddy
 http://sc-archive.lan:80 {
     reverse_proxy 192.168.1.11:8000
 }
@@ -105,13 +105,13 @@ sudo systemctl status caddy
 
 Apri Blocco Note **come amministratore** e modifica:
 
-```
+```text
 C:\Windows\System32\drivers\etc\hosts
 ```
 
 Aggiungi in fondo:
 
-```
+```text
 192.168.1.20    sc-archive.lan
 ```
 
