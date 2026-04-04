@@ -129,8 +129,6 @@
 
 ### 1.13 AEGIS GROUP_SPACE (v5.9.0) — COMPLETED
 
-
-
 - **Workspace condiviso per gruppo**: `~/sc-archive/{group_name}/` creato automaticamente alla creazione del gruppo. Boot migration per gruppi preesistenti. ✓
 - **Modello permessi**: root del gruppo — admin R+W, membri R; `shared/` — membri R+W, admin R. Enforced a livello `logic/groupspace.py` (zero fiducia nel frontend). ✓
 - **GROUP_SPACE hub**: link in navbar, lista gruppi accessibili all'utente corrente. ✓
