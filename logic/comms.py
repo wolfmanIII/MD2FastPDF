@@ -20,6 +20,11 @@ from logic.exceptions import CommsError, NotFoundError, AccessDeniedError
 _COMMS_SUBFOLDERS: tuple[str, ...] = ("inbound", "outbound", "staging")
 
 
+def _workspace_base() -> Path:
+    """Returns the resolved workspace base path from settings."""
+    return Path(settings.get("workspace_base", str(Path.home() / "sc-archive"))).resolve()
+
+
 @dataclass(frozen=True)
 class MessageRecord:
     """Immutable representation of a single comms transmission."""
@@ -93,8 +98,7 @@ class CommsManager:
 
     def _workspace_root(self, username: str) -> Path:
         """All users (including admin) map to workspace_base/username."""
-        base = Path(settings.get("workspace_base", str(Path.home() / "sc-archive")))
-        return (base / username).resolve()
+        return _workspace_base() / username
 
     def _comms_root(self, username: str) -> Path:
         return self._workspace_root(username) / "comms"
@@ -258,20 +262,25 @@ class CommsManager:
             filename=filename,
         )
         recipients = self._expand_recipients(recipient_str, allowed_usernames, sender)
-        home = Path.home().resolve()
+        base = _workspace_base()
         inbound_paths: list[tuple[str, Path]] = []
         for recipient in recipients:
             inbound_path = self._inbound(recipient) / filename
-            if not str(inbound_path.resolve()).startswith(str(home)):
+            if not inbound_path.is_relative_to(base):
                 raise AccessDeniedError(
-                    f"COMMS: Recipient path outside home boundary: {recipient}"
+                    f"COMMS: Recipient path outside workspace boundary: {recipient}"
                 )
             inbound_paths.append((recipient, inbound_path))
-        # All paths validated — write outbound, then each inbound
+        # All paths validated — write outbound, then deliver to each recipient in parallel
         await self._write_message_file(self._outbound(sender) / filename, record)
-        for recipient, inbound_path in inbound_paths:
+
+        async def _deliver(recipient: str, inbound_path: Path) -> None:
             await self.ensure_comms_folders(recipient)
             await self._write_message_file(inbound_path, record)
+
+        async with anyio.create_task_group() as tg:
+            for recipient, inbound_path in inbound_paths:
+                tg.start_soon(_deliver, recipient, inbound_path)
         return record
 
     async def mark_read(self, username: str, folder: str, filename: str) -> None:
