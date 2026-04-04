@@ -17,7 +17,6 @@ import anyio
 from config.settings import settings
 from logic.exceptions import CommsError, NotFoundError, AccessDeniedError
 
-_ADMIN_USERNAME: str = "admin"
 _COMMS_SUBFOLDERS: tuple[str, ...] = ("inbound", "outbound", "staging")
 
 
@@ -93,9 +92,7 @@ class CommsManager:
     """
 
     def _workspace_root(self, username: str) -> Path:
-        """Admin maps to Path.home(). Others to workspace_base/username."""
-        if username == _ADMIN_USERNAME:
-            return Path.home().resolve()
+        """All users (including admin) map to workspace_base/username."""
         base = Path(settings.get("workspace_base", str(Path.home() / "sc-archive")))
         return (base / username).resolve()
 
