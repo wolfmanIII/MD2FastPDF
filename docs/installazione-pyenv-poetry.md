@@ -87,6 +87,27 @@ Per inizializzare un progetto con Python 3.13 e Poetry:
     ```bash
     poetry install
     ```
+6 **Installazione Dipendenze di Sviluppo** (include pytest):
+    ```bash
+    poetry install --with dev
+    ```
+
+---
+
+## 🧪 5. Esecuzione Test Suite
+
+Il progetto include una suite pytest con 170 test (unit + async I/O). Richiede le dipendenze dev installate.
+
+```bash
+# Tutti i test
+poetry run pytest
+
+# Con report copertura
+poetry run pytest --cov=logic --cov-report=term-missing
+
+# File specifico
+poetry run pytest tests/test_comms_async.py -v
+```
 
 ---
 *Designed for the narrators of the SC-ARCHIVE station.*

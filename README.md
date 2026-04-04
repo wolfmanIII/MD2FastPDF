@@ -129,7 +129,20 @@ Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
 - `templates/components/`: Frammenti HTML/HTMX industriali.
 - `templates/layouts/`: Layout base (`base.html`).
 - `static/css/`: Design system Aegis — `output.css`, `editor-aegis.css`, `pdf-industrial.css`, `pdf-preview.css`.
+- `tests/`: Suite pytest — unit test e async I/O test per il layer `logic/`.
 - `docs/`: Database di documentazione operativa e tecnica.
+
+## 🧪 Test Suite
+
+```bash
+# Esegui tutti i test
+poetry run pytest
+
+# Con report di copertura
+poetry run pytest --cov=logic --cov-report=term-missing
+```
+
+170 test, 0 fallimenti. Copertura: `blueprints.py` 100%, `comms.py` 93%, `groupspace.py` 92%. I moduli `conversion`, `oracle`, `render` richiedono Gotenberg/Ollama — non inclusi nella suite unit.
 
 ---
 *Progettato per i narratori della stazione SC-ARCHIVE.*

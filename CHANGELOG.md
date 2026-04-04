@@ -1,6 +1,25 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.9.1] - AEGIS TEST SUITE: UNIT + ASYNC I/O (2026-04-04)
+Suite pytest completa per il layer `logic/`. 170 test, 0 fallimenti. Copertura: `blueprints.py` 100%, `comms.py` 93%, `groupspace.py` 92%.
+
+### Added
+- **`tests/conftest.py`**: Fixture condivise — `tmp_workspace`, `patch_groupspace_base`, `patch_blueprints_root`, `patch_comms_base`. Isolamento filesystem via `monkeypatch` + `tmp_path`.
+- **`tests/test_auth.py`**: 6 test su `UserRecord.to_dict()` e `UserStore._build_record()` (retrocompatibilità `groups=[]`).
+- **`tests/test_blueprints.py`**: 10 test su `BlueprintManager._sanitize()`, `_display_name()`, `group_by_category()`.
+- **`tests/test_groupspace.py`**: 15 test su `GroupSpaceAccess` (has_access, can_write, is_read_only) e `GroupSpaceManager.sanitize()`.
+- **`tests/test_comms.py`**: 29 test su `FrontmatterParser` (parse/serialize), `MessageRecord.recipients`, `CommsManager.allowed_recipients()`, `_expand_recipients()`, `_slugify()`.
+- **`tests/test_blueprints_async.py`**: 14 test async su `BlueprintManager` — list, read, write, delete con fixture filesystem isolato.
+- **`tests/test_groupspace_async.py`**: 27 test async su `GroupSpaceManager` — list_contents, read_file, write_file, create_file, delete_file con enforcement permessi.
+- **`tests/test_comms_async.py`**: 29 test async su `CommsManager` — create_comms_folders, list_folder, send_message, mark_read, delete_message, count_unread, save_draft, promote_draft.
+
+### Changed
+- **`pyproject.toml`**: Aggiunto `[tool.poetry.group.dev.dependencies]` — `pytest >=8.0`, `pytest-cov >=6.0`, `pytest-anyio`. Aggiunto `[tool.pytest.ini_options]` con `testpaths = ["tests"]`.
+- **`.gitignore`**: Aggiunti `.coverage` e `htmlcov/`.
+
+---
+
 ## [5.9.0] - SOLID REFACTORING: AUTH HOOKS, BLUEPRINT LOGIC, GROUPSPACE TEMPLATE (2026-04-04)
 Refactoring SOLID post-feature su moduli recentemente introdotti. Nessuna modifica funzionale.
 

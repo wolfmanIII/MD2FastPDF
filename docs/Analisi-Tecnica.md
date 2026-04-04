@@ -186,4 +186,48 @@ icons/            — SVG inline components
 
 ---
 
-Documento Tecnico Aegis Class System // v5.9.0
+## 6. Test Suite (v5.9.1)
+
+### 6.1 Struttura
+
+```text
+tests/
+  conftest.py              — fixture condivise (tmp_workspace, patch_*_base)
+  test_auth.py             — UserRecord, UserStore._build_record
+  test_blueprints.py       — BlueprintManager._sanitize, _display_name, group_by_category
+  test_groupspace.py       — GroupSpaceAccess, GroupSpaceManager.sanitize
+  test_comms.py            — FrontmatterParser, MessageRecord, CommsManager (metodi puri)
+  test_blueprints_async.py — BlueprintManager async I/O (list, read, write, delete)
+  test_groupspace_async.py — GroupSpaceManager async I/O (list_contents, read/write/create/delete_file)
+  test_comms_async.py      — CommsManager async I/O (send, mark_read, delete, draft, promote)
+```
+
+### 6.2 Strategia di Isolamento
+
+- **Fixture `patch_*_base`**: `monkeypatch.setattr` sostituisce il modulo-level `_workspace_base()` (o `BLUEPRINTS_ROOT`) con un `tmp_path` isolato per test. Nessun side-effect sul filesystem reale.
+- **Backend anyio**: ogni test `@pytest.mark.anyio` viene eseguito due volte — con `asyncio` e con `trio` — garantendo compatibilità cross-backend dell'I/O asincrono.
+- **Test puri vs async**: classi e metodi statici testati senza I/O (rapidi, deterministici); operazioni async testate con filesystem reale in-memory via `tmp_path`.
+
+### 6.3 Copertura
+
+| Modulo | Copertura | Note |
+| --- | --- | --- |
+| `blueprints.py` | 100% | Incluse list, read, write, delete |
+| `comms.py` | 93% | Escluse righe IOError/OSError impossibili da triggerare |
+| `groupspace.py` | 92% | Escluse righe settings-fallback e branch IOError |
+| `auth.py` | 38% | Solo `UserRecord` e `UserStore._build_record` — `AuthService` richiede bcrypt/filesystem reale |
+| `conversion.py` | 0% | Richiede Gotenberg attivo |
+| `oracle.py` | 0% | Richiede Ollama attivo |
+| `render.py` | 0% | Richiede Gotenberg attivo |
+
+### 6.4 Esecuzione
+
+```bash
+poetry run pytest                                        # suite completa
+poetry run pytest --cov=logic --cov-report=term-missing # con coverage
+poetry run pytest tests/test_comms_async.py -v          # singolo file
+```
+
+---
+
+Documento Tecnico Aegis Class System // v5.9.1

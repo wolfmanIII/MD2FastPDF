@@ -102,7 +102,7 @@
 
 ### 1.10 AEGIS COMMS — Sistema di Messaggistica [5.0] (v5.6.0)
 
-- **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root utente. Admin: `~/comms/`. Utenti: `~/sc-archive/{user}/comms/`. Creazione automatica alla registrazione. ✓
+- **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root utente. Tutti gli utenti (incluso admin): `~/sc-archive/{user}/comms/`. Creazione automatica alla registrazione. ✓
 - **Formato**: file `.md` con frontmatter (id, from, to, subject, timestamp, read). Parsing `re` stdlib — zero dipendenze aggiuntive. ✓
 - **Invio**: dual-write su `outbound/` sender + `inbound/` recipient. Cross-workspace write con path assoluti + security assertion su `Path.home()`. ✓
 - **Broadcast GM**: admin trasmette a `ALL` — copia individuale in ogni `inbound/` (read/unread per-utente indipendente). ✓
@@ -129,6 +129,8 @@
 
 ### 1.13 AEGIS GROUP_SPACE (v5.9.0) — COMPLETED
 
+
+
 - **Workspace condiviso per gruppo**: `~/sc-archive/{group_name}/` creato automaticamente alla creazione del gruppo. Boot migration per gruppi preesistenti. ✓
 - **Modello permessi**: root del gruppo — admin R+W, membri R; `shared/` — membri R+W, admin R. Enforced a livello `logic/groupspace.py` (zero fiducia nel frontend). ✓
 - **GROUP_SPACE hub**: link in navbar, lista gruppi accessibili all'utente corrente. ✓
@@ -137,6 +139,15 @@
 - **CRUD file**: crea, elimina file — bloccato se l'utente non ha permessi di scrittura nella directory corrente. ✓
 - **Path sanitization**: `GroupSpaceManager.sanitize()` previene traversal fuori da `{workspace_base}/{group_name}/`. ✓
 - **Accesso revoca immediata**: accesso verificato a ogni request da `GroupSpaceAccess.has_access()` — la rimozione dal gruppo è effettiva alla prossima request. ✓
+
+### 1.14 AEGIS TEST SUITE (v5.9.1) — COMPLETED
+
+- **Suite pytest**: 170 test, 0 fallimenti. Eseguiti su entrambi i backend anyio (`asyncio` e `trio`). ✓
+- **Unit test** (`tests/test_auth.py`, `test_comms.py`, `test_groupspace.py`, `test_blueprints.py`): 60 test su classi pure — nessun I/O, nessuna rete, nessun filesystem reale. ✓
+- **Async I/O test** (`tests/test_*_async.py`): 110 test su operazioni filesystem async tramite fixture `tmp_path` + `monkeypatch`. ✓
+- **Isolamento**: `patch_groupspace_base`, `patch_blueprints_root`, `patch_comms_base` — ogni test usa una directory isolata, nessuna scrittura sul filesystem reale. ✓
+- **Copertura**: `blueprints.py` 100%, `comms.py` 93%, `groupspace.py` 92%. I moduli `conversion`, `oracle`, `render` richiedono servizi esterni (Gotenberg/Ollama) — esclusi dalla suite unit. ✓
+- **Dev dependencies**: `pytest >=8.0`, `pytest-cov >=6.0`, `pytest-anyio` in `[tool.poetry.group.dev.dependencies]`. ✓
 
 ---
 
@@ -184,6 +195,7 @@ bin/            launch.sh, create_user.sh
 | [5.0] | AEGIS COMMS | **COMPLETED** |
 | [5.1] | AEGIS GROUPS & ADMIN | **COMPLETED** |
 | [5.2] | AEGIS GROUP_SPACE | **COMPLETED** |
+| [5.3] | AEGIS TEST SUITE | **COMPLETED** |
 
 ---
 
