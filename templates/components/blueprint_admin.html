@@ -14,17 +14,49 @@
     <form hx-post="/blueprints/save"
           hx-target="#blueprint-admin-panel"
           hx-swap="outerHTML"
-          class="space-y-3 mt-3">
+          class="space-y-3 mt-3"
+          onsubmit="return bpValidate()">
+      <input type="hidden" name="category" id="bp-category-value">
       <div class="grid grid-cols-2 gap-3">
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-2">
           <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Category</label>
-          <input type="text" name="category" placeholder="narrative" class="w-full" required>
+          <select id="bp-category-select" class="w-full" onchange="bpCategoryChange(this)">
+            {% for cat in categories.keys() %}
+            <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+            <option value="__new__">+ new category</option>
+          </select>
+          <input type="text" id="bp-category-new" placeholder="new-category-name"
+                 class="w-full hidden" oninput="bpCategoryChange(document.getElementById('bp-category-select'))">
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Filename</label>
           <input type="text" name="filename" placeholder="session-log" class="w-full" required>
         </div>
       </div>
+      <script>
+        function bpCategoryChange(sel) {
+          const newInput = document.getElementById('bp-category-new');
+          const hidden = document.getElementById('bp-category-value');
+          if (sel.value === '__new__') {
+            newInput.classList.remove('hidden');
+            hidden.value = newInput.value.trim();
+          } else {
+            newInput.classList.add('hidden');
+            hidden.value = sel.value;
+          }
+        }
+        function bpValidate() {
+          const hidden = document.getElementById('bp-category-value');
+          if (!hidden.value.trim()) {
+            document.getElementById('bp-category-new').focus();
+            return false;
+          }
+          return true;
+        }
+        // Init on load
+        (function() { bpCategoryChange(document.getElementById('bp-category-select')); })();
+      </script>
       <div class="flex flex-col gap-1">
         <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Content (Markdown)</label>
         <textarea name="content" rows="12" class="w-full font-mono text-sm" placeholder="# Template Title&#10;&#10;[content]" required></textarea>
