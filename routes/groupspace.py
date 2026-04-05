@@ -42,6 +42,8 @@ async def groupspace_hub(request: Request):
 @router.get("/{group_name}/files", response_class=HTMLResponse)
 async def groupspace_files(request: Request, group_name: str, path: str = ""):
     """File browser for a group workspace."""
+    if path == ".":
+        path = ""
     username = get_current_user(request)
     user_groups = await _get_user_groups(username)
     items = await GroupSpaceManager.list_contents(group_name, path, user_groups)
