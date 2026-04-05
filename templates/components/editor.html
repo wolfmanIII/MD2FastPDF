@@ -141,6 +141,12 @@
                         className: "fa fa-file-zipper",
                         title: "Export All Mermaid Diagrams (ZIP)"
                     },
+                    {
+                        name: "aegis-blueprint",
+                        action: () => htmx.ajax('GET', '/blueprints/modal', { target: '#modal-container' }),
+                        className: "fa fa-book-open",
+                        title: "Blueprint Archive"
+                    },
                     "|",
                     {
                         name: "aegis-save",

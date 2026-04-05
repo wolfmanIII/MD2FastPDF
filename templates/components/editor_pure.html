@@ -52,8 +52,8 @@
                     <button hx-get="/blueprints/modal"
                             hx-target="#modal-container"
                             hx-swap="innerHTML"
-                            class="btn-ghost text-[10px] px-3 h-10 font-mono tracking-widest" title="Blueprint Archive">
-                        BLUEPRINT_ARCHIVE
+                            class="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-all rounded-md text-(--neon-cyan) hover:text-white border border-(--neon-cyan-dim)/20 hover:border-white/20 shadow-[0_0_10px_rgba(0,240,255,0.1)]" title="Blueprint Archive">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     </button>
                     <button onclick="insertTag('\n```mermaid\ngraph TD\n    A[START] --> B(PROCESS)\n```\n', '')" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-all rounded-md text-(--neon-cyan) hover:text-white border border-(--neon-cyan-dim)/20 hover:border-white/20 shadow-[0_0_10px_rgba(0,240,255,0.1)]" title="Mermaid Diagram">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21l4-4m0 0l4 4m-4-4V3"></path></svg>
