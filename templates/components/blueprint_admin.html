@@ -46,6 +46,32 @@
             hidden.value = sel.value;
           }
         }
+        async function bpLoadEdit(path, category, filename) {
+          try {
+            const res = await fetch('/blueprints/content?path=' + encodeURIComponent(path));
+            if (!res.ok) return;
+            const data = await res.json();
+            const sel = document.getElementById('bp-category-select');
+            const newInput = document.getElementById('bp-category-new');
+            const hidden = document.getElementById('bp-category-value');
+            const opt = Array.from(sel.options).find(o => o.value === category);
+            if (opt) {
+              sel.value = category;
+              newInput.classList.add('hidden');
+              hidden.value = category;
+            } else {
+              sel.value = '__new__';
+              newInput.classList.remove('hidden');
+              newInput.value = category;
+              hidden.value = category;
+            }
+            document.querySelector('[name="filename"]').value = filename;
+            document.querySelector('[name="content"]').value = data.content;
+            document.getElementById('bp-category-select').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } catch (e) {
+            console.error('BLUEPRINT_LOAD_FAILED', e);
+          }
+        }
         function bpValidate() {
           const hidden = document.getElementById('bp-category-value');
           if (!hidden.value.trim()) {
@@ -84,17 +110,24 @@
         {% for bp in items %}
         <div class="flex items-center justify-between px-3 py-2 bg-zinc-900/50 border border-zinc-800">
           <span class="font-mono text-xs text-zinc-300 uppercase tracking-wider">{{ bp.name }}</span>
-          <form hx-post="/blueprints/delete"
-                hx-target="#blueprint-admin-panel"
-                hx-swap="outerHTML"
-                hx-confirm="PURGE {{ bp.name }}?"
-                class="m-0">
-            <input type="hidden" name="path" value="{{ bp.path }}">
-            <button type="submit"
-                    class="btn btn-error btn-sm btn-solid border-none bg-red-600 hover:bg-red-500 text-white font-bold tracking-widest">
-              PURGE
+          <div class="flex items-center gap-2">
+            <button type="button"
+                    onclick="bpLoadEdit('{{ bp.path }}', '{{ bp.category }}', '{{ bp.name | replace(' ', '-') | lower }}')"
+                    class="btn btn-ghost btn-sm text-zinc-400 font-mono tracking-widest">
+              EDIT
             </button>
-          </form>
+            <form hx-post="/blueprints/delete"
+                  hx-target="#blueprint-admin-panel"
+                  hx-swap="outerHTML"
+                  hx-confirm="PURGE {{ bp.name }}?"
+                  class="m-0">
+              <input type="hidden" name="path" value="{{ bp.path }}">
+              <button type="submit"
+                      class="btn btn-error btn-sm btn-solid border-none bg-red-600 hover:bg-red-500 text-white font-bold tracking-widest">
+                PURGE
+              </button>
+            </form>
+          </div>
         </div>
         {% endfor %}
       </div>

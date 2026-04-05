@@ -48,7 +48,8 @@ async function insertBlueprint(path) {
     const res = await fetch('/blueprints/content?path=' + encodeURIComponent(path));
     if (!res.ok) return;
     const data = await res.json();
-    const textarea = document.getElementById('pure-editor-input');
+    const textarea = document.getElementById('gs-editor-input')
+                  || document.getElementById('pure-editor-input');
     if (!textarea) return;
     const separator = textarea.value.length > 0 ? '\n\n---\n\n' : '';
     textarea.value += separator + data.content;
