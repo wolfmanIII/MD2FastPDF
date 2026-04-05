@@ -1,28 +1,31 @@
 <div id="delete-modal" class="modal modal-open">
-    <div class="modal-box glass-panel border-red-500/50 max-w-md shadow-[0_0_30px_rgba(239,68,68,0.2)]">
-        <div class="flex items-center space-x-3 mb-4 text-red-500">
-            {% with class="w-6 h-6 animate-pulse" %}{% include 'icons/action-trash.html' %}{% endwith %}
-            <h2 class="text-xl font-bold tracking-[0.2em]">SISTEMA_DANGER // CONFIRMATION</h2>
-        </div>
-        
-        <p class="text-zinc-400 text-sm mb-6 tracking-wide uppercase">
-            YOU ARE ABOUT TO PERMANENTLY DELETE THIS FILE:<br>
-            <span class="text-white font-mono break-all">{{ filename }}</span>
-        </p>
-        
-        <div class="modal-action">
-            <button type="button" 
-                    onclick="closeAegisModal('delete-modal')"
-                    class="btn btn-ghost btn-sm text-zinc-500 uppercase tracking-widest">
-                CANCEL
-            </button>
-            <button hx-post="/delete" 
-                    hx-vals='{"path": "{{ path }}"}'
-                    hx-target="#aegis-view-core"
-                    hx-on::after-request="closeAegisModal('delete-modal')"
-                    class="btn btn-error btn-sm btn-solid border-none bg-red-600 hover:bg-red-500 text-white px-6 font-bold tracking-widest">
-                CONFIRM_PURGE
-            </button>
-        </div>
+  <div class="bg-zinc-900 border border-zinc-700 max-w-sm w-full rounded-none p-0">
+
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+      <span class="text-red-400 font-mono text-sm uppercase tracking-widest flex items-center gap-2">
+        {% with class="w-4 h-4 animate-pulse" %}{% include 'icons/action-trash.html' %}{% endwith %}
+        // PURGE_CONFIRMATION
+      </span>
+      <button onclick="closeAegisModal('delete-modal')" class="btn btn-ghost btn-sm text-zinc-500">✕</button>
     </div>
+
+    <div class="p-6 space-y-3">
+      <p class="text-zinc-400 text-xs uppercase tracking-wide">PERMANENT_DELETION // CANNOT_BE_UNDONE:</p>
+      <p class="text-white font-mono text-sm break-all border border-zinc-800 px-3 py-2">{{ filename }}</p>
+    </div>
+
+    <div class="px-6 py-3 border-t border-zinc-800 flex justify-end gap-2">
+      <button type="button" onclick="closeAegisModal('delete-modal')"
+              class="btn btn-ghost btn-sm text-zinc-500">ABORT //</button>
+      <button hx-post="/delete"
+              hx-vals='{"path": "{{ path }}"}'
+              hx-target="#aegis-view-core"
+              hx-on::after-request="closeAegisModal('delete-modal')"
+              class="btn btn-error btn-sm btn-solid border-none bg-red-600 hover:bg-red-500 text-white font-bold tracking-widest">
+        CONFIRM_PURGE //
+      </button>
+    </div>
+
+  </div>
+  <div class="modal-backdrop" onclick="closeAegisModal('delete-modal')"></div>
 </div>

@@ -1,107 +1,98 @@
 <div id="oracle-mermaid-modal" class="modal modal-open">
-    <div class="modal-box glass-panel border-zinc-800 max-w-xl w-full p-0 overflow-hidden shadow-2xl rounded-sm">
-        
-        <!-- Standard Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-black/40">
-            <h3 class="font-bold text-lg tracking-widest uppercase flex items-center space-x-3 text-violet-400">
-                <i class="fa fa-microchip"></i>
-                <span>Neural Synthesis</span>
-            </h3>
-            <button onclick="closeAegisModal('oracle-mermaid-modal')" class="text-zinc-500 hover:text-white transition-colors">
-                <span class="text-2xl">&times;</span>
-            </button>
-        </div>
-        
-        <div class="p-8">
-            {% if not neural_on %}
-            <div class="bg-red-950/20 border border-red-500/30 p-4 text-[11px] text-red-500 uppercase font-bold flex items-center space-x-3 mb-6">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <span>SYSTEM_OFFLINE: NEURAL_LINK_PROTOCOL_DISABLED</span>
-            </div>
-            {% endif %}
+  <div class="bg-zinc-900 border border-zinc-700 max-w-xl w-full rounded-none p-0">
 
-            <p class="text-zinc-400 text-xs uppercase tracking-wide leading-relaxed mb-8">
-                Describe the logical architecture or operational flow. The Oracle will synthesize these directives into a structural vector protocol for the central buffer.
-            </p>
-            
-            <!-- Standard Form Control -->
-            <div class="form-control w-full mb-6">
-                <label class="label">
-                    <span class="label-text text-zinc-300 text-xs uppercase tracking-widest font-bold mb-2">Input Specification</span>
-                </label>
-                <textarea id="mermaid-description" 
-                    placeholder="Ex: Sequence diagram where AEGIS requests data from CORE-TRANSIT..."
-                    class="aegis-input-bg textarea textarea-bordered w-full h-56 border-zinc-800 text-zinc-100 focus:border-[#a78bfa] leading-relaxed resize-none p-6 text-sm"></textarea>
-            </div>
-            
-            <div id="mermaid-error" class="mt-6 bg-red-950/20 border border-red-500/30 p-5 text-[11px] text-red-500 uppercase font-bold flex items-center space-x-3">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <span id="error-message-text"></span>
-            </div>
-
-            <div class="modal-action flex items-center justify-between mt-10">
-                <div class="text-[9px] text-zinc-700 uppercase font-mono tracking-widest">Oracle Link: Stable</div>
-                <div class="flex space-x-4">
-                    <button type="button" onclick="closeAegisModal('oracle-mermaid-modal')" 
-                            class="btn btn-ghost btn-sm text-zinc-500 uppercase tracking-widest">
-                        Cancel
-                    </button>
-
-                    <button type="button" id="synthesize-btn" 
-                        class="btn-violet btn-solid font-bold h-10 px-8 transition-all uppercase tracking-widest text-[11px] {% if not neural_on %}opacity-30 grayscale pointer-events-none{% endif %}"
-                        onclick="synthesizeMermaid()">
-                        Initialize
-                    </button>
-                </div>
-            </div>
-        </div>
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+      <span class="text-violet-400 font-mono text-sm uppercase tracking-widest flex items-center gap-2">
+        <i class="fa fa-microchip"></i>
+        // NEURAL_SYNTHESIS
+      </span>
+      <button onclick="closeAegisModal('oracle-mermaid-modal')" class="btn btn-ghost btn-sm text-zinc-500">✕</button>
     </div>
-    
-    <script>
-        async function synthesizeMermaid() {
-            const btn = document.getElementById('synthesize-btn');
-            const desc = document.getElementById('mermaid-description').value;
-            const error = document.getElementById('mermaid-error');
-            const errorText = document.getElementById('error-message-text');
-            
-            if (!desc.trim()) return;
-            
-            btn.disabled = true;
-            btn.innerHTML = 'SYNTHESIZING...';
-            error.style.display = 'none';
 
-            try {
-                const response = await fetch('/api/oracle/mermaid', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ description: desc })
-                });
-                
-                const data = await response.json();
-                
-                if (data.syntax && !data.syntax.startsWith('ERROR')) {
-                    const easyMDE = window.aegisEditor;
-                    if (easyMDE && easyMDE.codemirror) {
-                        const cm = easyMDE.codemirror;
-                        const cursor = cm.getCursor();
-                        const text = "\n```mermaid\n" + data.syntax + "\n```\n";
-                        cm.replaceRange(text, cursor);
-                        closeAegisModal('oracle-mermaid-modal');
-                    } else {
-                        errorText.textContent = 'SYSTEM_ERROR: LINK_LOST';
-                        error.style.display = 'flex';
-                    }
-                } else {
-                    errorText.textContent = data.syntax || 'NEURAL_LINK_FAILURE';
-                    error.style.display = 'flex';
-                }
-            } catch (err) {
-                errorText.textContent = 'NETWORK_DISRUPTION';
-                error.style.display = 'flex';
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Initialize';
-            }
-        }
-    </script>
+    <div class="p-6 space-y-4">
+      {% if not neural_on %}
+      <div class="bg-red-950/20 border border-red-500/30 p-4 text-[11px] text-red-500 uppercase font-bold flex items-center gap-3">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>SYSTEM_OFFLINE: NEURAL_LINK_PROTOCOL_DISABLED</span>
+      </div>
+      {% endif %}
+
+      <p class="text-zinc-400 text-xs uppercase tracking-wide leading-relaxed">
+        Describe the logical architecture or operational flow. The Oracle will synthesize these directives into a structural vector protocol for the central buffer.
+      </p>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">INPUT_SPECIFICATION</label>
+        <textarea id="mermaid-description"
+                  placeholder="Ex: Sequence diagram where AEGIS requests data from CORE-TRANSIT..."
+                  class="w-full resize-none" style="height: 180px;"></textarea>
+      </div>
+
+      <div id="mermaid-error" class="bg-red-950/20 border border-red-500/30 p-4 text-[11px] text-red-500 uppercase font-bold flex items-center gap-3" style="display:none">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span id="error-message-text"></span>
+      </div>
+    </div>
+
+    <div class="px-6 py-3 border-t border-zinc-800 flex items-center justify-between">
+      <span class="text-[9px] text-zinc-700 uppercase font-mono tracking-widest">ORACLE_LINK: STABLE</span>
+      <div class="flex gap-2">
+        <button type="button" onclick="closeAegisModal('oracle-mermaid-modal')"
+                class="btn btn-ghost btn-sm text-zinc-500">ABORT //</button>
+        <button type="button" id="synthesize-btn"
+                class="btn-solid text-[10px] rounded-sm {% if not neural_on %}opacity-30 grayscale pointer-events-none{% endif %}"
+                onclick="synthesizeMermaid()">SYNTHESIZE //</button>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-backdrop" onclick="closeAegisModal('oracle-mermaid-modal')"></div>
 </div>
+
+<script>
+async function synthesizeMermaid() {
+    const btn = document.getElementById('synthesize-btn');
+    const desc = document.getElementById('mermaid-description').value;
+    const error = document.getElementById('mermaid-error');
+    const errorText = document.getElementById('error-message-text');
+
+    if (!desc.trim()) return;
+
+    btn.disabled = true;
+    btn.innerHTML = 'SYNTHESIZING...';
+    error.style.display = 'none';
+
+    try {
+        const response = await fetch('/api/oracle/mermaid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ description: desc })
+        });
+
+        const data = await response.json();
+
+        if (data.syntax && !data.syntax.startsWith('ERROR')) {
+            const easyMDE = window.aegisEditor;
+            if (easyMDE && easyMDE.codemirror) {
+                const cm = easyMDE.codemirror;
+                const cursor = cm.getCursor();
+                const text = "\n```mermaid\n" + data.syntax + "\n```\n";
+                cm.replaceRange(text, cursor);
+                closeAegisModal('oracle-mermaid-modal');
+            } else {
+                errorText.textContent = 'SYSTEM_ERROR: LINK_LOST';
+                error.style.display = 'flex';
+            }
+        } else {
+            errorText.textContent = data.syntax || 'NEURAL_LINK_FAILURE';
+            error.style.display = 'flex';
+        }
+    } catch (err) {
+        errorText.textContent = 'NETWORK_DISRUPTION';
+        error.style.display = 'flex';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'SYNTHESIZE //';
+    }
+}
+</script>

@@ -1,104 +1,100 @@
-<div id="comms-compose-modal"
-    class="modal modal-open bg-black/80 backdrop-blur-sm z-100 flex items-center justify-center fixed inset-0">
-    <div class="modal-box glass-panel aegis-hud-modal max-h-[90vh] overflow-y-auto p-6 space-y-4">
+<div id="comms-compose-modal" class="modal modal-open">
+  <div class="bg-zinc-900 border border-zinc-700 max-w-2xl w-full rounded-none p-0 max-h-[90vh] flex flex-col">
 
-        <div class="flex items-center justify-between border-b border-(--glass-border) pb-3">
-            <h2 class="text-sm font-bold neon-text tracking-widest uppercase">SIGNAL_COMPOSER // NEW_TRANSMISSION</h2>
-            <button onclick="closeAegisModal('comms-compose-modal')"
-                class="btn btn-ghost btn-sm text-zinc-500">✕</button>
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800 shrink-0">
+      <span class="neon-text font-mono text-sm uppercase tracking-widest">// SIGNAL_COMPOSER // NEW_TRANSMISSION</span>
+      <button onclick="closeAegisModal('comms-compose-modal')" class="btn btn-ghost btn-sm text-zinc-500">✕</button>
+    </div>
+
+    <form hx-post="/comms/send" hx-target="#comms-content-panel"
+          hx-on::after-request="if(event.detail.elt === this) closeAegisModal('comms-compose-modal')"
+          class="flex flex-col flex-1 min-h-0">
+
+      <div class="p-6 space-y-4 overflow-y-auto flex-1">
+
+        <!-- Recipients -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">TO:</label>
+            <button type="button" id="select-all-btn" onclick="toggleAllRecipients()"
+                    class="btn-ghost text-[10px] rounded-sm focus:outline-none">SELECT ALL</button>
+          </div>
+          <div class="grid grid-cols-3 gap-2 max-h-28 overflow-y-auto border border-zinc-800 rounded-sm p-3">
+            {% for r in recipients %}
+            <label class="flex items-center gap-3 text-[10px] text-zinc-100 tracking-widest uppercase cursor-pointer hover:text-white transition-colors">
+              <input type="checkbox" name="recipients" value="{{ r }}"
+                     class="recipient-checkbox accent-(--neon-cyan)"
+                     {% if original and r == original.sender %}checked{% endif %}>
+              <span>{{ r }}</span>
+            </label>
+            {% endfor %}
+          </div>
         </div>
 
-        <form hx-post="/comms/send" hx-target="#comms-content-panel"
-              hx-on::after-request="if(event.detail.elt === this) closeAegisModal('comms-compose-modal')"
-              class="space-y-4">
+        <!-- Subject -->
+        <div class="space-y-1">
+          <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">SUBJECT:</label>
+          <input type="text" name="subject" class="w-full"
+                 value="{% if original %}Re: {{ original.subject }}{% endif %}"
+                 placeholder="TRANSMISSION_SUBJECT...">
+        </div>
 
-            <!-- Recipients -->
-            <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                    <label class="text-[10px] text-zinc-100 uppercase tracking-widest font-bold">TO:</label>
-                    <button type="button" id="select-all-btn" onclick="toggleAllRecipients()"
-                        class="btn-ghost text-[10px] rounded-sm focus:outline-none">
-                        SELECT ALL
-                    </button>
-                </div>
-                <div class="grid grid-cols-3 gap-2 max-h-28 overflow-y-auto border border-(--glass-border) rounded-sm p-3">
-                    {% for r in recipients %}
-                    <label class="flex items-center gap-3 text-[10px] text-zinc-100 tracking-widest uppercase cursor-pointer hover:text-white transition-colors">
-                        <input type="checkbox" name="recipients" value="{{ r }}"
-                            class="recipient-checkbox accent-(--neon-cyan)"
-                            {% if original and r == original.sender %}checked{% endif %}>
-                        <span>{{ r }}</span>
-                    </label>
-                    {% endfor %}
-                </div>
+        <!-- Body + Preview -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">BODY:</label>
+            <textarea name="body" id="comms-body"
+                      class="w-full resize-none font-mono text-[11px]" style="height: 200px;"
+                      placeholder="AWAITING_TRANSMISSION..."
+                      hx-post="/comms/preview"
+                      hx-trigger="input changed delay:300ms"
+                      hx-target="#comms-preview-panel"
+                      hx-swap="outerHTML"></textarea>
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">PREVIEW:</label>
+            <div id="comms-preview-panel"
+                 class="overflow-y-auto bg-black/40 border border-zinc-800 rounded-sm p-3 prose max-w-none normal-case"
+                 style="height: 200px;">
+              <span class="text-zinc-600 text-[10px] uppercase tracking-widest">AWAITING_INPUT...</span>
             </div>
+          </div>
+        </div>
 
-            <!-- Subject -->
-            <div class="space-y-1">
-                <label class="text-[10px] text-zinc-100 uppercase tracking-widest font-bold">SUBJECT:</label>
-                <input type="text" name="subject" class="w-full"
-                    value="{% if original %}Re: {{ original.subject }}{% endif %}"
-                    placeholder="TRANSMISSION_SUBJECT...">
-            </div>
-
-            <!-- Body + Preview side-by-side -->
-            <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-1">
-                    <label class="text-[10px] text-zinc-100 uppercase tracking-widest font-bold">BODY:</label>
-                    <textarea name="body" id="comms-body"
-                        class="w-full resize-none font-mono text-[11px]" style="height: 200px;"
-                        placeholder="AWAITING_TRANSMISSION..."
-                        hx-post="/comms/preview"
-                        hx-trigger="input changed delay:300ms"
-                        hx-target="#comms-preview-panel"
-                        hx-swap="outerHTML"></textarea>
-                </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] text-zinc-100 uppercase tracking-widest font-bold">PREVIEW:</label>
-                    <div id="comms-preview-panel"
-                        class="overflow-y-auto bg-black/40 border border-zinc-800 rounded-sm p-3 prose max-w-none normal-case"
-                        style="height: 200px;">
-                        <span class="text-zinc-600 text-[10px] uppercase tracking-widest">AWAITING_INPUT...</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ORIGINAL_SIGNAL (reply context only) -->
-            {% if original %}
-            <details class="glass-panel p-3">
-                <summary class="text-[10px] tracking-widest uppercase text-zinc-500 cursor-pointer hover:neon-text transition-colors select-none">
-                    ↩ ORIGINAL_SIGNAL ▶
-                </summary>
-                <div class="mt-3 space-y-2 text-[10px] text-zinc-500 tracking-widest uppercase border-t border-(--glass-border) pt-3">
-                    <div><span class="text-zinc-600">SUBJECT:</span> {{ original.subject }}</div>
-                    <div><span class="text-zinc-600">FROM:</span> {{ original.sender }}</div>
-                    <pre class="text-zinc-600 font-mono normal-case text-[10px] mt-2 leading-relaxed whitespace-pre-wrap">{{ original.body.split('\n')[:3] | join('\n') }}{% if original.body.split('\n') | length > 3 %}
+        <!-- Original signal (reply context) -->
+        {% if original %}
+        <details class="border border-zinc-800 p-3">
+          <summary class="text-[10px] tracking-widest uppercase text-zinc-500 cursor-pointer hover:neon-text transition-colors select-none">
+            ↩ ORIGINAL_SIGNAL ▶
+          </summary>
+          <div class="mt-3 space-y-2 text-[10px] text-zinc-500 tracking-widest uppercase border-t border-zinc-800 pt-3">
+            <div><span class="text-zinc-600">SUBJECT:</span> {{ original.subject }}</div>
+            <div><span class="text-zinc-600">FROM:</span> {{ original.sender }}</div>
+            <pre class="text-zinc-600 font-mono normal-case text-[10px] mt-2 leading-relaxed whitespace-pre-wrap">{{ original.body.split('\n')[:3] | join('\n') }}{% if original.body.split('\n') | length > 3 %}
 ...{% endif %}</pre>
-                </div>
-            </details>
-            {% endif %}
+          </div>
+        </details>
+        {% endif %}
 
-            <!-- Draft filename (hidden, used when overwriting a draft) -->
-            <input type="hidden" name="draft_filename" id="comms-draft-filename" value="">
+        <input type="hidden" name="draft_filename" id="comms-draft-filename" value="">
 
-            <!-- Actions -->
-            <div class="flex items-center justify-between pt-2 border-t border-(--glass-border)">
-                <div class="flex items-center space-x-3">
-                    <button type="button"
-                        hx-post="/comms/draft/save"
-                        hx-include="closest form"
-                        hx-target="#draft-save-feedback"
-                        class="btn-ghost text-[10px] rounded-sm focus:outline-none">
-                        BUFFER_DRAFT
-                    </button>
-                    <div id="draft-save-feedback"></div>
-                </div>
-                <button type="submit" class="btn-solid text-[10px] rounded-sm focus:outline-none">
-                    TRANSMIT //
-                </button>
-            </div>
-        </form>
-    </div>
+      </div>
+
+      <div class="px-6 py-3 border-t border-zinc-800 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+          <button type="button"
+                  hx-post="/comms/draft/save"
+                  hx-include="closest form"
+                  hx-target="#draft-save-feedback"
+                  class="btn-ghost text-[10px] rounded-sm focus:outline-none">BUFFER_DRAFT</button>
+          <div id="draft-save-feedback"></div>
+        </div>
+        <button type="submit" class="btn-solid text-[10px] rounded-sm">TRANSMIT //</button>
+      </div>
+
+    </form>
+  </div>
+  <div class="modal-backdrop" onclick="closeAegisModal('comms-compose-modal')"></div>
 </div>
 
 <script>

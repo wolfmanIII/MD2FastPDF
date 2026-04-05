@@ -1,32 +1,26 @@
 <div id="admin-group-modal" class="modal modal-open">
-  <div class="modal-box glass-panel border-(--neon-cyan)/30 max-w-sm flex flex-col gap-5">
+  <div class="bg-zinc-900 border border-zinc-700 max-w-sm w-full rounded-none p-0">
 
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
       <span class="neon-text font-mono text-sm uppercase tracking-widest">// ESTABLISH_TEAM</span>
-      <button onclick="closeAegisModal('admin-group-modal')"
-              class="btn btn-ghost btn-sm text-zinc-500">✕</button>
+      <button onclick="closeAegisModal('admin-group-modal')" class="btn btn-ghost btn-sm text-zinc-500">✕</button>
     </div>
 
-    <form
-      hx-post="/admin/groups/create"
-      hx-target="#admin-content-panel"
-      hx-on::after-request="closeAegisModal('admin-group-modal')"
-      class="flex flex-col gap-4">
+    <form hx-post="/admin/groups/create"
+          hx-target="#admin-content-panel"
+          hx-on::after-request="closeAegisModal('admin-group-modal')"
+          class="p-6 space-y-4">
       <div class="flex flex-col gap-1">
-        <label class="text-zinc-400 text-[10px] font-mono uppercase tracking-widest">TEAM_DESIGNATION</label>
-        <input type="text" name="group_name" required autocomplete="off"
-               class="w-full">
+        <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">TEAM_DESIGNATION</label>
+        <input type="text" name="group_name" required autocomplete="off" class="w-full">
       </div>
-      <div class="flex justify-end gap-2">
+      <div class="flex justify-end gap-2 pt-2 border-t border-zinc-800 mt-4">
         <button type="button" onclick="closeAegisModal('admin-group-modal')"
-                class="btn btn-ghost btn-sm text-zinc-500 uppercase tracking-widest">
-          ABORT
-        </button>
-        <button type="submit" class="btn-solid text-[10px] rounded-sm">
-          ESTABLISH //
-        </button>
+                class="btn btn-ghost btn-sm text-zinc-500">ABORT //</button>
+        <button type="submit" class="btn-solid text-[10px] rounded-sm">ESTABLISH //</button>
       </div>
     </form>
+
   </div>
   <div class="modal-backdrop" onclick="closeAegisModal('admin-group-modal')"></div>
 </div>

@@ -1,35 +1,32 @@
 <div id="admin-user-modal" class="modal modal-open">
-  <div class="modal-box glass-panel border-(--neon-cyan)/30 max-w-md flex flex-col gap-5">
+  <div class="bg-zinc-900 border border-zinc-700 max-w-md w-full rounded-none p-0">
 
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
       <span class="neon-text font-mono text-sm uppercase tracking-widest">
         {% if mode == "create" %}// ENLIST_PERSONNEL{% else %}// MODIFY_CLEARANCE // {{ user.username | upper }}{% endif %}
       </span>
-      <button onclick="closeAegisModal('admin-user-modal')"
-              class="btn btn-ghost btn-sm text-zinc-500">✕</button>
+      <button onclick="closeAegisModal('admin-user-modal')" class="btn btn-ghost btn-sm text-zinc-500">✕</button>
     </div>
 
     <form
       hx-post="{% if mode == 'create' %}/admin/users/create{% else %}/admin/users/{{ user.username }}/edit{% endif %}"
       hx-target="#admin-content-panel"
       hx-on::after-request="closeAegisModal('admin-user-modal')"
-      class="flex flex-col gap-4">
+      class="p-6 space-y-4">
 
       {% if mode == "create" %}
       <div class="flex flex-col gap-1">
-        <label class="text-zinc-400 text-[10px] font-mono uppercase tracking-widest">CALLSIGN</label>
-        <input type="text" name="new_username" required autocomplete="off"
-               class="w-full">
+        <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">CALLSIGN</label>
+        <input type="text" name="new_username" required autocomplete="off" class="w-full">
       </div>
       <div class="flex flex-col gap-1">
-        <label class="text-zinc-400 text-[10px] font-mono uppercase tracking-widest">ACCESS_KEY</label>
-        <input type="password" name="password" required autocomplete="new-password"
-               class="w-full">
+        <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">ACCESS_KEY</label>
+        <input type="password" name="password" required autocomplete="new-password" class="w-full">
       </div>
       {% endif %}
 
       <div class="flex flex-col gap-2">
-        <label class="text-zinc-400 text-[10px] font-mono uppercase tracking-widest">TEAM_ASSIGNMENT</label>
+        <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">TEAM_ASSIGNMENT</label>
         {% if groups %}
         <div class="flex flex-wrap gap-3">
           {% for g in groups %}
@@ -46,16 +43,15 @@
         {% endif %}
       </div>
 
-      <div class="flex justify-end gap-2">
+      <div class="flex justify-end gap-2 pt-2 border-t border-zinc-800 mt-4">
         <button type="button" onclick="closeAegisModal('admin-user-modal')"
-                class="btn btn-ghost btn-sm text-zinc-500 uppercase tracking-widest">
-          ABORT
-        </button>
+                class="btn btn-ghost btn-sm text-zinc-500">ABORT //</button>
         <button type="submit" class="btn-solid text-[10px] rounded-sm">
           {% if mode == "create" %}ENLIST //{% else %}UPDATE_CLEARANCE //{% endif %}
         </button>
       </div>
     </form>
+
   </div>
   <div class="modal-backdrop" onclick="closeAegisModal('admin-user-modal')"></div>
 </div>
