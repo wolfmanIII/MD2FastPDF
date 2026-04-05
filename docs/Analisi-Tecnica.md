@@ -3,7 +3,7 @@
 - **Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
 - **Nome Tecnico Interno**: MD2FastPDF
 - **Data**: 4 Aprile 2026
-- **Versione**: 5.9.0
+- **Versione**: 5.10.0
 
 ## 1. Architettura di Sistema
 
@@ -230,4 +230,4 @@ poetry run pytest tests/test_comms_async.py -v          # singolo file
 
 ---
 
-Documento Tecnico Aegis Class System // v5.9.1
+Documento Tecnico Aegis Class System // v5.10.0

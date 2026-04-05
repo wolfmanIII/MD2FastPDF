@@ -1,6 +1,6 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
 
-**Versione 5.9.0** // GROUP_SPACE & BLUEPRINT
+**Versione 5.10.0** // GROUP_SPACE & BLUEPRINT
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.

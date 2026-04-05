@@ -1,6 +1,33 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.10.0] - REFACTORING STRUTTURALE + BLUEPRINT COMPLETATO (2026-04-05)
+Riorganizzazione struttura progetto, completamento funzionalità blueprint (edit admin, accesso da groupspace), rimozione file morto `editor_pure.html`.
+
+### Added
+- **`config/settings.default.json`**: Template con valori di default per `settings.json` (inclusa chiave `blueprints_root` configurabile).
+
+### Changed
+- **`logic/templates.py` → `config/templates.py`**: Configurazione Jinja2 spostata fuori dal layer business logic.
+- **`routes/auth.py` → `routes/login.py`**: Rinominato per evitare ambiguità con `logic/auth.py`.
+- **`logic/blueprints.py`**: `BLUEPRINTS_ROOT` costante sostituita da `_blueprints_root()` — path leggibile da `settings.json` (chiave `blueprints_root`), fallback al default di progetto.
+- **`templates/components/blueprint_admin.html`**: Campo Category trasformato in `<select>` con categorie esistenti + opzione "nuova categoria" con input libero. Aggiunto bottone EDIT per caricare un blueprint esistente nella form.
+- **`templates/components/blueprint_modal.html`**: `insertBlueprint()` usa `window.aegisEditor` (EasyMDE) se disponibile, altrimenti fallback su textarea (`#gs-editor-input` / `#pure-editor-input`).
+- **`templates/components/editor.html`**: Aggiunto bottone `BLUEPRINT_ARCHIVE` (`fa-book-open`) nella toolbar EasyMDE.
+- **`templates/components/groupspace_editor.html`**: Aggiunto bottone `BLUEPRINT_ARCHIVE` nella toolbar. Fix layout: `#gs-editor-root` ora partecipa alla catena flex (`grow flex flex-col min-h-0`).
+- **`routes/admin.py`**: `admin_panel` fetcha blueprints e passa `blueprints` + `categories` al contesto — necessario per il tab blueprint incluso via `{% include %}`.
+- **`.gitignore`**: Aggiunto `config/settings.json` (contiene IP/endpoint runtime, non va in repo).
+
+### Removed
+- **`templates/components/editor_pure.html`**: File morto — non referenziato da nessun template o route.
+
+### Fixed
+- Blueprint non accessibili dal groupspace editor.
+- Blueprint non modificabili dal pannello admin.
+- Crash `UndefinedError: 'categories' is undefined` su `/admin?tab=blueprints`.
+
+---
+
 ## [5.9.1] - AEGIS TEST SUITE: UNIT + ASYNC I/O (2026-04-04)
 Suite pytest completa per il layer `logic/`. 170 test, 0 fallimenti. Copertura: `blueprints.py` 100%, `comms.py` 93%, `groupspace.py` 92%.
 
@@ -47,7 +74,7 @@ Libreria template Markdown app-wide per documenti narrativi. Gestione admin inte
 - **`blueprints/narrative/`**: 5 template iniziali — `session-log.md`, `npc-profile.md`, `planet-description.md`, `ship-description.md`, `location-description.md`.
 
 ### Changed
-- **`templates/components/editor_pure.html`**: Aggiunto bottone `BLUEPRINT_ARCHIVE` in toolbar (prima del bottone Mermaid).
+- **`templates/components/editor.html`**: Aggiunto bottone `BLUEPRINT_ARCHIVE` nella toolbar EasyMDE.
 - **`routes/admin.py`**: Tab `BLUEPRINT_ARCHIVE` nel pannello SYS_ADMIN; terzo tab che serve `blueprint_admin.html`.
 - **`templates/components/admin_panel.html`**: Aggiunto tab BLUEPRINT_ARCHIVE; navigazione tab tramite `/admin?tab=X` per aggiornamento corretto dello stato attivo.
 - **`main.py`**: Registrazione `blueprint.router`.
@@ -175,7 +202,7 @@ Refactoring architetturale completo per conformità SOLID e rimozione totale deg
 ### Fixed — CSP Compliance
 - **Eliminati tutti gli attributi `style=` inline** dai template (9 file) e dagli snippet HTML generati dai route (`routes/archive.py`, `routes/editor.py`).
 - Nuove classi CSS in `main.css`: `.aegis-input-bg`, `.btn-violet`, `.aegis-hud-modal`, `#mermaid-error`.
-- Nuove classi in `editor-aegis.css`: `#editor-pure-root`, `#pure-editor-input`, `.aegis-panel-bg`, `#editor-easymde-root`, `#aegis-filetree`, `#editor-scan-overlay`, `.aegis-editor-header`, `.aegis-editor-main`.
+- Nuove classi in `editor-aegis.css`: `.aegis-panel-bg`, `#editor-easymde-root`, `#aegis-filetree`, `#editor-scan-overlay`, `.aegis-editor-header`, `.aegis-editor-main`.
 - Rimangono 2 soli `style=` intenzionali (valori CSS dinamici Jinja2: `--w: {{ value }}%` in `dashboard.html` e `stats_grid.html`).
 - I `style=` in `logic/conversion.py` (header/footer Gotenberg) sono strutturalmente necessari: Gotenberg non ha accesso ai file statici dell'app.
 
