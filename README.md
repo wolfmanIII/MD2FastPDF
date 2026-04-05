@@ -30,10 +30,10 @@
 - **Aegis Render Engine**: Export PNG singolo e ZIP bulk dei diagrammi Mermaid direttamente da file `.md` o dalla toolbar dell'editor.
 - **Backend Services Status**: Due pannelli dashboard separati per Gotenberg e Ollama con telemetria real-time (stato, endpoint, modelli chat/embedding).
 - **Aegis Oracle (Precision v5.2.0)**:
-    * **Context Isolation**: Utilizzo di delimitatori `[CONTEXT_START]` per il Ghost-Text, eliminando il fenomeno dell'"eco" e garantendo il completamento delle frasi.
-    *   **Broadcast Offline Protocol**: Il sistema comunica lo stato disattivato tramite alert pulsanti (`!! NEURAL_PROTOCOL_OFFLINE !!`) e banner informativi nel modale Mermaid.
-    *   **Hardened Scans**: Finestra di contesto a 16.384 token e temperatura 0.3 per riepiloghi tecnici ad alta precisione.
-    *   **Surgical Sanitization**: Sanitizzazione chirurgica delle allucinazioni HTML per preservare la struttura HUD.
+  - **Context Isolation**: Utilizzo di delimitatori `[CONTEXT_START]` per il Ghost-Text, eliminando il fenomeno dell'"eco" e garantendo il completamento delle frasi.
+    - **Broadcast Offline Protocol**: Il sistema comunica lo stato disattivato tramite alert pulsanti (`!! NEURAL_PROTOCOL_OFFLINE !!`) e banner informativi nel modale Mermaid.
+    - **Hardened Scans**: Finestra di contesto a 16.384 token e temperatura 0.3 per riepiloghi tecnici ad alta precisione.
+    - **Surgical Sanitization**: Sanitizzazione chirurgica delle allucinazioni HTML per preservare la struttura HUD.
 - **Aegis Uplink Config (v5.0.0)**: Terminale di configurazione centralizzato per la gestione dei parametri operativi (Ollama, Gotenberg, Neural Models) con persistenza locale in `config/settings.json`.
 - **Aegis Industrial UI**: Standardizzazione globale di tutti i campi input, select e textarea con estetica terminale pura, dimensioni ottimizzate (12px) e rimozione dei bordi framework.
 - **Neural Model Intelligence**: Filtro automatico dei modelli Ollama per escludere i motori di embedding dai menu di chat e sintesi.
@@ -55,12 +55,14 @@ Al **primo avvio**, SC-ARCHIVE crea automaticamente l'utente `admin` con passwor
 
 > [!TIP]
 > Per scegliere una password di default diversa da `admin` **prima** del primo avvio (quando `~/.config/sc-archive/users.json` non esiste ancora), esporta la variabile d'ambiente prima di lanciare:
+>
 > ```bash
 > export AEGIS_ADMIN_PASSWORD="la-tua-password"
 > ./bin/launch.sh
 > ```
+>
 > Se `~/.config/sc-archive/users.json` esiste già, questa variabile non ha effetto — usa Settings per cambiare la password.
-
+>
 > [!NOTE]
 > Per resettare l'utente admin, cancella il record `"admin"` da `~/.config/sc-archive/users.json` — al prossimo avvio viene ricreato con `AEGIS_ADMIN_PASSWORD` (default: `admin`).
 > In alternativa, usa direttamente `./bin/create_user.sh admin nuova_password` per sovrascrivere l'hash senza toccare il file.
@@ -76,6 +78,7 @@ La stazione **SC-ARCHIVE** richiede un ambiente Linux (Ubuntu 24.04 raccomandato
 ### 1. Ambiente Python & Dipendenze
 
 Il progetto utilizza `pyenv` per la gestione delle versioni e `Poetry` per le dipendenze deterministiche.
+
 ```bash
 # Seleziona la versione corretta via pyenv (scansiona .python-version)
 pyenv install $(cat .python-version)
@@ -89,6 +92,7 @@ poetry shell
 ### 2. Kernel di Conversione PDF (Gotenberg)
 
 La generazione PDF è delegata a un'istanza Docker di **Gotenberg**. È mandatorio che il servizio sia attivo sulla porta `3000`.
+
 ```bash
 # Avvio del motore di conversione
 docker run -d -p 3000:3000 gotenberg/gotenberg:8
@@ -101,6 +105,7 @@ docker run -d -p 3000:3000 --restart unless-stopped gotenberg/gotenberg:8
 ### 3. Strato Neurale (Ollama)
 
 L'intelligenza **Aegis Oracle** richiede Ollama in esecuzione.
+
 - **Installazione**: `curl -fsSL https://ollama.com/install.sh | sh`
 - **Modello Consigliato**: `ollama pull qwen2.5-coder:7b`
 - **Guida Dettagliata (Ubuntu 24.04)**: Consulta il manuale dedicato [ollama_ubuntu_24_04_guida.md](docs/ollama_ubuntu_24_04_guida.md).
@@ -108,6 +113,7 @@ L'intelligenza **Aegis Oracle** richiede Ollama in esecuzione.
 ### 4. Compilatore CSS (Tailwind v4)
 
 Il progetto utilizza il binario standalone di Tailwind CSS v4 per la compilazione JIT degli asset. Assicurati che il file `./tailwindcss` sia eseguibile:
+
 ```bash
 chmod +x tailwindcss
 ```
@@ -115,6 +121,7 @@ chmod +x tailwindcss
 ## 🚀 Sequenza di Avvio (Boot Sequence)
 
 Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
+
 ```bash
 ./bin/launch.sh
 ```
