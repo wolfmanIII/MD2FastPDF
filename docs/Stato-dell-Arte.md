@@ -1,7 +1,7 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.10.0
-**Ultimo Aggiornamento**: 4 Aprile 2026
+**Stato Attuale**: Op_Ready / Versione 5.11.0
+**Ultimo Aggiornamento**: 5 Aprile 2026
 
 ---
 
@@ -138,6 +138,12 @@
 - **Path sanitization**: `GroupSpaceManager.sanitize()` previene traversal fuori da `{workspace_base}/{group_name}/`. ✓
 - **Accesso revoca immediata**: accesso verificato a ogni request da `GroupSpaceAccess.has_access()` — la rimozione dal gruppo è effettiva alla prossima request. ✓
 
+### 1.15 MODAL STANDARDIZATION + MIGRATION TOOL (v5.11.0) — COMPLETED
+
+- **Standardizzazione modali**: tutte le 10 modali dell'applicazione refactorate allo stile `blueprint_modal.html` — shell `modal-box bg-zinc-900 border border-zinc-700 rounded-none p-0`, header con prefisso `//` in `neon-text`, close button ghost, footer con `ABORT //` + azione primaria. Modali oracle/mermaid usano `text-violet-400` per coerenza cromatica con il tema Oracle. ✓
+- **Settings modal**: larghezza `70vw` via inline style — unico modo affidabile per bypassare il `max-width` hardcoded di DaisyUI `modal-box`. Layout flex colonna con area di scroll interna isolata. ✓
+- **`bin/aegis-migrate.sh`**: script bash per export/import completo dei dati applicazione. Export crea `.tar.gz` con timestamp contenente settings, utenti, gruppi, blueprints e workspace. Import interattivo con rimappatura percorsi e aggiornamento automatico di `settings.json`. ✓
+
 ### 1.14 AEGIS TEST SUITE (v5.9.1) — COMPLETED
 
 - **Suite pytest**: 170 test, 0 fallimenti. Eseguiti su entrambi i backend anyio (`asyncio` e `trio`). ✓
@@ -164,13 +170,13 @@
 ### Package Structure
 
 ```text
-logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, templates.py, auth.py, comms.py, blueprints.py, groupspace.py, exceptions.py
-routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, auth, comms, admin, blueprint, groupspace, deps
+logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, auth.py, comms.py, blueprints.py, groupspace.py, exceptions.py
+routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, login, comms, admin, blueprint, groupspace, deps
 config/         __init__.py + settings.py (SettingsManager) + settings.json
 blueprints/     narrative/ (session-log, npc-profile, planet-description, ship-description, location-description)
 ~/.config/sc-archive/   users.json, groups.json, session.key
 static/css/     output.css, editor-aegis.css, pdf-industrial.css, pdf-preview.css, main.css
-bin/            launch.sh, create_user.sh
+bin/            launch.sh, create_user.sh, aegis-migrate.sh
 ```
 
 ---
@@ -198,4 +204,4 @@ bin/            launch.sh, create_user.sh
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.10.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.11.0 — DEPLOYMENT_ACTIVE.*

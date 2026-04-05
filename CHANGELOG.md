@@ -1,6 +1,19 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.11.0] - UI MODAL STANDARDIZATION + MIGRATION TOOL (2026-04-05)
+Standardizzazione uniforme di tutte le modali al design system di riferimento (`blueprint_modal.html`). Aggiunto script di migrazione completo per trasferimento dell'applicazione tra macchine.
+
+### Added
+- **`bin/aegis-migrate.sh`**: Script bash per export/import completo dei dati applicazione. Export crea un `.tar.gz` con timestamp contenente `settings.json`, `users.json`, `groups.json`, directory `blueprints/` e directory `workspace_base`. Import interattivo con rimappatura percorsi e aggiornamento automatico di `settings.json`.
+
+### Changed
+- **Tutte le modali** (`admin_group_modal.html`, `admin_user_modal.html`, `comms_compose_modal.html`, `create_modal.html`, `delete_modal.html`, `groupspace_create_modal.html`, `mermaid_list_modal.html`, `oracle_mermaid_modal.html`, `rename_modal.html`, `settings_modal.html`): refactoring uniforme allo stile `blueprint_modal.html` — shell `modal-box bg-zinc-900 border border-zinc-700 rounded-none p-0`, header `// TITLE` in `neon-text`/`text-violet-400`, close button ghost, footer `ABORT //` + azione primaria.
+- **`templates/components/settings_modal.html`**: larghezza portata a `70vw` via inline style (`style="width:70vw;max-width:70vw;"`) — unico modo affidabile per bypassare il `max-width` hardcoded di DaisyUI `modal-box`. Layout `max-h-[90vh] flex flex-col` con area di scroll interna separata da header e footer fissi.
+- **`templates/components/comms_compose_modal.html`**: stessa struttura scroll interna (`max-h-[90vh] flex flex-col`) per accomodare il contenuto esteso (recipients grid, body/preview side-by-side, original signal).
+
+---
+
 ## [5.10.0] - REFACTORING STRUTTURALE + BLUEPRINT COMPLETATO (2026-04-05)
 Riorganizzazione struttura progetto, completamento funzionalità blueprint (edit admin, accesso da groupspace), rimozione file morto `editor_pure.html`.
 

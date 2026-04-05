@@ -1,6 +1,6 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
 
-**Versione 5.10.0** // GROUP_SPACE & BLUEPRINT
+**Versione 5.11.0** // MODAL STANDARDIZATION & MIGRATION TOOL
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -138,6 +138,31 @@ Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
 - `static/css/`: Design system Aegis — `output.css`, `editor-aegis.css`, `pdf-industrial.css`, `pdf-preview.css`.
 - `tests/`: Suite pytest — unit test e async I/O test per il layer `logic/`.
 - `docs/`: Database di documentazione operativa e tecnica.
+- `bin/launch.sh`: Start script (Tailwind watcher + Uvicorn).
+- `bin/aegis-migrate.sh`: Export/import completo dei dati per migrazione tra macchine.
+
+## 🚚 Migrazione tra Macchine
+
+Lo script `bin/aegis-migrate.sh` esporta e reimporta tutti i dati applicazione in un unico archivio `.tar.gz`.
+
+**Dati inclusi nell'export:**
+- `config/settings.json` — configurazione runtime (endpoint, modelli, flags)
+- `~/.config/sc-archive/users.json` — utenti registrati con hash password
+- `~/.config/sc-archive/groups.json` — gruppi definiti
+- Directory `blueprints/` — template Markdown
+- Directory `workspace_base` — tutti i documenti dell'archivio
+
+```bash
+# Sulla macchina sorgente
+./bin/aegis-migrate.sh export /tmp
+
+# Copia l'archivio sulla macchina destinazione, poi:
+./bin/aegis-migrate.sh import /tmp/aegis-export-*.tar.gz
+```
+
+L'import è interattivo: mostra il percorso originale di blueprints e workspace e chiede dove ripristinarli. Se il percorso workspace cambia, `settings.json` viene aggiornato automaticamente.
+
+---
 
 ## 🧪 Test Suite
 
