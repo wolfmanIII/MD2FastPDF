@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
 from logic.auth import auth_service, group_store, user_store
+from logic.blueprints import BlueprintManager
 from logic.exceptions import AuthError, GroupError
 from config.templates import templates
 from routes.deps import require_admin
@@ -26,10 +27,13 @@ async def admin_panel(
     """Admin hub. Renders panel with user list as default tab."""
     users = await auth_service.list_users()
     groups = await group_store.list_groups()
+    blueprints = await BlueprintManager.list_blueprints()
     context = {
         "users": users,
         "groups": groups,
         "group_members": _group_members(groups, users),
+        "blueprints": blueprints,
+        "categories": BlueprintManager.group_by_category(blueprints),
         "tab": tab,
         "component_template": "components/admin_panel.html",
     }
