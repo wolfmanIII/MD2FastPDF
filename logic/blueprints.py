@@ -1,6 +1,7 @@
 """
 AEGIS_BLUEPRINT_PROTOCOL: Template library management for narrative documents.
-Blueprints are app-wide Markdown files stored in blueprints/ at the project root.
+Blueprints are app-wide Markdown files stored in a configurable root directory
+(default: blueprints/ at project root, overridable via settings key 'blueprints_root').
 Categories are derived from subfolder names.
 """
 import os
@@ -11,7 +12,16 @@ import anyio
 
 from logic.exceptions import AccessDeniedError, NotFoundError
 
-BLUEPRINTS_ROOT: Path = Path(__file__).parent.parent / "blueprints"
+_DEFAULT_BLUEPRINTS_ROOT: Path = Path(__file__).parent.parent / "blueprints"
+
+
+def _blueprints_root() -> Path:
+    """Returns the resolved blueprints root from settings, falling back to project default."""
+    from config.settings import settings
+    configured = settings.get("blueprints_root", "")
+    if configured:
+        return Path(configured).resolve()
+    return _DEFAULT_BLUEPRINTS_ROOT.resolve()
 
 
 class BlueprintManager:
@@ -19,8 +29,8 @@ class BlueprintManager:
 
     @staticmethod
     def _sanitize(path: str) -> Path:
-        """Prevents directory traversal outside blueprints/."""
-        root = BLUEPRINTS_ROOT.resolve()
+        """Prevents directory traversal outside blueprints root."""
+        root = _blueprints_root()
         resolved = (root / path.strip("/")).resolve()
         if not str(resolved).startswith(str(root)):
             raise AccessDeniedError("ACCESS_DENIED: Path outside blueprints root")
@@ -42,10 +52,11 @@ class BlueprintManager:
     async def list_blueprints() -> list[dict[str, Any]]:
         """Returns all .md blueprints organized by category (subfolder name)."""
         def _scan() -> list[dict[str, Any]]:
-            if not BLUEPRINTS_ROOT.exists():
+            root = _blueprints_root()
+            if not root.exists():
                 return []
             results: list[dict[str, Any]] = []
-            for category_entry in sorted(os.scandir(BLUEPRINTS_ROOT), key=lambda x: x.name):
+            for category_entry in sorted(os.scandir(root), key=lambda x: x.name):
                 if not category_entry.is_dir() or category_entry.name.startswith("."):
                     continue
                 for f in sorted(os.scandir(category_entry.path), key=lambda x: x.name):

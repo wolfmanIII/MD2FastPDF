@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse
 from pathlib import Path
-from logic.templates import templates
+from config.templates import templates
 from logic.files import (
     list_directory_contents, create_new_file, delete_file, rename_file, search_files
 )

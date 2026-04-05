@@ -11,7 +11,7 @@ from fastapi.responses import HTMLResponse
 
 from logic.auth import auth_service, group_store
 from logic.groupspace import GroupSpaceAccess, GroupSpaceManager
-from logic.templates import templates
+from config.templates import templates
 from routes import build_breadcrumbs
 from routes.deps import get_current_user
 

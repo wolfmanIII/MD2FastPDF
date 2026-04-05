@@ -20,10 +20,10 @@ def patch_groupspace_base(tmp_workspace: Path, monkeypatch: pytest.MonkeyPatch) 
 
 @pytest.fixture()
 def patch_blueprints_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Patches logic.blueprints.BLUEPRINTS_ROOT to an isolated tmp directory."""
+    """Patches logic.blueprints._blueprints_root to return an isolated tmp directory."""
     root = tmp_path / "blueprints"
     root.mkdir()
-    monkeypatch.setattr("logic.blueprints.BLUEPRINTS_ROOT", root)
+    monkeypatch.setattr("logic.blueprints._blueprints_root", lambda: root)
     return root
 
 

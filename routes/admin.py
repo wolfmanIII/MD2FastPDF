@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse
 
 from logic.auth import auth_service, group_store, user_store
 from logic.exceptions import AuthError, GroupError
-from logic.templates import templates
+from config.templates import templates
 from routes.deps import require_admin
 
 router = APIRouter(prefix="/admin", tags=["Aegis Admin"])

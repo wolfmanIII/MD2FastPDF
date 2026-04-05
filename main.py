@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
-from routes import core, archive, editor, pdf, config, oracle, render, settings, auth, admin, comms, blueprint, groupspace
+from routes import core, archive, editor, pdf, config, oracle, render, settings, login, admin, comms, blueprint, groupspace
 from logic.auth import auth_service, group_store, register_user_creation_hook, register_user_creation_sync_hook
 from logic.comms import comms_manager as _comms_manager
 from logic.conversion import gotenberg
@@ -95,7 +95,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # 4. Router Convergence (APIRouter Implementation)
 # Modular domain distribution as per Aegis Architecture Protocol
-app.include_router(auth.router)      # Identity & Session
+app.include_router(login.router)      # Identity & Session
 app.include_router(core.router)      # Dashboard & Telemetry
 app.include_router(archive.router)   # File Operations
 app.include_router(editor.router)    # Buffer Management

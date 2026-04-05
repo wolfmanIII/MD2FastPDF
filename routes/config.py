@@ -8,7 +8,7 @@ from pathlib import Path
 from config.settings import settings
 from logic.auth import auth_service
 from logic.exceptions import AccessDeniedError
-from logic.templates import templates
+from config.templates import templates
 from logic.files import list_only_directories, set_project_root, list_directory_contents
 from routes.deps import get_current_user
 

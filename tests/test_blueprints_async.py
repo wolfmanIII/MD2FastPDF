@@ -13,7 +13,7 @@ from logic.exceptions import AccessDeniedError, NotFoundError
 class TestListBlueprints:
     @pytest.mark.anyio
     async def test_returns_empty_when_root_missing(self, tmp_path: Path, monkeypatch):
-        monkeypatch.setattr("logic.blueprints.BLUEPRINTS_ROOT", tmp_path / "nonexistent")
+        monkeypatch.setattr("logic.blueprints._blueprints_root", lambda: tmp_path / "nonexistent")
         result = await BlueprintManager.list_blueprints()
         assert result == []
 

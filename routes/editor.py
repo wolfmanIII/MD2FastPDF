@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
 from pathlib import Path
-from logic.templates import templates
+from config.templates import templates
 from logic.files import read_file_content, write_file_content
 from routes import build_breadcrumbs
 

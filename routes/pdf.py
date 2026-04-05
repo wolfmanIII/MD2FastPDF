@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request, Response, Query
 from fastapi.responses import HTMLResponse
 from pathlib import Path
 from typing import Optional
-from logic.templates import templates
+from config.templates import templates
 from logic.files import read_file_content, read_file_bytes
 from logic.conversion import convert_markdown_to_pdf
 from config.settings import settings as app_settings

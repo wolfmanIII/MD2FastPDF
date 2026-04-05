@@ -2,7 +2,7 @@ import psutil
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from config.settings import settings
-from logic.templates import templates
+from config.templates import templates
 from logic.files import get_recent_files, get_storage_stats, get_project_root
 from logic.conversion import gotenberg
 from logic.oracle import oracle as neural_oracle

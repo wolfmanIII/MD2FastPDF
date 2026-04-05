@@ -4,7 +4,7 @@ from pathlib import Path
 
 from logic.files import read_file_content
 from logic.render import extract_mermaid_blocks, render_mermaid_png, render_mermaid_zip
-from logic.templates import templates
+from config.templates import templates
 
 # AEGIS_RENDER_ROUTER: Mermaid diagram rasterization pipeline
 router = APIRouter(tags=["Aegis Render"])

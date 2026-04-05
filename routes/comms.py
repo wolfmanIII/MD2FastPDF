@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse
 
 from logic.comms import comms_manager, CommsManager
 from logic.auth import _store, auth_service
-from logic.templates import templates, _render_markdown
+from config.templates import templates, _render_markdown
 from routes.deps import get_current_user
 
 router = APIRouter(prefix="/comms", tags=["Aegis Comms"])

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request, Form, Response
 from fastapi.responses import HTMLResponse
-from logic.templates import templates
+from config.templates import templates
 from config.settings import settings as app_settings
 from logic.oracle import oracle as neural_oracle
 from routes.deps import require_admin

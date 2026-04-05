@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
 from logic.auth import auth_service
 from logic.exceptions import AuthError
-from logic.templates import templates
+from config.templates import templates
 from routes.deps import get_current_user
 
 # AEGIS_AUTH_ROUTER: Identity and session control

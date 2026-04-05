@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from logic.blueprints import BlueprintManager
-from logic.templates import templates
+from config.templates import templates
 from routes.deps import require_admin
 
 router = APIRouter(prefix="/blueprints", tags=["Aegis Blueprint"])
