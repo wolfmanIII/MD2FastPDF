@@ -1,7 +1,7 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.11.0
-**Ultimo Aggiornamento**: 5 Aprile 2026
+**Stato Attuale**: Op_Ready / Versione 5.12.0
+**Ultimo Aggiornamento**: 10 Aprile 2026
 
 ---
 
@@ -91,10 +91,12 @@
 - **Login Page**: pagina `templates/layouts/login.html` standalone con tema Aegis Industrial.
 - **Session Auth**: `SessionMiddleware` (starlette/itsdangerous) con cookie firmato; `auth_middleware` verifica la sessione e blocca ogni path non-pubblico con redirect a `/login`.
 - **HTMX-aware redirect**: header `HX-Redirect` per le richieste HTMX, `302` per le normali.
-- **Per-User Workspace Isolation**: `ContextVar[Path]` (`_REQUEST_ROOT`) in `logic/files.py` — ogni request async riceve il root dell'utente autenticato senza refactoring delle firme.
-- **UserStore + AuthService**: separazione SOLID — `UserStore` gestisce `config/users.json`, `AuthService` espone autenticazione, creazione utente, cambio password, aggiornamento root.
+- **Per-User Workspace Isolation**: `ContextVar[Path]` (`_REQUEST_ROOT`) in `logic/files.py` — ogni request async riceve il root dell'utente autenticato senza refactoring delle firme. Root calcolata come `Path.home() / "sc-archive" / username` — nessun path hardcoded, funziona cross-PC.
+- **UserStore + AuthService**: separazione SOLID — `UserStore` gestisce `~/.config/sc-archive/users.json`, `AuthService` espone autenticazione, creazione utente, cambio password, aggiornamento root. ISP split: `UserStoreProtocol` (async) e `SyncUserStoreProtocol` (bootstrap/CLI).
+- **Legacy migration**: `_migrate_legacy_users()` a module-load sposta automaticamente `config/users.json` → `~/.config/sc-archive/users.json` con merge (record legacy vincono su admin bootstrap).
 - **Password Hashing**: `bcrypt` (cost factor 12) per tutti gli hash.
 - **Admin Bootstrap**: al primo avvio, se `users.json` è vuoto, viene creato `admin` con password `admin` (sovrascrivibile via `AEGIS_ADMIN_PASSWORD` env var).
+- **AEGIS_SECRET_KEY**: variabile d'ambiente obbligatoria — generata e persistita in `~/.config/sc-archive/session.key` da `bin/launch.sh` tramite `openssl rand -hex 32` (solo al primo avvio).
 - **OPERATOR_ACCESS_KEY**: sezione nella Settings modal (`POST /auth/password`) per cambio password autenticato.
 - **Root Picker persistente**: la selezione root viene salvata per-utente in `users.json` via `POST /config/select-root`.
 - **Navbar**: username corrente e pulsante `// LOGOUT` visibili in ogni pagina autenticata.
@@ -105,7 +107,7 @@
 - **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root utente. Tutti gli utenti (incluso admin): `~/sc-archive/{user}/comms/`. Creazione automatica alla registrazione. ✓
 - **Formato**: file `.md` con frontmatter (id, from, to, subject, timestamp, read). Parsing `re` stdlib — zero dipendenze aggiuntive. ✓
 - **Invio**: dual-write su `outbound/` sender + `inbound/` recipient. Cross-workspace write con path assoluti + security assertion su `Path.home()`. ✓
-- **Broadcast GM**: admin trasmette a `ALL` — copia individuale in ogni `inbound/` (read/unread per-utente indipendente). ✓
+- **Broadcast GM**: admin può scrivere a tutti gli utenti senza restrizioni di gruppo — `allowed_recipients()` bypassa il filtro se il sender ha gruppo `"admin"`. Utenti normali raggiungono solo i propri gruppi e gli admin. ✓
 - **Bozze**: `staging/` — editabili, promovibili a trasmissione. Draft pre-fill in compose modal. ✓
 - **Unread badge**: navbar HTMX-polled ogni 30s. `hx-push-url="false"` per evitare URL pollution. Invisibile se count = 0. ✓
 - **UI**: hub tabbato (`RECEPTION_ARRAY` / `OUTBOUND_LOG` / `STAGING_BUFFER`), compose modal con preview Markdown live, message reader con `render_md`. Tab ricaricano l'intero hub via `/comms?tab=X` per aggiornare lo stato attivo correttamente. ✓
@@ -117,7 +119,7 @@
 - **UserRecord.groups**: campo `list[str]` aggiunto con retrocompatibilità. ✓
 - **Admin promozione via gruppo**: chiunque abbia `"admin"` in `groups` è admin. `require_admin` FastAPI dependency. ✓
 - **Admin panel** (`/admin`): CRUD completo utenti e gruppi. Tab `CREW_REGISTRY` / `TEAM_INDEX` / `BLUEPRINT_ARCHIVE`. Tab ricaricano l'intero pannello via `/admin?tab=X` per aggiornare lo stato attivo. ✓
-- **Messaggistica filtrata**: `CommsManager.allowed_recipients()` — destinatari = gruppo condiviso col sender **o** gruppo `"admin"`. ✓
+- **Messaggistica filtrata**: `CommsManager.allowed_recipients()` — admin vede tutti gli utenti; utenti normali raggiungono chi condivide almeno un gruppo o ha gruppo `"admin"`. ✓
 
 ### 1.12 AEGIS BLUEPRINT [4.7] (v5.8.0) — COMPLETED
 
@@ -204,4 +206,4 @@ bin/            launch.sh, create_user.sh, aegis-migrate.sh
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.11.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.12.0 — DEPLOYMENT_ACTIVE.*

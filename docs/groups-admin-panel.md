@@ -14,7 +14,7 @@ Sistema di gruppi utente con tre effetti:
 
 1. **Admin panel** (`/admin`) — interfaccia HTMX per creare/eliminare gruppi, creare/modificare/eliminare utenti con assegnazione gruppi.
 2. **Promozione admin via gruppo** — chiunque abbia il gruppo `"admin"` ha privilegi amministrativi (non più hardcoded su username).
-3. **Messaggistica ristretta** — in AEGIS COMMS, un utente può scrivere solo a utenti che condividono almeno un gruppo con lui, e agli admin.
+3. **Messaggistica filtrata** — in AEGIS COMMS, un utente può scrivere solo a utenti che condividono almeno un gruppo con lui, e agli admin. L'admin bypassa il filtro e può scrivere a tutti gli utenti senza restrizioni.
 
 ---
 
@@ -167,6 +167,8 @@ Nav link `SYS_ADMIN` in `base.html` visibile solo se `request.session.get("is_ad
 ```python
 @staticmethod
 def allowed_recipients(sender, sender_groups, all_users) -> list[str]:
+    if "admin" in sender_groups:
+        return [u.username for u in all_users if u.username != sender]
     return [
         u.username for u in all_users
         if u.username != sender
@@ -174,7 +176,8 @@ def allowed_recipients(sender, sender_groups, all_users) -> list[str]:
     ]
 ```
 
-Un destinatario è raggiungibile se ha gruppo `"admin"` **oppure** condivide almeno un gruppo col sender.
+- **Admin sender**: vede tutti gli utenti senza restrizioni di gruppo.
+- **Utente normale**: raggiunge chi ha gruppo `"admin"` **oppure** condivide almeno un gruppo col sender.
 
 ### Impatto su `CommsManager`
 

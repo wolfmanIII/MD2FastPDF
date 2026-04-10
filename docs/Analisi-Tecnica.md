@@ -2,8 +2,8 @@
 
 - **Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
 - **Nome Tecnico Interno**: MD2FastPDF
-- **Data**: 4 Aprile 2026
-- **Versione**: 5.10.0
+- **Data**: 10 Aprile 2026
+- **Versione**: 5.12.0
 
 ## 1. Architettura di Sistema
 
@@ -23,7 +23,7 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
   - `auth_middleware`: verifica sessione, blocca path non pubblici, binda `_REQUEST_ROOT` ContextVar per la request corrente. HTMX-aware: emette `HX-Redirect` per richieste headless.
 - **Asincronia**: `asyncio` + `anyio` per I/O filesystem; `httpx.AsyncClient` per Gotenberg e Ollama.
 - **Jinja2**: rendering server-side con filtro custom `parent_path`.
-- **SOLID Compliance**: Protocol-based abstractions in `conversion.py`; mutation hook registry in `files.py`; DI via constructor in `oracle.py` e `GotenbergClient`; `UserStoreProtocol` runtime-checkable in `auth.py`.
+- **SOLID Compliance**: Protocol-based abstractions in `conversion.py`; mutation hook registry in `files.py`; DI via constructor in `oracle.py` e `GotenbergClient`; `UserStoreProtocol` + `SyncUserStoreProtocol` (ISP split) runtime-checkable in `auth.py`.
 
 ### 1.3 Frontend (HTMX / Tailwind)
 
@@ -42,13 +42,13 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 
 ### 1.5 Autenticazione e Workspace Isolation (`logic/auth.py`)
 
-- **SessionMiddleware**: cookie firmato con `AEGIS_SECRET_KEY` (24h TTL). Outer layer nel middleware stack.
-- **auth_middleware**: HTTP middleware inner — legge `request.session["username"]`, recupera root utente da `UserStore`, binda `PathSanitizer._REQUEST_ROOT` via `ContextVar`.
-- **UserStore**: persistenza `~/.config/sc-archive/users.json`. Hashing `bcrypt` (cost 12). API async-first; sync variants solo per bootstrap. Metodi aggiunti: `list_users()`, `update_groups()`, `delete_user()`.
+- **SessionMiddleware**: cookie firmato con `AEGIS_SECRET_KEY` (24h TTL). Outer layer nel middleware stack. `AEGIS_SECRET_KEY` è **obbligatorio**: `bin/launch.sh` lo genera e persiste in `~/.config/sc-archive/session.key` via `openssl rand -hex 32` (eseguito solo al primo avvio).
+- **auth_middleware**: HTTP middleware inner — legge `request.session["username"]`, recupera root utente da `UserStore`, binda `PathSanitizer._REQUEST_ROOT` via `ContextVar`. Cattura solo `AegisError` — errori di programmazione non vengono inghiottiti.
+- **UserStore**: persistenza `~/.config/sc-archive/users.json`. Hashing `bcrypt` (cost 12). API async-first; sync variants solo per bootstrap. Metodi aggiunti: `list_users()`, `update_groups()`, `delete_user()`. Migrazione automatica a module-load: `_migrate_legacy_users()` sposta `config/users.json` → `~/.config/sc-archive/users.json` con merge (record legacy vincono su bootstrap placeholder).
 - **GroupStore**: persistenza `~/.config/sc-archive/groups.json`. CRUD gruppi asincrono. `delete_group()` riceve `UserStore` come parametro (DIP) — blocca se il gruppo ha utenti assegnati.
-- **AuthService**: business logic (authenticate, create_user, change_password, update_user_root, get_user, update_user_groups, delete_user, list_users). Dipende da `UserStoreProtocol` + `SyncGroupStoreProtocol` (DIP). Side-effect di creazione utente (es. comms folders) delegati a hook registry (`register_user_creation_hook`, `register_user_creation_sync_hook`) — nessuna dipendenza diretta su CommsManager (SRP).
+- **AuthService**: business logic (authenticate, create_user, change_password, update_user_root, get_user, update_user_groups, delete_user, list_users). Dipende da `UserStoreProtocol` (async) + `SyncUserStoreProtocol` (bootstrap/CLI) + `SyncGroupStoreProtocol` — ISP split per non esporre path sync agli consumer async. Side-effect di creazione utente delegati a hook registry (`register_user_creation_hook`, `register_user_creation_sync_hook`) — nessuna dipendenza diretta su CommsManager (SRP).
 - **UserRecord**: campi `__slots__` — `username`, `password_hash`, `root`, `groups: list[str]`. Retrocompatibilità: utenti senza `groups` in JSON letti con `groups=[]`.
-- **Per-user workspace**: admin → `Path.home()`; utenti → `workspace_base/{username}`. Root persistita per-utente in `users.json`.
+- **Per-user workspace**: tutti gli utenti → `Path.home() / "sc-archive" / username`. Calcolato a runtime — nessun path hardcoded, funziona cross-PC. Root persistita per-utente in `users.json`.
 - **Admin bootstrap**: primo avvio crea `admin` con `groups=["admin"]` se `users.json` è vuoto. Crea il gruppo `"admin"` in `GroupStore`. Sovrascrivibile via `AEGIS_ADMIN_PASSWORD`.
 - **require_admin** (`routes/deps.py`): FastAPI dependency — verifica `"admin" in record.groups`, altrimenti HTTP 403. `POST /login` setta `request.session["is_admin"]`.
 - **ContextVar isolation**: `_REQUEST_ROOT` in `logic/files.py` — nessuna contaminazione tra sessioni concorrenti in asyncio.
@@ -65,7 +65,7 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 | `conversion.py` | `GotenbergClient`, `MarkdownRenderer`, `PdfHtmlBuilder`, `DetailedScaffolding`, `MinimalScaffolding` | Pipeline MD→PDF via Gotenberg |
 | `oracle.py` | `OracleClient`, `PromptTemplates` | Integrazione Ollama (completion, synthesis, summarize) |
 | `render.py` | funzioni `render_mermaid_png`, `render_mermaid_zip` | Export PNG/ZIP Mermaid via Gotenberg screenshot |
-| `auth.py` | `AuthService`, `UserStore`, `GroupStore`, `UserRecord`, `UserStoreProtocol`, `GroupStoreProtocol`, `SyncGroupStoreProtocol` | Multi-user auth, workspace isolation, group management, user creation hook registry |
+| `auth.py` | `AuthService`, `UserStore`, `GroupStore`, `UserRecord`, `UserStoreProtocol`, `SyncUserStoreProtocol`, `GroupStoreProtocol`, `SyncGroupStoreProtocol` | Multi-user auth, workspace isolation, group management, user creation hook registry, legacy migration |
 | `comms.py` | `FrontmatterParser`, `MessageRecord`, `CommsManager` | Messaggistica filesystem-based, dual-write, draft, filtraggio gruppi |
 | `blueprints.py` | `BlueprintManager` | Libreria template Markdown app-wide in `blueprints/`; path sanitization propria |
 | `groupspace.py` | `GroupSpaceAccess`, `GroupSpaceManager` | Workspace condivisi per gruppo; modello permessi (root: admin R+W / membri R; shared/: membri R+W / admin R) |
@@ -153,7 +153,7 @@ icons/            — SVG inline components
 | Admin promozione | Chiunque abbia `"admin"` in `UserRecord.groups` è admin — non hardcoded su username |
 | Workspace isolation | `ContextVar[Path]` per-request — impossibile accedere al workspace di un altro utente |
 | Path traversal | `PathSanitizer.resolve_and_sanitize()` — blocca `../`, path nascosti, symlink escape |
-| COMMS cross-write | Path assoluti costruiti da `workspace_base + username`; security assertion: path sotto `Path.home()` |
+| COMMS cross-write | Path assoluti costruiti da `Path.home() / "sc-archive" / username`; security assertion: path deve essere sotto `Path.home()` |
 | GROUP_SPACE isolation | `GroupSpaceManager._sanitize()` — ogni path risolto contro `{workspace_base}/{group_name}/`; traversal bloccato |
 | GROUP_SPACE permessi | `GroupSpaceAccess.can_write()` — admin: R+W in root, R in `shared/`; membri: R in root, R+W in `shared/` |
 | XSS | `bleach.Cleaner` whitelist su ogni pipeline MD→HTML e corpo messaggio COMMS |
@@ -230,4 +230,4 @@ poetry run pytest tests/test_comms_async.py -v          # singolo file
 
 ---
 
-Documento Tecnico Aegis Class System // v5.10.0
+Documento Tecnico Aegis Class System // v5.12.0

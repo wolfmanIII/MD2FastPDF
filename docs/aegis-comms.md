@@ -9,7 +9,7 @@
 
 ## 1. Obiettivo
 
-Sistema di messaggistica filesystem-based integrato in SC-ARCHIVE. Qualsiasi utente può scrivere a uno o più utenti. Broadcast a tutti disponibile a chiunque. Admin ha visibilità globale come GM/Referee. Zero database.
+Sistema di messaggistica filesystem-based integrato in SC-ARCHIVE. Gli utenti possono scrivere ai membri dei propri gruppi e agli admin. L'admin bypassa il filtro gruppi e può scrivere a tutti gli utenti senza restrizioni (ruolo GM/Referee). Zero database.
 
 ---
 
@@ -76,7 +76,7 @@ class MessageRecord:
 
 ## 3. Flusso invio
 
-1. Sender seleziona uno o più destinatari (o ALL) — lista filtrata per gruppo
+1. Sender seleziona uno o più destinatari (o ALL) — lista filtrata per gruppo; admin vede tutti gli utenti senza restrizioni
 2. `CommsManager.send_message()` itera la lista destinatari espansa
 3. Scrive una copia in `sender/comms/outbound/` con `to` originale
 4. Scrive una copia in `recipient/comms/inbound/` per ogni destinatario
@@ -217,6 +217,6 @@ Internal:
 |-----------|-------------|
 | SRP | `FrontmatterParser` solo parsing. `CommsManager` solo I/O. `MessageRecord` value object. Route handlers solo HTTP translation. |
 | OCP | Aggiungere folder type → solo `_COMMS_SUBFOLDERS` + nuova route. Nessuna classe modificata. |
-| LSP | `UserStoreProtocol` aggiornato con `list_usernames` — `UserStore` soddisfa strutturalmente. |
+| LSP | `UserStoreProtocol` / `SyncUserStoreProtocol` — `UserStore` soddisfa entrambi strutturalmente. |
 | ISP | `CommsManager` non dipende da `PathSanitizer` né da FastAPI. `UserStore` non iniettato in `CommsManager`. |
 | DIP | `CommsManager` dipende da `SettingsManager` (astrazione) e `anyio`. Non dipende da request objects. |
