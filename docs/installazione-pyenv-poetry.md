@@ -75,13 +75,13 @@ Per inizializzare un progetto con Python 3.13 e Poetry:
     ```bash
     pyenv local 3.13 (nella cartella del progetto)
     ```
-3 **Inizializzare Poetry**:
-    ```bash
-    poetry init
-    ```
-4 **Configurazione In-Project (Consigliata)**: Per mantenere l'ambiente virtuale all'interno del progetto (come Pipenv):
+3 **Configurazione In-Project (Consigliata)**: Per mantenere l'ambiente virtuale all'interno del progetto (come Pipenv). Va impostata **prima** di `poetry init` per avere effetto sul virtualenv creato successivamente:
     ```bash
     poetry config virtualenvs.in-project true
+    ```
+4 **Inizializzare Poetry**:
+    ```bash
+    poetry init
     ```
 5 **Installazione Dipendenze**:
     ```bash
