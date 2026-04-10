@@ -160,9 +160,7 @@ class GroupStore:
     @staticmethod
     def _group_workspace(name: str) -> Path:
         """Returns the absolute path for a group's shared workspace."""
-        from config.settings import settings
-        base = Path(settings.get("workspace_base", str(Path.home() / "sc-archive")))
-        return base / name
+        return Path.home() / "sc-archive" / name
 
     @staticmethod
     def provision_group_dirs_sync(name: str) -> None:
