@@ -122,7 +122,7 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 **Obiettivo**: Accesso autenticato stile JupyterHub — ogni utente ha la propria sessione e workspace isolato (cartella home).
 - **Login page**: `templates/layouts/login.html` standalone con tema industriale Aegis. Redirect automatico se sessione non attiva. ✓
 - **Session middleware**: `SessionMiddleware` (starlette/itsdangerous) — cookie firmato. `auth_middleware` HTTP middleware verifica la sessione e blocca ogni path non-pubblico. ✓
-- **Password storage**: `config/users.json` con hash `bcrypt` (cost 12). Nessuna dipendenza da database esterno. ✓
+- **Password storage**: `~/.config/sc-archive/users.json` con hash `bcrypt` (cost 12). Nessuna dipendenza da database esterno. ✓
 - **Per-user workspace**: ogni utente mappato a cartella dedicata (`~/sc-archive/<username>/`). `ContextVar[Path]` in `logic/files.py` — isolamento per-request senza refactoring delle firme. ✓
 - **Session isolation**: `_REQUEST_ROOT` ContextVar keyed per async context — nessuna contaminazione tra sessioni concorrenti. ✓
 - **AuthService + UserStore**: separazione SOLID — `UserStore` gestisce persistenza, `AuthService` espone API di business. ✓
@@ -150,4 +150,24 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-**(I flussi operativi futuri sono stati ricalibrati. Aegis Oracle promosso a priorità assoluta [4.0] del ciclo operativo corrente.)** 🚀🌑
+### [5.5] - AEGIS BLUEPRINT VARIABLE INJECTION [PENDING]
+
+**Obiettivo**: Pre-compilazione guidata dei placeholder nei blueprint prima dell'inserimento nell'editor.
+
+I template attuali contengono placeholder nel formato `[NOME]`, `[ANNO.DIA]`, `[SISTEMA / PIANETA]`, ecc. Oggi vengono inseriti grezzi e compilati a mano dall'utente dopo l'inserimento.
+
+**Specifiche**:
+- **Rilevamento automatico**: al click su un blueprint nella gallery modal, scansionare il contenuto per pattern `[TESTO IN MAIUSCOLO / CON SPAZI]` (regex: `\[[A-Z0-9 _/\.]+\]`).
+- **Form modale**: se presenti placeholder, mostrare un secondo modal con un campo input per ciascuno (label = nome del placeholder, es. "NUMERO", "ANNO.DIA").
+- **Sostituzione**: al submit del form, sostituire tutti i placeholder con i valori inseriti, poi iniettare il testo risultante nell'editor (stessa logica di `insertBlueprint()`).
+- **Bypass diretto**: se nessun placeholder rilevato, inserimento immediato senza step aggiuntivi (comportamento attuale preservato).
+- **Placeholder duplicati**: se lo stesso placeholder appare più volte, un solo campo nel form — sostituzione globale.
+
+**File coinvolti**:
+- `templates/components/blueprint_modal.html` — logica JS di rilevamento + apertura form
+- `templates/components/blueprint_variable_modal.html` — nuovo fragment modale con form dinamico
+- `routes/blueprint.py` — eventuale endpoint `GET /blueprints/placeholders?path=` per estrazione server-side
+
+---
+
+**(I flussi operativi futuri sono stati ricalibrati. Aegis Oracle promosso a priorità assoluta [4.0] del ciclo operativo corrente.)**

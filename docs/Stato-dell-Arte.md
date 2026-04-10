@@ -203,6 +203,7 @@ bin/            launch.sh, create_user.sh, aegis-migrate.sh
 | [5.2] | AEGIS GROUP_SPACE | **COMPLETED** |
 | [5.3] | AEGIS TEST SUITE | **COMPLETED** |
 | [5.4] | AEGIS REFACTOR STRUTTURALE | **COMPLETED** |
+| [5.5] | AEGIS BLUEPRINT VARIABLE INJECTION | **PENDING** |
 
 ---
 
