@@ -31,7 +31,7 @@
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Filename</label>
-          <input type="text" name="filename" placeholder="session-log" class="w-full" required>
+          <input type="text" name="filename" placeholder="nome-template" class="w-full" required>
         </div>
       </div>
       <script>
@@ -108,11 +108,12 @@
       </p>
       <div class="space-y-1">
         {% for bp in items %}
+        {% set bp_slug = bp.name | replace(' ', '-') | lower %}
         <div class="flex items-center justify-between px-3 py-2 bg-zinc-900/50 border border-zinc-800">
           <span class="font-mono text-xs text-zinc-300 uppercase tracking-wider">{{ bp.name }}</span>
           <div class="flex items-center gap-2">
             <button type="button"
-                    onclick="bpLoadEdit('{{ bp.path }}', '{{ bp.category }}', '{{ bp.name | replace(' ', '-') | lower }}')"
+                    onclick="bpLoadEdit('{{ bp.path }}', '{{ bp.category }}', '{{ bp_slug }}')"
                     class="btn btn-ghost btn-sm text-zinc-400 font-mono tracking-widest">
               EDIT
             </button>
