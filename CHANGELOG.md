@@ -1,6 +1,31 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.12.0] - AUTH HARDENING + COMMS ADMIN BYPASS + UI FIXES (2026-04-10)
+Hardening dell'autenticazione (path dinamici, ISP split, secret key persistente), bypass gruppi per admin in COMMS, fix palette filetree, fix blueprint admin.
+
+### Security / Breaking
+- **`AEGIS_SECRET_KEY`** è ora **obbligatoria** — `os.environ["AEGIS_SECRET_KEY"]` senza fallback. Se assente, l'avvio fallisce immediatamente. `bin/launch.sh` genera e persiste la chiave in `~/.config/sc-archive/session.key` tramite `openssl rand -hex 32` (solo al primo avvio).
+- **`auth_middleware`** cattura solo `AegisError` (non `except Exception`) — gli errori di programmazione non vengono più inghiottiti silenziosamente.
+
+### Added
+- **`logic/auth.py` — `_migrate_legacy_users()`**: Migrazione automatica a module-load. Sposta `config/users.json` → `~/.config/sc-archive/users.json` con merge (record legacy vincono su eventuali placeholder bootstrap). Elimina il file legacy dopo la migrazione.
+- **`logic/auth.py` — `SyncUserStoreProtocol`**: Nuovo Protocol ISP-compliant per i path sync (bootstrap/CLI). `AuthService.__init__` ora accetta `sync_store: SyncUserStoreProtocol` separato da `store: UserStoreProtocol` — i consumer async non sono esposti ai metodi sync.
+
+### Changed
+- **`logic/auth.py` — `AuthService._default_root`**: Usa `Path.home() / "sc-archive" / username` calcolato a runtime. Rimossa ogni dipendenza da `settings.json` per il path utente — funziona cross-PC senza modificare la configurazione.
+- **`logic/auth.py` — `GroupStore._group_workspace`**: Stessa correzione — `Path.home() / "sc-archive" / name`. Eliminato il crash di avvio causato da `workspace_base` hardcoded su altra macchina.
+- **`config/settings.json`**: Rimosso il campo `workspace_base` — era un path assoluto di un'altra macchina e causava `PermissionError` all'avvio.
+- **`logic/comms.py` — `CommsManager.allowed_recipients()`**: Admin (sender con gruppo `"admin"`) bypassa il filtro gruppi e vede tutti gli utenti. Utenti normali mantengono la restrizione al gruppo condiviso + admin.
+
+### Fixed
+- **`templates/components/blueprint_admin.html`**: Collisione virgolette singole nell'attributo `onclick` — usato `{% set bp_slug %}` per pre-calcolare lo slug fuori dall'attributo. Placeholder filename cambiato da `session-log` (nome di un blueprint esistente) a `nome-template`.
+- **`templates/components/filetree_node.html`**: Palette icone e testo allineata al file browser — `.md` `neon-text`, `.pdf` icona `text-red-400`, `.html` icona `text-amber-400`. Icone ingrandite a `w-4 h-4`. Transizione folder chiusa/aperta con SVG outline puri (fix FontAwesome `fa-folder-open` parzialmente riempito).
+- **`templates/icons/folder-open.html`**: Nuovo SVG outline open folder (Lucide-style, `fill="none"`, `stroke="currentColor"`) per la transizione cartella espansa nel filetree.
+- **COMMS labels**: `text-zinc-100 font-bold` su tutte le label di `comms_message_reader.html`, `comms_message_list.html`, `comms_compose_modal.html`. Spaziatura checkbox destinatari aumentata (`gap-3`).
+
+---
+
 ## [5.11.0] - UI MODAL STANDARDIZATION + MIGRATION TOOL (2026-04-05)
 Standardizzazione uniforme di tutte le modali al design system di riferimento (`blueprint_modal.html`). Aggiunto script di migrazione completo per trasferimento dell'applicazione tra macchine.
 

@@ -1,6 +1,6 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
 
-**Versione 5.11.0** // MODAL STANDARDIZATION & MIGRATION TOOL
+**Versione 5.12.0** // AUTH HARDENING & COMMS ADMIN BYPASS
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -21,7 +21,7 @@
 
 - **Aegis Group_Space**: Workspace filesystem condiviso per gruppo. Modello permessi asimmetrico (admin R+W su root, membri R+W su `shared/`). Browser, editor e CRUD file integrati nella navbar.
 - **Aegis Blueprint**: Libreria template Markdown app-wide (`blueprints/`). Modal in toolbar editor per inserimento istantaneo in fondo al documento. Admin panel con gestione CRUD blueprint per categoria.
-- **Aegis Groups & Admin Panel**: Sistema di gruppi utente con admin panel HTMX (`/admin`). CRUD utenti e gruppi. Chiunque abbia il gruppo `"admin"` ha privilegi admin. Messaggistica filtrata per gruppo condiviso.
+- **Aegis Groups & Admin Panel**: Sistema di gruppi utente con admin panel HTMX (`/admin`). CRUD utenti e gruppi. Chiunque abbia il gruppo `"admin"` ha privilegi admin. Messaggistica filtrata per gruppo condiviso — admin bypassa il filtro e può scrivere a tutti gli utenti senza restrizioni (ruolo GM/Referee).
 - **Aegis COMMS**: Messaggistica filesystem-based multi-utente. Hub tabbato (RECEPTION_ARRAY / OUTBOUND_LOG / STAGING_BUFFER), compose modal con preview Markdown live, draft management, unread badge HTMX-polled ogni 30s.
 - **Aegis Filetree**: Sidebar albero directory collassabile nell'editor con navigazione lazy, highlight del file attivo e persistenza stato in `localStorage`.
 - **Aegis Slim-Tech Editor**: Interfaccia di scrittura compattata con supporto **Fullscreen Breakthrough** (bypass automatico dei filtri glass-panel).
@@ -125,6 +125,9 @@ Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
 ```bash
 ./bin/launch.sh
 ```
+
+> [!NOTE]
+> Al primo avvio, `bin/launch.sh` genera automaticamente una chiave crittografica casuale e la persiste in `~/.config/sc-archive/session.key` (via `openssl rand -hex 32`). Questa chiave viene usata come `AEGIS_SECRET_KEY` per firmare i cookie di sessione. Nei lanci successivi viene riusata — non verrà mai sovrascritta automaticamente.
 
 ## 📂 Struttura del Progetto
 
