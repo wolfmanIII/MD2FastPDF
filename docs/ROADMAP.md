@@ -41,8 +41,7 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 - **Fullscreen safe**: la sidebar è sorella del container editor, non genitore — nessun conflitto con i fix fullscreen esistenti. ✓
 - **Highlight file attivo**: il documento aperto è evidenziato nell'albero. ✓
 - **State persistence navigazione**: path espansi ripristinati via `htmx:afterSettle`. ✓
-- **Palette coerente**: icone e colori identici al file browser (neon-text, red-400, amber-400). ✓
-- **Piano dettagliato**: `docs/piano-aegis-filetree.md`.
+- **Palette coerente**: icone e colori identici al file browser (neon-text, red-400, amber-400). Icone SVG outline con transizione chiusa/aperta. ✓
 
 ---
 
@@ -61,31 +60,6 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 - **CSP Ready**: eliminati tutti gli `style=` inline da template e route. `style-src 'self'` senza `unsafe-inline`. ✓
 - **CSS extraction**: `editor-aegis.css`, `pdf-industrial.css`, `pdf-preview.css` come file statici dedicati. ✓
 - **Package restructure**: `config/` promosso a package Python, `logic/__init__.py` aggiunto. ✓
-
----
-
-### [5.0] - AEGIS COMMS (Sistema di Messaggistica Multi-Utente) [COMPLETED]
-**Obiettivo**: Canale di comunicazione sicuro tra utenti e admin (GM/Referee). Filesystem-based, nessun database.
-- **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root di ogni utente (admin: `~/comms/`, utenti: `~/sc-archive/{user}/comms/`). Auto-creazione alla registrazione utente. ✓
-- **Formato messaggi**: file `.md` con frontmatter (id, from, to, subject, timestamp, read). Parsing stdlib `re` — nessuna dipendenza aggiuntiva. ✓
-- **Flusso invio**: dual-write — copia in `outbound/` del sender + copia in `inbound/` del recipient. Cross-workspace write con path assoluti validati. ✓
-- **Broadcast GM**: admin può trasmettere a tutti gli operatori raggiungibili (`to: ALL`). Una copia per utente in `inbound/` (tracking read/unread indipendente). ✓
-- **Draft management**: bozze in `staging/` — editabili, promuovibili a trasmissione con un click. ✓
-- **Unread badge**: contatore nella navbar, HTMX-polled ogni 30s (`GET /comms/unread-count`). ✓
-- **UI**: hub tabbato (RECEPTION_ARRAY / OUTBOUND_LOG / STAGING_BUFFER), modale composizione con preview Markdown live, reader con `render_md`, azioni inline (PURGE / RESPOND). ✓
-- **Documentazione**: `docs/aegis-comms.md`.
-
----
-
-### [5.1] - AEGIS GROUPS & ADMIN PANEL [COMPLETED]
-**Obiettivo**: Sistema di gruppi utente con admin panel HTMX e messaggistica ristretta per gruppo.
-- **GroupStore**: persistenza `~/.config/sc-archive/groups.json`. CRUD asincrono. Blocca eliminazione se gruppo ha membri. ✓
-- **UserRecord.groups**: campo `list[str]` con retrocompatibilità (`groups: []` per utenti senza campo). ✓
-- **Admin promozione via gruppo**: chiunque abbia il gruppo `"admin"` ha privilegi admin — non hardcoded su username. `require_admin` FastAPI dependency. ✓
-- **Admin panel** (`/admin`): CRUD completo utenti (crea, modifica gruppi, elimina) e gruppi (crea, elimina se vuoto). Tab CREW_REGISTRY / FACTION_INDEX. ✓
-- **Nav link SYS_ADMIN**: visibile in `base.html` solo se `request.session["is_admin"]`. ✓
-- **Messaggistica filtrata**: `CommsManager.allowed_recipients()` — destinatari raggiungibili = gruppo condiviso col sender **o** gruppo `"admin"`. ✓
-- **Documentazione**: `docs/groups-admin-panel.md`.
 
 ---
 
@@ -135,23 +109,66 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
+### [5.0] - AEGIS COMMS (Sistema di Messaggistica Multi-Utente) [COMPLETED]
+**Obiettivo**: Canale di comunicazione sicuro tra utenti e admin (GM/Referee). Filesystem-based, nessun database.
+- **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root di ogni utente (`~/sc-archive/{user}/comms/`). Auto-creazione alla registrazione utente. ✓
+- **Formato messaggi**: file `.md` con frontmatter (id, from, to, subject, timestamp, read). Parsing stdlib `re` — nessuna dipendenza aggiuntiva. ✓
+- **Flusso invio**: dual-write — copia in `outbound/` del sender + copia in `inbound/` del recipient. Cross-workspace write con path assoluti validati. ✓
+- **Broadcast GM**: admin bypassa il filtro gruppi e può trasmettere a tutti gli utenti. Una copia per utente in `inbound/` (tracking read/unread indipendente). ✓
+- **Draft management**: bozze in `staging/` — editabili, promuovibili a trasmissione con un click. ✓
+- **Unread badge**: contatore nella navbar, HTMX-polled ogni 30s (`GET /comms/unread-count`). ✓
+- **UI**: hub tabbato (RECEPTION_ARRAY / OUTBOUND_LOG / STAGING_BUFFER), modale composizione con preview Markdown live, reader con `render_md`, azioni inline (PURGE / RESPOND). ✓
+- **Documentazione**: `docs/aegis-comms.md`.
+
+---
+
+### [5.1] - AEGIS GROUPS & ADMIN PANEL [COMPLETED]
+**Obiettivo**: Sistema di gruppi utente con admin panel HTMX e messaggistica ristretta per gruppo.
+- **GroupStore**: persistenza `~/.config/sc-archive/groups.json`. CRUD asincrono. Blocca eliminazione se gruppo ha membri. ✓
+- **UserRecord.groups**: campo `list[str]` con retrocompatibilità (`groups: []` per utenti senza campo). ✓
+- **Admin promozione via gruppo**: chiunque abbia il gruppo `"admin"` ha privilegi admin — non hardcoded su username. `require_admin` FastAPI dependency. ✓
+- **Admin panel** (`/admin`): CRUD completo utenti (crea, modifica gruppi, elimina) e gruppi (crea, elimina se vuoto). Tab CREW_REGISTRY / FACTION_INDEX. ✓
+- **Nav link SYS_ADMIN**: visibile in `base.html` solo se `request.session["is_admin"]`. ✓
+- **Messaggistica filtrata**: `CommsManager.allowed_recipients()` — admin vede tutti; utenti normali raggiungono chi condivide almeno un gruppo o ha gruppo `"admin"`. ✓
+- **Documentazione**: `docs/groups-admin-panel.md`.
+
+---
+
 ### [5.2] - AEGIS GROUP_SPACE (Workspace Condiviso per Gruppo) [COMPLETED]
-
 **Obiettivo**: Filesystem condiviso per i membri di un gruppo con modello permessi asimmetrico.
-
 - **Workspace per gruppo**: `~/sc-archive/{group_name}/` creato automaticamente alla creazione del gruppo. Boot migration per gruppi preesistenti. ✓
 - **Modello permessi**: root del gruppo — admin R+W, membri R; `shared/` — membri R+W, admin R. Enforced in `logic/groupspace.py`. ✓
 - **GROUP_SPACE hub**: link in navbar, lista gruppi accessibili all'utente corrente. ✓
 - **Browser**: navigazione file nel workspace di gruppo con indicatore `READ_ONLY` / `READ_WRITE`. ✓
 - **Editor**: visualizzazione e modifica file. Textarea `readonly` e toolbar ridotta (no save) se area in sola lettura. ✓
 - **CRUD file**: crea, elimina file — bloccato se l'utente non ha permessi di scrittura nella directory corrente. ✓
-- **Path sanitization**: `GroupSpaceManager.sanitize()` previene traversal fuori da `{workspace_base}/{group_name}/`. ✓
+- **Path sanitization**: `GroupSpaceManager.sanitize()` previene traversal fuori da `~/sc-archive/{group_name}/`. ✓
 - **Accesso revoca immediata**: accesso verificato a ogni request da `GroupSpaceAccess.has_access()`. ✓
 
 ---
 
-### [5.5] - AEGIS BLUEPRINT VARIABLE INJECTION [PENDING]
+### [5.3] - AEGIS TEST SUITE [COMPLETED]
+**Obiettivo**: Copertura pytest completa per il layer `logic/` con isolamento filesystem e compatibilità cross-backend anyio.
+- **170 test, 0 fallimenti**. Eseguiti su entrambi i backend anyio (`asyncio` e `trio`). ✓
+- **Unit test** (`test_auth.py`, `test_comms.py`, `test_groupspace.py`, `test_blueprints.py`): 60 test su classi pure — nessun I/O, nessuna rete. ✓
+- **Async I/O test** (`test_*_async.py`): 110 test su operazioni filesystem tramite fixture `tmp_path` + `monkeypatch`. ✓
+- **Isolamento**: `patch_groupspace_base`, `patch_blueprints_root`, `patch_comms_base` — ogni test usa directory isolata, nessuna scrittura sul filesystem reale. ✓
+- **Copertura**: `blueprints.py` 100%, `comms.py` 93%, `groupspace.py` 92%. I moduli `conversion`, `oracle`, `render` richiedono servizi esterni — esclusi dalla suite unit. ✓
 
+---
+
+### [5.4] - AEGIS REFACTOR STRUTTURALE [COMPLETED]
+**Obiettivo**: Riorganizzazione struttura progetto, completamento funzionalità blueprint, standardizzazione modali.
+- **`logic/templates.py` → `config/templates.py`**: Configurazione Jinja2 spostata fuori dal layer business logic. ✓
+- **`routes/auth.py` → `routes/login.py`**: Rinominato per evitare ambiguità con `logic/auth.py`. ✓
+- **Blueprint edit da admin**: form crea/sovrascrive con select categoria + input nuova categoria + bottone EDIT per caricare blueprint esistente. ✓
+- **Blueprint da groupspace editor**: bottone `BLUEPRINT_ARCHIVE` nella toolbar; `insertBlueprint()` usa `window.aegisEditor` o fallback textarea. ✓
+- **Standardizzazione modali**: tutte le 10 modali refactorate allo stile `blueprint_modal.html` — shell uniforme, header `// TITLE`, footer `ABORT //` + azione primaria. ✓
+- **`bin/aegis-migrate.sh`**: export/import completo (settings, users, groups, blueprints, workspace) in `.tar.gz` con rimappatura percorsi interattiva. ✓
+
+---
+
+### [5.5] - AEGIS BLUEPRINT VARIABLE INJECTION [PENDING]
 **Obiettivo**: Pre-compilazione guidata dei placeholder nei blueprint prima dell'inserimento nell'editor.
 
 I template attuali contengono placeholder nel formato `[NOME]`, `[ANNO.DIA]`, `[SISTEMA / PIANETA]`, ecc. Oggi vengono inseriti grezzi e compilati a mano dall'utente dopo l'inserimento.
