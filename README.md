@@ -149,6 +149,7 @@ Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
 Lo script `bin/aegis-migrate.sh` esporta e reimporta tutti i dati applicazione in un unico archivio `.tar.gz`.
 
 **Dati inclusi nell'export:**
+
 - `config/settings.json` — configurazione runtime (endpoint, modelli, flags)
 - `~/.config/sc-archive/users.json` — utenti registrati con hash password
 - `~/.config/sc-archive/groups.json` — gruppi definiti

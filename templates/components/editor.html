@@ -167,29 +167,64 @@
             window.aegisEditor = easyMDE;
             const cm = easyMDE.codemirror;
 
-            // AEGIS_HUD_SYNC: Force root state to match editor mode
+            // AEGIS_HUD_SYNC: Force root state and body scroll to match editor mode
             const syncHUD = () => {
                 const isFull = easyMDE.isFullscreenActive();
+                const isSide = easyMDE.isSideBySideActive();
+                const isPrev = easyMDE.isPreviewActive();
+                
+                // AEGIS_FULLSCREEN_BREAKTHROUGH: Re-enable for CSS overrides
                 root.classList.toggle('aegis-fullscreen-active', isFull);
-                document.body.style.overflow = isFull ? 'hidden' : '';
+                
+                if (isFull || isSide || isPrev) {
+                    document.body.style.setProperty('overflow', 'hidden', 'important');
+                } else {
+                    // Force restoration of scroll - removing the inline style entirely
+                    document.body.style.removeProperty('overflow');
+                    document.documentElement.style.removeProperty('overflow');
+                    // Fallback for tricky scenarios
+                    if (window.getComputedStyle(document.body).overflow === 'hidden') {
+                        document.body.style.setProperty('overflow', 'visible', 'important');
+                    }
+                }
             };
 
-            // Direct override of core functions to bypass event lag/failure
+            // Enhanced overrides with state-settlement delay
             const originalToggleFS = easyMDE.toggleFullScreen;
             easyMDE.toggleFullScreen = function () {
                 originalToggleFS.apply(this, arguments);
-                syncHUD();
+                setTimeout(syncHUD, 0);
             };
 
             const originalToggleSide = easyMDE.toggleSideBySide;
             easyMDE.toggleSideBySide = function () {
                 originalToggleSide.apply(this, arguments);
-                syncHUD();
-                setTimeout(renderAegisVisuals, 100);
+                setTimeout(syncHUD, 0);
+                setTimeout(renderAegisVisuals, 50);
             };
 
-            // Fallback for keybindings
+            const originalTogglePreview = easyMDE.togglePreview;
+            easyMDE.togglePreview = function () {
+                originalTogglePreview.apply(this, arguments);
+                setTimeout(syncHUD, 0);
+                if (this.isPreviewActive()) {
+                    setTimeout(renderAegisVisuals, 50);
+                    // AEGIS_TOOLBAR_SYNC_PREVIEW: Force re-enable operational controllers
+                    root.querySelectorAll('.editor-toolbar button.aegis-op-btn').forEach(btn => {
+                        btn.disabled = false;
+                        btn.classList.remove('disabled');
+                    });
+                }
+            };
+
+            // Sync on refresh for keybindings and internal state changes
             cm.on("refresh", syncHUD);
+            cm.on("update", syncHUD);
+
+            // ESCAPE_PROTOCOL: Ensure scroll is restored even on hard escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') setTimeout(syncHUD, 100);
+            });
 
             // AEGIS_INPUT_PRIORITY: Hard-link Tab and Esc to Oracle protocols
             cm.setOption("extraKeys", {
@@ -421,28 +456,6 @@
                 document.body.addEventListener('htmx:afterSettle', window._aegisTreeRestoreBound);
 
             })();
-
-            // AEGIS_PREVIEW_VISUALS: Watch for preview toggle
-            const originalTogglePreview = easyMDE.togglePreview;
-            easyMDE.togglePreview = function () {
-                originalTogglePreview.apply(this, arguments);
-                if (this.isPreviewActive()) {
-                    setTimeout(renderAegisVisuals, 50);
-                    // AEGIS_TOOLBAR_SYNC_PREVIEW: Force re-enable operational controllers
-                    root.querySelectorAll('.editor-toolbar button.aegis-op-btn').forEach(btn => {
-                        btn.disabled = false;
-                        btn.classList.remove('disabled');
-                    });
-                }
-            };
-
-            const originalToggleSideBySide = easyMDE.toggleSideBySide;
-            easyMDE.toggleSideBySide = function () {
-                originalToggleSideBySide.apply(this, arguments);
-                if (this.isSideBySideActive()) {
-                    setTimeout(renderAegisVisuals, 50);
-                }
-            };
 
             cm.on("update", () => {
                 if (easyMDE.isSideBySideActive() || easyMDE.isPreviewActive()) {
