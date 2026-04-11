@@ -158,7 +158,20 @@ class OracleClient:
             raise OracleError(f"SYNTHESIS_OFFLINE: {response.status_code}")
 
         try:
-            return response.json().get("response", "").strip()
+            result = response.json().get("response", "").strip()
+            
+            # AEGIS_SYNTAX_STRIPPER: Remove hallucinated markdown fences
+            if result.startswith("```"):
+                lines = result.splitlines()
+                # Remove first line if it's a fence
+                if lines and lines[0].startswith("```"):
+                    lines = lines[1:]
+                # Remove last line if it's a fence
+                if lines and lines[-1].strip() == "```":
+                    lines = lines[:-1]
+                result = "\n".join(lines).strip()
+            
+            return result
         except Exception:
             raise OracleError("DATA_CORRUPTION")
 

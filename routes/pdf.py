@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from pathlib import Path
 from typing import Optional
 from config.templates import templates
-from logic.files import read_file_content, read_file_bytes
+from logic.files import read_file_content, read_file_bytes, PathSanitizer
 from logic.conversion import convert_markdown_to_pdf
 from config.settings import settings as app_settings
 from routes import build_breadcrumbs
@@ -19,7 +19,9 @@ async def _resolve_pdf_bytes(path: str, header_footer: Optional[bool]) -> bytes:
     if str(path).lower().endswith(".pdf"):
         return await read_file_bytes(path)
     content = await read_file_content(path)
-    return await convert_markdown_to_pdf(content, Path(path).name, show_header_footer=show_hf)
+    # AEGIS_PATH_CONTEXT: Resolve parent dir for relative asset embedding (Images)
+    base_path = PathSanitizer.resolve_and_sanitize(str(Path(path).parent))
+    return await convert_markdown_to_pdf(content, Path(path).name, show_header_footer=show_hf, base_path=base_path)
 
 
 @router.get("/pdf/view", response_class=HTMLResponse)

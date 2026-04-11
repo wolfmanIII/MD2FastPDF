@@ -90,11 +90,28 @@
                     codeSyntaxHighlighting: false,
                 },
                 previewRender: function (plainText, preview) {
-                    // Use marked to generate HTML
-                    const html = marked.parse(plainText);
-                    // Schedule mermaid render once HTML is injected
-                    setTimeout(renderAegisVisuals, 100);
-                    return html;
+                    try {
+                        const currentPath = "{{ path }}";
+                        const currentDir = currentPath.split('/').slice(0, -1).join('/');
+
+                        // AEGIS_ASSET_RESOLVER: Rewrite relative image paths in markdown before parsing
+                        // This regex handles standard markdown image syntax: ![alt](path)
+                        const processedText = plainText.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, href) => {
+                            if (href && !href.startsWith('http') && !href.startsWith('/') && !href.startsWith('data:')) {
+                                const resolvedPath = currentDir ? `${currentDir}/${href}` : href;
+                                const finalHref = `/files/raw?path=${encodeURIComponent(resolvedPath)}`;
+                                return `![${alt}](${finalHref})`;
+                            }
+                            return match;
+                        });
+
+                        const html = marked.parse(processedText);
+                        setTimeout(renderAegisVisuals, 100);
+                        return html;
+                    } catch (e) {
+                        console.error("AEGIS_PREVIEW_ERR //", e);
+                        return marked.parse(plainText); // Fallback to raw render
+                    }
                 },
                 toolbar: [
                     "bold", "italic", "heading", "|",

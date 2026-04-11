@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Request, Form, HTTPException
+from fastapi import APIRouter, Request, Form, HTTPException, Response
 from fastapi.responses import HTMLResponse
 from pathlib import Path
 from config.templates import templates
 from logic.files import (
-    list_directory_contents, create_new_file, delete_file, rename_file, search_files
+    list_directory_contents, create_new_file, delete_file, rename_file, search_files, read_file_bytes
 )
 from routes import build_breadcrumbs
 
@@ -134,6 +134,35 @@ async def file_tree_expand(request: Request, path: str = ".", active: str = ""):
         "parent_path": path,
         "active_path": active,
     })
+
+
+@router.get("/files/raw")
+async def get_raw_file(path: str):
+    """
+    Serves a raw file from the archive (images, assets, etc.).
+    """
+    try:
+        content = await read_file_bytes(path)
+        # Determine media type based on extension
+        ext = Path(path).suffix.lower()
+        media_types = {
+            ".png": "image/png",
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".gif": "image/gif",
+            ".svg": "image/svg+xml",
+            ".webp": "image/webp",
+            ".pdf": "application/pdf"
+        }
+        media_type = media_types.get(ext, "application/octet-stream")
+        
+        return Response(
+            content=content,
+            media_type=media_type,
+            headers={"Content-Disposition": "inline"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"FILE_NOT_FOUND")
 
 
 @router.post("/delete", response_class=HTMLResponse)

@@ -1,5 +1,8 @@
 import httpx
 import bleach
+import base64
+import mimetypes
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Callable, Protocol
@@ -37,7 +40,7 @@ class PageScaffolding(Protocol):
 
 class RendererProtocol(Protocol):
     """Converts raw Markdown content to sanitized HTML."""
-    def render(self, content: str) -> str: ...
+    def render(self, content: str, base_path: Optional[Path] = None) -> str: ...
 
 
 class HtmlBuilderProtocol(Protocol):
@@ -94,14 +97,50 @@ class MinimalScaffolding:
 
 
 class MarkdownRenderer:
-    """Converts Markdown source to sanitized HTML."""
+    """Converts Markdown source to sanitized HTML with image embedding support."""
 
-    def render(self, content: str) -> str:
+    def render(self, content: str, base_path: Optional[Path] = None) -> str:
         raw_html = markdown.markdown(
             content,
             extensions=['fenced_code', 'tables', 'attr_list']
         )
-        return CLEANER.clean(raw_html)
+        sanitized_html = CLEANER.clean(raw_html)
+        
+        if base_path:
+            return self._embed_images(sanitized_html, base_path)
+        return sanitized_html
+
+    def _embed_images(self, html: str, base_path: Path) -> str:
+        """Finds relative image paths and embeds them as Base64 data URLs."""
+        from logic.files import PathSanitizer
+        
+        def replacer(match):
+            full_tag = match.group(0)
+            prefix = match.group(1)
+            src = match.group(2)
+            suffix = match.group(3)
+            
+            if src.startswith(('http', 'data:', '/')):
+                return full_tag
+                
+            try:
+                # Security: Resolve relative to base_path, then verify root isolation
+                img_disk_path = (base_path / src).resolve()
+                if not str(img_disk_path).startswith(str(PathSanitizer.get_root())):
+                    return full_tag
+                    
+                if img_disk_path.is_file():
+                    with open(img_disk_path, "rb") as f:
+                        data = f.read()
+                        encoded = base64.b64encode(data).decode('utf-8')
+                        mime, _ = mimetypes.guess_type(str(img_disk_path))
+                        mime = mime or "image/png"
+                        return f'{prefix}data:{mime};base64,{encoded}{suffix}'
+            except Exception:
+                pass
+            return full_tag
+
+        return re.sub(r'(<img [^>]*src=")([^"]+)(")', replacer, html)
 
 
 class PdfHtmlBuilder:
@@ -171,10 +210,10 @@ class GotenbergClient:
         except Exception:
             return False, "OFFLINE"
 
-    async def render_pdf(self, markdown_content: str, filename: str, show_header_footer: bool = False) -> bytes:
+    async def render_pdf(self, markdown_content: str, filename: str, show_header_footer: bool = False, base_path: Optional[Path] = None) -> bytes:
         """Converts markdown to PDF with sanitization and industrial styling."""
         url = self._url_provider()
-        html_body = self._renderer.render(markdown_content)
+        html_body = self._renderer.render(markdown_content, base_path=base_path)
         _name = filename if len(filename) < 40 else filename[:37] + "..."
 
         scaffolding: PageScaffolding = DetailedScaffolding(_name) if show_header_footer else MinimalScaffolding()
@@ -211,5 +250,5 @@ gotenberg = GotenbergClient(
 )
 
 # Legacy Compatibility Entry Point
-async def convert_markdown_to_pdf(markdown_content: str, filename: str, show_header_footer: bool = False) -> bytes:
-    return await gotenberg.render_pdf(markdown_content, filename, show_header_footer)
+async def convert_markdown_to_pdf(markdown_content: str, filename: str, show_header_footer: bool = False, base_path: Optional[Path] = None) -> bytes:
+    return await gotenberg.render_pdf(markdown_content, filename, show_header_footer, base_path=base_path)
