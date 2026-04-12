@@ -1,7 +1,7 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.12.0
-**Ultimo Aggiornamento**: 10 Aprile 2026
+**Stato Attuale**: Op_Ready / Versione 5.13.0
+**Ultimo Aggiornamento**: 12 Aprile 2026
 
 ---
 
@@ -129,6 +129,14 @@
 - **5 template iniziali** in `blueprints/narrative/`: Session Log, NPC Profile, Planet Description, Ship Description, Location Description. ✓
 - **Path sanitization**: `BlueprintManager._sanitize()` previene traversal fuori da `blueprints/`. ✓
 
+### 1.16 AEGIS BLUEPRINT VARIABLE INJECTION [5.5] (v5.13.0) — COMPLETED
+
+- **`GET /blueprints/placeholders?path=`**: endpoint server-side che estrae placeholder univoci via regex `\[[A-Z0-9 _/\.]+\]` e li restituisce come JSON. Deduplicazione con `dict.fromkeys` (ordine di prima occorrenza preservato). ✓
+- **Rilevamento automatico**: click su blueprint chiama `requestBlueprint()` — fetch dei placeholder prima di procedere. ✓
+- **`blueprint_variable_modal.html`**: modal con form dinamico — un `<input>` per ciascun placeholder, label uppercase, focus automatico sul primo campo. ✓
+- **Sostituzione globale**: `replaceAll('[PH]', value)` per ogni placeholder; se il campo è vuoto, il token originale viene preservato. ✓
+- **Bypass diretto**: se nessun placeholder rilevato, inserimento immediato senza step aggiuntivi — comportamento attuale invariato. ✓
+
 ### 1.13 AEGIS GROUP_SPACE (v5.9.0) — COMPLETED
 
 - **Workspace condiviso per gruppo**: `~/sc-archive/{group_name}/` creato automaticamente alla creazione del gruppo. Boot migration per gruppi preesistenti. ✓
@@ -203,7 +211,7 @@ bin/            launch.sh, create_user.sh, aegis-migrate.sh
 | [5.2] | AEGIS GROUP_SPACE | **COMPLETED** |
 | [5.3] | AEGIS TEST SUITE | **COMPLETED** |
 | [5.4] | AEGIS REFACTOR STRUTTURALE | **COMPLETED** |
-| [5.5] | AEGIS BLUEPRINT VARIABLE INJECTION | **PENDING** |
+| [5.5] | AEGIS BLUEPRINT VARIABLE INJECTION | **COMPLETED** |
 
 ---
 

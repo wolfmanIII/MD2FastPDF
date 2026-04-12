@@ -1,6 +1,18 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.13.0] - AEGIS BLUEPRINT VARIABLE INJECTION (2026-04-12)
+Pre-compilazione guidata dei placeholder `[UPPERCASE]` nei blueprint prima dell'inserimento in editor.
+
+### Added
+- **`routes/blueprint.py` — `GET /blueprints/placeholders?path=`**: estrae i placeholder univoci dal contenuto del blueprint via regex `\[[A-Z0-9 _/\.]+\]`. Deduplicazione con `dict.fromkeys` (ordine di prima occorrenza). Restituisce `{"placeholders": [...]}`.
+- **`templates/components/blueprint_variable_modal.html`**: nuovo fragment modale con form dinamico — un `<input>` per ciascun placeholder rilevato, label uppercase, focus automatico sul primo campo. Azioni: `ABORT //` e `INJECT_BLUEPRINT //`.
+
+### Changed
+- **`templates/components/blueprint_modal.html`**: click su blueprint chiama `requestBlueprint(path)` invece di `insertBlueprint(path)` diretto. Se i placeholder sono presenti, il blueprint modal si chiude e si apre `blueprint_variable_modal`; altrimenti inserimento diretto invariato. Incluso `blueprint_variable_modal.html` via `{% include %}`.
+
+---
+
 ## [5.12.0] - AUTH HARDENING + COMMS ADMIN BYPASS + UI FIXES (2026-04-10)
 Hardening dell'autenticazione (path dinamici, ISP split, secret key persistente), bypass gruppi per admin in COMMS, fix palette filetree, fix blueprint admin.
 

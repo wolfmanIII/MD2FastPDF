@@ -168,22 +168,14 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [5.5] - AEGIS BLUEPRINT VARIABLE INJECTION [PENDING]
+### [5.5] - AEGIS BLUEPRINT VARIABLE INJECTION [COMPLETED]
 **Obiettivo**: Pre-compilazione guidata dei placeholder nei blueprint prima dell'inserimento nell'editor.
-
-I template attuali contengono placeholder nel formato `[NOME]`, `[ANNO.DIA]`, `[SISTEMA / PIANETA]`, ecc. Oggi vengono inseriti grezzi e compilati a mano dall'utente dopo l'inserimento.
-
-**Specifiche**:
-- **Rilevamento automatico**: al click su un blueprint nella gallery modal, scansionare il contenuto per pattern `[TESTO IN MAIUSCOLO / CON SPAZI]` (regex: `\[[A-Z0-9 _/\.]+\]`).
-- **Form modale**: se presenti placeholder, mostrare un secondo modal con un campo input per ciascuno (label = nome del placeholder, es. "NUMERO", "ANNO.DIA").
-- **Sostituzione**: al submit del form, sostituire tutti i placeholder con i valori inseriti, poi iniettare il testo risultante nell'editor (stessa logica di `insertBlueprint()`).
-- **Bypass diretto**: se nessun placeholder rilevato, inserimento immediato senza step aggiuntivi (comportamento attuale preservato).
-- **Placeholder duplicati**: se lo stesso placeholder appare più volte, un solo campo nel form — sostituzione globale.
-
-**File coinvolti**:
-- `templates/components/blueprint_modal.html` — logica JS di rilevamento + apertura form
-- `templates/components/blueprint_variable_modal.html` — nuovo fragment modale con form dinamico
-- `routes/blueprint.py` — eventuale endpoint `GET /blueprints/placeholders?path=` per estrazione server-side
+- **Endpoint `GET /blueprints/placeholders?path=`**: estrazione server-side dei placeholder univoci via regex `\[[A-Z0-9 _/\.]+\]`. ✓
+- **Rilevamento automatico**: click su blueprint chiama `requestBlueprint()` — se placeholder trovati, apre il form; altrimenti inserimento diretto. ✓
+- **`blueprint_variable_modal.html`**: modal con form dinamico — un input per ciascun placeholder (label = nome, focus automatico sul primo campo). ✓
+- **Sostituzione globale**: `replaceAll()` su ogni placeholder, fallback al token originale se il campo è lasciato vuoto. ✓
+- **Bypass diretto**: se nessun placeholder rilevato, comportamento attuale invariato. ✓
+- **Placeholder duplicati**: deduplicati lato server (`dict.fromkeys`) — un solo campo, sostituzione globale. ✓
 
 ---
 
