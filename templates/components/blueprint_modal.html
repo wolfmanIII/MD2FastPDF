@@ -23,7 +23,7 @@
         <div class="grid grid-cols-2 gap-2">
           {% for bp in items %}
           <button
-            onclick="insertBlueprint('{{ bp.path }}')"
+            onclick="requestBlueprint('{{ bp.path }}')"
             class="btn-ghost text-left text-[11px] font-mono uppercase tracking-widest px-4 py-3 rounded-none border border-zinc-800 hover:border-(--neon-cyan) hover:neon-text transition-all">
             {{ bp.name }}
           </button>
@@ -42,7 +42,82 @@
   </div>
 </div>
 
+{% include "components/blueprint_variable_modal.html" %}
+
 <script>
+async function requestBlueprint(path) {
+  try {
+    const res = await fetch('/blueprints/placeholders?path=' + encodeURIComponent(path));
+    if (!res.ok) return;
+    const data = await res.json();
+    const hasPh = data.sections && data.sections.some(s => s.placeholders.length > 0);
+    if (!hasPh) {
+      await insertBlueprint(path);
+    } else {
+      openVariableModal(path, data.sections);
+    }
+  } catch (e) {
+    console.error('BLUEPRINT_PLACEHOLDER_CHECK_FAILED', e);
+  }
+}
+
+function openVariableModal(path, sections) {
+  document.getElementById('bp-var-path').value = path;
+  const fields = document.getElementById('bp-var-fields');
+  fields.innerHTML = '';
+  for (const section of sections) {
+    if (!section.placeholders.length) continue;
+    fields.innerHTML += `
+      <p class="text-zinc-600 font-mono text-[10px] uppercase tracking-widest border-b border-zinc-800 pb-1 mt-2">
+        ${section.heading}
+      </p>
+    `;
+    for (const ph of section.placeholders) {
+      const id = 'bpvar-' + ph.replace(/[^A-Z0-9]/g, '_');
+      fields.innerHTML += `
+        <div class="flex flex-col gap-1">
+          <label for="${id}" class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">${ph}</label>
+          <input type="text" id="${id}" data-placeholder="${ph}" class="w-full" placeholder="${ph}" autocomplete="off">
+        </div>
+      `;
+    }
+  }
+  closeAegisModal('blueprint-modal');
+  document.getElementById('blueprint-var-modal').classList.add('modal-open');
+  const first = fields.querySelector('input');
+  if (first) setTimeout(() => first.focus(), 50);
+}
+
+async function submitVariableForm() {
+  const path = document.getElementById('bp-var-path').value;
+  try {
+    const res = await fetch('/blueprints/content?path=' + encodeURIComponent(path));
+    if (!res.ok) return;
+    const data = await res.json();
+    let content = data.content;
+    document.querySelectorAll('#bp-var-fields input').forEach(input => {
+      const ph = input.dataset.placeholder;
+      const val = input.value.trim() || ('[' + ph + ']');
+      content = content.replaceAll('[' + ph + ']', val);
+    });
+    if (window.aegisEditor) {
+      const current = window.aegisEditor.value();
+      const separator = current.length > 0 ? '\n\n---\n\n' : '';
+      window.aegisEditor.value(current + separator + content);
+    } else {
+      const textarea = document.getElementById('gs-editor-input')
+                    || document.getElementById('pure-editor-input');
+      if (!textarea) return;
+      const separator = textarea.value.length > 0 ? '\n\n---\n\n' : '';
+      textarea.value += separator + content;
+      textarea.dispatchEvent(new Event('input'));
+    }
+    closeAegisModal('blueprint-var-modal');
+  } catch (e) {
+    console.error('BLUEPRINT_VAR_SUBMIT_FAILED', e);
+  }
+}
+
 async function insertBlueprint(path) {
   try {
     const res = await fetch('/blueprints/content?path=' + encodeURIComponent(path));
