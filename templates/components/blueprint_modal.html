@@ -68,8 +68,8 @@ function openVariableModal(path, sections) {
   for (const section of sections) {
     if (!section.placeholders.length) continue;
     fields.innerHTML += `
-      <p class="text-zinc-600 font-mono text-[10px] uppercase tracking-widest border-b border-zinc-800 pb-1 mt-2">
-        ${section.heading}
+      <p class="text-zinc-400 font-mono text-[10px] uppercase tracking-widest border-b border-zinc-700 pb-1 mt-2">
+        <i class="fa fa-angle-right neon-text mr-1"></i>${section.heading}
       </p>
     `;
     for (const ph of section.placeholders) {
