@@ -136,6 +136,22 @@ async def groupspace_create_form(request: Request, group_name: str, path: str = 
     )
 
 
+@router.get("/{group_name}/delete/confirm", response_class=HTMLResponse)
+async def groupspace_delete_confirm(
+    request: Request,
+    group_name: str,
+    path: str,
+    current_dir: str = "",
+):
+    """Returns the delete confirmation modal for a group workspace file."""
+    filename = path.split("/")[-1] if "/" in path else path
+    return templates.TemplateResponse(
+        request,
+        "components/groupspace_delete_modal.html",
+        {"group_name": group_name, "path": path, "current_dir": current_dir, "filename": filename},
+    )
+
+
 @router.post("/{group_name}/delete", response_class=HTMLResponse)
 async def groupspace_delete(
     request: Request,

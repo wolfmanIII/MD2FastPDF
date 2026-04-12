@@ -1,0 +1,30 @@
+<div id="gs-delete-modal" class="modal modal-open">
+  <div class="modal-box bg-zinc-900 border border-zinc-700 max-w-sm w-full rounded-none p-0">
+
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+      <span class="text-red-400 font-mono text-sm uppercase tracking-widest flex items-center gap-2">
+        {% with class="w-4 h-4 animate-pulse" %}{% include 'icons/action-trash.html' %}{% endwith %}
+        // PURGE_CONFIRMATION
+      </span>
+      <button onclick="closeAegisModal('gs-delete-modal')" class="btn btn-ghost btn-sm text-zinc-500">✕</button>
+    </div>
+
+    <div class="p-6 space-y-3">
+      <p class="text-zinc-400 text-xs uppercase tracking-wide">PERMANENT_DELETION // CANNOT_BE_UNDONE:</p>
+      <p class="text-white font-mono text-sm break-all border border-zinc-800 px-3 py-2">{{ filename }}</p>
+    </div>
+
+    <div class="px-6 py-3 border-t border-zinc-800 flex justify-end gap-2">
+      <button type="button" onclick="closeAegisModal('gs-delete-modal')"
+              class="btn btn-ghost btn-sm text-zinc-500">ABORT //</button>
+      <button hx-post="/group-space/{{ group_name }}/delete"
+              hx-vals='{"path": "{{ path }}", "current_dir": "{{ current_dir }}"}'
+              hx-target="#aegis-view-core"
+              hx-on::after-request="closeAegisModal('gs-delete-modal')"
+              class="btn btn-error btn-sm btn-solid border-none bg-red-600 hover:bg-red-500 text-white font-bold tracking-widest">
+        CONFIRM_PURGE //
+      </button>
+    </div>
+
+  </div>
+</div>
