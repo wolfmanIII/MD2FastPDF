@@ -1,6 +1,6 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
 
-**Versione 5.12.0** // AUTH HARDENING & COMMS ADMIN BYPASS
+**Versione 5.13.0** // BLUEPRINT VARIABLE INJECTION
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -20,6 +20,7 @@
 ## 🚀 Features
 
 - **Aegis Group_Space**: Workspace filesystem condiviso per gruppo. Modello permessi asimmetrico (admin R+W su root, membri R+W su `shared/`). Browser, editor e CRUD file integrati nella navbar.
+- **Aegis Blueprint Variable Injection**: Al click su un blueprint, rilevamento automatico dei placeholder `[UPPERCASE]` e form modale guidato per pre-compilarli prima dell'inserimento. Bypass diretto se nessun placeholder presente.
 - **Aegis Blueprint**: Libreria template Markdown app-wide (`blueprints/`). Modal in toolbar editor per inserimento istantaneo in fondo al documento. Admin panel con gestione CRUD blueprint per categoria.
 - **Aegis Groups & Admin Panel**: Sistema di gruppi utente con admin panel HTMX (`/admin`). CRUD utenti e gruppi. Chiunque abbia il gruppo `"admin"` ha privilegi admin. Messaggistica filtrata per gruppo condiviso — admin bypassa il filtro e può scrivere a tutti gli utenti senza restrizioni (ruolo GM/Referee).
 - **Aegis COMMS**: Messaggistica filesystem-based multi-utente. Hub tabbato (RECEPTION_ARRAY / OUTBOUND_LOG / STAGING_BUFFER), compose modal con preview Markdown live, draft management, unread badge HTMX-polled ogni 30s.

@@ -2,8 +2,8 @@
 
 - **Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
 - **Nome Tecnico Interno**: MD2FastPDF
-- **Data**: 10 Aprile 2026
-- **Versione**: 5.12.0
+- **Data**: 12 Aprile 2026
+- **Versione**: 5.13.0
 
 ## 1. Architettura di Sistema
 
@@ -67,7 +67,7 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 | `render.py` | funzioni `render_mermaid_png`, `render_mermaid_zip` | Export PNG/ZIP Mermaid via Gotenberg screenshot |
 | `auth.py` | `AuthService`, `UserStore`, `GroupStore`, `UserRecord`, `UserStoreProtocol`, `SyncUserStoreProtocol`, `GroupStoreProtocol`, `SyncGroupStoreProtocol` | Multi-user auth, workspace isolation, group management, user creation hook registry, legacy migration |
 | `comms.py` | `FrontmatterParser`, `MessageRecord`, `CommsManager` | Messaggistica filesystem-based, dual-write, draft, filtraggio gruppi |
-| `blueprints.py` | `BlueprintManager` | Libreria template Markdown app-wide in `blueprints/`; path sanitization propria |
+| `blueprints.py` | `BlueprintManager`, `_extract_placeholder_sections()` | Libreria template Markdown app-wide in `blueprints/`; path sanitization propria; estrazione placeholder per sezione Markdown |
 | `groupspace.py` | `GroupSpaceAccess`, `GroupSpaceManager` | Workspace condivisi per gruppo; modello permessi (root: admin R+W / membri R; shared/: membri R+W / admin R) |
 | `templates.py` | `templates` (Jinja2Templates) | Configurazione motore template + filtri custom (`render_md`, `parent_path`) |
 | `exceptions.py` | `AegisError` e sottoclassi | Gerarchia eccezioni dominio (zero `HTTPException` in `logic/`) |
@@ -107,7 +107,7 @@ AegisError
 | `settings.py` | `/` | Settings UI, model management |
 | `comms.py` | `/comms` | Hub messaggistica, compose, send, draft, unread badge |
 | `admin.py` | `/admin` | Admin panel — CRUD utenti, gruppi, blueprint (require_admin) |
-| `blueprint.py` | `/blueprints` | Gallery template (tutti gli utenti), CRUD admin-only |
+| `blueprint.py` | `/blueprints` | Gallery template (tutti gli utenti), CRUD admin-only, `GET /placeholders` per estrazione placeholder per sezione |
 | `groupspace.py` | `/group-space` | Hub gruppi, browser, editor, save, create, delete per workspace condivisi |
 | `deps.py` | — | `get_current_user`, `require_admin` dependencies condivise |
 | `__init__.py` | — | `build_breadcrumbs()` utility condivisa |
@@ -138,7 +138,7 @@ layouts/
   base.html       — scaffold HTML completo (nav, sidebar, modal container, toast container)
   login.html      — pagina login standalone
 shell.html        — wrapper minimo per component_template pattern
-components/       — 40 fragment Jinja2 HTMX (incl. 8 comms, 5 admin, 2 blueprint, 4 groupspace)
+components/       — 41 fragment Jinja2 HTMX (incl. 8 comms, 5 admin, 3 blueprint, 4 groupspace)
 icons/            — SVG inline components
 ```
 
@@ -230,4 +230,4 @@ poetry run pytest tests/test_comms_async.py -v          # singolo file
 
 ---
 
-Documento Tecnico Aegis Class System // v5.12.0
+Documento Tecnico Aegis Class System // v5.13.0
