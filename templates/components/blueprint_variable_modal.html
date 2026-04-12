@@ -1,0 +1,37 @@
+<div id="blueprint-var-modal" class="modal">
+  <div class="modal-box bg-zinc-900 border border-zinc-700 max-w-lg w-full rounded-none p-0">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+      <span class="neon-text font-mono text-sm uppercase tracking-widest">// VARIABLE_INJECTION</span>
+      <button onclick="closeAegisModal('blueprint-var-modal')"
+              class="btn btn-ghost btn-sm text-zinc-500">✕</button>
+    </div>
+
+    <!-- Subtitle -->
+    <div class="px-6 pt-4 pb-2">
+      <span class="text-zinc-500 font-mono text-[10px] uppercase tracking-widest">
+        PLACEHOLDER_DETECTED // COMPILE_BEFORE_INJECTION
+      </span>
+    </div>
+
+    <!-- Content -->
+    <div class="px-6 pb-6 max-h-[60vh] overflow-y-auto">
+      <input type="hidden" id="bp-var-path" value="">
+      <div id="bp-var-fields" class="space-y-3">
+        <!-- Fields injected dynamically by openVariableModal() -->
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-3 border-t border-zinc-800 flex justify-between items-center">
+      <button onclick="closeAegisModal('blueprint-var-modal')"
+              class="btn btn-ghost btn-sm text-zinc-500">ABORT //</button>
+      <button onclick="submitVariableForm()"
+              class="btn-solid text-[10px] rounded-sm focus:outline-none">
+        INJECT_BLUEPRINT //
+      </button>
+    </div>
+
+  </div>
+</div>
