@@ -48,10 +48,9 @@ class PathSanitizer:
     @staticmethod
     def set_root(new_path: Union[str, Path]):
         global _DEFAULT_ROOT
+        # Resolve to canonical form (follows symlinks). Confinement policy is
+        # enforced upstream by the route (allowed_base check), not here.
         resolved = Path(new_path).resolve()
-        # Security: Always resolve and ensure it's within Path.home()
-        if not str(resolved).startswith(str(Path.home().resolve())):
-            raise AccessDeniedError("ACCESS_DENIED: Root must be within HOME")
         _DEFAULT_ROOT = resolved
         _REQUEST_ROOT.set(resolved)
         _notify_mutation()
@@ -60,15 +59,18 @@ class PathSanitizer:
     def resolve_and_sanitize(relative_path: str) -> Path:
         """Prevents directory traversal and hidden path access."""
         root = PathSanitizer.get_root()
+        # Resolve root too: if root contains symlink components the stored path
+        # may differ from the fully-resolved requested_path, breaking startswith.
+        resolved_root = root.resolve()
         try:
             requested_path = (root / relative_path.strip("/")).resolve()
 
             # Traversal Check
-            if not str(requested_path).startswith(str(root)):
+            if not str(requested_path).startswith(str(resolved_root)):
                 raise AccessDeniedError("ACCESS_DENIED: Path outside active root")
 
             # Hidden Path Check
-            parts = requested_path.relative_to(root).parts
+            parts = requested_path.relative_to(resolved_root).parts
             if any(part.startswith(".") for part in parts):
                 raise AccessDeniedError("ACCESS_DENIED: Hidden path access forbidden")
 
@@ -83,23 +85,26 @@ class DirectoryLister:
     """Tactical directory scanning and filtering."""
 
     @staticmethod
-    async def list_home_dirs(relative_path: str = "") -> List[Dict[str, str]]:
-        """Lists directories in HOME specifically for the root picker."""
-        home = Path.home().resolve()
-        target = (home / relative_path.strip("/")).resolve()
+    async def list_home_dirs(relative_path: str = "", base: Path | None = None) -> List[Dict[str, str]]:
+        """Lists directories for the root picker, confined to `base` (default: home).
+        Admin passes base=Path('/') for full-filesystem access."""
+        fs_base = (base or Path.home()).resolve()
+        clean = relative_path.strip("/")
+        # normpath handles ".." without following symlinks — prevents traversal attacks
+        # while allowing symlinks that point outside fs_base to be navigated.
+        target = Path(os.path.normpath(fs_base / clean)) if clean else fs_base
 
-        if not str(target).startswith(str(home)):
-            target = home
+        if not str(target).startswith(str(fs_base)):
+            target = fs_base
 
         def _scan():
             dirs = []
             try:
                 for entry in os.scandir(target):
                     if entry.is_dir() and not entry.name.startswith("."):
-                        dirs.append({
-                            "name": entry.name,
-                            "path": str((target / entry.name).relative_to(home))
-                        })
+                        # Logical child: relative_to always works since target is under fs_base
+                        logical_child = target / entry.name
+                        dirs.append({"name": entry.name, "path": str(logical_child.relative_to(fs_base))})
             except PermissionError as e:
                 raise AccessDeniedError("ACCESS_DENIED: Directory non leggibile") from e
             return sorted(dirs, key=lambda x: x["name"].lower())
@@ -319,7 +324,7 @@ class StorageCache:
 def get_project_root() -> Path: return PathSanitizer.get_root()
 def set_project_root(path): PathSanitizer.set_root(path)
 def sanitize_path(rel_path): return PathSanitizer.resolve_and_sanitize(rel_path)
-async def list_only_directories(p=""): return await DirectoryLister.list_home_dirs(p)
+async def list_only_directories(p="", base: Path | None = None): return await DirectoryLister.list_home_dirs(p, base=base)
 async def list_directory_contents(p="."): return await DirectoryLister.list_contents(p)
 async def read_file_content(p): return await FileManager.read_text(p)
 async def read_file_bytes(p): return await FileManager.read_bytes(p)
