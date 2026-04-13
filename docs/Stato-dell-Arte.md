@@ -129,14 +129,6 @@
 - **5 template iniziali** in `blueprints/narrative/`: Session Log, NPC Profile, Planet Description, Ship Description, Location Description. ✓
 - **Path sanitization**: `BlueprintManager._sanitize()` previene traversal fuori da `blueprints/`. ✓
 
-### 1.16 AEGIS BLUEPRINT VARIABLE INJECTION [5.5] (v5.13.0) — COMPLETED
-
-- **`GET /blueprints/placeholders?path=`**: endpoint server-side che estrae placeholder univoci via regex `\[[A-Z0-9 _/\.]+\]` e li restituisce come JSON. Deduplicazione con `dict.fromkeys` (ordine di prima occorrenza preservato). ✓
-- **Rilevamento automatico**: click su blueprint chiama `requestBlueprint()` — fetch dei placeholder prima di procedere. ✓
-- **`blueprint_variable_modal.html`**: modal con form dinamico — un `<input>` per ciascun placeholder, label uppercase, focus automatico sul primo campo. ✓
-- **Sostituzione globale**: `replaceAll('[PH]', value)` per ogni placeholder; se il campo è vuoto, il token originale viene preservato. ✓
-- **Bypass diretto**: se nessun placeholder rilevato, inserimento immediato senza step aggiuntivi — comportamento attuale invariato. ✓
-
 ### 1.13 AEGIS GROUP_SPACE (v5.9.0) — COMPLETED
 
 - **Workspace condiviso per gruppo**: `~/sc-archive/{group_name}/` creato automaticamente alla creazione del gruppo. Boot migration per gruppi preesistenti. ✓
@@ -148,12 +140,6 @@
 - **Path sanitization**: `GroupSpaceManager.sanitize()` previene traversal fuori da `{workspace_base}/{group_name}/`. ✓
 - **Accesso revoca immediata**: accesso verificato a ogni request da `GroupSpaceAccess.has_access()` — la rimozione dal gruppo è effettiva alla prossima request. ✓
 
-### 1.15 MODAL STANDARDIZATION + MIGRATION TOOL (v5.11.0) — COMPLETED
-
-- **Standardizzazione modali**: tutte le 10 modali dell'applicazione refactorate allo stile `blueprint_modal.html` — shell `modal-box bg-zinc-900 border border-zinc-700 rounded-none p-0`, header con prefisso `//` in `neon-text`, close button ghost, footer con `ABORT //` + azione primaria. Modali oracle/mermaid usano `text-violet-400` per coerenza cromatica con il tema Oracle. ✓
-- **Settings modal**: larghezza `70vw` via inline style — unico modo affidabile per bypassare il `max-width` hardcoded di DaisyUI `modal-box`. Layout flex colonna con area di scroll interna isolata. ✓
-- **`bin/aegis-migrate.sh`**: script bash per export/import completo dei dati applicazione. Export crea `.tar.gz` con timestamp contenente settings, utenti, gruppi, blueprints e workspace. Import interattivo con rimappatura percorsi e aggiornamento automatico di `settings.json`. ✓
-
 ### 1.14 AEGIS TEST SUITE (v5.9.1) — COMPLETED
 
 - **Suite pytest**: 170 test, 0 fallimenti. Eseguiti su entrambi i backend anyio (`asyncio` e `trio`). ✓
@@ -162,6 +148,20 @@
 - **Isolamento**: `patch_groupspace_base`, `patch_blueprints_root`, `patch_comms_base` — ogni test usa una directory isolata, nessuna scrittura sul filesystem reale. ✓
 - **Copertura**: `blueprints.py` 100%, `comms.py` 93%, `groupspace.py` 92%. I moduli `conversion`, `oracle`, `render` richiedono servizi esterni (Gotenberg/Ollama) — esclusi dalla suite unit. ✓
 - **Dev dependencies**: `pytest >=8.0`, `pytest-cov >=6.0`, `pytest-anyio` in `[tool.poetry.group.dev.dependencies]`. ✓
+
+### 1.15 MODAL STANDARDIZATION + MIGRATION TOOL (v5.11.0) — COMPLETED
+
+- **Standardizzazione modali**: tutte le 10 modali dell'applicazione refactorate allo stile `blueprint_modal.html` — shell `modal-box bg-zinc-900 border border-zinc-700 rounded-none p-0`, header con prefisso `//` in `neon-text`, close button ghost, footer con `ABORT //` + azione primaria. Modali oracle/mermaid usano `text-violet-400` per coerenza cromatica con il tema Oracle. ✓
+- **Settings modal**: larghezza `70vw` via inline style — unico modo affidabile per bypassare il `max-width` hardcoded di DaisyUI `modal-box`. Layout flex colonna con area di scroll interna isolata. ✓
+- **`bin/aegis-migrate.sh`**: script bash per export/import completo dei dati applicazione. Export crea `.tar.gz` con timestamp contenente settings, utenti, gruppi, blueprints e workspace. Import interattivo con rimappatura percorsi e aggiornamento automatico di `settings.json`. ✓
+
+### 1.16 AEGIS BLUEPRINT VARIABLE INJECTION [5.5] (v5.13.0) — COMPLETED
+
+- **`GET /blueprints/placeholders?path=`**: endpoint server-side che estrae placeholder univoci via regex `\[[A-Z0-9 _/\.]+\]` e li restituisce come JSON. Deduplicazione con `dict.fromkeys` (ordine di prima occorrenza preservato). ✓
+- **Rilevamento automatico**: click su blueprint chiama `requestBlueprint()` — fetch dei placeholder prima di procedere. ✓
+- **`blueprint_variable_modal.html`**: modal con form dinamico — un `<input>` per ciascun placeholder, label uppercase, focus automatico sul primo campo. ✓
+- **Sostituzione globale**: `replaceAll('[PH]', value)` per ogni placeholder; se il campo è vuoto, il token originale viene preservato. ✓
+- **Bypass diretto**: se nessun placeholder rilevato, inserimento immediato senza step aggiuntivi — comportamento attuale invariato. ✓
 
 ---
 
@@ -215,4 +215,4 @@ bin/            launch.sh, create_user.sh, aegis-migrate.sh
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.12.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.13.0 — DEPLOYMENT_ACTIVE.*
