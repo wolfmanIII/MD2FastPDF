@@ -7,7 +7,7 @@
 ## Scenari disponibili
 
 | Scenario | SC-ARCHIVE gira su | Caddy gira su | Complessità |
-|----------|--------------------|---------------|-------------|
+| ---------- | -------------------- | --------------- | ------------- |
 | **A** | WSL2 (Windows) | Raspberry Pi | Alta — portproxy necessario |
 | **B** | Raspberry Pi | Raspberry Pi (stesso) | Bassa — tutto sul Pi |
 | **C** | PC Linux | Raspberry Pi (o qualsiasi host) | Media — solo firewall |
@@ -110,6 +110,10 @@ Browser (LAN) → Raspberry Pi :80 (Caddy) → localhost :8000 (SC-ARCHIVE)
 | Raspberry Pi | 192.168.1.20 | SC-ARCHIVE + Caddy (stesso Pi) |
 
 SC-ARCHIVE e Caddy girano sullo stesso dispositivo. Nessun portproxy, nessuna rete interna.
+
+> **Servizi esterni**: Gotenberg e Ollama **non** girano sul Pi — devono essere su un altro host in LAN (es. PC Linux). Configurare i relativi IP in `config/settings.json` o dalla UI Settings:
+> - `gotenberg_ip` → `http://192.168.1.X:3000`
+> - `ollama_ip` → `http://192.168.1.X:11434`
 
 ### B.1 IP statico sul Pi
 
