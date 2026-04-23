@@ -112,6 +112,7 @@ Browser (LAN) → Raspberry Pi :80 (Caddy) → localhost :8000 (SC-ARCHIVE)
 SC-ARCHIVE e Caddy girano sullo stesso dispositivo. Nessun portproxy, nessuna rete interna.
 
 > **Servizi esterni**: Gotenberg e Ollama **non** girano sul Pi — devono essere su un altro host in LAN (es. PC Linux). Configurare i relativi IP in `config/settings.json` o dalla UI Settings:
+>
 > - `gotenberg_ip` → `http://192.168.1.X:3000`
 > - `ollama_ip` → `http://192.168.1.X:11434`
 
