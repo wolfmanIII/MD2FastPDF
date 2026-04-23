@@ -1,6 +1,23 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.14.0] - DOCKER RASPBERRY PI DEPLOY (2026-04-23)
+Stack containerizzato completo per Raspberry Pi 4/5 (ARM64). Build multi-stage con risoluzione automatica del binario Tailwind per architettura.
+
+### Added
+- **`Dockerfile`**: Build multi-stage in 3 fasi — `css-builder` (compila Tailwind su `$BUILDPLATFORM`, scarica binario `arm64` o `x64` da GitHub in base a `$BUILDARCH`), `deps-builder` (Poetry 2.3.2 + `poetry-plugin-export`, venv isolato), `runtime` (`python:3.13-slim` + `openssl`). Nessun binario `tailwindcss` nel contesto build.
+- **`docker-compose.yml`**: Tre servizi — `sc-archive` (build .), `gotenberg/gotenberg:8`, `caddy:alpine`. Tre named volumes: `sc-archive-config` (`/app/config`), `sc-archive-userdata` (`/root/.config/sc-archive`), `sc-archive-workspaces` (`/root/sc-archive`). Caddy espone la porta `80` sulla LAN.
+- **`docker/entrypoint.sh`**: Inizializza `config/settings.json` con valori Docker (`gotenberg_ip: http://gotenberg:3000`, `ollama_ip: $OLLAMA_IP`, `workspace_base: /root/sc-archive`). Genera session key via `openssl rand -hex 32` se assente. Bootstrap admin con `AEGIS_ADMIN_PASSWORD`.
+- **`docker/Caddyfile`**: `http://sc-archive.lan:80 { reverse_proxy sc-archive:8000 }`. Variante IP diretto documentata.
+- **`docker/.env.example`**: Template con `AEGIS_ADMIN_PASSWORD` e `OLLAMA_IP`.
+- **`.dockerignore`**: Esclude `.git`, `__pycache__`, `.venv`, `tests/`, `docs/`, `static/css/output.css`, `config/settings.json`, binario `tailwindcss`.
+- **`docs/docker-raspberry.md`**: Guida operativa completa — architettura, prerequisiti Docker sul Pi, installazione step-by-step, DNS LAN, primo avvio, volumi, configurazione Ollama esterno, aggiornamento, gestione container, troubleshooting.
+
+### Changed
+- **`docs/rete-lan-caddy.md`** (rinominato da `rete-lan-caddy-wsl2.md`): Aggiunto Scenario B (SC-ARCHIVE su RPi, Gotenberg/Ollama esterni) e Scenario C (SC-ARCHIVE su PC Linux → Caddy su RPi). Nota esplicita che nel deploy Docker su RPi Gotenberg e Ollama sono servizi separati non installati sul Pi stesso.
+
+---
+
 ## [5.13.0] - AEGIS BLUEPRINT VARIABLE INJECTION (2026-04-12)
 Pre-compilazione guidata dei placeholder `[UPPERCASE]` nei blueprint prima dell'inserimento in editor.
 

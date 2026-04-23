@@ -23,7 +23,7 @@ SC-ARCHIVE :8000                        │
 ```
 
 | Servizio | Container | Porta esposta |
-|----------|-----------|---------------|
+| -------- | --------- | ------------- |
 | SC-ARCHIVE | `sc-archive` | interna (via Caddy) |
 | Gotenberg | `gotenberg` | interna |
 | Caddy | `caddy` | `80` → LAN |
@@ -183,7 +183,7 @@ Aprire il browser su `http://sc-archive.lan` e accedere con `admin` / password s
 ## Volumi — Dati persistenti
 
 | Volume | Percorso nel container | Contenuto |
-|--------|------------------------|-----------|
+| ------ | ---------------------- | --------- |
 | `sc-archive-config` | `/app/config` | `settings.json` |
 | `sc-archive-userdata` | `/root/.config/sc-archive` | `users.json`, `groups.json`, `session.key` |
 | `sc-archive-workspaces` | `/root/sc-archive` | Workspace file degli utenti |
@@ -280,6 +280,7 @@ docker compose logs sc-archive
 ```
 
 Cause comuni:
+
 - `settings.json` corrotto nel volume → `docker compose exec sc-archive cat config/settings.json`
 - Porta 80 già occupata sul Pi → `sudo lsof -i :80`
 

@@ -1,6 +1,6 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
 
-**Versione 5.13.0** // BLUEPRINT VARIABLE INJECTION
+**Versione 5.14.0** // DOCKER RASPBERRY PI DEPLOY
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -10,11 +10,11 @@
 ## 🛠 Tech Stack
 
 - **Core**: Python 3.13+ + FastAPI
-- **Frontend**: HTMX + Tailwind CSS v4 Standalone CLI (v4.2.1) + Jinja2
+- **Frontend**: HTMX + Tailwind CSS v4 Standalone CLI (v4.2.2) + Jinja2
 - **Editor**: EasyMDE (CodeMirror 5)
 - **PDF Engine**: Gotenberg (Chromium via Docker)
 - **Neural Engine**: local Ollama (`qwen2.5-coder:7b`)
-- **CSS Optimizer**: Tailwind CSS Standalone Compiler (v4.2.1)
+- **CSS Optimizer**: Tailwind CSS Standalone Compiler (v4.2.2)
 - **Environment**: Poetry + pyenv
 
 ## 🚀 Features
@@ -144,6 +144,11 @@ Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
 - `docs/`: Database di documentazione operativa e tecnica.
 - `bin/launch.sh`: Start script (Tailwind watcher + Uvicorn).
 - `bin/aegis-migrate.sh`: Export/import completo dei dati per migrazione tra macchine.
+- `Dockerfile`: Build multi-stage (css-builder ARM64, deps-builder, runtime).
+- `docker-compose.yml`: Stack sc-archive + gotenberg + caddy con named volumes.
+- `docker/entrypoint.sh`: Init settings Docker, session key, bootstrap admin.
+- `docker/Caddyfile`: Reverse proxy `http://sc-archive.lan:80`.
+- `docker/.env.example`: Template variabili d'ambiente Docker.
 
 ## 🚚 Migrazione tra Macchine
 
@@ -166,6 +171,40 @@ Lo script `bin/aegis-migrate.sh` esporta e reimporta tutti i dati applicazione i
 ```
 
 L'import è interattivo: mostra il percorso originale di blueprints e workspace e chiede dove ripristinarli. Se il percorso workspace cambia, `settings.json` viene aggiornato automaticamente.
+
+---
+
+## 🐳 Deploy su Raspberry Pi (Docker)
+
+Stack completo SC-ARCHIVE containerizzato per Raspberry Pi 4/5 (ARM64), con Caddy come reverse proxy e Gotenberg integrato.
+
+**Guida completa**: [docs/docker-raspberry.md](docs/docker-raspberry.md)
+
+### Quick Start
+
+```bash
+# 1. Clona il repository sul Pi
+git clone <repo-url> ~/sc-archive && cd ~/sc-archive
+
+# 2. Configura le variabili d'ambiente
+cp docker/.env.example .env
+nano .env   # imposta AEGIS_ADMIN_PASSWORD e OLLAMA_IP
+
+# 3. Build e avvio
+docker compose up -d --build
+```
+
+Il sistema è raggiungibile su `http://sc-archive.lan` (aggiungi l'IP del Pi in `/etc/hosts` sui dispositivi LAN).
+
+**Componenti**:
+
+| Container | Ruolo |
+|-----------|-------|
+| `sc-archive` | Applicazione FastAPI |
+| `gotenberg` | PDF engine (Chromium headless) |
+| `caddy` | Reverse proxy (porta 80 → LAN) |
+
+**Dati persistenti** in tre named volumes Docker: `sc-archive-config`, `sc-archive-userdata`, `sc-archive-workspaces`.
 
 ---
 
