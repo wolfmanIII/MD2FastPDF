@@ -1,0 +1,3 @@
+http://sc-archive.lan:80 {
+    reverse_proxy sc-archive:8000
+}

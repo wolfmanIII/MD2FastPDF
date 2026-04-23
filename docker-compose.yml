@@ -1,0 +1,32 @@
+services:
+  sc-archive:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - sc-archive-config:/app/config
+      - sc-archive-userdata:/root/.config/sc-archive
+      - sc-archive-workspaces:/root/sc-archive
+    environment:
+      - AEGIS_ADMIN_PASSWORD=${AEGIS_ADMIN_PASSWORD:-admin}
+      - OLLAMA_IP=${OLLAMA_IP:-http://localhost:11434}
+    depends_on:
+      - gotenberg
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - sc-archive
+
+volumes:
+  sc-archive-config:
+  sc-archive-userdata:
+  sc-archive-workspaces:

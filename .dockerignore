@@ -1,0 +1,10 @@
+.git
+**/__pycache__
+**/*.pyc
+**/*.pyo
+.venv
+tests/
+docs/
+static/css/output.css
+config/settings.json
+config/__pycache__
