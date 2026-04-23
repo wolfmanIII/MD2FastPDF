@@ -1,13 +1,19 @@
 # syntax=docker/dockerfile:1
 
-# --- Stage 1: Compile Tailwind CSS on build host arch (x86 binary works here) ---
+# --- Stage 1: Compile Tailwind CSS (downloads correct binary for build host arch) ---
 FROM --platform=$BUILDPLATFORM debian:bookworm-slim AS css-builder
+ARG BUILDARCH
+ARG TAILWIND_VERSION=4.2.2
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+RUN BINARY="tailwindcss-linux-$([ "$BUILDARCH" = "arm64" ] && echo arm64 || echo x64)" && \
+    curl -fsSL "https://github.com/tailwindlabs/tailwindcss/releases/download/v${TAILWIND_VERSION}/${BINARY}" \
+      -o /usr/local/bin/tailwindcss && \
+    chmod +x /usr/local/bin/tailwindcss
 WORKDIR /app
-COPY tailwindcss ./tailwindcss
 COPY static/css/main.css ./static/css/main.css
 COPY templates/ ./templates/
-RUN chmod +x tailwindcss && \
-    ./tailwindcss -i static/css/main.css -o static/css/output.css --minify
+RUN tailwindcss -i static/css/main.css -o static/css/output.css --minify
 
 # --- Stage 2: Install Python dependencies ---
 FROM python:3.13-slim AS deps-builder
