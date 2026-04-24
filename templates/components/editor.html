@@ -94,16 +94,22 @@
                         const currentPath = "{{ path }}";
                         const currentDir = currentPath.split('/').slice(0, -1).join('/');
 
-                        // AEGIS_ASSET_RESOLVER: Rewrite relative image paths in markdown before parsing
-                        // This regex handles standard markdown image syntax: ![alt](path)
-                        const processedText = plainText.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, href) => {
-                            if (href && !href.startsWith('http') && !href.startsWith('/') && !href.startsWith('data:')) {
-                                const resolvedPath = currentDir ? `${currentDir}/${href}` : href;
-                                const finalHref = `/files/raw?path=${encodeURIComponent(resolvedPath)}`;
-                                return `![${alt}](${finalHref})`;
-                            }
-                            return match;
-                        });
+                        // AEGIS_ASSET_RESOLVER: Rewrite relative image paths and .md links before parsing
+                        const processedText = plainText
+                            .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, href) => {
+                                if (href && !href.startsWith('http') && !href.startsWith('/') && !href.startsWith('data:')) {
+                                    const resolvedPath = currentDir ? `${currentDir}/${href}` : href;
+                                    return `![${alt}](/files/raw?path=${encodeURIComponent(resolvedPath)})`;
+                                }
+                                return match;
+                            })
+                            .replace(/(?<!!)\[([^\]]+)\]\(([^)#\s]+\.md(?:#[^)]*)?)\)/g, (match, text, href) => {
+                                if (href && !href.startsWith('http') && !href.startsWith('/')) {
+                                    const resolvedPath = currentDir ? `${currentDir}/${href}` : href;
+                                    return `[${text}](/editor?path=${encodeURIComponent(resolvedPath)})`;
+                                }
+                                return match;
+                            });
 
                         const html = marked.parse(processedText);
                         setTimeout(renderAegisVisuals, 100);
