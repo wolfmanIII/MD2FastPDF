@@ -105,10 +105,20 @@ class MarkdownRenderer:
             extensions=['fenced_code', 'tables', 'attr_list']
         )
         sanitized_html = CLEANER.clean(raw_html)
-        
+        sanitized_html = self._strip_md_links(sanitized_html)
+
         if base_path:
             return self._embed_images(sanitized_html, base_path)
         return sanitized_html
+
+    def _strip_md_links(self, html: str) -> str:
+        """Replaces <a href="*.md"> with plain text — .md links are broken in PDF context."""
+        return re.sub(
+            r'<a [^>]*href="[^"]+\.md[^"]*"[^>]*>(.*?)</a>',
+            r'\1',
+            html,
+            flags=re.DOTALL
+        )
 
     def _embed_images(self, html: str, base_path: Path) -> str:
         """Finds relative image paths and embeds them as Base64 data URLs."""
