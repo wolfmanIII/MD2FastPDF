@@ -105,8 +105,14 @@
                             })
                             .replace(/(?<!!)\[([^\]]+)\]\(([^)#\s]+\.md(?:#[^)]*)?)\)/g, (match, text, href) => {
                                 if (href && !href.startsWith('http') && !href.startsWith('/')) {
-                                    const resolvedPath = currentDir ? `${currentDir}/${href}` : href;
-                                    return `[${text}](/editor?path=${encodeURIComponent(resolvedPath)})`;
+                                    const raw = currentDir ? `${currentDir}/${href}` : href;
+                                    const parts = raw.split('/');
+                                    const normalized = [];
+                                    for (const p of parts) {
+                                        if (p === '..') normalized.pop();
+                                        else if (p && p !== '.') normalized.push(p);
+                                    }
+                                    return `[${text}](/editor?path=${encodeURIComponent(normalized.join('/'))})`;
                                 }
                                 return match;
                             });
