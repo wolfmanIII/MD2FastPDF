@@ -21,18 +21,15 @@ _ADMIN_USERNAME: str = "admin"
 
 def _user_allowed_base(username: str) -> Path:
     """Returns the filesystem subtree the user is allowed to select as root.
-    Admin: full filesystem (/). Others: ~/sc-archive/<username>."""
+    Admin: home directory. Others: ~/sc-archive/<username>."""
     if username == _ADMIN_USERNAME:
-        return Path("/")
+        return Path.home().resolve()
     base = Path(settings.get("workspace_base", str(Path.home() / "sc-archive")))
     return (base / username).resolve()
 
 
 def _user_fs_base(username: str) -> Path:
-    """Returns the root from which the picker browses.
-    Admin uses filesystem root (/); others use home."""
-    if username == _ADMIN_USERNAME:
-        return Path("/")
+    """Returns the root from which the picker browses. Always starts at home."""
     return Path.home().resolve()
 
 
