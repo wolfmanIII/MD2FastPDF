@@ -11,7 +11,7 @@ from logic.exceptions import (
 )
 
 # AEGIS_ARCHIVE_PROTOCOL: Centralized Constants
-ALLOWED_EXTENSIONS: Set[str] = {".md", ".html", ".pdf", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"}
+ALLOWED_EXTENSIONS: Set[str] = {".md", ".html", ".pdf", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".mp3"}
 TEXT_EXTENSIONS: Set[str] = {".md", ".html"}
 SKIP_DIRS: Set[str] = {".git", ".venv", "node_modules", ".pytest_cache", "__pycache__", ".gemini", "comms"}
 CACHE_TTL: int = 60  # Seconds

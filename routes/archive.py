@@ -152,7 +152,10 @@ async def get_raw_file(path: str):
             ".gif": "image/gif",
             ".svg": "image/svg+xml",
             ".webp": "image/webp",
-            ".pdf": "application/pdf"
+            ".pdf": "application/pdf",
+            ".mp3": "audio/mpeg",
+            ".ogg": "audio/ogg",
+            ".wav": "audio/wav"
         }
         media_type = media_types.get(ext, "application/octet-stream")
         
