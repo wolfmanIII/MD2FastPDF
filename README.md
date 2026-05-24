@@ -74,50 +74,78 @@ Al **primo avvio**, SC-ARCHIVE crea automaticamente l'utente `admin` con passwor
 
 ## 📦 Protocollo di Installazione (Setup Manual)
 
-La stazione **SC-ARCHIVE** richiede un ambiente Linux (Ubuntu 24.04 raccomandato) con i seguenti sottosistemi attivi:
+La stazione **SC-ARCHIVE** richiede un ambiente Linux (Ubuntu 24.04 raccomandato). Seguire la sequenza completa su una macchina fresh. Per i dettagli su pyenv e Poetry, vedere [docs/installazione-pyenv-poetry.md](docs/installazione-pyenv-poetry.md).
 
-### 1. Ambiente Python & Dipendenze
-
-Il progetto utilizza `pyenv` per la gestione delle versioni e `Poetry` per le dipendenze deterministiche. Guida completa: [installazione-pyenv-poetry.md](docs/installazione-pyenv-poetry.md).
+### 1. Dipendenze di Build
 
 ```bash
-# Seleziona la versione corretta via pyenv (scansiona .python-version)
-pyenv install $(cat .python-version)
-pyenv local $(cat .python-version)
-
-# Installa le dipendenze Aegis via Poetry
-poetry install
-poetry shell
+sudo apt update && sudo apt install -y \
+    build-essential libssl-dev zlib1g-dev \
+    libbz2-dev libreadline-dev libsqlite3-dev curl \
+    git libncursesw5-dev xz-utils tk-dev libxml2-dev \
+    libxmlsec1-dev libffi-dev liblzma-dev
 ```
 
-### 2. Kernel di Conversione PDF (Gotenberg)
-
-La generazione PDF è delegata a un'istanza Docker di **Gotenberg**. È mandatorio che il servizio sia attivo sulla porta `3000`.
+### 2. Pyenv
 
 ```bash
-# Avvio del motore di conversione
-docker run -d -p 3000:3000 gotenberg/gotenberg:8
+curl https://pyenv.run | bash
+```
 
-# In questo modo il container viene riavviato a meno che
-# non venga fermato manualmente
+Aggiungere al `~/.bashrc`:
+
+```bash
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+```
+
+```bash
+source ~/.bashrc
+```
+
+### 3. Python 3.13 (dalla directory del progetto)
+
+```bash
+pyenv install $(cat .python-version)
+pyenv local $(cat .python-version)
+```
+
+### 4. Poetry
+
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
+```
+
+Se `~/.local/bin` non è nel PATH aggiungerlo al `~/.bashrc` e ricaricare.
+
+### 5. Dipendenze Python
+
+```bash
+poetry config virtualenvs.in-project true
+poetry install --with dev
+```
+
+### 6. Tailwind CSS v4 (Standalone CLI)
+
+```bash
+curl -fsSL https://github.com/tailwindlabs/tailwindcss/releases/download/v4.2.2/tailwindcss-linux-x64 \
+    -o tailwindcss
+chmod +x tailwindcss
+```
+
+### 7. Kernel di Conversione PDF (Gotenberg)
+
+```bash
 docker run -d -p 3000:3000 --restart unless-stopped gotenberg/gotenberg:8
 ```
 
-### 3. Strato Neurale (Ollama)
-
-L'intelligenza **Aegis Oracle** richiede Ollama in esecuzione.
+### 8. Strato Neurale (Ollama)
 
 - **Installazione**: `curl -fsSL https://ollama.com/install.sh | sh`
 - **Modello Consigliato**: `ollama pull qwen2.5-coder:7b`
-- **Guida Dettagliata (Ubuntu 24.04)**: Consulta il manuale dedicato [ollama_ubuntu_24_04_guida.md](docs/ollama_ubuntu_24_04_guida.md).
-
-### 4. Compilatore CSS (Tailwind v4)
-
-Il progetto utilizza il binario standalone di Tailwind CSS v4 per la compilazione JIT degli asset. Assicurati che il file `./tailwindcss` sia eseguibile:
-
-```bash
-chmod +x tailwindcss
-```
+- **Guida Dettagliata (Ubuntu 24.04)**: [docs/ollama_ubuntu_24_04_guida.md](docs/ollama_ubuntu_24_04_guida.md)
 
 ## 🚀 Sequenza di Avvio (Boot Sequence)
 
