@@ -78,7 +78,7 @@ La stazione **SC-ARCHIVE** richiede un ambiente Linux (Ubuntu 24.04 raccomandato
 
 ### 1. Ambiente Python & Dipendenze
 
-Il progetto utilizza `pyenv` per la gestione delle versioni e `Poetry` per le dipendenze deterministiche.
+Il progetto utilizza `pyenv` per la gestione delle versioni e `Poetry` per le dipendenze deterministiche. Guida completa: [installazione-pyenv-poetry.md](docs/installazione-pyenv-poetry.md).
 
 ```bash
 # Seleziona la versione corretta via pyenv (scansiona .python-version)
