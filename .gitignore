@@ -53,3 +53,6 @@ Thumbs.db
 # Runtime data (sensitive — generated on first run)
 config/users.json
 config/settings.json
+
+# Agent memory (session context, not project code)
+memory/
