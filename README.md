@@ -199,7 +199,7 @@ Il sistema è raggiungibile su `http://sc-archive.lan` (aggiungi l'IP del Pi in 
 **Componenti**:
 
 | Container | Ruolo |
-|-----------|-------|
+| ----------- | ------- |
 | `sc-archive` | Applicazione FastAPI |
 | `gotenberg` | PDF engine (Chromium headless) |
 | `caddy` | Reverse proxy (porta 80 → LAN) |
