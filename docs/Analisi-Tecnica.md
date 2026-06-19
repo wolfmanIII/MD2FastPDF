@@ -2,8 +2,8 @@
 
 - **Progetto**: Space Craft Archive Management System (FastAPI + HTMX)
 - **Nome Tecnico Interno**: MD2FastPDF
-- **Data**: 12 Aprile 2026
-- **Versione**: 5.13.0
+- **Data**: 19 Giugno 2026
+- **Versione**: 5.15.0
 
 ## 1. Architettura di Sistema
 
@@ -61,7 +61,7 @@ L'applicazione segue un modello asincrono basato su FastAPI con isolamento per-r
 
 | Modulo | Classi principali | Responsabilità |
 | -------- | ------------------- | ---------------- |
-| `files.py` | `PathSanitizer`, `FileManager`, `DirectoryLister`, `StorageCache` | Filesystem I/O, path security, cache stats |
+| `files.py` | `PathSanitizer`, `FileManager`, `DirectoryLister`, `StorageCache` | Filesystem I/O, path security, cache stats; `list_contents()` e `search()` espongono `mtime_str`/`ctime_str` (metadati temporali, fallback `st_ctime` su Linux) |
 | `conversion.py` | `GotenbergClient`, `MarkdownRenderer`, `PdfHtmlBuilder`, `DetailedScaffolding`, `MinimalScaffolding` | Pipeline MD→PDF via Gotenberg |
 | `oracle.py` | `OracleClient`, `PromptTemplates` | Integrazione Ollama (completion, synthesis, summarize) |
 | `render.py` | funzioni `render_mermaid_png`, `render_mermaid_zip` | Export PNG/ZIP Mermaid via Gotenberg screenshot |
@@ -126,7 +126,7 @@ AegisError
 | File | Scopo |
 | ------ | ------- |
 | `output.css` | Tailwind v4 compiled output |
-| `editor-aegis.css` | Stili EasyMDE, fullscreen fix, layout editor, filetree sidebar |
+| `editor-aegis.css` | Stili EasyMDE, fullscreen fix, layout editor, filetree sidebar; resize handle `#aegis-filetree-resizer` (drag col-resize, glow neon-cyan, classe `.no-transition`) |
 | `pdf-industrial.css` | Stylesheet documento PDF (inviato a Gotenberg) |
 | `pdf-preview.css` | Tooltip override, iframe, overflow viewer PDF |
 | `main.css` | Utility classes globali, variabili CSS custom |
@@ -183,6 +183,7 @@ icons/            — SVG inline components
 - **Protocol-based DI**: `RendererProtocol`, `HtmlBuilderProtocol`, `PageScaffolding`, `UserStoreProtocol` — tutte le dipendenze critiche sono Protocol, non classi concrete.
 - **Mutation hook registry**: `StorageCache` si invalida via hook registrato da `main.py` — nessuna dipendenza inversa da `files.py` verso la cache.
 - **Atomic file write**: write su `.tmp` → `rename()` — nessuna lettura parziale possibile.
+- **localStorage UI persistence**: stato sidebar filetree persistito lato client (`aegis-filetree-collapsed`, `aegis-filetree-width`, `aegis-filetree-expanded`). Ripristino completo al reload senza round-trip server.
 
 ---
 
@@ -230,4 +231,4 @@ poetry run pytest tests/test_comms_async.py -v          # singolo file
 
 ---
 
-Documento Tecnico Aegis Class System // v5.13.0
+Documento Tecnico Aegis Class System // v5.15.0

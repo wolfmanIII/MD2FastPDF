@@ -46,40 +46,68 @@
            target="_blank"
            {% endif %}
            class="group flex items-center justify-between p-2 rounded-sm neon-text neon-hover-item transition-all text-left cursor-pointer no-underline">
-            
-            <div class="flex items-center space-x-4">
+
+            <div class="flex items-center space-x-4 flex-1 min-w-0">
                 {% if item.is_dir %}
-                <span class="text-zinc-100 group-hover:neon-text transition-colors">
+                <span class="text-zinc-100 group-hover:neon-text transition-colors shrink-0">
                     {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/folder.html' %}{% endwith %}
                 </span>
-                <span class="font-bold tracking-widest text-[11px]">
-                    {{ item.name }}/
-                </span>
+                <div class="flex flex-col min-w-0">
+                    <span class="font-bold tracking-widest text-[11px] truncate">{{ item.name }}/</span>
+                    {% if item.mtime_str is defined %}
+                    <span class="hidden lg:block text-[9px] font-mono tracking-wider text-zinc-500 mt-0.5">
+                        CRE <span class="text-(--neon-cyan)">{{ item.ctime_str }}</span>
+                        <span class="text-zinc-700 mx-1">//</span>
+                        MOD <span class="text-(--neon-cyan)">{{ item.mtime_str }}</span>
+                    </span>
+                    {% endif %}
+                </div>
                 {% elif item.path.lower().endswith('.pdf') %}
-                <span class="text-red-400 group-hover:neon-text transition-colors">
+                <span class="text-red-400 group-hover:neon-text transition-colors shrink-0">
                     {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(248,113,113,0.5)]" %}{% include 'icons/cube.html' %}{% endwith %}
                 </span>
-                <span class="font-bold tracking-widest text-zinc-300 text-[11px]">
-                    {{ item.name }}
-                </span>
+                <div class="flex flex-col min-w-0">
+                    <span class="font-bold tracking-widest text-zinc-300 text-[11px] truncate">{{ item.name }}</span>
+                    {% if item.mtime_str is defined %}
+                    <span class="hidden lg:block text-[9px] font-mono tracking-wider text-zinc-500 mt-0.5">
+                        CRE <span class="text-(--neon-cyan)">{{ item.ctime_str }}</span>
+                        <span class="text-zinc-700 mx-1">//</span>
+                        MOD <span class="text-(--neon-cyan)">{{ item.mtime_str }}</span>
+                    </span>
+                    {% endif %}
+                </div>
                 {% elif item.path.lower().endswith('.html') %}
-                <span class="text-amber-400 group-hover:neon-text transition-colors">
+                <span class="text-amber-400 group-hover:neon-text transition-colors shrink-0">
                     {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(251,191,36,0.5)]" %}{% include 'icons/cube.html' %}{% endwith %}
                 </span>
-                <span class="font-bold tracking-widest text-zinc-300 text-[11px]">
-                    {{ item.name }}
-                </span>
+                <div class="flex flex-col min-w-0">
+                    <span class="font-bold tracking-widest text-zinc-300 text-[11px] truncate">{{ item.name }}</span>
+                    {% if item.mtime_str is defined %}
+                    <span class="hidden lg:block text-[9px] font-mono tracking-wider text-zinc-500 mt-0.5">
+                        CRE <span class="text-(--neon-cyan)">{{ item.ctime_str }}</span>
+                        <span class="text-zinc-700 mx-1">//</span>
+                        MOD <span class="text-(--neon-cyan)">{{ item.mtime_str }}</span>
+                    </span>
+                    {% endif %}
+                </div>
                 {% else %}
-                <span class="text-zinc-100 group-hover:neon-text transition-colors">
+                <span class="text-zinc-100 group-hover:neon-text transition-colors shrink-0">
                     {% with class="w-5 h-5 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]" %}{% include 'icons/cube.html' %}{% endwith %}
                 </span>
-                <span class="font-bold tracking-widest text-[11px]">
-                    {{ item.name }}
-                </span>
+                <div class="flex flex-col min-w-0">
+                    <span class="font-bold tracking-widest text-[11px] truncate">{{ item.name }}</span>
+                    {% if item.mtime_str is defined %}
+                    <span class="hidden lg:block text-[9px] font-mono tracking-wider text-zinc-500 mt-0.5">
+                        CRE <span class="text-(--neon-cyan)">{{ item.ctime_str }}</span>
+                        <span class="text-zinc-700 mx-1">//</span>
+                        MOD <span class="text-(--neon-cyan)">{{ item.mtime_str }}</span>
+                    </span>
+                    {% endif %}
+                </div>
                 {% endif %}
             </div>
-            
-            <div class="flex gap-2">
+
+            <div class="flex gap-2 shrink-0">
                 {% if not item.is_dir and item.path.lower().endswith('.md') %}
                 <div class="tooltip tooltip-bottom" data-tip="Export diagrams (ZIP)">
                 <button type="button" class="btn btn-outline btn-neon btn-xs z-20"

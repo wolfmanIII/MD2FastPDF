@@ -126,17 +126,28 @@ class DirectoryLister:
                     if entry.name.startswith(".") or entry.name in SKIP_DIRS:
                         continue
 
+                    stat = entry.stat()
+                    mtime_str = datetime.fromtimestamp(stat.st_mtime).strftime("%d/%m/%Y %H:%M")
+                    # st_birthtime is available on macOS/BSD and some Linux filesystems;
+                    # fall back to st_ctime (inode change time) on ext4/xfs.
+                    ctime_raw = getattr(stat, "st_birthtime", stat.st_ctime)
+                    ctime_str = datetime.fromtimestamp(ctime_raw).strftime("%d/%m/%Y %H:%M")
+
                     if entry.is_dir():
                         items.append({
                             "name": entry.name,
                             "is_dir": True,
-                            "path": str(Path(relative_path) / entry.name)
+                            "path": str(Path(relative_path) / entry.name),
+                            "mtime_str": mtime_str,
+                            "ctime_str": ctime_str,
                         })
                     elif any(entry.name.lower().endswith(ext) for ext in ALLOWED_EXTENSIONS):
                         items.append({
                             "name": entry.name,
                             "is_dir": False,
-                            "path": str(Path(relative_path) / entry.name)
+                            "path": str(Path(relative_path) / entry.name),
+                            "mtime_str": mtime_str,
+                            "ctime_str": ctime_str,
                         })
             except PermissionError:
                 raise AccessDeniedError("PERMISSION_DENIED")
@@ -159,10 +170,19 @@ class DirectoryLister:
                 for filename in filenames:
                     if any(filename.lower().endswith(ext) for ext in ALLOWED_EXTENSIONS) and query in filename.lower():
                         file_path = Path(r) / filename
+                        try:
+                            stat = file_path.stat()
+                            mtime_str = datetime.fromtimestamp(stat.st_mtime).strftime("%d/%m/%Y %H:%M")
+                            ctime_raw = getattr(stat, "st_birthtime", stat.st_ctime)
+                            ctime_str = datetime.fromtimestamp(ctime_raw).strftime("%d/%m/%Y %H:%M")
+                        except (FileNotFoundError, PermissionError):
+                            mtime_str = ctime_str = "—"
                         results.append({
                             "name": filename,
                             "is_dir": False,
-                            "path": str(file_path.relative_to(root))
+                            "path": str(file_path.relative_to(root)),
+                            "mtime_str": mtime_str,
+                            "ctime_str": ctime_str,
                         })
             return sorted(results, key=lambda x: x["name"].lower())
 

@@ -1,6 +1,18 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.15.0] - AEGIS UX REFINEMENTS (2026-06-19)
+Metadati temporali nell'archive browser e sidebar filetree editor ridimensionabile.
+
+### Added
+- **`logic/files.py` — `DirectoryLister.list_contents()`**: ogni item (file e directory) ora espone `mtime_str` e `ctime_str` formattati `DD/MM/YYYY HH:MM`. Usa `st_birthtime` se disponibile (macOS/BSD e filesystem Linux con supporto); fallback a `st_ctime` (inode change time) su ext4/xfs.
+- **`logic/files.py` — `DirectoryLister.search()`**: stessa logica applicata ai risultati di ricerca ricorsiva.
+- **`templates/components/results_grid.html`**: date di creazione e modifica mostrate sotto il nome file/directory come sottotitolo inline (`CRE ... // MOD ...`), visibili da viewport `lg`. Font mono, label `text-zinc-500`, valori `text-(--neon-cyan)`.
+- **`static/css/editor-aegis.css` — `#aegis-filetree-resizer`**: handle drag (4px, `cursor: col-resize`) tra sidebar e editor. Glow neon-cyan al hover e durante il drag. Classe `.no-transition` su `#aegis-filetree` per disabilitare la transizione CSS durante il resize.
+- **`templates/components/editor.html`**: `<div id="aegis-filetree-resizer">` inserito tra `#aegis-filetree` e il form editor. Logica drag nell'IIFE filetree — `mousedown`/`mousemove`/`mouseup` sul `document`. Larghezza min 120px / max 600px. Persistenza in `localStorage` (`aegis-filetree-width`); ripristino al reload. Handle nascosto quando la sidebar è collassata, visibile all'apertura.
+
+---
+
 ## [5.14.0] - DOCKER RASPBERRY PI DEPLOY (2026-04-23)
 Stack containerizzato completo per Raspberry Pi 4/5 (ARM64). Build multi-stage con risoluzione automatica del binario Tailwind per architettura.
 

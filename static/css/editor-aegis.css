@@ -45,8 +45,25 @@
     min-width: 0;
     flex-shrink: 0;
     overflow: hidden;
-    border-right: 1px solid var(--glass-border);
     transition: width 0.2s ease;
+}
+
+#aegis-filetree.no-transition {
+    transition: none !important;
+}
+
+#aegis-filetree-resizer {
+    width: 4px;
+    flex-shrink: 0;
+    cursor: col-resize;
+    background: var(--glass-border, rgba(255,255,255,0.08));
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
+#aegis-filetree-resizer:hover,
+#aegis-filetree-resizer.dragging {
+    background: rgba(125, 211, 252, 0.5);
+    box-shadow: 0 0 8px rgba(125, 211, 252, 0.35);
 }
 
 #editor-scan-overlay {

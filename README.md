@@ -1,6 +1,6 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
 
-**Versione 5.14.0** // DOCKER RASPBERRY PI DEPLOY
+**Versione 5.15.0** // AEGIS UX REFINEMENTS
 
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
@@ -19,6 +19,8 @@
 
 ## 🚀 Features
 
+- **File Metadata temporali**: Data di creazione e ultima modifica visibili sotto ogni file/directory nell'archive browser (`CRE DD/MM/YYYY HH:MM // MOD DD/MM/YYYY HH:MM`). Font mono, accent neon-cyan. Applicato anche ai risultati di ricerca.
+- **Sidebar editor ridimensionabile**: Drag handle tra sidebar filetree e editor. Larghezza regolabile tra 120px e 600px, persistita in `localStorage`.
 - **Aegis Group_Space**: Workspace filesystem condiviso per gruppo. Modello permessi asimmetrico (admin R+W su root, membri R+W su `shared/`). Browser, editor e CRUD file integrati nella navbar.
 - **Aegis Blueprint Variable Injection**: Al click su un blueprint, rilevamento automatico dei placeholder `[UPPERCASE]` e form modale guidato per pre-compilarli prima dell'inserimento. Bypass diretto se nessun placeholder presente.
 - **Aegis Blueprint**: Libreria template Markdown app-wide (`blueprints/`). Modal in toolbar editor per inserimento istantaneo in fondo al documento. Admin panel con gestione CRUD blueprint per categoria.

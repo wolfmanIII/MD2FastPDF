@@ -179,4 +179,21 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
+---
+
+### [5.6] - AEGIS UX REFINEMENTS (v5.15.0) [COMPLETED]
+**Obiettivo**: Miglioramenti ergonomici al file browser e all'editor — informazioni contestuali e controllo del layout senza impatto sull'architettura.
+
+**Metadati temporali nell'elenco file**
+- **`DirectoryLister.list_contents()`**: ogni item espone `mtime_str` (ultima modifica) e `ctime_str` (data creazione) formattati `DD/MM/YYYY HH:MM`. `st_birthtime` usato se disponibile (macOS/BSD + alcuni filesystem Linux); fallback a `st_ctime` su ext4/xfs. ✓
+- **`DirectoryLister.search()`**: stessa logica applicata ai risultati di ricerca ricorsiva. Errori `FileNotFoundError`/`PermissionError` gestiti con fallback `"—"`. ✓
+- **`results_grid.html`**: date visualizzate come sottotitolo sotto il nome (`CRE … // MOD …`), font mono, testo `zinc-500`, valori `neon-cyan`. Visibili da breakpoint `lg` in su. Compatibili con la riga di navigazione `.. [UP_DIRECTORY]` (nessuna data mostrata per essa). ✓
+
+**Sidebar filetree ridimensionabile**
+- **`#aegis-filetree-resizer`** (`editor-aegis.css`): elemento da 4px tra sidebar e editor, `cursor: col-resize`, glow neon-cyan al hover e durante il drag (classe `.dragging`). Classe `.no-transition` aggiunta alla sidebar durante il drag per eliminare lag percepito. ✓
+- **Drag logic** (`editor.html`): `mousedown` sul handle → traccia delta X → aggiorna `sidebar.style.width` (min 120px / max 600px) → `mouseup` persiste in `localStorage` (`aegis-filetree-width`). ✓
+- **Persistenza e integrazione**: larghezza ripristinata al reload. Handle sincronizzato con il toggle collasso — nascosto se sidebar è a 0px, ripristinato all'apertura. ✓
+
+---
+
 **(I flussi operativi futuri sono stati ricalibrati. Aegis Oracle promosso a priorità assoluta [4.0] del ciclo operativo corrente.)**

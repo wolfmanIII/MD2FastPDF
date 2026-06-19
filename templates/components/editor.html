@@ -51,6 +51,9 @@
             </div>
         </div>
 
+        <!-- FILETREE RESIZE HANDLE -->
+        <div id="aegis-filetree-resizer"></div>
+
         <!-- EDITOR FORM -->
         <form id="editor-form" class="grow flex flex-col min-w-0 overflow-hidden relative m-0">
             <input type="hidden" name="path" value="{{ path }}">
@@ -391,19 +394,64 @@
             // AEGIS_FILETREE: Sidebar toggle with localStorage persistence
             (function () {
                 const sidebar = document.getElementById('aegis-filetree');
+                const resizer = document.getElementById('aegis-filetree-resizer');
                 const icon = document.getElementById('aegis-filetree-icon');
-                const collapsed = localStorage.getItem('aegis-filetree-collapsed') === 'true';
+                const COLLAPSED_KEY = 'aegis-filetree-collapsed';
+                const WIDTH_KEY = 'aegis-filetree-width';
+                const DEFAULT_WIDTH = 260;
+                const MIN_WIDTH = 120;
+                const MAX_WIDTH = 600;
+
+                const savedWidth = parseInt(localStorage.getItem(WIDTH_KEY), 10) || DEFAULT_WIDTH;
+                const collapsed = localStorage.getItem(COLLAPSED_KEY) === 'true';
+
                 if (collapsed) {
                     sidebar.style.width = '0px';
+                    if (resizer) resizer.style.display = 'none';
                     if (icon) icon.style.opacity = '0.3';
+                } else {
+                    sidebar.style.width = savedWidth + 'px';
                 }
 
                 window.aegisTreeToggleSidebar = function () {
                     const isCollapsed = sidebar.style.width === '0px';
-                    sidebar.style.width = isCollapsed ? '260px' : '0px';
+                    const restoreWidth = parseInt(localStorage.getItem(WIDTH_KEY), 10) || DEFAULT_WIDTH;
+                    sidebar.style.width = isCollapsed ? restoreWidth + 'px' : '0px';
+                    if (resizer) resizer.style.display = isCollapsed ? '' : 'none';
                     if (icon) icon.style.opacity = isCollapsed ? '1' : '0.3';
-                    localStorage.setItem('aegis-filetree-collapsed', isCollapsed ? 'false' : 'true');
+                    localStorage.setItem(COLLAPSED_KEY, isCollapsed ? 'false' : 'true');
                 };
+
+                // AEGIS_FILETREE_RESIZE: Drag handle
+                if (resizer) {
+                    resizer.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        const startX = e.clientX;
+                        const startWidth = parseInt(sidebar.style.width || DEFAULT_WIDTH, 10);
+                        sidebar.classList.add('no-transition');
+                        resizer.classList.add('dragging');
+                        document.body.style.cursor = 'col-resize';
+                        document.body.style.userSelect = 'none';
+
+                        function onMove(e) {
+                            const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + (e.clientX - startX)));
+                            sidebar.style.width = newWidth + 'px';
+                        }
+
+                        function onUp() {
+                            sidebar.classList.remove('no-transition');
+                            resizer.classList.remove('dragging');
+                            document.body.style.cursor = '';
+                            document.body.style.userSelect = '';
+                            localStorage.setItem(WIDTH_KEY, parseInt(sidebar.style.width, 10));
+                            document.removeEventListener('mousemove', onMove);
+                            document.removeEventListener('mouseup', onUp);
+                        }
+
+                        document.addEventListener('mousemove', onMove);
+                        document.addEventListener('mouseup', onUp);
+                    });
+                }
 
                 function _updateTreeState(path, isExpanded) {
                     const expanded = JSON.parse(localStorage.getItem('aegis-filetree-expanded') || '[]');

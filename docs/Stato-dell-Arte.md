@@ -1,7 +1,7 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.13.0
-**Ultimo Aggiornamento**: 12 Aprile 2026
+**Stato Attuale**: Op_Ready / Versione 5.15.0
+**Ultimo Aggiornamento**: 19 Giugno 2026
 
 ---
 
@@ -15,6 +15,7 @@
 - **Multiformat Viewer**: supporto PDF (Aegis Preview) e HTML (scheda esterna).
 - **Operazioni File**: creazione, rinomina, eliminazione con conferma modale e feedback HTMX.
 - **Bottoni azione sempre visibili**: tutti i controlli file (rename, delete, export Mermaid, neural scan) sempre visibili con tooltip DaisyUI.
+- **Metadati temporali file**: data di creazione e ultima modifica visibili sotto il nome di ogni file/directory nell'elenco (`CRE DD/MM/YYYY HH:MM // MOD DD/MM/YYYY HH:MM`). Visibili da viewport `lg` in su. Font mono, accent neon-cyan. `st_birthtime` con fallback a `st_ctime` per compatibilità Linux ext4/xfs. Applicato anche ai risultati di ricerca.
 
 ### 1.2 Editor Markdown (Aegis Slim-Tech)
 
@@ -31,6 +32,7 @@
 - **Highlight file attivo**: documento aperto evidenziato con bordo sinistro cyan.
 - **State persistence navigazione**: path espansi salvati in `localStorage` e ripristinati via `htmx:afterSettle` dopo ogni caricamento file.
 - **Fullscreen safe**: sidebar nascosta automaticamente in fullscreen EasyMDE (CSS condizionale su `.aegis-fullscreen-active`).
+- **Sidebar ridimensionabile**: drag handle `#aegis-filetree-resizer` (4px, cursor `col-resize`) tra sidebar e editor. Larghezza regolabile tra 120px e 600px. Transizione CSS disabilitata durante il drag. Larghezza persistita in `localStorage` (`aegis-filetree-width`) e ripristinata al reload. Handle nascosto quando la sidebar è collassata.
 - **Palette coerente**: dir `neon-text` + drop-shadow cyan, `.md` `neon-text`, `.pdf` icona `text-red-400`, `.html` icona `text-amber-400`.
 - **Icone SVG outline**: `folder.html` (chiusa) / `folder-open.html` (aperta) — `fill="none"`, stroke puro, identici al file browser.
 
@@ -212,7 +214,8 @@ bin/            launch.sh, create_user.sh, aegis-migrate.sh
 | [5.3] | AEGIS TEST SUITE | **COMPLETED** |
 | [5.4] | AEGIS REFACTOR STRUTTURALE | **COMPLETED** |
 | [5.5] | AEGIS BLUEPRINT VARIABLE INJECTION | **COMPLETED** |
+| [5.6] | AEGIS UX REFINEMENTS | **COMPLETED** |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.13.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.15.0 — DEPLOYMENT_ACTIVE.*
