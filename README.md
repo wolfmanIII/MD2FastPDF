@@ -2,6 +2,10 @@
 
 **Versione 5.15.0** // AEGIS UX REFINEMENTS
 
+> **Perché filesystem e niente database?** Non è una svista: è una scelta di design coerente col dominio. → [MANIFESTO.md](MANIFESTO.md)
+>
+> **Why filesystem and no database?** Not an oversight — a deliberate design choice fit to the domain. → [MANIFESTO.md](MANIFESTO.md)
+>
 > [!NOTE]
 > **MD2FastPDF** is the internal technical name for the project core and backend services. **SC-ARCHIVE** is the external station designation and branding.
 
