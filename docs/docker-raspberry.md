@@ -196,6 +196,65 @@ docker compose down -v   # rimuove anche i volumi
 
 ---
 
+## Deploy Ibrido: Pi + Nodo GPU Esterno
+
+Per scenari event/convention o installazioni permanenti con Oracle attivo, il pattern raccomandato è a due nodi:
+
+```text
+Raspberry Pi 4/5
+├── SC-ARCHIVE (Docker)
+├── Gotenberg (Docker)
+└── Caddy (Docker)
+        │
+        └──► LAN ──► Nodo GPU (Ollama)
+                      ├── PC Linux x86 con NVIDIA GPU
+                      └── NVIDIA DGX Spark (ARM64 / Blackwell)
+```
+
+**Vantaggi**: il Pi gestisce i file e la generazione PDF senza carico GPU; il nodo Ollama serve l'Oracle con latenza minima anche sotto carico multi-utente.
+
+### NVIDIA DGX Spark come nodo Ollama
+
+Il DGX Spark (GB10 Blackwell, 128 GB RAM unificata) è un host Ollama di prima classe. Configurazione su DGX OS (Ubuntu-based):
+
+```bash
+# Installa Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Scarica il modello
+ollama pull qwen2.5-coder:latest
+
+# Esponi Ollama sulla LAN (binding su tutte le interfacce)
+sudo systemctl edit ollama --force
+```
+
+Aggiungi nel file di override systemd:
+
+```ini
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0"
+```
+
+```bash
+sudo systemctl daemon-reload && sudo systemctl restart ollama
+```
+
+Verifica dal Pi:
+
+```bash
+curl http://<IP_DGX>:11434/api/tags
+```
+
+Nel `.env` del Pi:
+
+```env
+OLLAMA_IP=http://<IP_DGX>:11434
+```
+
+> **Firewall DGX**: se attivo, aprire la porta: `sudo ufw allow 11434`
+
+---
+
 ## Configurazione Ollama
 
 Ollama deve girare sul PC Linux con binding su tutte le interfacce (non solo localhost):
