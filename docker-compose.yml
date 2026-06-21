@@ -2,13 +2,15 @@ services:
   sc-archive:
     build: .
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - sc-archive-config:/app/config
       - sc-archive-userdata:/root/.config/sc-archive
       - sc-archive-workspaces:/root/sc-archive
     environment:
       - AEGIS_ADMIN_PASSWORD=${AEGIS_ADMIN_PASSWORD:-admin}
-      - OLLAMA_IP=${OLLAMA_IP:-http://localhost:11434}
+      - OLLAMA_IP=${OLLAMA_IP:-http://host.docker.internal:11434}
     depends_on:
       - gotenberg
 

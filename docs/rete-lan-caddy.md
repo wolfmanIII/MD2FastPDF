@@ -6,11 +6,96 @@
 
 ## Scenari disponibili
 
-| Scenario | SC-ARCHIVE gira su | Caddy gira su | Complessità |
-| ---------- | -------------------- | --------------- | ------------- |
-| **A** | WSL2 (Windows) | Raspberry Pi | Alta — portproxy necessario |
-| **B** | Raspberry Pi | Raspberry Pi (stesso) | Bassa — tutto sul Pi |
-| **C** | PC Linux | Raspberry Pi (o qualsiasi host) | Media — solo firewall |
+| Scenario | SC-ARCHIVE + Gotenberg | Ollama | Caddy | Note |
+| -------- | ---------------------- | ------ | ----- | ---- |
+| **A** | WSL2 (Windows) | PC Windows / LAN | Raspberry Pi | Alta — portproxy necessario |
+| **B** | Raspberry Pi (bare-metal) | PC Linux / LAN | Raspberry Pi (stesso) | Bassa — tutto sul Pi |
+| **C** | PC Linux (bare-metal) | stesso PC | Raspberry Pi (o qualsiasi host) | Media — solo firewall |
+| **D** | PC Linux (Docker) | stesso PC (nativo, GPU diretta) | incluso in Docker | Raccomandato per eventi |
+
+---
+
+## Scenario D — PC Linux Docker (Raccomandato per Eventi)
+
+Pattern ottimale per convention ed eventi da tavolo. Un solo PC Linux esegue l'intero stack: SC-ARCHIVE e Gotenberg in Docker, Ollama nativo con accesso diretto alla GPU.
+
+```text
+Browser (LAN)
+     │
+     ▼
+PC Linux (x86 / ARM64)
+├── Caddy :80        ← incluso nello stack Docker
+├── SC-ARCHIVE :8000 ← container Docker
+├── Gotenberg :3000  ← container Docker
+└── Ollama :11434    ← nativo, accesso diretto alla GPU host
+```
+
+**Perché Ollama fuori da Docker**: i container non accedono alla GPU host senza configurazione NVIDIA Container Toolkit. Ollama nativo usa la GPU direttamente senza overhead — più semplice e più veloce.
+
+### D.1 Installazione Ollama nativo
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull qwen2.5-coder:latest
+```
+
+Ollama in modalità default ascolta su `localhost:11434`. Poiché SC-ARCHIVE gira in un container Docker, deve raggiungere Ollama sull'host. Configurare il binding:
+
+```bash
+sudo systemctl edit ollama --force
+```
+
+```ini
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0"
+```
+
+```bash
+sudo systemctl daemon-reload && sudo systemctl restart ollama
+```
+
+### D.2 Setup Docker stack
+
+```bash
+git clone <repo-url> ~/sc-archive && cd ~/sc-archive
+cp docker/.env.example .env
+nano .env
+```
+
+Contenuto `.env`:
+
+```env
+AEGIS_ADMIN_PASSWORD=changeme
+# OLLAMA_IP non necessario se Ollama gira sullo stesso PC — il default punta a host.docker.internal:11434
+# Decommentare solo se Ollama è su un host remoto:
+# OLLAMA_IP=http://192.168.1.X:11434
+```
+
+```bash
+docker compose up -d --build
+```
+
+Caddy è incluso nello stack — nessuna installazione separata necessaria.
+
+### D.3 DNS per i client dell'evento
+
+Su ogni tablet/laptop dei giocatori, aggiungere in `/etc/hosts` (Linux/macOS) o `C:\Windows\System32\drivers\etc\hosts` (Windows):
+
+```text
+<IP_LAN_PC>    sc-archive.lan
+```
+
+> Alternativa zero-config: configurare il router dell'evento per risolvere `sc-archive.lan` via DNS locale — elimina la necessità di toccare ogni dispositivo.
+
+### D.4 Verifica stack completo
+
+```bash
+# Gotenberg
+docker compose exec sc-archive curl http://gotenberg:3000/health
+
+# Ollama raggiungibile dal container
+docker compose exec sc-archive curl http://<IP_LAN_PC>:11434/api/tags
+```
 
 ---
 
