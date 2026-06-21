@@ -56,3 +56,6 @@ config/settings.json
 
 # Agent memory (session context, not project code)
 memory/
+
+# Claude Code local settings (machine-specific permissions)
+.claude/settings.local.json
