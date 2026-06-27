@@ -3,11 +3,16 @@ import bleach
 import base64
 import mimetypes
 import re
+import logging
 from dataclasses import dataclass
+from io import BytesIO
 from pathlib import Path
 from typing import Optional, Callable, Protocol
 
 import markdown
+from pypdf import PdfReader, PdfWriter
+
+_log = logging.getLogger(__name__)
 
 from config.settings import settings
 from logic.exceptions import ConversionError
@@ -190,6 +195,74 @@ class PdfHtmlBuilder:
         """
 
 
+class PdfOutlineInjector:
+    """Post-processes Gotenberg PDF output to inject a navigable bookmark outline."""
+
+    _HEADING = re.compile(r'^(#{1,6})\s+(.+)$', re.MULTILINE)
+    _INLINE = re.compile(r'\*{1,3}([^*]+)\*{1,3}|`([^`]+)`|!?\[([^\]]*)\]\([^)]*\)')
+
+    def inject(self, pdf_bytes: bytes, markdown_content: str) -> bytes:
+        headings = self._extract_headings(markdown_content)
+        if not headings:
+            return pdf_bytes
+        try:
+            return self._inject_outline(pdf_bytes, headings)
+        except Exception:
+            _log.warning("PDF outline injection failed — returning original PDF")
+            return pdf_bytes
+
+    def _extract_headings(self, content: str) -> list[tuple[int, str]]:
+        return [
+            (len(m.group(1)), self._clean(m.group(2)))
+            for m in self._HEADING.finditer(content)
+        ]
+
+    def _clean(self, text: str) -> str:
+        return self._INLINE.sub(
+            lambda m: m.group(1) or m.group(2) or m.group(3) or '', text
+        ).strip()
+
+    def _inject_outline(self, pdf_bytes: bytes, headings: list[tuple[int, str]]) -> bytes:
+        reader = PdfReader(BytesIO(pdf_bytes))
+        page_texts: list[str] = []
+        for page in reader.pages:
+            try:
+                page_texts.append(page.extract_text() or "")
+            except Exception:
+                page_texts.append("")
+
+        if not any(page_texts):
+            _log.warning("PDF outline: no extractable text — returning original PDF")
+            return pdf_bytes
+
+        located: list[tuple[int, str, int]] = []
+        search_from = 0
+        for level, text in headings:
+            for i in range(search_from, len(page_texts)):
+                if text in page_texts[i] or text.lower() in page_texts[i].lower():
+                    located.append((level, text, i))
+                    search_from = i
+                    break
+
+        if not located:
+            return pdf_bytes
+
+        writer = PdfWriter()
+        writer.append(reader)
+
+        stack: list[tuple[int, object]] = []
+        for level, text, page_num in located:
+            while stack and stack[-1][0] >= level:
+                stack.pop()
+            parent = stack[-1][1] if stack else None
+            item = writer.add_outline_item(text, page_num, parent=parent)
+            stack.append((level, item))
+
+        output = BytesIO()
+        writer.write(output)
+        return output.getvalue()
+
+
 class GotenbergClient:
     """Industrial HTTP gateway for the Gotenberg PDF Engine (Aegis Optimus)."""
 
@@ -198,10 +271,12 @@ class GotenbergClient:
         url_provider: Callable[[], str],
         renderer: Optional[RendererProtocol] = None,
         builder: Optional[HtmlBuilderProtocol] = None,
+        outline_injector: Optional[PdfOutlineInjector] = None,
     ):
         self._url_provider = url_provider
         self._renderer = renderer or MarkdownRenderer()
         self._builder = builder or PdfHtmlBuilder()
+        self._outline_injector = outline_injector or PdfOutlineInjector()
         self.client = httpx.AsyncClient(
             timeout=60.0,
             limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
@@ -251,7 +326,7 @@ class GotenbergClient:
         if response.status_code != 200:
             raise ConversionError(f"GOTENBERG_ERROR: {response.text}")
 
-        return response.content
+        return self._outline_injector.inject(response.content, markdown_content)
 
 
 # Global instance for app lifecycle management
