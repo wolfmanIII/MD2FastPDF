@@ -1,6 +1,6 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.15.0
+**Stato Attuale**: Op_Ready / Versione 5.16.0
 **Ultimo Aggiornamento**: 27 Giugno 2026
 
 ---
@@ -219,4 +219,4 @@ bin/            launch.sh, create_user.sh, aegis-migrate.sh
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.15.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.16.0 — DEPLOYMENT_ACTIVE.*

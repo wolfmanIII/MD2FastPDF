@@ -1,8 +1,20 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
-## [5.15.0] - AEGIS UX REFINEMENTS + PDF BOOKMARKS (2026-06-19 / 2026-06-27)
-Metadati temporali nell'archive browser, sidebar filetree editor ridimensionabile, bookmark PDF gerarchici.
+## [5.16.0] - PDF BOOKMARK INJECTION (2026-06-27)
+Outline PDF gerarchico iniettato automaticamente su ogni esportazione.
+
+### Added
+- **`logic/conversion.py` — `PdfOutlineInjector`**: classe SRP per l'iniezione di outline PDF dopo la conversione Gotenberg. Estrae heading `#`–`######` dal Markdown sorgente, li sanitizza (rimozione inline Markdown), localizza la pagina tramite `pypdf` text extraction, calcola la coordinata Y in PDF user space via CTM×TM (`y_pdf = um[1]*tm[4] + um[3]*tm[5] + um[5]`), inietta l'outline gerarchico con `PdfWriter.add_outline_item()` e `Fit.xyz`. Fallback silenzioso: se l'injection fallisce, restituisce il PDF originale senza eccezioni.
+- **`logic/conversion.py` — `GotenbergClient`**: accetta `outline_injector: Optional[PdfOutlineInjector]` nel costruttore (DIP). `render_pdf()` invoca `inject()` sull'output Gotenberg prima di restituirlo.
+- **`logic/conversion.py` — `MarkdownRenderer`**: aggiunta extension `toc` alla lista `markdown.markdown()`.
+- **`pyproject.toml`**: aggiunta dipendenza `pypdf (>=4.0.0,<5.0.0)`.
+- **`docs/spec-pdf-bookmarks.md`**: specifica implementativa completa del PDF Outline Protocol.
+
+---
+
+## [5.15.0] - AEGIS UX REFINEMENTS (2026-06-19)
+Metadati temporali nell'archive browser e sidebar filetree editor ridimensionabile.
 
 ### Added
 - **`logic/files.py` — `DirectoryLister.list_contents()`**: ogni item (file e directory) ora espone `mtime_str` e `ctime_str` formattati `DD/MM/YYYY HH:MM`. Usa `st_birthtime` se disponibile (macOS/BSD e filesystem Linux con supporto); fallback a `st_ctime` (inode change time) su ext4/xfs.
@@ -10,11 +22,6 @@ Metadati temporali nell'archive browser, sidebar filetree editor ridimensionabil
 - **`templates/components/results_grid.html`**: date di creazione e modifica mostrate sotto il nome file/directory come sottotitolo inline (`CRE ... // MOD ...`), visibili da viewport `lg`. Font mono, label `text-zinc-500`, valori `text-(--neon-cyan)`.
 - **`static/css/editor-aegis.css` — `#aegis-filetree-resizer`**: handle drag (4px, `cursor: col-resize`) tra sidebar e editor. Glow neon-cyan al hover e durante il drag. Classe `.no-transition` su `#aegis-filetree` per disabilitare la transizione CSS durante il resize.
 - **`templates/components/editor.html`**: `<div id="aegis-filetree-resizer">` inserito tra `#aegis-filetree` e il form editor. Logica drag nell'IIFE filetree — `mousedown`/`mousemove`/`mouseup` sul `document`. Larghezza min 120px / max 600px. Persistenza in `localStorage` (`aegis-filetree-width`); ripristino al reload. Handle nascosto quando la sidebar è collassata, visibile all'apertura.
-- **`logic/conversion.py` — `PdfOutlineInjector`**: classe SRP per l'iniezione di outline PDF dopo la conversione Gotenberg. Estrae heading `#`–`######` dal Markdown sorgente, li sanitizza (rimozione inline Markdown), localizza la pagina tramite `pypdf` text extraction, calcola la coordinata Y in PDF user space via CTM×TM (`y_pdf = um[1]*tm[4] + um[3]*tm[5] + um[5]`), inietta l'outline gerarchico con `PdfWriter.add_outline_item()` e `Fit.xyz`. Fallback silenzioso: se l'injection fallisce, restituisce il PDF originale senza eccezioni.
-- **`logic/conversion.py` — `GotenbergClient`**: accetta `outline_injector: Optional[PdfOutlineInjector]` nel costruttore (DIP). `render_pdf()` invoca `inject()` sull'output Gotenberg prima di restituirlo.
-- **`logic/conversion.py` — `MarkdownRenderer`**: aggiunta extension `toc` alla lista `markdown.markdown()` — assegna `id` HTML agli heading (non influisce sui PDF ma abilita le ancore HTML in preview).
-- **`pyproject.toml`**: aggiunta dipendenza `pypdf (>=4.0.0,<5.0.0)`.
-- **`docs/spec-pdf-bookmarks.md`**: specifica implementativa completa del PDF Outline Protocol.
 
 ---
 

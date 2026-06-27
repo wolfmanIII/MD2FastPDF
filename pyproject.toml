@@ -1,6 +1,6 @@
 [project]
 name = "md2fastpdf"
-version = "5.15.0"
+version = "5.16.0"
 description = "Spacecraft Documentation Management System // Aegis Class"
 authors = [
     {name = "Space Wolf",email = "wolfmanIII@gmail.com"}
