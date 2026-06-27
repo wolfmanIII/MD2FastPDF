@@ -1,7 +1,7 @@
 # Stato del Progetto: SC-ARCHIVE
 
 **Stato Attuale**: Op_Ready / Versione 5.15.0
-**Ultimo Aggiornamento**: 19 Giugno 2026
+**Ultimo Aggiornamento**: 27 Giugno 2026
 
 ---
 
@@ -43,6 +43,7 @@
 - **Global PDF Branding**: testata e piè di pagina configurabili da Uplink Config, persistiti localmente.
 - Sanitizzazione XSS via `bleach` sulla pipeline di conversione.
 - **Industrial PDF CSS**: stylesheet `static/css/pdf-industrial.css` caricato a module init — nessun CSS inline nel codice Python.
+- **PDF Bookmark Injection**: `PdfOutlineInjector` in `logic/conversion.py` inietta automaticamente l'outline PDF dopo la conversione Gotenberg. Estrae heading `#`–`######` dal sorgente Markdown, localizza ogni titolo nel PDF via `pypdf` text extraction (ricerca case-insensitive pagina per pagina), calcola la coordinata Y in PDF user space tramite trasformata CTM×TM (`y_pdf = um[1]*tm[4] + um[3]*tm[5] + um[5]`), costruisce la gerarchia tramite stack di livelli e inietta l'outline con `PdfWriter.add_outline_item()` + `Fit.xyz`. Dipendenza: `pypdf >=4.0`. Fallback: se l'injection fallisce, il PDF originale viene restituito senza errori.
 
 ### 1.4 Aegis Render Engine (Mermaid Image Export)
 

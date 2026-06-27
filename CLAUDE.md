@@ -6,7 +6,7 @@ Senior Linux Software Engineer and Architect. Write efficient, maintainable, and
 ## TECH STACK
 - OS: Linux (Ubuntu 24.04)
 - Languages: Python 3.13
-- Frameworks: FastAPI, HTMX, Tailwind v4, Jinja2, Gotenberg (Docker)
+- Frameworks: FastAPI, HTMX, Tailwind v4, Jinja2, Gotenberg (Docker), pypdf (PDF post-processing)
 - AI Layer: Ollama (`qwen2.5-coder:7b`)
 - Environment: Poetry + pyenv
 

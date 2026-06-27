@@ -46,6 +46,7 @@
 - **Neural Model Intelligence**: Filtro automatico dei modelli Ollama per escludere i motori di embedding dai menu di chat e sintesi.
 - **Dashboard Telemetry 2.0**: Monitoraggio real-time di CPU e Memoria via HTMX (`/stats`) e aggiornamento automatico dello stato servizi al salvataggio della configurazione.
 - **Global PDF Branding**: Esportazione PDF automatizzata con testata e piè di pagina SC-ARCHIVE (configurabile via Uplink).
+- **PDF Bookmark Injection**: outline PDF gerarchico iniettato automaticamente dopo la conversione Gotenberg — titoli `#`/`##`/`###` diventano bookmark navigabili nel pannello del lettore PDF. Localizzazione pagina + coordinata Y via `pypdf` visitor (CTM×TM). Best-effort scroll esatto (`Fit.xyz`); fallback a cima pagina se il testo non è estraibile.
 
 ## 🔐 Primo Accesso (Inizializzazione Operatore)
 

@@ -58,42 +58,49 @@ def _clean(text: str) -> str:
 
 Edge case: se `extract_text()` restituisce `None` o stringa vuota, la pagina viene trattata come vuota (il titolo verrà cercato nelle pagine successive).
 
-### Step 3 — Localizzazione titolo: Named Destinations (primary) + text search (fallback)
+### Step 3 — Localizzazione titolo: text search + coordinate CTM×TM
 
-Chromium crea **named destinations** PDF per ogni elemento HTML con attributo `id`. L'estensione `toc` di Python-Markdown assegna automaticamente `id` agli heading usando la stessa funzione `slugify`:
+> **Nota**: Gotenberg usa Chromium `printToPDF` che **non genera named destinations** nel PDF prodotto — `reader.named_destinations` è sempre vuoto. La localizzazione si basa interamente su text extraction e coordinate della matrice di testo.
 
-```text
-"## 2.1 Ship Profiles"  →  id="21-ship-profiles"
-"## Dashboard"          →  id="dashboard"
-"### Actions Phase"     →  id="actions-phase"
-```
+**3a — Text search per numero di pagina:**
 
-`slugify` replica la logica dell'estensione `toc`:
-1. NFKD normalize → encode ASCII (strip non-ASCII)
-2. Rimuove caratteri non-word, non-space, non-hyphen
-3. Strip + lowercase
-4. Sostituisce sequenze di `[\s_-]+` con `-`
-
-**Algoritmo di localizzazione per ogni heading:**
+Per ogni heading (testo già sanitizzato in Step 1), si cerca nella lista `page_texts` costruita in Step 2, avanzando da `search_from` (puntatore che preserva l'ordinamento dei titoli nel documento):
 
 ```text
-slug = slugify(clean_text)
-
-se slug in reader.named_destinations:
-    dest = named_destinations[slug]
-    page_num = dest.page           ← numero pagina esatto
-    top = dest.top                 ← coordinata Y in punti PDF
-    → usa Fit.xyz(left=None, top=top, zoom=None)   ← scroll esatto
-
-altrimenti (fallback text search):
-    per i in range(search_from, n_pagine):
-        se text in page_texts[i]:
-            page_num = i, top = None
-            → usa add_outline_item senza Fit (cima pagina)
-            break
+per i in range(search_from, n_pagine):
+    se text in page_texts[i] oppure text.lower() in page_texts[i].lower():
+        page_num = i
+        break
 ```
 
-Il puntatore `search_from` avanza comunque in avanti su entrambi i path.
+**3b — Estrazione coordinata Y via visitor CTM×TM:**
+
+Una volta trovata la pagina, si usa `page.extract_text(visitor_text=callback)` per ottenere le coordinate precise del testo. Chromium genera PDF con una CTM (Current Transformation Matrix) che scala e trasla le coordinate — `tm[5]` (Y della text matrix) non è direttamente in PDF user space.
+
+Trasformazione corretta:
+
+```text
+y_pdf = um[1]*tm[4] + um[3]*tm[5] + um[5]
+```
+
+dove `um` è la CTM (matrice `[a,b,c,d,e,f]`) e `tm` è la text matrix. Il visitor accumula `(text_chunk, y_pdf)` per ogni frammento non vuoto. Dopo la visita si concatena il testo di tutti i chunk e si individua l'offset dell'heading — la Y del chunk corrispondente è la coordinata di scroll.
+
+```python
+chunks: list[tuple[str, float]] = []
+
+def visitor(text, um, tm, _fd, _fs):
+    if text.strip() and um and tm:
+        y_pdf = float(um[1])*float(tm[4]) + float(um[3])*float(tm[5]) + float(um[5])
+        chunks.append((text, y_pdf))
+
+page.extract_text(visitor_text=visitor)
+
+full_text = ''.join(c[0] for c in chunks)
+idx = full_text.lower().find(heading_text.lower())
+# trova il chunk che contiene idx → restituisce la sua y_pdf
+```
+
+Se il visitor fallisce o il testo non viene trovato nel chunk breakdown, `top` è `None` — il bookmark punta comunque alla pagina ma senza scroll preciso.
 
 ### Step 4 — Iniezione outline gerarchica
 
@@ -196,8 +203,8 @@ Nessuna dipendenza di sistema aggiuntiva — `pypdf` è pure Python.
 
 | File | Modifica |
 | ---- | -------- |
-| `pyproject.toml` | Aggiunge `pypdf` alle dipendenze |
-| `logic/conversion.py` | Aggiunge `PdfOutlineInjector` (con slugify + named dest lookup), aggiorna `GotenbergClient.__init__` e `render_pdf`, aggiunge `toc` extension a `MarkdownRenderer` |
+| `pyproject.toml` | Aggiunge `pypdf (>=4.0.0,<5.0.0)` alle dipendenze |
+| `logic/conversion.py` | Aggiunge `PdfOutlineInjector` (con text search + visitor CTM×TM), aggiorna `GotenbergClient.__init__` e `render_pdf`, aggiunge `toc` extension a `MarkdownRenderer` |
 
 Nessuna modifica a route, template o settings.
 
