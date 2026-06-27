@@ -231,12 +231,17 @@ class PdfOutlineInjector:
         return self._SLUG_SPACES.sub('-', value)
 
     def _find_heading_y(self, page: object, heading_text: str) -> float | None:
-        """Returns the Y coordinate (PDF units) of heading_text on the page via text visitor."""
+        """Returns the Y coordinate in PDF user space for heading_text on the page.
+
+        Applies CTM × TM to convert from text matrix coordinates to PDF user space:
+        y_pdf = um[1]*tm[4] + um[3]*tm[5] + um[5]
+        """
         chunks: list[tuple[str, float]] = []
 
-        def visitor(text: str, _um: object, tm: object, _fd: object, _fs: object) -> None:
-            if text.strip() and tm:
-                chunks.append((text, float(tm[5])))  # tm[5] = Y baseline in PDF units
+        def visitor(text: str, um: object, tm: object, _fd: object, _fs: object) -> None:
+            if text.strip() and um and tm:
+                y_pdf = float(um[1]) * float(tm[4]) + float(um[3]) * float(tm[5]) + float(um[5])
+                chunks.append((text, y_pdf))
 
         try:
             page.extract_text(visitor_text=visitor)  # type: ignore[attr-defined]
