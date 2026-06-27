@@ -4,6 +4,7 @@ import base64
 import mimetypes
 import re
 import logging
+import unicodedata
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
@@ -107,7 +108,7 @@ class MarkdownRenderer:
     def render(self, content: str, base_path: Optional[Path] = None) -> str:
         raw_html = markdown.markdown(
             content,
-            extensions=['fenced_code', 'tables', 'attr_list']
+            extensions=['fenced_code', 'tables', 'attr_list', 'toc']
         )
         sanitized_html = CLEANER.clean(raw_html)
         sanitized_html = self._strip_md_links(sanitized_html)
@@ -200,6 +201,8 @@ class PdfOutlineInjector:
 
     _HEADING = re.compile(r'^(#{1,6})\s+(.+)$', re.MULTILINE)
     _INLINE = re.compile(r'\*{1,3}([^*]+)\*{1,3}|`([^`]+)`|!?\[([^\]]*)\]\([^)]*\)')
+    _SLUG_STRIP = re.compile(r'[^\w\s-]')
+    _SLUG_SPACES = re.compile(r'[\s_-]+')
 
     def inject(self, pdf_bytes: bytes, markdown_content: str) -> bytes:
         headings = self._extract_headings(markdown_content)
@@ -222,8 +225,56 @@ class PdfOutlineInjector:
             lambda m: m.group(1) or m.group(2) or m.group(3) or '', text
         ).strip()
 
+    def _slugify(self, text: str) -> str:
+        value = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+        value = self._SLUG_STRIP.sub('', value).strip().lower()
+        return self._SLUG_SPACES.sub('-', value)
+
+    def _dest_page_num(self, dest: object, reader: PdfReader) -> int | None:
+        try:
+            page = dest.page  # type: ignore[attr-defined]
+            if isinstance(page, int):
+                return page
+            page_ref = dest['/Page']  # type: ignore[index]
+            for i, p in enumerate(reader.pages):
+                if p.indirect_reference and p.indirect_reference.idnum == page_ref.idnum:
+                    return i
+        except Exception:
+            pass
+        return None
+
+    def _dest_top(self, dest: object) -> float | None:
+        try:
+            top = dest.top  # type: ignore[attr-defined]
+            return float(top) if top is not None else None
+        except Exception:
+            return None
+
+    def _locate(
+        self,
+        text: str,
+        named_dests: dict,
+        reader: PdfReader,
+        page_texts: list[str],
+        search_from: int,
+    ) -> tuple[int | None, float | None]:
+        dest = named_dests.get(self._slugify(text))
+        if dest is not None:
+            page_num = self._dest_page_num(dest, reader)
+            if page_num is not None:
+                return page_num, self._dest_top(dest)
+
+        for i in range(search_from, len(page_texts)):
+            if text in page_texts[i] or text.lower() in page_texts[i].lower():
+                return i, None
+        return None, None
+
     def _inject_outline(self, pdf_bytes: bytes, headings: list[tuple[int, str]]) -> bytes:
+        from pypdf.generic import Fit
+
         reader = PdfReader(BytesIO(pdf_bytes))
+        named_dests = reader.named_destinations
+
         page_texts: list[str] = []
         for page in reader.pages:
             try:
@@ -231,18 +282,17 @@ class PdfOutlineInjector:
             except Exception:
                 page_texts.append("")
 
-        if not any(page_texts):
-            _log.warning("PDF outline: no extractable text — returning original PDF")
+        if not named_dests and not any(page_texts):
+            _log.warning("PDF outline: no named destinations and no extractable text — returning original PDF")
             return pdf_bytes
 
-        located: list[tuple[int, str, int]] = []
+        located: list[tuple[int, str, int, float | None]] = []
         search_from = 0
         for level, text in headings:
-            for i in range(search_from, len(page_texts)):
-                if text in page_texts[i] or text.lower() in page_texts[i].lower():
-                    located.append((level, text, i))
-                    search_from = i
-                    break
+            page_num, top = self._locate(text, named_dests, reader, page_texts, search_from)
+            if page_num is not None:
+                located.append((level, text, page_num, top))
+                search_from = page_num
 
         if not located:
             return pdf_bytes
@@ -251,11 +301,12 @@ class PdfOutlineInjector:
         writer.append(reader)
 
         stack: list[tuple[int, object]] = []
-        for level, text, page_num in located:
+        for level, text, page_num, top in located:
             while stack and stack[-1][0] >= level:
                 stack.pop()
             parent = stack[-1][1] if stack else None
-            item = writer.add_outline_item(text, page_num, parent=parent)
+            fit = Fit.xyz(left=None, top=top, zoom=None) if top is not None else None
+            item = writer.add_outline_item(text, page_num, parent=parent, **({"fit": fit} if fit else {}))
             stack.append((level, item))
 
         output = BytesIO()
