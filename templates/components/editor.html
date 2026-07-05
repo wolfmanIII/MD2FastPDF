@@ -258,6 +258,9 @@
                 }
             };
 
+            // AEGIS_DEFAULT_PREVIEW: Open every document in preview mode first
+            easyMDE.togglePreview();
+
             // Sync on refresh for keybindings and internal state changes
             cm.on("refresh", syncHUD);
             cm.on("update", syncHUD);
