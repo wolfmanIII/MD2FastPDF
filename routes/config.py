@@ -128,6 +128,8 @@ async def select_root(
         "current_path": ".",
         "breadcrumbs": [{"name": "ROOT", "path": "."}],
     }
-    return templates.TemplateResponse(
+    response = templates.TemplateResponse(
         request=request, name="components/file_list.html", context=context
     )
+    response.headers["HX-Trigger"] = "root-updated"
+    return response
