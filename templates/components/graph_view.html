@@ -1,7 +1,79 @@
 <div class="w-full grow flex flex-col min-h-0">
     <div class="px-8 py-4 flex items-center justify-between border-b border-(--glass-border) shrink-0">
         <h2 class="neon-text font-bold text-lg tracking-widest uppercase">DOCUMENT_RELATIONSHIP_GRAPH</h2>
-        <span id="aegis-graph-count" class="text-zinc-500 text-[10px] uppercase tracking-widest"></span>
+        <div class="flex items-center space-x-4">
+            <span id="aegis-graph-count" class="text-zinc-500 text-xs uppercase tracking-widest"></span>
+            <details id="aegis-graph-controls" class="relative">
+                <summary class="text-zinc-400 hover:neon-text transition-colors cursor-pointer select-none text-sm uppercase tracking-widest">CONTROLS</summary>
+                <div class="glass-panel absolute right-0 mt-3 w-96 max-h-[75vh] overflow-y-auto p-5 flex flex-col space-y-5 z-50 text-base normal-case tracking-normal">
+                    <div>
+                        <label class="block text-zinc-400 uppercase tracking-widest text-sm mb-2">Cerca</label>
+                        <input id="aegis-graph-search" type="text" placeholder="Filtra per nome..."
+                               class="w-full bg-black/40 border border-(--glass-border) rounded px-3 py-2 text-zinc-100 text-base focus:outline-none focus:border-(--neon-cyan)">
+                    </div>
+
+                    <label class="flex items-center justify-between cursor-pointer">
+                        <span class="text-zinc-300 uppercase tracking-widest text-sm">Nascondi orfani</span>
+                        <input id="aegis-graph-hide-orphans" type="checkbox" class="accent-(--neon-cyan) cursor-pointer w-5 h-5">
+                    </label>
+                    <label class="flex items-center justify-between cursor-pointer">
+                        <span class="text-zinc-300 uppercase tracking-widest text-sm">Mostra direzione</span>
+                        <input id="aegis-graph-arrows" type="checkbox" checked class="accent-(--neon-cyan) cursor-pointer w-5 h-5">
+                    </label>
+
+                    <div class="space-y-4 pt-4 border-t border-(--glass-border)">
+                        <div>
+                            <div class="flex items-center justify-between text-zinc-300 uppercase tracking-widest text-sm mb-2">
+                                <span>Dimensione nodi</span>
+                                <span id="aegis-graph-node-size-val" class="neon-text">1.0x</span>
+                            </div>
+                            <input id="aegis-graph-node-size" type="range" min="0.5" max="2.5" step="0.1" value="1"
+                                   class="w-full h-2 accent-(--neon-cyan) cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between text-zinc-300 uppercase tracking-widest text-sm mb-2">
+                                <span>Spessore linee</span>
+                                <span id="aegis-graph-line-thickness-val" class="neon-text">1.2px</span>
+                            </div>
+                            <input id="aegis-graph-line-thickness" type="range" min="0.5" max="4" step="0.1" value="1.2"
+                                   class="w-full h-2 accent-(--neon-cyan) cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between text-zinc-300 uppercase tracking-widest text-sm mb-2">
+                                <span>Forza di repulsione</span>
+                                <span id="aegis-graph-repel-val" class="neon-text">-130</span>
+                            </div>
+                            <input id="aegis-graph-repel" type="range" min="-400" max="-20" step="10" value="-130"
+                                   class="w-full h-2 accent-(--neon-cyan) cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between text-zinc-300 uppercase tracking-widest text-sm mb-2">
+                                <span>Distanza collegamenti</span>
+                                <span id="aegis-graph-link-distance-val" class="neon-text">55px</span>
+                            </div>
+                            <input id="aegis-graph-link-distance" type="range" min="20" max="200" step="5" value="55"
+                                   class="w-full h-2 accent-(--neon-cyan) cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between text-zinc-300 uppercase tracking-widest text-sm mb-2">
+                                <span>Forza collegamenti</span>
+                                <span id="aegis-graph-link-strength-val" class="neon-text">0.50</span>
+                            </div>
+                            <input id="aegis-graph-link-strength" type="range" min="0.1" max="1" step="0.05" value="0.5"
+                                   class="w-full h-2 accent-(--neon-cyan) cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between text-zinc-300 uppercase tracking-widest text-sm mb-2">
+                                <span>Dissolvenza testi</span>
+                                <span id="aegis-graph-text-fade-val" class="neon-text">0.0</span>
+                            </div>
+                            <input id="aegis-graph-text-fade" type="range" min="0" max="3" step="0.1" value="0"
+                                   class="w-full h-2 accent-(--neon-cyan) cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
     </div>
     <div id="aegis-graph-canvas" class="grow relative min-h-0">
         <svg id="aegis-graph-svg" class="w-full h-full"></svg>
@@ -20,10 +92,22 @@
     const countEl = document.getElementById("aegis-graph-count");
 
     const NEON_CYAN = "#7dd3fc";
-    const NODE_FILL = "#27272a";     // zinc-800
     const NODE_STROKE = "#52525b";   // zinc-600
-    const LINK_COLOR = "#3f3f46";    // zinc-700
+    const LINK_COLOR = "#52525b";    // zinc-600
     const LABEL_COLOR = "#a1a1aa";   // zinc-400
+
+    // Live-tunable state (bound to the CONTROLS panel)
+    let nodeSizeMultiplier = 1;
+    let lineThickness = 1.2;
+    let repelForce = -130;
+    let linkDistance = 55;
+    let linkStrength = 0.5;
+    let textFadeThreshold = 0;
+    let hideOrphans = false;
+    let showArrows = true;
+    let searchQuery = "";
+    let hoveredId = null;
+    let currentZoomK = 1;
 
     async function init() {
         let data;
@@ -45,30 +129,69 @@
             return;
         }
 
+        // --- Derived data: degree, adjacency, groups/colors (computed before
+        // d3.forceLink mutates edges' source/target from ids into node refs) ---
+        const degree = new Map();
+        nodes.forEach(n => degree.set(n.id, 0));
+        edges.forEach(e => {
+            degree.set(e.source, (degree.get(e.source) || 0) + 1);
+            degree.set(e.target, (degree.get(e.target) || 0) + 1);
+        });
+
+        const adjacency = new Map();
+        nodes.forEach(n => adjacency.set(n.id, new Set()));
+        edges.forEach(e => {
+            adjacency.get(e.source)?.add(e.target);
+            adjacency.get(e.target)?.add(e.source);
+        });
+
+        const groups = Array.from(new Set(nodes.map(n => n.group))).sort();
+        const colorScale = d3.scaleOrdinal(groups, d3.schemeTableau10);
+
+        function nodeRadius(d) {
+            const deg = degree.get(d.id) || 0;
+            const base = 6 + deg * 1.5;
+            return Math.min(Math.max(base * nodeSizeMultiplier, 4), 40);
+        }
+
         const width = container.clientWidth;
         const height = container.clientHeight;
 
         const svg = d3.select(svgEl)
             .attr("viewBox", [0, 0, width, height]);
 
+        svg.append("defs").append("marker")
+            .attr("id", "aegis-arrow")
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 9)
+            .attr("markerWidth", 7)
+            .attr("markerHeight", 7)
+            .attr("orient", "auto-start-reverse")
+            .append("path")
+            .attr("d", "M0,-5L10,0L0,5")
+            .attr("fill", LINK_COLOR);
+
         const zoomLayer = svg.append("g");
 
         svg.call(d3.zoom().scaleExtent([0.2, 4]).on("zoom", (event) => {
             zoomLayer.attr("transform", event.transform);
+            currentZoomK = event.transform.k;
+            refreshTextFade();
         }));
 
         const simulation = d3.forceSimulation(nodes)
-            .force("link", d3.forceLink(edges).id(d => d.id).distance(55).strength(0.5))
-            .force("charge", d3.forceManyBody().strength(-130))
+            .force("link", d3.forceLink(edges).id(d => d.id).distance(linkDistance).strength(linkStrength))
+            .force("charge", d3.forceManyBody().strength(repelForce))
             .force("center", d3.forceCenter(width / 2, height / 2))
-            .force("collide", d3.forceCollide(34));
+            .force("collide", d3.forceCollide(nodeRadius));
 
         const link = zoomLayer.append("g")
-            .attr("stroke", LINK_COLOR)
-            .attr("stroke-width", 1.2)
             .selectAll("line")
             .data(edges)
-            .join("line");
+            .join("line")
+            .attr("stroke", LINK_COLOR)
+            .attr("stroke-width", lineThickness)
+            .attr("marker-end", showArrows ? "url(#aegis-arrow)" : null);
 
         const node = zoomLayer.append("g")
             .selectAll("g")
@@ -78,16 +201,11 @@
             .call(drag(simulation));
 
         node.append("circle")
-            .attr("r", 8)
-            .attr("fill", NODE_FILL)
+            .attr("r", nodeRadius)
+            .attr("fill", d => colorScale(d.group))
+            .attr("fill-opacity", 0.85)
             .attr("stroke", NODE_STROKE)
-            .attr("stroke-width", 1.5)
-            .on("mouseover", function () {
-                d3.select(this).attr("stroke", NEON_CYAN).attr("fill", "#0e7490");
-            })
-            .on("mouseout", function () {
-                d3.select(this).attr("stroke", NODE_STROKE).attr("fill", NODE_FILL);
-            });
+            .attr("stroke-width", 1.5);
 
         node.append("text")
             .text(d => d.label)
@@ -106,12 +224,80 @@
 
         htmx.process(container);
 
+        node.on("mouseover", (event, d) => {
+            hoveredId = d.id;
+            refreshEmphasis();
+            refreshTextFade();
+        }).on("mouseout", () => {
+            hoveredId = null;
+            refreshEmphasis();
+            refreshTextFade();
+        });
+
+        function refreshEmphasis() {
+            const query = searchQuery.trim().toLowerCase();
+
+            function nodeMatches(d) {
+                return d.label.toLowerCase().includes(query) || d.id.toLowerCase().includes(query);
+            }
+
+            node.style("opacity", d => {
+                if (hoveredId) {
+                    return d.id === hoveredId || adjacency.get(hoveredId)?.has(d.id) ? 1 : 0.15;
+                }
+                if (query) {
+                    return nodeMatches(d) ? 1 : 0.15;
+                }
+                return 1;
+            });
+
+            node.select("circle")
+                .attr("stroke", d => d.id === hoveredId ? NEON_CYAN : NODE_STROKE)
+                .attr("stroke-width", d => d.id === hoveredId ? 2.5 : 1.5);
+
+            link.style("opacity", d => {
+                if (hoveredId) {
+                    return d.source.id === hoveredId || d.target.id === hoveredId ? 0.9 : 0.08;
+                }
+                if (query) {
+                    return nodeMatches(d.source) && nodeMatches(d.target) ? 0.9 : 0.08;
+                }
+                return 0.9;
+            });
+        }
+
+        function refreshTextFade() {
+            node.select("text").style("opacity", d => {
+                if (hoveredId) {
+                    return d.id === hoveredId || adjacency.get(hoveredId)?.has(d.id) ? 1 : 0;
+                }
+                return currentZoomK >= textFadeThreshold ? 1 : 0;
+            });
+        }
+
+        function refreshOrphans() {
+            node.style("display", d => (hideOrphans && (degree.get(d.id) || 0) === 0) ? "none" : null);
+        }
+
+        refreshEmphasis();
+        refreshTextFade();
+
         simulation.on("tick", () => {
             link
                 .attr("x1", d => d.source.x)
                 .attr("y1", d => d.source.y)
-                .attr("x2", d => d.target.x)
-                .attr("y2", d => d.target.y);
+                .attr("x2", d => {
+                    const dx = d.target.x - d.source.x, dy = d.target.y - d.source.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    const r = nodeRadius(d.target) + 2;
+                    return d.target.x - (dx / dist) * r;
+                })
+                .attr("y2", d => {
+                    const dx = d.target.x - d.source.x, dy = d.target.y - d.source.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    const r = nodeRadius(d.target) + 2;
+                    return d.target.y - (dy / dist) * r;
+                });
 
             node.attr("transform", d => "translate(" + d.x + "," + d.y + ")");
         });
@@ -136,6 +322,63 @@
                 .on("drag", dragged)
                 .on("end", dragended);
         }
+
+        // --- CONTROLS panel bindings ---
+        document.getElementById("aegis-graph-search").addEventListener("input", (e) => {
+            searchQuery = e.target.value;
+            refreshEmphasis();
+        });
+
+        document.getElementById("aegis-graph-hide-orphans").addEventListener("change", (e) => {
+            hideOrphans = e.target.checked;
+            refreshOrphans();
+        });
+
+        document.getElementById("aegis-graph-arrows").addEventListener("change", (e) => {
+            showArrows = e.target.checked;
+            link.attr("marker-end", showArrows ? "url(#aegis-arrow)" : null);
+        });
+
+        document.getElementById("aegis-graph-node-size").addEventListener("input", (e) => {
+            nodeSizeMultiplier = parseFloat(e.target.value);
+            document.getElementById("aegis-graph-node-size-val").textContent = nodeSizeMultiplier.toFixed(1) + "x";
+            node.select("circle").attr("r", nodeRadius);
+            simulation.force("collide").radius(nodeRadius);
+            simulation.alpha(0.3).restart();
+        });
+
+        document.getElementById("aegis-graph-line-thickness").addEventListener("input", (e) => {
+            lineThickness = parseFloat(e.target.value);
+            document.getElementById("aegis-graph-line-thickness-val").textContent = lineThickness.toFixed(1) + "px";
+            link.attr("stroke-width", lineThickness);
+        });
+
+        document.getElementById("aegis-graph-repel").addEventListener("input", (e) => {
+            repelForce = parseFloat(e.target.value);
+            document.getElementById("aegis-graph-repel-val").textContent = repelForce.toFixed(0);
+            simulation.force("charge").strength(repelForce);
+            simulation.alpha(0.3).restart();
+        });
+
+        document.getElementById("aegis-graph-link-distance").addEventListener("input", (e) => {
+            linkDistance = parseFloat(e.target.value);
+            document.getElementById("aegis-graph-link-distance-val").textContent = linkDistance.toFixed(0) + "px";
+            simulation.force("link").distance(linkDistance);
+            simulation.alpha(0.3).restart();
+        });
+
+        document.getElementById("aegis-graph-link-strength").addEventListener("input", (e) => {
+            linkStrength = parseFloat(e.target.value);
+            document.getElementById("aegis-graph-link-strength-val").textContent = linkStrength.toFixed(2);
+            simulation.force("link").strength(linkStrength);
+            simulation.alpha(0.3).restart();
+        });
+
+        document.getElementById("aegis-graph-text-fade").addEventListener("input", (e) => {
+            textFadeThreshold = parseFloat(e.target.value);
+            document.getElementById("aegis-graph-text-fade-val").textContent = textFadeThreshold.toFixed(1);
+            refreshTextFade();
+        });
     }
 
     init();
