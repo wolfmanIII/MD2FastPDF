@@ -4,8 +4,10 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 
 ---
 
-### [4.0] - AEGIS ORACLE (Active Deployment // Phase 1) [COMPLETED]
+## [4.0] - AEGIS ORACLE (Active Deployment // Phase 1) [COMPLETED]
+
 **Obiettivo**: Dotare la stazione di uno strato di intelligenza neurale locale per massimizzare la velocità di produzione.
+
 - **Modello Operativo Primario**: `qwen2.5-coder:7b` (via Ollama locale). Ottimizzato per generazione strutturata e aderenza sintattica a Markdown/Mermaid.
 - **Specifiche Hardware Base**: Compatibilità certificata per Full GPU Offload su architettura Pascal (es. Nvidia GTX 1070 Ti 8GB VRAM) con 16GB RAM di sistema.
 - **Neural Completion**: Autocompletamento tecnico in-editor.
@@ -16,7 +18,9 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [4.1] - AEGIS REFACTOR (SOLID Compliance & UI Refinement) [COMPLETED]
+
 **Obiettivo**: Eliminare le violazioni SOLID e perfezionare l'ergonomia visiva della stazione per un workflow industriale fluido.
+
 - **SRP Implementation**: Scomposizione di `logic/files.py` in kernel specializzati.
 - **Persistent Clients**: Implementati client dedicati con lifecycle gestito per Gotenberg e Oracle.
 - **DIP Architecture**: Transizione verso interfacce iniettabili e gestione centralizzata dei client HTTP.
@@ -25,7 +29,8 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [4.2] - AEGIS RENDER (Mermaid Image Export) [COMPLETED]
-**Obiettivo**: Estrazione e export dei diagrammi Mermaid come immagini standalone dal documento.
+
+- **Obiettivo**: Estrazione e export dei diagrammi Mermaid come immagini standalone dal documento.
 - **PNG Export**: Rendering lato server del codice Mermaid in PNG tramite Gotenberg (screenshot headless Chromium).
 - **Bulk Extract**: Estrazione di tutti i blocchi Mermaid presenti nel documento in un archivio `.zip`.
 - **Toolbar Integration**: Azioni `aegis-render` e `aegis-render-all` integrate nella toolbar EasyMDE.
@@ -34,7 +39,9 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [4.3] - AEGIS FILETREE (Sidebar Albero Directory nell'Editor) [COMPLETED]
+
 **Obiettivo**: Sidebar collassabile nell'editor che mostra l'albero completo della root selezionata, con navigazione lazy e highlight del file attivo. Esclusiva della view editor — nessun impatto su dashboard o file browser.
+
 - **Lazy expand**: le cartelle caricano i figli solo al click — nessun render ricorsivo totale. ✓
 - **Navigazione**: click su `.md` carica il file nell'editor; altri formati si aprono in nuova scheda. ✓
 - **Toggle collassabile**: stato persistito in `localStorage`, bottone `«` / `»`. ✓
@@ -46,7 +53,8 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [4.4] - AEGIS CENTRALIZED UPLINK (Centralized Settings & Industrial UI) [COMPLETED]
-**Obiettivo**: Consolidamento della configurazione e standardizzazione estetica totale.
+
+- **Obiettivo**: Consolidamento della configurazione e standardizzazione estetica totale.
 - **Settings Manager**: Transizione da variabili ENV a `config/settings.json` persistente. ✓
 - **Industrial Form Standard**: Unificazione globale dello stile input/select via `base.html` (12px, borderless, mono). ✓
 - **Neural Filtering**: Esclusione automatica modelli di embedding dai selettori operativi. ✓
@@ -55,7 +63,8 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [4.5] - AEGIS HARDENING (SOLID & CSP Compliance) [COMPLETED]
-**Obiettivo**: Conformità architetturale SOLID su tutto il codebase Python e CSP compliance per penetration test.
+
+- **Obiettivo**: Conformità architetturale SOLID su tutto il codebase Python e CSP compliance per penetration test.
 - **SOLID full-stack**: Protocol types, DI constructor, mutation hook registry, async I/O su tutti i moduli. ✓
 - **CSP Ready**: eliminati tutti gli `style=` inline da template e route. `style-src 'self'` senza `unsafe-inline`. ✓
 - **CSS extraction**: `editor-aegis.css`, `pdf-industrial.css`, `pdf-preview.css` come file statici dedicati. ✓
@@ -64,13 +73,16 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [4.6] - AEGIS CHRONOS (Versionamento Narrativo) [CANCELLED]
-**Obiettivo originale**: Strato di versionamento leggero integrato nell'editor per archivi narrativi.
+
+- **Obiettivo originale**: Strato di versionamento leggero integrato nell'editor per archivi narrativi.
+
 > **Rimosso dalla roadmap attiva.** Il versionamento è già gestito dall'utente via Git nel terminale. Integrare un frontend Git in SC-ARCHIVE aggiungerebbe complessità significativa (subprocess, gestione conflitti, credenziali remote) per funzionalità che un terminale gestisce meglio e con più controllo. SC-ARCHIVE non è un IDE.
 
 ---
 
 ### [4.7] - AEGIS BLUEPRINT (Technical Templating) [COMPLETED]
-**Obiettivo**: Standardizzazione della produzione documentale industriale con libreria template app-wide.
+
+- **Obiettivo**: Standardizzazione della produzione documentale industriale con libreria template app-wide.
 - **Galleria Blueprint**: Modal in toolbar editor (`BLUEPRINT_ARCHIVE`) — blueprint raggruppati per categoria. Click inserisce il contenuto in fondo al buffer editor (separatore `---` se non vuoto). ✓
 - **Admin management**: Tab `BLUEPRINT_ARCHIVE` nel pannello SYS_ADMIN — form crea/sovrascrive blueprint, lista con PURGE per eliminazione. ✓
 - **5 template iniziali**: `blueprints/narrative/` — Session Log, NPC Profile, Planet Description, Ship Description, Location Description. ✓
@@ -79,13 +91,16 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [4.8] - AEGIS GUARD (Local Security Protocol) [CANCELLED]
-**Obiettivo originale**: Blindatura dei dati locali e gestione dell'accesso in rete.
+
+- **Obiettivo originale**: Blindatura dei dati locali e gestione dell'accesso in rete.
+
 > **Rimosso dalla roadmap attiva.** La cifratura at-rest è incompatibile con il workflow reale di SC-ARCHIVE: i file `.md` sono tracciati su repository Git remoti (GitHub), accessibili da editor esterni e potenzialmente condivisi con altri giocatori. Cifrare i file renderebbe i diff illeggibili, bloccherebbe qualsiasi editor esterno e trasformerebbe SC-ARCHIVE in un lock-in obbligatorio — contrario agli obiettivi del progetto. La Network Gateway UI è out-of-scope per un'applicazione applicativo-layer.
 
 ---
 
 ### [4.9] - AEGIS STABILITY (System Integrity) [COMPLETED]
-**Obiettivo**: Rafforzamento della robustezza del codice e della diagnostica in tempo reale.
+
+- **Obiettivo**: Rafforzamento della robustezza del codice e della diagnostica in tempo reale.
 - **Centralized Exception Handling**: Gerarchia `AegisError` in `logic/exceptions.py` con `status_code` integrato. Business logic completamente disaccoppiata da FastAPI — nessun `HTTPException` nei moduli `logic/`. ✓
 - **Global FastAPI Handler**: `@app.exception_handler(AegisError)` in `main.py` traduce ogni eccezione di dominio in `JSONResponse` con logging strutturato. ✓
 - **Domain Exception Migration**: Tutti i `raise HTTPException` nei moduli `logic/` rimpiazzati con eccezioni tipizzate (`AccessDeniedError`, `NotFoundError`, `ConversionError`, `OracleError`, `RenderError`, ecc.). ✓
@@ -93,7 +108,8 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [4.10] - AEGIS IDENTITY (Multi-User Auth & Workspace Isolation) [COMPLETED]
-**Obiettivo**: Accesso autenticato stile JupyterHub — ogni utente ha la propria sessione e workspace isolato (cartella home).
+
+- **Obiettivo**: Accesso autenticato stile JupyterHub — ogni utente ha la propria sessione e workspace isolato (cartella home).
 - **Login page**: `templates/layouts/login.html` standalone con tema industriale Aegis. Redirect automatico se sessione non attiva. ✓
 - **Session middleware**: `SessionMiddleware` (starlette/itsdangerous) — cookie firmato. `auth_middleware` HTTP middleware verifica la sessione e blocca ogni path non-pubblico. ✓
 - **Password storage**: `~/.config/sc-archive/users.json` con hash `bcrypt` (cost 12). Nessuna dipendenza da database esterno. ✓
@@ -110,7 +126,8 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [5.0] - AEGIS COMMS (Sistema di Messaggistica Multi-Utente) [COMPLETED]
-**Obiettivo**: Canale di comunicazione sicuro tra utenti e admin (GM/Referee). Filesystem-based, nessun database.
+
+- **Obiettivo**: Canale di comunicazione sicuro tra utenti e admin (GM/Referee). Filesystem-based, nessun database.
 - **Struttura cartelle**: `comms/{inbound,outbound,staging}/` nella root di ogni utente (`~/sc-archive/{user}/comms/`). Auto-creazione alla registrazione utente. ✓
 - **Formato messaggi**: file `.md` con frontmatter (id, from, to, subject, timestamp, read). Parsing stdlib `re` — nessuna dipendenza aggiuntiva. ✓
 - **Flusso invio**: dual-write — copia in `outbound/` del sender + copia in `inbound/` del recipient. Cross-workspace write con path assoluti validati. ✓
@@ -123,7 +140,8 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [5.1] - AEGIS GROUPS & ADMIN PANEL [COMPLETED]
-**Obiettivo**: Sistema di gruppi utente con admin panel HTMX e messaggistica ristretta per gruppo.
+
+- **Obiettivo**: Sistema di gruppi utente con admin panel HTMX e messaggistica ristretta per gruppo.
 - **GroupStore**: persistenza `~/.config/sc-archive/groups.json`. CRUD asincrono. Blocca eliminazione se gruppo ha membri. ✓
 - **UserRecord.groups**: campo `list[str]` con retrocompatibilità (`groups: []` per utenti senza campo). ✓
 - **Admin promozione via gruppo**: chiunque abbia il gruppo `"admin"` ha privilegi admin — non hardcoded su username. `require_admin` FastAPI dependency. ✓
@@ -135,7 +153,8 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [5.2] - AEGIS GROUP_SPACE (Workspace Condiviso per Gruppo) [COMPLETED]
-**Obiettivo**: Filesystem condiviso per i membri di un gruppo con modello permessi asimmetrico.
+
+- **Obiettivo**: Filesystem condiviso per i membri di un gruppo con modello permessi asimmetrico.
 - **Workspace per gruppo**: `~/sc-archive/{group_name}/` creato automaticamente alla creazione del gruppo. Boot migration per gruppi preesistenti. ✓
 - **Modello permessi**: root del gruppo — admin R+W, membri R; `shared/` — membri R+W, admin R. Enforced in `logic/groupspace.py`. ✓
 - **GROUP_SPACE hub**: link in navbar, lista gruppi accessibili all'utente corrente. ✓
@@ -148,7 +167,8 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [5.3] - AEGIS TEST SUITE [COMPLETED]
-**Obiettivo**: Copertura pytest completa per il layer `logic/` con isolamento filesystem e compatibilità cross-backend anyio.
+
+- **Obiettivo**: Copertura pytest completa per il layer `logic/` con isolamento filesystem e compatibilità cross-backend anyio.
 - **170 test, 0 fallimenti**. Eseguiti su entrambi i backend anyio (`asyncio` e `trio`). ✓
 - **Unit test** (`test_auth.py`, `test_comms.py`, `test_groupspace.py`, `test_blueprints.py`): 60 test su classi pure — nessun I/O, nessuna rete. ✓
 - **Async I/O test** (`test_*_async.py`): 110 test su operazioni filesystem tramite fixture `tmp_path` + `monkeypatch`. ✓
@@ -158,7 +178,8 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [5.4] - AEGIS REFACTOR STRUTTURALE [COMPLETED]
-**Obiettivo**: Riorganizzazione struttura progetto, completamento funzionalità blueprint, standardizzazione modali.
+
+- **Obiettivo**: Riorganizzazione struttura progetto, completamento funzionalità blueprint, standardizzazione modali.
 - **`logic/templates.py` → `config/templates.py`**: Configurazione Jinja2 spostata fuori dal layer business logic. ✓
 - **`routes/auth.py` → `routes/login.py`**: Rinominato per evitare ambiguità con `logic/auth.py`. ✓
 - **Blueprint edit da admin**: form crea/sovrascrive con select categoria + input nuova categoria + bottone EDIT per caricare blueprint esistente. ✓
@@ -169,7 +190,8 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [5.5] - AEGIS BLUEPRINT VARIABLE INJECTION [COMPLETED]
-**Obiettivo**: Pre-compilazione guidata dei placeholder nei blueprint prima dell'inserimento nell'editor.
+
+- **Obiettivo**: Pre-compilazione guidata dei placeholder nei blueprint prima dell'inserimento nell'editor.
 - **Endpoint `GET /blueprints/placeholders?path=`**: estrazione server-side dei placeholder univoci via regex `\[[A-Z0-9 _/\.]+\]`. ✓
 - **Rilevamento automatico**: click su blueprint chiama `requestBlueprint()` — se placeholder trovati, apre il form; altrimenti inserimento diretto. ✓
 - **`blueprint_variable_modal.html`**: modal con form dinamico — un input per ciascun placeholder (label = nome, focus automatico sul primo campo). ✓
@@ -182,14 +204,17 @@ Questo documento delinea la strategia di espansione per la stazione operativa **
 ---
 
 ### [5.6] - AEGIS UX REFINEMENTS (v5.15.0) [COMPLETED]
+
 **Obiettivo**: Miglioramenti ergonomici al file browser e all'editor — informazioni contestuali e controllo del layout senza impatto sull'architettura.
 
-**Metadati temporali nell'elenco file**
+#### Metadati temporali nell'elenco file
+
 - **`DirectoryLister.list_contents()`**: ogni item espone `mtime_str` (ultima modifica) e `ctime_str` (data creazione) formattati `DD/MM/YYYY HH:MM`. `st_birthtime` usato se disponibile (macOS/BSD + alcuni filesystem Linux); fallback a `st_ctime` su ext4/xfs. ✓
 - **`DirectoryLister.search()`**: stessa logica applicata ai risultati di ricerca ricorsiva. Errori `FileNotFoundError`/`PermissionError` gestiti con fallback `"—"`. ✓
 - **`results_grid.html`**: date visualizzate come sottotitolo sotto il nome (`CRE … // MOD …`), font mono, testo `zinc-500`, valori `neon-cyan`. Visibili da breakpoint `lg` in su. Compatibili con la riga di navigazione `.. [UP_DIRECTORY]` (nessuna data mostrata per essa). ✓
 
-**Sidebar filetree ridimensionabile**
+#### **Sidebar filetree ridimensionabile**
+
 - **`#aegis-filetree-resizer`** (`editor-aegis.css`): elemento da 4px tra sidebar e editor, `cursor: col-resize`, glow neon-cyan al hover e durante il drag (classe `.dragging`). Classe `.no-transition` aggiunta alla sidebar durante il drag per eliminare lag percepito. ✓
 - **Drag logic** (`editor.html`): `mousedown` sul handle → traccia delta X → aggiorna `sidebar.style.width` (min 120px / max 600px) → `mouseup` persiste in `localStorage` (`aegis-filetree-width`). ✓
 - **Persistenza e integrazione**: larghezza ripristinata al reload. Handle sincronizzato con il toggle collasso — nascosto se sidebar è a 0px, ripristinato all'apertura. ✓
