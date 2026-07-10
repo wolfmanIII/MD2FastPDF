@@ -227,61 +227,66 @@
     <div class="h-1 neon-bg w-full shrink-0"></div>
 
     <header class="w-full glass-panel border-x-0 border-t-0 sticky top-0 z-40 shrink-0">
-        <div class="w-full px-8 h-16 flex items-center justify-between mx-auto">
-            <div class="flex items-center space-x-4">
-                <a href="/" hx-get="/" hx-push-url="true" class="flex items-center space-x-3 group no-underline cursor-pointer">
-                    <img src="/static/logo.png" alt="SC-ARCHIVE"
-                         class="w-9 h-9 drop-shadow-[0_0_8px_rgba(125,211,252,0.4)] group-hover:drop-shadow-[0_0_12px_rgba(125,211,252,0.6)] transition-all">
-                    <span class="neon-text font-bold text-2xl tracking-widest">SC-ARCHIVE</span>
-                </a>
-                <span class="neon-text flex items-center space-x-2 text-xs uppercase tracking-widest" title="SYS_ACTIVE">
-                    <span class="w-2 h-2 rounded-full neon-bg animate-pulse"></span>
-                    <span class="hidden sm:inline">SYS_ACTIVE</span>
-                </span>
-                <span class="text-zinc-700 hidden sm:block">|</span>
-                <span class="text-zinc-100 text-xs uppercase tracking-[0.3em] hidden sm:block">Aegis Class System</span>
-                <span class="text-zinc-700 hidden md:block">|</span>
-                <span id="aegis-root-badge"
-                      hx-get="/root-badge"
-                      hx-trigger="load, every 60s, root-updated from:body"
-                      hx-target="this"
-                      hx-push-url="false"
-                      hx-swap="outerHTML">
-                </span>
-            </div>
-            <nav class="flex items-center space-x-6 text-sm font-medium uppercase tracking-widest">
-                <details id="aegis-modules-menu" class="relative">
-                    <summary class="text-zinc-400 hover:neon-text transition-colors cursor-pointer select-none">MODULES</summary>
-                    <div class="glass-panel absolute right-0 mt-3 min-w-48 p-2 flex flex-col space-y-1 z-50">
-                        <a href="/files" hx-get="/files" hx-target="#aegis-view-core" hx-push-url="true"
-                            class="px-3 py-2 rounded text-zinc-400 hover:neon-text hover:bg-white/5 transition-colors cursor-pointer no-underline">ARCHIVE</a>
-                        <a href="/graph" hx-get="/graph" hx-target="#aegis-view-core" hx-push-url="true"
-                            class="px-3 py-2 rounded text-zinc-400 hover:neon-text hover:bg-white/5 transition-colors cursor-pointer no-underline">GRAPH</a>
-                        <a href="/group-space" hx-get="/group-space" hx-push-url="true"
-                            class="px-3 py-2 rounded text-zinc-400 hover:neon-text hover:bg-white/5 transition-colors cursor-pointer no-underline">LIBRARY</a>
-                        <a href="/comms" hx-get="/comms" hx-push-url="true"
-                            class="px-3 py-2 rounded text-zinc-400 hover:neon-text hover:bg-white/5 transition-colors cursor-pointer no-underline flex items-center justify-between">
-                            <span>COMMS</span>
-                            <span id="comms-unread-badge"
-                                  hx-get="/comms/unread-count"
-                                  hx-trigger="load, every 30s"
-                                  hx-target="this"
-                                  hx-push-url="false"
-                                  hx-swap="outerHTML">
-                            </span>
-                        </a>
-                        {% if request.session.get("is_admin") %}
-                        <a href="/admin" hx-get="/admin" hx-push-url="true"
-                           class="px-3 py-2 rounded text-zinc-400 hover:neon-text hover:bg-white/5 transition-colors cursor-pointer no-underline">SYS_ADMIN</a>
-                        {% endif %}
+        <div class="w-full px-8 h-32 flex items-center justify-between mx-auto">
+            <a href="/" hx-get="/" hx-push-url="true" class="flex items-center space-x-4 group no-underline cursor-pointer shrink-0">
+                <img src="/static/logo.png" alt="SC-ARCHIVE"
+                     class="w-24 h-24 drop-shadow-[0_0_8px_rgba(125,211,252,0.4)] group-hover:drop-shadow-[0_0_12px_rgba(125,211,252,0.6)] transition-all">
+                <div class="flex flex-col justify-center">
+                    <span class="neon-text font-bold text-3xl tracking-widest">SC-ARCHIVE</span>
+                    <div class="flex items-center space-x-3 mt-1">
+                        <span class="neon-text flex items-center space-x-2 text-xs uppercase tracking-widest" title="SYS_ACTIVE">
+                            <span class="w-2 h-2 rounded-full neon-bg animate-pulse"></span>
+                            <span class="hidden sm:inline">SYS_ACTIVE</span>
+                        </span>
+                        <span class="text-zinc-700 hidden sm:block">|</span>
+                        <span class="text-zinc-100 text-xs uppercase tracking-[0.3em] hidden sm:block">Aegis Class System</span>
                     </div>
-                </details>
-                <span class="text-zinc-700">|</span>
-                <span class="text-zinc-400 text-[12px] tracking-widest">{{ request.session.get("username", "") | upper }}</span>
-                <form method="post" action="/logout" class="m-0 p-0">
-                    <button type="submit" class="text-zinc-500 hover:text-red-400 transition-colors text-[10px] tracking-widest uppercase border-none bg-transparent cursor-pointer">// LOGOUT</button>
-                </form>
-            </nav>
+                </div>
+            </a>
+            <div class="flex flex-col items-end justify-center h-full py-5">
+                <nav class="flex items-center space-x-6 text-sm font-medium uppercase tracking-widest">
+                    <details id="aegis-modules-menu" class="relative">
+                        <summary class="text-zinc-400 hover:neon-text transition-colors cursor-pointer select-none">MODULES</summary>
+                        <div class="glass-panel absolute right-0 mt-3 min-w-48 p-2 flex flex-col space-y-1 z-50">
+                            <a href="/files" hx-get="/files" hx-target="#aegis-view-core" hx-push-url="true"
+                                class="px-3 py-2 rounded text-zinc-400 hover:neon-text hover:bg-white/5 transition-colors cursor-pointer no-underline">ARCHIVE</a>
+                            <a href="/graph" hx-get="/graph" hx-target="#aegis-view-core" hx-push-url="true"
+                                class="px-3 py-2 rounded text-zinc-400 hover:neon-text hover:bg-white/5 transition-colors cursor-pointer no-underline">GRAPH</a>
+                            <a href="/group-space" hx-get="/group-space" hx-push-url="true"
+                                class="px-3 py-2 rounded text-zinc-400 hover:neon-text hover:bg-white/5 transition-colors cursor-pointer no-underline">LIBRARY</a>
+                            <a href="/comms" hx-get="/comms" hx-push-url="true"
+                                class="px-3 py-2 rounded text-zinc-400 hover:neon-text hover:bg-white/5 transition-colors cursor-pointer no-underline flex items-center justify-between">
+                                <span>COMMS</span>
+                                <span id="comms-unread-badge"
+                                      hx-get="/comms/unread-count"
+                                      hx-trigger="load, every 30s"
+                                      hx-target="this"
+                                      hx-push-url="false"
+                                      hx-swap="outerHTML">
+                                </span>
+                            </a>
+                            {% if request.session.get("is_admin") %}
+                            <a href="/admin" hx-get="/admin" hx-push-url="true"
+                               class="px-3 py-2 rounded text-zinc-400 hover:neon-text hover:bg-white/5 transition-colors cursor-pointer no-underline">SYS_ADMIN</a>
+                            {% endif %}
+                        </div>
+                    </details>
+                    <span class="text-zinc-700">|</span>
+                    <span class="text-zinc-400 text-[12px] tracking-widest">{{ request.session.get("username", "") | upper }}</span>
+                    <form method="post" action="/logout" class="m-0 p-0">
+                        <button type="submit" class="text-zinc-500 hover:text-red-400 transition-colors text-[10px] tracking-widest uppercase border-none bg-transparent cursor-pointer">// LOGOUT</button>
+                    </form>
+                </nav>
+                <div class="flex items-center space-x-4 mt-3">
+                    <span id="aegis-root-badge"
+                          hx-get="/root-badge"
+                          hx-trigger="load, every 60s, root-updated from:body"
+                          hx-target="this"
+                          hx-push-url="false"
+                          hx-swap="outerHTML">
+                    </span>
+                </div>
+            </div>
         </div>
     </header>
 
