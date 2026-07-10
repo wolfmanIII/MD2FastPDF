@@ -9,7 +9,9 @@ echo "--- STARTING MD2FastPDF INDUSTRIAL TERMINAL ---"
 ./tailwindcss -i static/css/main.css -o static/css/output.css
 
 # Start Tailwind watcher in background
-./tailwindcss -i static/css/main.css -o static/css/output.css --watch &
+# --watch=always: senza `always` il watcher si ferma appena stdin si chiude,
+# cosa che avviene sempre in esecuzione non interattiva (es. systemd --user).
+./tailwindcss -i static/css/main.css -o static/css/output.css --watch=always &
 
 # Load or generate persistent session key
 KEY_FILE="$HOME/.config/sc-archive/session.key"
