@@ -110,6 +110,14 @@ body:has(.aegis-fullscreen-active) main {
     backdrop-filter: none !important;
 }
 
+/* AEGIS_FULLSCREEN_HEADER_FIX: the app header's own backdrop-filter creates a
+   containing block that can leak through the fixed-position fullscreen editor
+   (more visible now that the header is taller) — hide it outright instead of
+   relying on z-index stacking. */
+body:has(.aegis-fullscreen-active) header {
+    display: none !important;
+}
+
 /* EasyMDE Industrial Overrides - Aegis Sky */
 .EasyMDEContainer {
     flex-grow: 1 !important;
