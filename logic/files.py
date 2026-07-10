@@ -15,6 +15,7 @@ ALLOWED_EXTENSIONS: Set[str] = {".md", ".html", ".pdf", ".png", ".jpg", ".jpeg",
 TEXT_EXTENSIONS: Set[str] = {".md", ".html"}
 SKIP_DIRS: Set[str] = {".git", ".venv", "node_modules", ".pytest_cache", "__pycache__", ".gemini", "comms"}
 CACHE_TTL: int = 60  # Seconds
+STORAGE_CAPACITY_BYTES: int = 10 * 1024 ** 3  # 10 GB — DENSITY_CAPACITY baseline
 
 # Per-request root isolation via ContextVar (AEGIS_IDENTITY_PROTOCOL)
 _DEFAULT_ROOT: Path = Path(__file__).parent.parent.resolve()
@@ -326,12 +327,13 @@ class StorageCache:
 
             size_str = f"{total_size} B" if total_size < 1024 else \
                        f"{total_size/1024:.1f} KB" if total_size < 1024**2 else \
-                       f"{total_size/1024**2:.1f} MB"
+                       f"{total_size/1024**2:.1f} MB" if total_size < 1024**3 else \
+                       f"{total_size/1024**3:.2f} GB"
 
             return {
                 "total_size": size_str,
                 "file_count": count,
-                "usage_percent": min(100, (total_size / (100 * 1024 * 1024)) * 100)
+                "usage_percent": min(100, (total_size / STORAGE_CAPACITY_BYTES) * 100)
             }
 
         data = await anyio.to_thread.run_sync(_calc)
