@@ -183,6 +183,10 @@
             .force("link", d3.forceLink(edges).id(d => d.id).distance(linkDistance).strength(linkStrength))
             .force("charge", d3.forceManyBody().strength(repelForce))
             .force("center", d3.forceCenter(width / 2, height / 2))
+            // Weak centering pull: keeps the whole graph roughly inside the
+            // viewport even at high repel force, instead of drifting off-screen.
+            .force("x", d3.forceX(width / 2).strength(0.03))
+            .force("y", d3.forceY(height / 2).strength(0.03))
             .force("collide", d3.forceCollide(nodeRadius));
 
         const link = zoomLayer.append("g")
