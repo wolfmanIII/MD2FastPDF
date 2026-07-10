@@ -25,6 +25,23 @@ def _system_context() -> dict:
     }
 
 
+@router.get("/root-badge", response_class=HTMLResponse)
+async def root_badge(request: Request):
+    """
+    Returns the compact archive-root badge fragment for the persistent header.
+    """
+    root = get_project_root()
+    return templates.TemplateResponse(
+        request=request,
+        name="components/root_badge.html",
+        context={
+            "request": request,
+            "root_name": root.name or "SYS_HOME",
+            "full_root": str(root),
+        },
+    )
+
+
 @router.get("/services/status", response_class=HTMLResponse)
 async def services_status(request: Request):
     """
