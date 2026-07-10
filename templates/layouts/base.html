@@ -230,9 +230,8 @@
         <div class="w-full px-8 h-16 flex items-center justify-between mx-auto">
             <div class="flex items-center space-x-4">
                 <a href="/" hx-get="/" hx-push-url="true" class="flex items-center space-x-3 group no-underline cursor-pointer">
-                    <div class="neon-text drop-shadow-[0_0_8px_rgba(0,240,255,0.4)] group-hover:drop-shadow-[0_0_12px_rgba(0,240,255,0.6)] transition-all">
-                        {% with class="w-8 h-8", dim=32 %}{% include 'icons/holocron.html' %}{% endwith %}
-                    </div>
+                    <img src="/static/logo.png" alt="SC-ARCHIVE"
+                         class="w-9 h-9 drop-shadow-[0_0_8px_rgba(125,211,252,0.4)] group-hover:drop-shadow-[0_0_12px_rgba(125,211,252,0.6)] transition-all">
                     <span class="neon-text font-bold text-2xl tracking-widest">SC-ARCHIVE</span>
                 </a>
                 <span class="neon-text flex items-center space-x-2 text-xs uppercase tracking-widest" title="SYS_ACTIVE">
