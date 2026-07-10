@@ -1,4 +1,11 @@
-<span class="text-zinc-500 text-xs uppercase tracking-[0.2em] hidden md:flex items-center space-x-1" title="{{ full_root }}">
+<span id="aegis-root-badge"
+      class="text-zinc-500 text-xs uppercase tracking-[0.2em] hidden md:flex items-center space-x-1"
+      title="{{ full_root }}"
+      hx-get="/root-badge"
+      hx-trigger="every 60s, root-updated from:body"
+      hx-target="this"
+      hx-push-url="false"
+      hx-swap="outerHTML">
     <span>ARCHIVE:</span>
     <span class="neon-text">{{ root_name }}</span>
 </span>
