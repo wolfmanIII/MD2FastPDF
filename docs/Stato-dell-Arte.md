@@ -1,7 +1,7 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.16.0
-**Ultimo Aggiornamento**: 27 Giugno 2026
+**Stato Attuale**: Op_Ready / Versione 5.20.0
+**Ultimo Aggiornamento**: 11 Luglio 2026
 
 ---
 
@@ -166,6 +166,31 @@
 - **Sostituzione globale**: `replaceAll('[PH]', value)` per ogni placeholder; se il campo è vuoto, il token originale viene preservato. ✓
 - **Bypass diretto**: se nessun placeholder rilevato, inserimento immediato senza step aggiuntivi — comportamento attuale invariato. ✓
 
+### 1.17 AEGIS GRAPH VIEW [5.7] (v5.20.0) — COMPLETED
+
+- **`ArchiveGraphBuilder`** (`logic/graph.py`): deriva un grafo nodi/archi dai link Markdown (`[testo](path.md)`) trovati nell'archivio dell'utente attivo. Scan ricorsivo confinato alla root utente, ogni link risolto e passato per `PathSanitizer.resolve_and_sanitize` — traversal, path nascosti, file inesistenti e URL esterni scartati silenziosamente, mai un'eccezione propagata.
+- **`GET /graph`** (fragment/shell) e **`GET /graph/data`** (JSON `{nodes, edges}`) in `routes/graph.py`.
+- **Force-directed layout** D3.js v7 (`static/js/d3.min.js`, vendorizzato — nessun CDN, coerente con `htmx`/`easymde`/`marked`/`mermaid`): zoom/pan/drag, click sul nodo apre il documento nell'editor via HTMX.
+- **Pannello CONTROLS live**: ricerca testuale (dimming dei nodi non corrispondenti), toggle "nascondi orfani" e "mostra direzione", 6 slider — dimensione nodi, spessore linee, forza di repulsione, distanza collegamenti, forza collegamenti, dissolvenza testi in base allo zoom. Tutti gli slider aggiornano la simulazione D3 in tempo reale (`simulation.alpha(0.3).restart()`), nessun submit/reload.
+- **Colorazione per cartella**: colore nodo assegnato per cartella padre (`d3.scaleOrdinal` + `schemeTableau10`).
+- **Dimensione nodo per grado**: raggio proporzionale al numero di collegamenti (in+out), combinato con il moltiplicatore manuale dello slider.
+- **Hover highlight**: passando sopra un nodo, nodo + vicini diretti evidenziati, resto del grafo attenuato (adjacency map costruita client-side una sola volta).
+- **Frecce direzionali**: marker SVG `marker-end` sugli archi (i link Markdown sono intrinsecamente direzionali), disattivabili dal pannello.
+- **Forze di centraggio**: `forceX`/`forceY` a bassa intensità (0.03) mantengono il grafo centrato nel viewport a qualunque intensità di repulsione — senza, i nodi potevano derivare fuori dall'area visibile rendendo lo slider "Forza di repulsione" apparentemente inerte.
+- **Tutto lato client**: nessuna dipendenza Python aggiuntiva, nessuna modifica a `logic/graph.py`/`routes/graph.py` oltre alla creazione iniziale.
+
+### 1.18 REBRANDING & HEADER REDESIGN (v5.20.0) — COMPLETED
+
+- **Logo esagonale trasparente** (`static/logo.png`): sfondo bianco rimosso da `static/logo.jpg` via flood-fill dai bordi (non una soglia globale — preserva i riflessi chiari interni al disegno) + erosione 1px per eliminare l'alone da compressione JPEG. Sostituisce l'icona diamante placeholder nell'header.
+- **Favicon rigenerate**: `favicon.svg` è ora un'icona vettoriale semplificata (esagono + freccia, neon-cyan) — il logo completo era illeggibile a 16px (troppi dettagli/colori). `favicon.ico`/`favicon-16x16.png`/`favicon-32x32.png` rigenerati dal nuovo SVG; `apple-touch-icon.png` (180px) mantiene il logo completo dove il dettaglio si vede. Aggiunto fallback `rel="alternate icon"` per browser legacy.
+- **Header a due righe**: logo ingrandito da 36px a 96px, header alzato a 128px. Sinistra: logo + "SC-ARCHIVE" con SYS_ACTIVE/tagline sotto. Destra: dropdown MODULES/USERNAME/LOGOUT con badge archivio sotto, allineati a destra.
+- **Nav MODULES**: Archive/Graph/Library/Comms/Admin raggruppati in un dropdown (`<details>` + `.glass-panel`) invece di occupare la barra per intero. Chiusura automatica al click esterno o alla navigazione HTMX. OS_CORE e SYS_ACTIVE (ridondanti — il logo già linka alla home, SYS_ACTIVE non era un link) rimossi dalla nav.
+- **Badge archivio persistente** (`GET /root-badge`): nome della cartella attiva visibile in ogni pagina, non solo in dashboard. Si auto-perpetua ad ogni swap (stesso pattern di `comms-unread-badge`) e ascolta `HX-Trigger: root-updated` emesso da `POST /root-picker/select` per l'aggiornamento istantaneo.
+- **Fix fullscreen editor**: l'header (glass-panel con `backdrop-filter`) filtrava attraverso l'editor in fullscreen — leak di stacking-context reso molto più visibile dall'header ingrandito. Nascosto esplicitamente via `body:has(.aegis-fullscreen-active) header`.
+- **Editor in preview di default**: `easyMDE.togglePreview()` chiamato subito dopo l'init.
+- **`DENSITY_CAPACITY`**: soglia della barra storage in dashboard alzata da 100 MB a 10 GB (`STORAGE_CAPACITY_BYTES`, `logic/files.py`); aggiunto livello GB alla formattazione `ARCHIVE_SIZE`.
+- **Fix `bin/launch.sh`**: watcher Tailwind con `--watch=always` — senza `always` il processo si fermava silenziosamente appena stdin si chiudeva (sempre vero sotto systemd `--user`, nessun TTY), impedendo la ricompilazione CSS dopo l'avvio del servizio.
+
 ---
 
 ## 2. Infrastruttura Tecnica
@@ -183,12 +208,14 @@
 ### Package Structure
 
 ```text
-logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, auth.py, comms.py, blueprints.py, groupspace.py, exceptions.py
-routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, login, comms, admin, blueprint, groupspace, deps
+logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, auth.py, comms.py, blueprints.py, groupspace.py, graph.py, exceptions.py
+routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, login, comms, admin, blueprint, groupspace, graph, deps
 config/         __init__.py + settings.py (SettingsManager) + settings.json
 blueprints/     narrative/ (session-log, npc-profile, planet-description, ship-description, location-description)
 ~/.config/sc-archive/   users.json, groups.json, session.key
 static/css/     output.css, editor-aegis.css, pdf-industrial.css, pdf-preview.css, main.css
+static/js/      htmx.min.js, easymde.min.js, marked.min.js, mermaid.min.js, highlight.min.js, d3.min.js
+static/         logo.jpg, logo.png (trasparente), favicon/ (favicon.svg, favicon.ico, favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png, android-chrome-*.png)
 bin/            launch.sh, create_user.sh, aegis-migrate.sh
 ```
 
@@ -216,7 +243,9 @@ bin/            launch.sh, create_user.sh, aegis-migrate.sh
 | [5.4] | AEGIS REFACTOR STRUTTURALE | **COMPLETED** |
 | [5.5] | AEGIS BLUEPRINT VARIABLE INJECTION | **COMPLETED** |
 | [5.6] | AEGIS UX REFINEMENTS | **COMPLETED** |
+| [5.7] | AEGIS GRAPH VIEW | **COMPLETED** |
+| [5.8] | AEGIS REBRANDING & HEADER REDESIGN | **COMPLETED** |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.16.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.20.0 — DEPLOYMENT_ACTIVE.*

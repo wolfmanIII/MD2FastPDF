@@ -1,6 +1,33 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.20.0] - AEGIS GRAPH VIEW & REBRANDING (2026-07-11)
+Vista a grafo stile Obsidian per l'archivio, nuovo logo/favicon, header rinnovato.
+
+### Added
+- **`logic/graph.py` — `ArchiveGraphBuilder`**: classe SRP che deriva un grafo nodi/archi dai link Markdown (`[testo](path.md)`) trovati nell'archivio dell'utente attivo. Scan ricorsivo confinato alla root utente (`PathSanitizer.get_root()`), risoluzione e sanitizzazione di ogni link (traversal, path nascosti, file inesistenti o URL esterni scartati silenziosamente). Nessuna eccezione mai propagata.
+- **`routes/graph.py`**: `GET /graph` (fragment/shell HTMX) e `GET /graph/data` (JSON nodi/archi).
+- **`templates/components/graph_view.html`**: force-directed graph D3.js v7 (vendorizzato in `static/js/d3.min.js`), zoom/pan/drag, click-to-open sull'editor via HTMX. Pannello **CONTROLS** live: ricerca testuale (dimming), toggle nascondi orfani e frecce direzionali, 6 slider (dimensione nodi, spessore linee, forza di repulsione, distanza collegamenti, forza collegamenti, dissolvenza testi su zoom). Colorazione nodo per cartella padre (`d3.scaleOrdinal` + `schemeTableau10`), dimensione nodo proporzionale al grado, hover highlight su nodo + vicini diretti. Forze di centraggio deboli (`forceX`/`forceY`) per tenere il grafo nel viewport a qualunque intensità di repulsione.
+- Nuova voce nav **GRAPH** nel dropdown MODULES.
+- **`static/logo.png`**: logo esagonale con trasparenza vera (sfondo bianco rimosso da `static/logo.jpg` via flood-fill dai bordi + erosione 1px, non una soglia globale — preserva i riflessi chiari interni al disegno). Usato nell'header al posto dell'icona diamante placeholder.
+- **`static/favicon/favicon.svg`**: icona vettoriale semplificata (esagono + freccia, neon-cyan) — il logo completo era illeggibile a 16px. `favicon.ico`/`favicon-16x16.png`/`favicon-32x32.png` rigenerati dal nuovo SVG; `apple-touch-icon.png` (180px) mantiene il logo completo.
+- **Badge archivio persistente**: nome della cartella archivio attiva (`GET /root-badge`) visibile nell'header di ogni pagina, non solo in dashboard. Si auto-perpetua ad ogni swap (pattern già usato da `comms-unread-badge`) e ascolta `HX-Trigger: root-updated` emesso da `POST /root-picker/select` per aggiornarsi istantaneamente al cambio directory.
+- **Nav MODULES**: Archive/Graph/Library/Comms/Admin raggruppati in un dropdown (`<details>` + `.glass-panel`) per alleggerire la barra di navigazione. Chiusura automatica al click esterno o alla navigazione HTMX.
+- **Editor in preview di default**: `easyMDE.togglePreview()` chiamato subito dopo l'init — ogni `.md` si apre mostrando il rendering invece del buffer grezzo.
+- **`DENSITY_CAPACITY`**: soglia della barra di utilizzo storage in dashboard alzata da 100 MB a 10 GB (`STORAGE_CAPACITY_BYTES` in `logic/files.py`); aggiunto il livello GB alla formattazione di `ARCHIVE_SIZE`.
+
+### Changed
+- **Header**: logo da 36px a 96px, header alzato a 128px per farci spazio. Layout a due righe: logo + "SC-ARCHIVE" a sinistra con stato SYS_ACTIVE/tagline sotto; MODULES/USERNAME/LOGOUT a destra con badge archivio sotto, allineati a destra.
+- **`bin/launch.sh`**: watcher Tailwind avviato con `--watch=always` invece di `--watch` — senza `always` il processo si ferma silenziosamente appena stdin si chiude, condizione sempre vera in esecuzione non interattiva (systemd `--user`, nessun TTY). Il CSS non veniva più ricompilato dopo l'avvio del servizio.
+
+### Fixed
+- **`root_badge.html`**: mancavano `id`/attributi `hx-*` sul proprio elemento radice — al primo swap (`load`) l'elemento sostituiva se stesso con uno privo di `hx-trigger`, perdendo polling e ascolto di `root-updated` per sempre. Serviva ricaricare la pagina per vedere la nuova directory.
+- **Repulsione grafo senza effetto visibile**: senza vincolo di centraggio, aumentare "Forza di repulsione" spingeva i nodi fuori dall'area visibile invece di allargarli a vista. Aggiunte forze `forceX`/`forceY` deboli per tenere il grafo centrato nel viewport.
+- **Header visibile durante il fullscreen dell'editor**: leak di stacking-context (backdrop-filter dell'header) reso molto più visibile dall'header ingrandito — nascosto esplicitamente via `body:has(.aegis-fullscreen-active) header`.
+- **`apple-touch-icon`**: puntava erroneamente a `favicon.svg` invece che a un PNG dedicato.
+
+---
+
 ## [5.16.0] - PDF BOOKMARK INJECTION (2026-06-27)
 Outline PDF gerarchico iniettato automaticamente su ogni esportazione.
 
