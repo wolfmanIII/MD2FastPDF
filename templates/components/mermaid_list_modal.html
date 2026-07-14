@@ -17,7 +17,7 @@
         {{ blocks|length }} DIAGRAM{{ 'S' if blocks|length > 1 else '' }} — SELECT_TO_EXPORT_PNG
       </p>
       {% for block in blocks %}
-      <a href="/render/mermaid/png?path={{ path }}&index={{ loop.index0 }}"
+      <a href="/render/mermaid/png?path={{ path | urlencode }}&index={{ loop.index0 }}"
          target="_blank"
          onclick="closeAegisModal('mermaid-list-modal')"
          class="flex items-center justify-between p-3 border border-zinc-800 hover:border-violet-500/50 hover:bg-violet-500/5 transition-all group no-underline">

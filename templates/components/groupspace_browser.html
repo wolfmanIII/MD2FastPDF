@@ -17,7 +17,7 @@
       {% if breadcrumbs|length > 1 %}
       {% for crumb in breadcrumbs[1:] %}
       <span class="text-zinc-200 shrink-0">/</span>
-      <button hx-get="/group-space/{{ group_name }}/files?path={{ crumb.path }}"
+      <button hx-get="/group-space/{{ group_name }}/files?path={{ crumb.path | urlencode }}"
               hx-target="#aegis-view-core" hx-push-url="true"
               class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">
         {{ crumb.name }}
@@ -33,7 +33,7 @@
       {% else %}
       <span class="neon-text font-mono text-[10px] tracking-widest border border-(--neon-cyan)/30 px-2 py-1">READ_WRITE</span>
       {% if not read_only %}
-      <button hx-get="/group-space/{{ group_name }}/create-form?path={{ path }}"
+      <button hx-get="/group-space/{{ group_name }}/create-form?path={{ path | urlencode }}"
               hx-target="#modal-container"
               class="btn-solid h-8 rounded-sm text-[10px] tracking-[0.2em] font-bold">
         + NEW_ENTRY
@@ -52,7 +52,7 @@
     {% else %}
 
     {% if path %}
-    <button hx-get="/group-space/{{ group_name }}/files?path={{ path | parent_path }}"
+    <button hx-get="/group-space/{{ group_name }}/files?path={{ path | parent_path | urlencode }}"
             hx-target="#aegis-view-core" hx-push-url="true"
             class="group flex items-center space-x-4 p-2 rounded-sm neon-hover-item transition-all cursor-pointer">
       <span class="text-zinc-100 group-hover:neon-text transition-colors">
@@ -66,9 +66,9 @@
     <div class="group flex items-center justify-between p-2 rounded-sm neon-hover-item transition-all">
       <button
         {% if item.is_dir %}
-        hx-get="/group-space/{{ group_name }}/files?path={{ item.path }}"
+        hx-get="/group-space/{{ group_name }}/files?path={{ item.path | urlencode }}"
         {% else %}
-        hx-get="/group-space/{{ group_name }}/editor?path={{ item.path }}"
+        hx-get="/group-space/{{ group_name }}/editor?path={{ item.path | urlencode }}"
         {% endif %}
         hx-target="#aegis-view-core" hx-push-url="true"
         class="flex items-center space-x-4 text-left grow cursor-pointer">
@@ -87,7 +87,7 @@
 
       {% if not item.is_dir and not read_only %}
       <button type="button"
-              hx-get="/group-space/{{ group_name }}/delete/confirm?path={{ item.path }}&current_dir={{ path }}"
+              hx-get="/group-space/{{ group_name }}/delete/confirm?path={{ item.path | urlencode }}&current_dir={{ path | urlencode }}"
               hx-target="#modal-container"
               onclick="event.stopPropagation()"
               class="btn btn-outline btn-error btn-xs z-20">

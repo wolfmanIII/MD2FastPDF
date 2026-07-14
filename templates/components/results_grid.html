@@ -27,8 +27,8 @@
     </div>
     {% else %}
         {% if not searching and current_path != "." %}
-    <a href="/files?path={{ current_path|parent_path }}"
-       hx-get="/files?path={{ current_path|parent_path }}"
+    <a href="/files?path={{ current_path|parent_path|urlencode }}"
+       hx-get="/files?path={{ current_path|parent_path|urlencode }}"
        hx-target="#aegis-view-core" hx-push-url="true"
        class="group flex items-center space-x-4 p-2 rounded-sm neon-hover-item transition-all cursor-pointer no-underline">
         <span class="text-zinc-100 group-hover:neon-text transition-colors">
@@ -38,9 +38,9 @@
     </a>
     {% endif %}
     {% for item in items %}
-        <a href="{% if item.is_dir %}/files?path={{ item.path }}{% elif item.path.lower().endswith('.md') %}/editor?path={{ item.path }}{% elif item.path.lower().endswith('.pdf') %}/pdf/view?path={{ item.path }}{% elif item.path.lower().endswith('.html') %}/html/view?path={{ item.path }}{% endif %}"
+        <a href="{% if item.is_dir %}/files?path={{ item.path|urlencode }}{% elif item.path.lower().endswith('.md') %}/editor?path={{ item.path|urlencode }}{% elif item.path.lower().endswith('.pdf') %}/pdf/view?path={{ item.path|urlencode }}{% elif item.path.lower().endswith('.html') %}/html/view?path={{ item.path|urlencode }}{% endif %}"
            {% if not item.path.lower().endswith('.html') %}
-           hx-get="{% if item.is_dir %}/files?path={{ item.path }}{% elif item.path.lower().endswith('.md') %}/editor?path={{ item.path }}{% elif item.path.lower().endswith('.pdf') %}/pdf/view?path={{ item.path }}{% endif %}" 
+           hx-get="{% if item.is_dir %}/files?path={{ item.path|urlencode }}{% elif item.path.lower().endswith('.md') %}/editor?path={{ item.path|urlencode }}{% elif item.path.lower().endswith('.pdf') %}/pdf/view?path={{ item.path|urlencode }}{% endif %}"
            hx-target="#aegis-view-core" hx-push-url="true"
            {% else %}
            target="_blank"
@@ -111,7 +111,7 @@
                 {% if not item.is_dir and item.path.lower().endswith('.md') %}
                 <div class="tooltip tooltip-bottom" data-tip="Export diagrams (ZIP)">
                 <button type="button" class="btn btn-outline btn-neon btn-xs z-20"
-                   onclick="event.preventDefault(); event.stopPropagation(); window.location.href='/render/mermaid/bulk?path={{ item.path }}'">
+                   onclick="event.preventDefault(); event.stopPropagation(); window.location.href='/render/mermaid/bulk?path=' + encodeURIComponent(&quot;{{ item.path }}&quot;)">
                    <i class="fa fa-image"></i>
                 </button>
                 </div>
@@ -128,7 +128,7 @@
                 </div>
                 <div class="tooltip tooltip-bottom" data-tip="Rename">
                 <button type="button" class="btn btn-outline btn-neon btn-xs z-20"
-                     hx-get="/rename/form?path={{ item.path }}"
+                     hx-get="/rename/form?path={{ item.path|urlencode }}"
                      hx-target="#modal-container"
                      onclick="event.preventDefault(); event.stopPropagation();">
                      {% with class="w-3 h-3" %}{% include 'icons/action-edit.html' %}{% endwith %}
@@ -136,7 +136,7 @@
                 </div>
                 <div class="tooltip tooltip-bottom" data-tip="Delete">
                 <button type="button" class="btn btn-outline btn-error btn-xs z-20"
-                     hx-get="/delete/confirm?path={{ item.path }}"
+                     hx-get="/delete/confirm?path={{ item.path|urlencode }}"
                      hx-target="#modal-container"
                      onclick="event.preventDefault(); event.stopPropagation();">
                      {% with class="w-3 h-3" %}{% include 'icons/action-trash.html' %}{% endwith %}
@@ -145,7 +145,7 @@
                 {% elif not item.is_dir %}
                 <div class="tooltip tooltip-bottom" data-tip="Rename">
                 <button type="button" class="btn btn-outline btn-neon btn-xs z-20"
-                     hx-get="/rename/form?path={{ item.path }}"
+                     hx-get="/rename/form?path={{ item.path|urlencode }}"
                      hx-target="#modal-container"
                      onclick="event.preventDefault(); event.stopPropagation();">
                      {% with class="w-3 h-3" %}{% include 'icons/action-edit.html' %}{% endwith %}
@@ -153,7 +153,7 @@
                 </div>
                 <div class="tooltip tooltip-left" data-tip="Delete">
                 <button type="button" class="btn btn-outline btn-error btn-xs z-20"
-                     hx-get="/delete/confirm?path={{ item.path }}"
+                     hx-get="/delete/confirm?path={{ item.path|urlencode }}"
                      hx-target="#modal-container"
                      onclick="event.preventDefault(); event.stopPropagation();">
                      {% with class="w-3 h-3" %}{% include 'icons/action-trash.html' %}{% endwith %}

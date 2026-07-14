@@ -12,7 +12,7 @@
                 class="neon-text hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{ group_name | upper }}</button>
         {% for crumb in breadcrumbs[1:] %}
         <span class="text-zinc-200 shrink-0">/</span>
-        <button hx-get="/group-space/{{ group_name }}/files?path={{ crumb.path }}"
+        <button hx-get="/group-space/{{ group_name }}/files?path={{ crumb.path | urlencode }}"
                 hx-target="#aegis-view-core" hx-push-url="true"
                 class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0">{{ crumb.name }}</button>
         {% endfor %}

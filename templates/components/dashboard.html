@@ -43,7 +43,7 @@
             </h3>
             <div class="space-y-2">
                 {% for file in recent_files %}
-                <a href="/editor?path={{ file.path }}" hx-get="/editor?path={{ file.path }}"
+                <a href="/editor?path={{ file.path | urlencode }}" hx-get="/editor?path={{ file.path | urlencode }}"
                     hx-target="#aegis-view-core" hx-push-url="true"
                     class="flex items-center justify-between text-xs group transition-all cursor-pointer hover:bg-(--neon-cyan)/5 p-1 rounded-sm no-underline">
                     <span class="text-zinc-100 group-hover:neon-text transition-colors">>> {{ file.name }}</span>

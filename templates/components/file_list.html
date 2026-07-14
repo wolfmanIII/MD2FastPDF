@@ -9,7 +9,7 @@
                 class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0 no-underline">DASHBOARD</a>
             <span class="opacity-100 text-zinc-200 shrink-0">/</span>
             {% for crumb in breadcrumbs %}
-            <a href="/files?path={{ crumb.path }}" hx-get="/files?path={{ crumb.path }}" hx-target="#aegis-view-core"
+            <a href="/files?path={{ crumb.path | urlencode }}" hx-get="/files?path={{ crumb.path | urlencode }}" hx-target="#aegis-view-core"
                 hx-push-url="true"
                 class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0 no-underline">{{
                 crumb.name }}</a>
@@ -18,7 +18,7 @@
         </div>
 
         <!-- NEW FILE BUTTON (Moved next to breadcrumbs for clean layout) -->
-        <button hx-get="/create/form?path={{ current_path }}" hx-target="#modal-container"
+        <button hx-get="/create/form?path={{ current_path | urlencode }}" hx-target="#modal-container"
             class="btn-solid h-8 rounded-sm group flex items-center space-x-2 text-[10px] tracking-[0.2em] font-bold shrink-0">
             {% with class="w-4 h-4" %}{% include 'icons/plus.html' %}{% endwith %}
             <span>NEW_ENTRY</span>

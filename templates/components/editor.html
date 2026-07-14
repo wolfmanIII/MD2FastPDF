@@ -19,7 +19,7 @@
                     class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0 no-underline">DASHBOARD</a>
                 <span class="opacity-100 text-zinc-200 shrink-0">/</span>
                 {% for crumb in breadcrumbs %}
-                <a href="/files?path={{ crumb.path }}" hx-get="/files?path={{ crumb.path }}"
+                <a href="/files?path={{ crumb.path | urlencode }}" hx-get="/files?path={{ crumb.path | urlencode }}"
                     hx-target="#aegis-view-core" hx-push-url="true"
                     class="text-zinc-100 hover:text-white cursor-pointer transition-colors bg-white/5 px-2 py-0.5 rounded shrink-0 no-underline">{{
                     crumb.name }}</a>
@@ -44,7 +44,7 @@
 
         <!-- FILETREE SIDEBAR -->
         <div id="aegis-filetree">
-            <div id="aegis-filetree-inner" hx-get="/tree?active={{ path }}" hx-trigger="load delay:50ms"
+            <div id="aegis-filetree-inner" hx-get="/tree?active={{ path | urlencode }}" hx-trigger="load delay:50ms"
                 hx-target="this" hx-swap="innerHTML" class="h-full overflow-y-auto overflow-x-hidden">
                 <div class="p-3 text-[10px] text-zinc-600 tracking-widest animate-pulse uppercase">SCANNING_ARCHIVE...
                 </div>
@@ -172,13 +172,13 @@
                     },
                     {
                         name: "aegis-render",
-                        action: () => htmx.ajax('GET', '/render/mermaid/list?path={{ path }}', { target: '#modal-container' }),
+                        action: () => htmx.ajax('GET', '/render/mermaid/list?path=' + encodeURIComponent("{{ path }}"), { target: '#modal-container' }),
                         className: "fa fa-image",
                         title: "Export Mermaid Diagram (PNG)"
                     },
                     {
                         name: "aegis-render-all",
-                        action: () => window.location.href = '/render/mermaid/bulk?path={{ path }}',
+                        action: () => window.location.href = '/render/mermaid/bulk?path=' + encodeURIComponent("{{ path }}"),
                         className: "fa fa-file-zipper",
                         title: "Export All Mermaid Diagrams (ZIP)"
                     },
@@ -197,7 +197,7 @@
                     },
                     {
                         name: "aegis-print",
-                        action: () => htmx.ajax('GET', '/pdf/view?path={{ path }}', { target: '#aegis-view-core', pushUrl: true }),
+                        action: () => htmx.ajax('GET', '/pdf/view?path=' + encodeURIComponent("{{ path }}"), { target: '#aegis-view-core', pushUrl: true }),
                         className: "fa fa-file-pdf",
                         title: "Print Document (PDF)"
                     },
@@ -475,7 +475,7 @@
                     const loaded = dir.dataset.loaded === 'true';
 
                     if (!loaded) {
-                        htmx.ajax('GET', '/tree/expand?path=' + encodeURIComponent(dir.dataset.path) + '&active={{ path }}', {
+                        htmx.ajax('GET', '/tree/expand?path=' + encodeURIComponent(dir.dataset.path) + '&active=' + encodeURIComponent("{{ path }}"), {
                             target: children,
                             swap: 'innerHTML'
                         });
