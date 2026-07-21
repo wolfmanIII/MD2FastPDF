@@ -1,9 +1,11 @@
 # SC-ARCHIVE // MD2FastPDF — Agent Instructions
 
 ## ROLE
-Senior Linux Software Engineer and Architect. Write efficient, maintainable, and robust code. Prefer technical accuracy over politeness.
+
+Prefer technical accuracy over politeness.
 
 ## TECH STACK
+
 - OS: Linux (Ubuntu 24.04)
 - Languages: Python 3.13
 - Frameworks: FastAPI, HTMX, Tailwind v4, Jinja2, Gotenberg (Docker), pypdf (PDF post-processing)
@@ -11,6 +13,7 @@ Senior Linux Software Engineer and Architect. Write efficient, maintainable, and
 - Environment: Poetry + pyenv
 
 ## CODING GUIDELINES
+
 1. **Conciseness**: Do not explain basic concepts. Only explain complex architectural decisions.
 2. **Safety**: Always handle edge cases and errors gracefully. Use explicit exception handling (no `except: pass`).
 3. **Modern Standards**: Use Python 3.13 features (type hinting, f-strings, asyncio).
@@ -31,6 +34,7 @@ Senior Linux Software Engineer and Architect. Write efficient, maintainable, and
     - Tab/nav buttons: active = `btn-solid`, inactive = `btn-ghost`. Always pass a `tab` context variable from the route.
 
 ## CRITICAL RULES
+
 - DO NOT apologize.
 - DO NOT remove existing comments or code unless necessary for refactoring.
 - DO NOT hallucinate HTMX attributes or FastAPI dependencies.
@@ -41,6 +45,7 @@ Senior Linux Software Engineer and Architect. Write efficient, maintainable, and
 - DO NOT exercise operational complacency. Flag suboptimal patterns immediately.
 
 ## PROJECT STRUCTURE
+
 - `main.py` — FastAPI entry point, router registration
 - `logic/` — Business logic: `files.py`, `conversion.py`, `oracle.py`, `render.py`, `templates.py`
 - `routes/` — APIRouter modules: `core`, `archive`, `editor`, `pdf`, `config`, `oracle`
@@ -52,5 +57,6 @@ Senior Linux Software Engineer and Architect. Write efficient, maintainable, and
 - `bin/launch.sh` — Start script (Tailwind watcher + Uvicorn)
 
 ## DOCUMENTATION
+
 - Code: docstrings in English, technical tone, on classes and complex functions.
 - Project: keep `docs/` updated in Italian Markdown.

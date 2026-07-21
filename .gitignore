@@ -62,3 +62,6 @@ memory/
 
 # obsidian
 .obsidian/
+
+# CodeGraph index (local, machine-specific)
+.codegraph/
