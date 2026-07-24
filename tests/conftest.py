@@ -32,3 +32,11 @@ def patch_comms_base(tmp_workspace: Path, monkeypatch: pytest.MonkeyPatch) -> Pa
     """Patches logic.comms._workspace_base to return tmp_workspace."""
     monkeypatch.setattr("logic.comms._workspace_base", lambda: tmp_workspace)
     return tmp_workspace
+
+
+@pytest.fixture()
+def archive_root(tmp_path: Path) -> Path:
+    """Binds PathSanitizer's per-request root to an isolated tmp directory."""
+    from logic.files import PathSanitizer
+    PathSanitizer.bind_request_root(tmp_path)
+    return tmp_path

@@ -3,7 +3,6 @@ AEGIS_GRAPH_PROTOCOL: Derives a document relationship graph from Markdown
 cross-links (`[text](path.md)`) found in the active archive root.
 """
 import logging
-import os
 import re
 from pathlib import Path
 from typing import Optional, TypedDict
@@ -12,7 +11,7 @@ from urllib.parse import unquote
 import anyio
 
 from logic.exceptions import AegisError
-from logic.files import PathSanitizer, SKIP_DIRS
+from logic.files import DirectoryLister, PathSanitizer, read_text_at
 
 logger = logging.getLogger("aegis.graph")
 
@@ -51,7 +50,7 @@ class ArchiveGraphBuilder:
             nodes.setdefault(rel_path, ArchiveGraphBuilder._make_node(rel_path))
 
             try:
-                content = await ArchiveGraphBuilder._read(file_path)
+                content = await read_text_at(file_path)
             except (OSError, UnicodeDecodeError) as e:
                 logger.warning("AEGIS_GRAPH: impossibile leggere %s — %s", rel_path, e)
                 continue
@@ -67,18 +66,7 @@ class ArchiveGraphBuilder:
 
     @staticmethod
     def _scan_md_files(root: Path) -> list[Path]:
-        files = []
-        for r, dirs, filenames in os.walk(root):
-            dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith(".")]
-            for filename in filenames:
-                if filename.lower().endswith(".md"):
-                    files.append(Path(r) / filename)
-        return files
-
-    @staticmethod
-    async def _read(file_path: Path) -> str:
-        async with await anyio.open_file(file_path, mode="r", encoding="utf-8") as f:
-            return await f.read()
+        return [entry["path"] for entry in DirectoryLister.scan_markdown_files(root)]
 
     @staticmethod
     def _make_node(rel_path: str) -> GraphNode:

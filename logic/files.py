@@ -2,7 +2,7 @@ import os
 from contextvars import ContextVar
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Union, Optional, Set, Callable
+from typing import List, Dict, Union, Optional, Set, Callable, TypedDict
 import anyio
 
 from logic.exceptions import (
@@ -82,8 +82,43 @@ class PathSanitizer:
             raise InvalidPathError()
 
 
+async def read_text_at(path: Path) -> str:
+    """Reads an already-resolved absolute Path as UTF-8 text. Deliberately
+    outside PathSanitizer's contract: callers (ArchiveGraphBuilder, the
+    typed-relations index builder) resolve paths themselves via a prior walk
+    of the active root, not from user-supplied relative input — unlike
+    FileManager.read_text, which always goes through resolve_and_sanitize."""
+    async with await anyio.open_file(path, mode="r", encoding="utf-8") as f:
+        return await f.read()
+
+
+class MarkdownFileEntry(TypedDict):
+    path: Path
+    mtime: float
+
+
 class DirectoryLister:
     """Tactical directory scanning and filtering."""
+
+    @staticmethod
+    def scan_markdown_files(root: Path) -> List[MarkdownFileEntry]:
+        """Synchronous recursive walk collecting every .md file under root with
+        its mtime, honoring SKIP_DIRS. Shared by ArchiveGraphBuilder and the
+        typed-relations index builder — dispatch via anyio.to_thread.run_sync,
+        this is not itself async."""
+        entries: List[MarkdownFileEntry] = []
+        for r, dirs, filenames in os.walk(root):
+            dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith(".")]
+            for filename in filenames:
+                if not filename.lower().endswith(".md"):
+                    continue
+                file_path = Path(r) / filename
+                try:
+                    mtime = file_path.stat().st_mtime
+                except OSError:
+                    continue
+                entries.append({"path": file_path, "mtime": mtime})
+        return entries
 
     @staticmethod
     async def list_home_dirs(relative_path: str = "", base: Path | None = None) -> List[Dict[str, str]]:
