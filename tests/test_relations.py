@@ -20,13 +20,28 @@ from logic.relations import (
 
 class TestVocabulary:
     def test_expected_relation_names_present(self):
-        assert set(VOCABULARY_BY_NAME) == {"crew", "member_of", "located_in", "hostile_to", "owns"}
+        assert set(VOCABULARY_BY_NAME) == {
+            "crew", "member_of", "located_in", "hostile_to", "owns",
+            "owes_debt_to", "reports_to", "allied_with", "mentor_of",
+        }
 
     def test_hostile_to_is_symmetric(self):
         assert VOCABULARY_BY_NAME["hostile_to"].inverse == "hostile_to"
 
+    def test_allied_with_is_symmetric(self):
+        assert VOCABULARY_BY_NAME["allied_with"].inverse == "allied_with"
+
     def test_crew_inverse_is_serves_on(self):
         assert VOCABULARY_BY_NAME["crew"].inverse == "serves_on"
+
+    def test_owes_debt_to_inverse_is_creditor_of(self):
+        assert VOCABULARY_BY_NAME["owes_debt_to"].inverse == "creditor_of"
+
+    def test_reports_to_inverse_is_has_subordinate(self):
+        assert VOCABULARY_BY_NAME["reports_to"].inverse == "has_subordinate"
+
+    def test_mentor_of_inverse_is_student_of(self):
+        assert VOCABULARY_BY_NAME["mentor_of"].inverse == "student_of"
 
     def test_inverse_names_are_not_frontmatter_keys(self):
         names = {r.name for r in VOCABULARY}

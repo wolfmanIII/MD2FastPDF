@@ -57,8 +57,8 @@ chiave         valore (lista di due nomi)
 
 ## 3. Le uniche chiavi riconosciute
 
-Il programma riconosce **solo queste 5 chiavi** come relazioni. Qualunque altra parola
-tu scriva come chiave (es. `captain`, `note`, `colore`) viene **ignorata in silenzio**:
+Il programma riconosce **solo queste chiavi** come relazioni. Qualunque altra parola
+tu scriva come chiave (es. `note`, `colore`) viene **ignorata in silenzio**:
 non è un errore, semplicemente non crea nessuna relazione, resta un'annotazione morta.
 
 | Chiave da scrivere | Significato | Etichetta nel pannello RELAZIONI | Esempio |
@@ -67,12 +67,20 @@ non è un errore, semplicemente non crea nessuna relazione, resta un'annotazione
 | `member_of` | membro di un gruppo/organizzazione | **Membro di** | `member_of: Pax Pirata` su `Kira Venn.md` |
 | `located_in` | situato dentro un luogo | **Situato in** | `located_in: Porozlo` su `Kira Venn.md` |
 | `hostile_to` | ostilità reciproca | **Ostile a** | `hostile_to: [Tarn Mekel]` su `Kira Venn.md` |
-| `owns` | possiede/comanda qualcosa | **Possiede** | `owns: [Maelstrom]` su `Kira Venn.md` |
+| `owns` | possiede/comanda qualcosa (nave, oggetto...) | **Possiede** | `owns: [Maelstrom]` su `Kira Venn.md` |
+| `owes_debt_to` | è in debito con qualcuno | **Debitore di** | `owes_debt_to: [Malen Trast]` su `Dorel Varr.md` |
+| `reports_to` | risponde/è subordinato a qualcuno (catena di comando o lealtà, anche segreta) | **Risponde a** | `reports_to: [Malen Trast]` su `Tenente Vesk.md` |
+| `allied_with` | alleanza reciproca | **Alleato di** | `allied_with: [Jaro Vey]` su `Alto Sacerdote Khaeden.md` |
+| `mentor_of` | è mentore/maestro di qualcuno | **Mentore di** | `mentor_of: [Fratello Malek]` su `Alto Sacerdote Khaeden.md` |
 
-Non esiste (ancora) una chiave dedicata a "capitano di" — il più vicino è `owns`
-(nel senso di comando/possesso). Se in futuro serve davvero una relazione diversa,
-si aggiunge al vocabolario — ma solo quando c'è un caso d'uso concreto, per non
-gonfiare la lista all'infinito.
+Le ultime 4 (`owes_debt_to`, `reports_to`, `allied_with`, `mentor_of`) sono state aggiunte
+dopo un'analisi del materiale di campagna reale — non sono teoriche, ricorrono più volte
+nelle schede NPC. `member_of` resta la scelta giusta per l'appartenenza *formale* a un
+gruppo/organizzazione; `reports_to` è per un rapporto di subordinazione/lealtà *personale*
+verso un singolo individuo (anche quando è segreto o doppiogiochista).
+
+Se in futuro serve un'altra relazione diversa da queste, si aggiunge al vocabolario — ma
+solo quando c'è un caso d'uso concreto nel testo, per non gonfiare la lista all'infinito.
 
 C'è anche `type:`, che **non è una relazione**: è solo un'etichetta libera per dire
 che tipo di entità è il file (`ship`, `npc`, `location`...). Utile per tenere ordine,

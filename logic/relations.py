@@ -44,11 +44,17 @@ class RelationDef:
 
 
 VOCABULARY: tuple[RelationDef, ...] = (
-    RelationDef("crew",        inverse="serves_on",  label="Equipaggio"),
-    RelationDef("member_of",   inverse="has_member",  label="Membro di"),
-    RelationDef("located_in",  inverse="contains",    label="Situato in"),
-    RelationDef("hostile_to",  inverse="hostile_to",  label="Ostile a"),
-    RelationDef("owns",        inverse="owned_by",    label="Possiede"),
+    RelationDef("crew",          inverse="serves_on",       label="Equipaggio"),
+    RelationDef("member_of",     inverse="has_member",       label="Membro di"),
+    RelationDef("located_in",    inverse="contains",         label="Situato in"),
+    RelationDef("hostile_to",    inverse="hostile_to",       label="Ostile a"),
+    RelationDef("owns",          inverse="owned_by",         label="Possiede"),
+    # Added after analyzing real campaign content (Protocollo_SIGMA) — each
+    # recurs across several NPC sheets, not a theoretical/speculative addition.
+    RelationDef("owes_debt_to",  inverse="creditor_of",      label="Debitore di"),
+    RelationDef("reports_to",    inverse="has_subordinate",  label="Risponde a"),
+    RelationDef("allied_with",   inverse="allied_with",      label="Alleato di"),
+    RelationDef("mentor_of",     inverse="student_of",       label="Mentore di"),
 )
 
 VOCABULARY_BY_NAME: dict[str, RelationDef] = {r.name: r for r in VOCABULARY}

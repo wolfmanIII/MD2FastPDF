@@ -186,11 +186,17 @@ class RelationDef:
     range: str | None = None    # tipo di entità ammesso alla destinazione (RF-9)
 
 VOCABULARY: tuple[RelationDef, ...] = (
-    RelationDef("crew",        inverse="serves_on",   label="Equipaggio"),
-    RelationDef("member_of",   inverse="has_member",  label="Membro di"),
-    RelationDef("located_in",  inverse="contains",    label="Situato in"),
-    RelationDef("hostile_to",  inverse="hostile_to",  label="Ostile a"),  # simmetrica
-    RelationDef("owns",        inverse="owned_by",    label="Possiede"),
+    RelationDef("crew",          inverse="serves_on",       label="Equipaggio"),
+    RelationDef("member_of",     inverse="has_member",       label="Membro di"),
+    RelationDef("located_in",    inverse="contains",         label="Situato in"),
+    RelationDef("hostile_to",    inverse="hostile_to",       label="Ostile a"),  # simmetrica
+    RelationDef("owns",          inverse="owned_by",         label="Possiede"),
+    # Aggiunte dopo analisi del materiale di campagna reale (Protocollo_SIGMA),
+    # non teoriche — ricorrono più volte nelle schede NPC.
+    RelationDef("owes_debt_to",  inverse="creditor_of",      label="Debitore di"),
+    RelationDef("reports_to",    inverse="has_subordinate",  label="Risponde a"),
+    RelationDef("allied_with",   inverse="allied_with",      label="Alleato di"),  # simmetrica
+    RelationDef("mentor_of",     inverse="student_of",       label="Mentore di"),
 )
 ```
 
