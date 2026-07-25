@@ -77,7 +77,7 @@ SC-Archive ora ha bisogno di entrambe le cose.
 Espliciti, e vincolanti:
 
 | Non-obiettivo | Motivo |
-|---|---|
+| --- | --- |
 | Introdurre SQLite o qualsiasi DB | I volumi in gioco (ordine 10²–10⁴ nodi) stanno in memoria. Un DB aggiungerebbe stato duplicato da sincronizzare col filesystem. |
 | Sostituire i wikilink nel corpo | Restano validi e utili come *menzioni*. La feature è additiva. |
 | Rendere obbligatorio il frontmatter | I file senza frontmatter devono continuare a funzionare esattamente come oggi. |
@@ -195,6 +195,7 @@ VOCABULARY: tuple[RelationDef, ...] = (
 ```
 
 Note:
+
 - Una relazione **simmetrica** ha `inverse == name` (es. `hostile_to`). Il codice deve
   gestire il caso senza duplicare l'arco.
 - I nomi inversi non sono chiavi valide di frontmatter: sono nomi di query. Solo i `name`
@@ -222,7 +223,7 @@ class Edge:
 
 Strutture di lookup mantenute in memoria:
 
-```
+```text
 entities:    dict[str, Entity]
 out_edges:   dict[tuple[str, str], list[str]]   # (source_key, relation) -> [target_key]
 in_edges:    dict[tuple[str, str], list[str]]   # (target_key, relation) -> [source_key]
@@ -307,7 +308,7 @@ punto in cui la direzione conta.
 Da allineare alle convenzioni di routing già presenti nel repo ⚠️.
 
 | Metodo | Path | Scopo |
-|---|---|---|
+| --- | --- | --- |
 | `GET` | `/api/entities/{key}/relations` | RF-4, RF-5 — tutte le relazioni di un'entità |
 | `GET` | `/api/entities/{key}/relations/{relation}` | RF-4 — una relazione specifica |
 | `GET` | `/api/graph` | dati per la vista a grafo, archi tipizzati |
@@ -342,14 +343,16 @@ Gli step 1–5 non toccano nulla di esistente e sono l'80% del valore.
 
 Coerente con la copertura già presente nel repo (170+ test asincroni) ⚠️.
 
-**Unitari**
+### **Unitari**
+
 - Normalizzazione: maiuscole, spazi multipli, accenti, `[[wikilink]]`, stringa vuota.
 - Frontmatter assente, malformato, non-mapping, chiave con valore scalare, valore `null`,
   lista vuota, lista con elementi non-stringa.
 - Chiavi di frontmatter fuori vocabolario: devono essere ignorate silenziosamente.
 - Relazione simmetrica: nessun arco duplicato.
 
-**Integrazione**
+### **Integrazione**
+
 - Vault di fixture con 3–4 entità e relazioni note → asserzioni su `related` in entrambe
   le direzioni.
 - Riferimento dangling → presente in `diagnostics`, assente da `related`, nessuna
@@ -358,10 +361,12 @@ Coerente con la copertura già presente nel repo (170+ test asincroni) ⚠️.
   degli *altri* file restano intatti.
 - Cancellazione di un file target: gli archi entranti diventano dangling.
 
-**Regressione (critico, vedi §3)**
+### **Regressione (critico, vedi §3)**
+
 - Vault senza nessuna chiave di relazione → output identico alla versione precedente.
 
-**Sicurezza**
+### **Sicurezza**
+
 - Valore di relazione contenente path traversal (`../../etc/passwd`): deve essere trattato
   come riferimento non risolto, mai come path. Verificare che passi da `PathSanitizer`.
 - Valore contenente markup HTML: sanitizzato prima di finire in una risposta renderizzata.
@@ -371,7 +376,7 @@ Coerente con la copertura già presente nel repo (170+ test asincroni) ⚠️.
 ## 8. Rischi
 
 | Rischio | Mitigazione |
-|---|---|
+| --- | --- |
 | Il vocabolario cresce a dismisura e diventa un'ontologia ingestibile | Nuovo tipo di relazione solo quando esiste una query concreta che lo richiede. |
 | L'utente dichiara le relazioni nel frontmatter *e* le ripete nel corpo, con divergenze | Nessuna: sono due piani diversi (dati vs prosa). Documentare che il frontmatter è autoritativo per le query, il corpo per la lettura. |
 | Duplicazione di informazione tra file (`crew` su nave e `serves_on` su PNG) | Convenzione: ogni relazione è dichiarata da **un solo lato**. L'inverso si ottiene via `in_edges`, non riscrivendolo. Segnalare i doppioni in `diagnostics`. |
