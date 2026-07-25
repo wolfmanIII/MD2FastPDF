@@ -440,8 +440,12 @@ body:has(.aegis-fullscreen-active) header {
 /* AEGIS_FRONTMATTER_DIM: neutralize heading/emphasis token styling CodeMirror's
    markdown mode applies within a leading frontmatter block (see editor.html's
    markFrontmatterLines) — the closing '---' otherwise reads as a Setext heading
-   underline for the preceding line. */
-.CodeMirror-line.aegis-frontmatter-line span[class*="cm-"] {
+   underline for the preceding line. Targets the line itself (not just spans
+   with a cm-* token class) so plain untokenized lines — e.g. a key: value row
+   CodeMirror didn't flag as anything special — are dimmed too, consistently
+   with lines that did get a heading/emphasis token. */
+.CodeMirror-line.aegis-frontmatter-line,
+.CodeMirror-line.aegis-frontmatter-line * {
     font-weight: normal !important;
     font-style: normal !important;
     font-size: inherit !important;
