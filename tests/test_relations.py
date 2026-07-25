@@ -6,6 +6,7 @@ from logic.relations import (
     VOCABULARY_BY_NAME,
     Edge,
     FrontmatterRelationParser,
+    ParseWarning,
     canonical_key,
     extract_frontmatter,
     strip_wikilink,
@@ -166,3 +167,27 @@ class TestFrontmatterRelationParser:
         path = Path("ships/The Beowulf.md")
         edges = self.parser.parse(path, {"crew": ["Kira Venn"]})
         assert edges[0].source == "the beowulf"
+
+    def test_warnings_param_omitted_behaves_as_before(self):
+        # Backward-compat: existing callers passing only (path, frontmatter) must
+        # keep working unchanged (no warnings collection, log-only).
+        edges = self.parser.parse(self.path, {"crew": 42})
+        assert edges == []
+
+    def test_unsupported_value_type_appends_a_parse_warning(self):
+        warnings: list[ParseWarning] = []
+        self.parser.parse(self.path, {"crew": 42}, warnings)
+        assert len(warnings) == 1
+        assert warnings[0].origin_path == self.path
+        assert warnings[0].relation == "crew"
+
+    def test_non_string_list_item_appends_a_parse_warning(self):
+        warnings: list[ParseWarning] = []
+        self.parser.parse(self.path, {"crew": ["Kira Venn", 42]}, warnings)
+        assert len(warnings) == 1
+        assert warnings[0].relation == "crew"
+
+    def test_valid_values_append_no_warnings(self):
+        warnings: list[ParseWarning] = []
+        self.parser.parse(self.path, {"crew": ["Kira Venn"]}, warnings)
+        assert warnings == []

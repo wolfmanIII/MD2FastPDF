@@ -52,6 +52,7 @@ VOCABULARY: tuple[RelationDef, ...] = (
 )
 
 VOCABULARY_BY_NAME: dict[str, RelationDef] = {r.name: r for r in VOCABULARY}
+VOCABULARY_BY_INVERSE: dict[str, RelationDef] = {r.inverse: r for r in VOCABULARY}
 
 
 @dataclass(frozen=True)
@@ -71,6 +72,15 @@ class Edge:
     target: str                 # Entity.key — not guaranteed to exist yet
     relation: str                # RelationDef.name
     origin_path: Path            # file that declared this relation
+
+
+@dataclass(frozen=True)
+class ParseWarning:
+    """A frontmatter relation value that couldn't be interpreted, surfaced
+    structurally for diagnostics() in addition to the log line (RF-7)."""
+    origin_path: Path
+    relation: str
+    message: str
 
 
 _WIKILINK_RE = re.compile(r"^\[\[(.+)\]\]$")
@@ -113,19 +123,20 @@ def extract_frontmatter(content: str) -> dict | None:
 
 class RelationParser(Protocol):
     """Extracts typed relation edges from a file's already-parsed frontmatter."""
-    def parse(self, path: Path, frontmatter: dict) -> list[Edge]: ...
+    def parse(self, path: Path, frontmatter: dict, warnings: list[ParseWarning] | None = None) -> list[Edge]: ...
 
 
 class FrontmatterRelationParser:
     """Default RelationParser: reads VOCABULARY keys from a frontmatter dict."""
 
-    def parse(self, path: Path, frontmatter: dict) -> list[Edge]:
+    def parse(self, path: Path, frontmatter: dict, warnings: list[ParseWarning] | None = None) -> list[Edge]:
         source = canonical_key(path.stem)
         edges: list[Edge] = []
         for relation_def in VOCABULARY:
             if relation_def.name not in frontmatter:
                 continue
-            for raw_target in self._normalize_values(frontmatter[relation_def.name], path, relation_def.name):
+            values = self._normalize_values(frontmatter[relation_def.name], path, relation_def.name, warnings)
+            for raw_target in values:
                 edges.append(Edge(
                     source=source,
                     target=canonical_key(raw_target),
@@ -134,8 +145,14 @@ class FrontmatterRelationParser:
                 ))
         return edges
 
-    @staticmethod
-    def _normalize_values(raw_value: object, path: Path, relation_name: str) -> list[str]:
+    @classmethod
+    def _normalize_values(
+        cls,
+        raw_value: object,
+        path: Path,
+        relation_name: str,
+        warnings: list[ParseWarning] | None,
+    ) -> list[str]:
         """A scalar string becomes a one-element list; a list is used as-is,
         skipping non-string items; any other type is ignored with a warning.
         """
@@ -147,13 +164,13 @@ class FrontmatterRelationParser:
                 if isinstance(item, str):
                     values.append(item)
                 else:
-                    _log.warning(
-                        "AEGIS_RELATIONS // NON_STRING_LIST_ITEM // %s [%s]: %r",
-                        path, relation_name, item,
-                    )
+                    cls._warn(path, relation_name, "NON_STRING_LIST_ITEM", f"non-string list item: {item!r}", warnings)
             return values
-        _log.warning(
-            "AEGIS_RELATIONS // UNSUPPORTED_VALUE_TYPE // %s [%s]: %r",
-            path, relation_name, raw_value,
-        )
+        cls._warn(path, relation_name, "UNSUPPORTED_VALUE_TYPE", f"unsupported value type: {raw_value!r}", warnings)
         return []
+
+    @staticmethod
+    def _warn(path: Path, relation_name: str, tag: str, message: str, warnings: list[ParseWarning] | None) -> None:
+        _log.warning("AEGIS_RELATIONS // %s // %s [%s]: %s", tag, path, relation_name, message)
+        if warnings is not None:
+            warnings.append(ParseWarning(path, relation_name, message))

@@ -1,4 +1,5 @@
-"""Async I/O tests for logic/relations_index.py — RelationIndexBuilder.build()."""
+"""Async I/O tests for logic/relations_index.py — RelationIndexBuilder.build(),
+RelationIndex query methods, and RelationIndexBuilder.reindex_file()."""
 from pathlib import Path
 
 import pytest
@@ -216,3 +217,260 @@ class TestRobustness:
         assert index.in_edges == {}
         assert index.dangling == []
         assert index.key_collisions == []
+
+
+# ---------------------------------------------------------------------------
+# related() — forward, inverse, symmetric (RF-4, RF-5)
+# ---------------------------------------------------------------------------
+
+class TestRelated:
+    @pytest.mark.anyio
+    async def test_forward_query(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        crew = {e.display_name for e in index.related("Beowulf", "crew")}
+        assert crew == {"Kira Venn", "Tarn Mekel"}
+
+    @pytest.mark.anyio
+    async def test_inverse_query_by_inverse_name(self, archive_root: Path):
+        # Kira Venn.md declares nothing — RF-5: still resolvable via the
+        # inverse name, free from in_edges.
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        ships = index.related("Kira Venn", "serves_on")
+        assert [e.display_name for e in ships] == ["Beowulf"]
+
+    @pytest.mark.anyio
+    async def test_symmetric_relation_visible_from_either_side(self, archive_root: Path):
+        # Only Tarn Mekel.md declares hostile_to: [Kira Venn] — Kira must see
+        # it too without declaring anything herself.
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert [e.display_name for e in index.related("Kira Venn", "hostile_to")] == ["Tarn Mekel"]
+        assert [e.display_name for e in index.related("Tarn Mekel", "hostile_to")] == ["Kira Venn"]
+
+    @pytest.mark.anyio
+    async def test_symmetric_relation_not_double_counted_when_both_sides_declare(self, archive_root: Path):
+        _write(archive_root, "A.md", "---\ntype: npc\nhostile_to: [B]\n---\n\nA.\n")
+        _write(archive_root, "B.md", "---\ntype: npc\nhostile_to: [A]\n---\n\nB.\n")
+        index = await RelationIndexBuilder().build()
+        assert [e.display_name for e in index.related("A", "hostile_to")] == ["B"]
+
+    @pytest.mark.anyio
+    async def test_unknown_relation_name_returns_empty_list(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert index.related("Beowulf", "not_a_real_relation") == []
+
+    @pytest.mark.anyio
+    async def test_unknown_entity_returns_empty_list(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert index.related("Nobody", "crew") == []
+
+    @pytest.mark.anyio
+    async def test_entity_lookup_is_case_and_whitespace_insensitive(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert [e.display_name for e in index.related("  BEOWULF  ", "crew")] == ["Kira Venn", "Tarn Mekel"]
+
+    @pytest.mark.anyio
+    async def test_dangling_target_never_appears_in_related_result(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        crew = [e.display_name for e in index.related("Beowulf", "crew")]
+        assert "Ghost Crewman" not in crew
+
+
+# ---------------------------------------------------------------------------
+# relations_of()
+# ---------------------------------------------------------------------------
+
+class TestRelationsOf:
+    @pytest.mark.anyio
+    async def test_aggregates_forward_and_inverse(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        beowulf_rel = index.relations_of("Beowulf")
+        assert {e.display_name for e in beowulf_rel["crew"]} == {"Kira Venn", "Tarn Mekel"}
+
+        kira_rel = index.relations_of("Kira Venn")
+        assert [e.display_name for e in kira_rel["serves_on"]] == ["Beowulf"]
+        assert [e.display_name for e in kira_rel["hostile_to"]] == ["Tarn Mekel"]
+
+    @pytest.mark.anyio
+    async def test_entity_with_no_relations_returns_empty_dict(self, archive_root: Path):
+        _write(archive_root, "Lonely.md", "---\ntype: npc\n---\n\nNo relations at all.\n")
+        index = await RelationIndexBuilder().build()
+        assert index.relations_of("Lonely") == {}
+
+    @pytest.mark.anyio
+    async def test_unknown_entity_returns_empty_dict(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert index.relations_of("Nobody") == {}
+
+
+# ---------------------------------------------------------------------------
+# diagnostics()
+# ---------------------------------------------------------------------------
+
+class TestDiagnostics:
+    @pytest.mark.anyio
+    async def test_reports_dangling_and_collisions(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        _write(archive_root, "a/Manifest.md", "---\ntype: doc\n---\n\nA.\n")
+        _write(archive_root, "b/Manifest.md", "---\ntype: doc\n---\n\nB.\n")
+        index = await RelationIndexBuilder().build()
+        diag = index.diagnostics()
+        assert len(diag.dangling) == 1
+        assert diag.dangling[0].reference == "ghost crewman"
+        assert len(diag.key_collisions) == 1
+        assert diag.key_collisions[0].key == "manifest"
+
+    @pytest.mark.anyio
+    async def test_reports_parse_warnings(self, archive_root: Path):
+        _write(archive_root, "Bad.md", "---\ntype: ship\ncrew: 42\n---\n\nOK.\n")
+        index = await RelationIndexBuilder().build()
+        diag = index.diagnostics()
+        assert len(diag.parse_warnings) == 1
+        assert diag.parse_warnings[0].relation == "crew"
+
+    @pytest.mark.anyio
+    async def test_empty_vault_has_empty_diagnostics(self, archive_root: Path):
+        index = await RelationIndexBuilder().build()
+        diag = index.diagnostics()
+        assert diag.dangling == [] and diag.key_collisions == [] and diag.parse_warnings == []
+
+
+# ---------------------------------------------------------------------------
+# reindex_file() — edit, delete, create (RF-6)
+# ---------------------------------------------------------------------------
+
+class TestReindexFile:
+    @pytest.mark.anyio
+    async def test_edit_replaces_only_that_files_edges(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+
+        _write(archive_root, "ships/Beowulf.md", (
+            "---\ntype: ship\ncrew: [Kira Venn]\n---\n\nRewritten.\n"
+        ))
+        builder = RelationIndexBuilder()
+        await builder.reindex_file(index, Path("ships/Beowulf.md"))
+
+        assert index.out_edges[("beowulf", "crew")] == ["kira venn"]
+        # Tarn Mekel's own hostile_to edge (a different file) is untouched.
+        assert index.out_edges[("tarn mekel", "hostile_to")] == ["kira venn"]
+        assert index.entities["tarn mekel"].path == Path("npcs/Tarn Mekel.md")
+
+    @pytest.mark.anyio
+    async def test_edit_clears_old_dangling_reference(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert len(index.dangling) == 1  # Ghost Crewman
+
+        _write(archive_root, "ships/Beowulf.md", (
+            "---\ntype: ship\ncrew: [Kira Venn]\n---\n\nNo more ghost.\n"
+        ))
+        await RelationIndexBuilder().reindex_file(index, Path("ships/Beowulf.md"))
+        assert index.dangling == []
+
+    @pytest.mark.anyio
+    async def test_edit_updates_entity_type(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+
+        _write(archive_root, "ships/Beowulf.md", "---\ntype: derelict\n---\n\nAbandoned.\n")
+        await RelationIndexBuilder().reindex_file(index, Path("ships/Beowulf.md"))
+        assert index.entities["beowulf"].entity_type == "derelict"
+
+    @pytest.mark.anyio
+    async def test_new_edge_appears_after_edit(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+
+        _write(archive_root, "npcs/Kira Venn.md", "---\ntype: npc\nowns: [Beowulf]\n---\n\nPilota.\n")
+        await RelationIndexBuilder().reindex_file(index, Path("npcs/Kira Venn.md"))
+        assert index.out_edges[("kira venn", "owns")] == ["beowulf"]
+
+    @pytest.mark.anyio
+    async def test_deleted_file_removes_its_entity(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+
+        (archive_root / "npcs" / "Tarn Mekel.md").unlink()
+        await RelationIndexBuilder().reindex_file(index, Path("npcs/Tarn Mekel.md"))
+        assert "tarn mekel" not in index.entities
+
+    @pytest.mark.anyio
+    async def test_deleted_file_demotes_incoming_edges_to_dangling(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert index.out_edges[("beowulf", "crew")] == ["kira venn", "tarn mekel"]
+
+        (archive_root / "npcs" / "Tarn Mekel.md").unlink()
+        await RelationIndexBuilder().reindex_file(index, Path("npcs/Tarn Mekel.md"))
+
+        assert "tarn mekel" not in index.out_edges.get(("beowulf", "crew"), [])
+        assert any(d.reference == "tarn mekel" and d.relation == "crew" for d in index.dangling)
+
+    @pytest.mark.anyio
+    async def test_deleted_file_own_outgoing_edges_are_gone_not_dangling(self, archive_root: Path):
+        # Tarn Mekel declared hostile_to: [Kira Venn] himself — once Tarn is
+        # gone, that edge must vanish entirely, not become a dangling entry
+        # attributed to a file that no longer exists.
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+
+        (archive_root / "npcs" / "Tarn Mekel.md").unlink()
+        await RelationIndexBuilder().reindex_file(index, Path("npcs/Tarn Mekel.md"))
+
+        assert ("tarn mekel", "hostile_to") not in index.out_edges
+        assert not any(d.origin_path == Path("npcs/Tarn Mekel.md") for d in index.dangling)
+
+    @pytest.mark.anyio
+    async def test_deletion_does_not_raise(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        (archive_root / "npcs" / "Tarn Mekel.md").unlink()
+        await RelationIndexBuilder().reindex_file(index, Path("npcs/Tarn Mekel.md"))  # would raise if mishandled
+
+    @pytest.mark.anyio
+    async def test_reindexing_a_brand_new_file_adds_it(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+
+        _write(archive_root, "ships/Zheng He.md", "---\ntype: ship\ncrew: [Kira Venn]\n---\n\nNew ship.\n")
+        await RelationIndexBuilder().reindex_file(index, Path("ships/Zheng He.md"))
+
+        assert "zheng he" in index.entities
+
+    @pytest.mark.anyio
+    async def test_reindexing_a_brand_new_file_edges_are_queryable(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+
+        _write(archive_root, "ships/Zheng He.md", "---\ntype: ship\ncrew: [Kira Venn]\n---\n\nNew ship.\n")
+        await RelationIndexBuilder().reindex_file(index, Path("ships/Zheng He.md"))
+
+        served = {e.display_name for e in index.related("Kira Venn", "serves_on")}
+        assert served == {"Beowulf", "Zheng He"}
+
+    @pytest.mark.anyio
+    async def test_other_files_by_path_entries_are_untouched(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        tarn_edges_before = list(index.by_path[Path("npcs/Tarn Mekel.md")])
+
+        _write(archive_root, "ships/Beowulf.md", "---\ntype: ship\ncrew: []\n---\n\nEmptied out.\n")
+        await RelationIndexBuilder().reindex_file(index, Path("ships/Beowulf.md"))
+
+        assert index.by_path[Path("npcs/Tarn Mekel.md")] == tarn_edges_before
+
+    @pytest.mark.anyio
+    async def test_reindexing_a_path_with_no_prior_state_is_a_no_op_safe_call(self, archive_root: Path):
+        index = await RelationIndexBuilder().build()
+        _write(archive_root, "Fresh.md", "---\ntype: doc\n---\n\nFirst time.\n")
+        await RelationIndexBuilder().reindex_file(index, Path("Fresh.md"))
+        assert "fresh" in index.entities
