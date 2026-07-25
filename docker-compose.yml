@@ -10,7 +10,7 @@ services:
       - sc-archive-workspaces:/root/sc-archive
       - sc-archive-blueprints:/app/blueprints
     environment:
-      - AEGIS_ADMIN_PASSWORD=${AEGIS_ADMIN_PASSWORD:-admin}
+      - AEGIS_ADMIN_PASSWORD=${AEGIS_ADMIN_PASSWORD:-}
       - OLLAMA_IP=${OLLAMA_IP:-http://host.docker.internal:11434}
     depends_on:
       - gotenberg

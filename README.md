@@ -56,19 +56,19 @@
 
 ## 🔐 Primo Accesso (Inizializzazione Operatore)
 
-Al **primo avvio**, SC-ARCHIVE crea automaticamente l'utente `admin` con password di default `admin` e il workspace in `~/sc-archive/admin/`.
+Al **primo avvio**, SC-ARCHIVE crea automaticamente l'utente `admin` e il workspace in `~/sc-archive/admin/`. Se non hai impostato `AEGIS_ADMIN_PASSWORD`, la password viene **generata casualmente** e salvata in `~/.config/sc-archive/admin_password.txt` (permessi `600`) — nessun default fisso e prevedibile come `admin`/`admin`. La stessa password viene anche stampata nei log all'avvio come conferma immediata, ma il file è il riferimento persistente (i log possono ruotare).
 
 **Sequenza obbligatoria al primo accesso:**
 
 1. Avvia la stazione: `./bin/launch.sh`
-2. Apri il browser su `http://localhost:8000`
-3. Effettua il login con `admin` / `admin`
+2. Recupera la password generata: `cat ~/.config/sc-archive/admin_password.txt`
+3. Apri il browser su `http://localhost:8000` e accedi con `admin` / la password recuperata
 4. Apri **Settings** (icona ingranaggio) → sezione **OPERATOR_ACCESS_KEY**
-5. Inserisci `admin` in "Current Key" e la nuova password in "New Key"
+5. Inserisci la password generata in "Current Key" e la tua nuova password in "New Key"
 6. Clicca **ROTATE_KEY** — da questo momento userai la nuova password
 
 > [!TIP]
-> Per scegliere una password di default diversa da `admin` **prima** del primo avvio (quando `~/.config/sc-archive/users.json` non esiste ancora), esporta la variabile d'ambiente prima di lanciare:
+> Per scegliere tu la password di default **prima** del primo avvio (quando `~/.config/sc-archive/users.json` non esiste ancora), esporta la variabile d'ambiente prima di lanciare:
 >
 > ```bash
 > export AEGIS_ADMIN_PASSWORD="la-tua-password"
@@ -78,7 +78,7 @@ Al **primo avvio**, SC-ARCHIVE crea automaticamente l'utente `admin` con passwor
 > Se `~/.config/sc-archive/users.json` esiste già, questa variabile non ha effetto — usa Settings per cambiare la password.
 >
 > [!NOTE]
-> Per resettare l'utente admin, cancella il record `"admin"` da `~/.config/sc-archive/users.json` — al prossimo avvio viene ricreato con `AEGIS_ADMIN_PASSWORD` (default: `admin`).
+> Per resettare l'utente admin, cancella il record `"admin"` da `~/.config/sc-archive/users.json` — al prossimo avvio viene ricreato con `AEGIS_ADMIN_PASSWORD` se impostata, altrimenti con una nuova password casuale (di nuovo salvata in `~/.config/sc-archive/admin_password.txt`).
 > In alternativa, usa direttamente `./bin/create_user.sh admin nuova_password` per sovrascrivere l'hash senza toccare il file.
 
 **Workspace:** ogni utente ha una cartella dedicata in `~/sc-archive/<username>/` e non può uscire da quel subtree. Solo `admin` può selezionare qualsiasi cartella della home tramite il **Root Picker** nella dashboard — la scelta viene salvata e ripristinata ad ogni login.

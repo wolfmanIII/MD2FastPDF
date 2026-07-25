@@ -92,6 +92,9 @@ OLLAMA_IP=http://192.168.1.X:11434
 
 Sostituire `192.168.1.X` con l'IP effettivo del PC Linux che esegue Ollama.
 
+> [!WARNING]
+> Se `AEGIS_ADMIN_PASSWORD` non viene impostata, **non** viene usata nessuna password fissa: SC-ARCHIVE ne genera una casuale al primo avvio e la salva in `/root/.config/sc-archive/admin_password.txt` (nel volume `sc-archive-userdata`, persistente) — vedi sezione "Primo avvio" più sotto.
+
 ### 3. Configura il Caddyfile
 
 ```bash
@@ -174,7 +177,11 @@ All'avvio del container `sc-archive`, l'entrypoint esegue automaticamente:
 
 2. **Genera la session key** in `/root/.config/sc-archive/session.key` (persiste nel volume `sc-archive-userdata`)
 
-3. **Bootstrap admin**: se `users.json` è assente, crea l'utente `admin` con la password da `AEGIS_ADMIN_PASSWORD` e il gruppo `"admin"`.
+3. **Bootstrap admin**: se `users.json` è assente, crea l'utente `admin` con il gruppo `"admin"`. Password: quella da `AEGIS_ADMIN_PASSWORD` se impostata nel `.env`, altrimenti una password casuale generata al volo e salvata in `/root/.config/sc-archive/admin_password.txt` (persiste nel volume `sc-archive-userdata`) — recuperabile con:
+
+```bash
+docker compose exec sc-archive cat /root/.config/sc-archive/admin_password.txt
+```
 
 Aprire il browser su `http://sc-archive.lan` e accedere con `admin` / password scelta.
 
@@ -185,7 +192,7 @@ Aprire il browser su `http://sc-archive.lan` e accedere con `admin` / password s
 | Volume | Percorso nel container | Contenuto |
 | ------ | ---------------------- | --------- |
 | `sc-archive-config` | `/app/config` | `settings.json` |
-| `sc-archive-userdata` | `/root/.config/sc-archive` | `users.json`, `groups.json`, `session.key` |
+| `sc-archive-userdata` | `/root/.config/sc-archive` | `users.json`, `groups.json`, `session.key`, `admin_password.txt` |
 | `sc-archive-workspaces` | `/root/sc-archive` | Workspace file degli utenti |
 | `sc-archive-blueprints` | `/app/blueprints` | Template della libreria Blueprint |
 

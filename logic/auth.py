@@ -5,7 +5,9 @@ UserStore: persistent registry backed by ~/.config/sc-archive/users.json.
 AuthService: credential verification, user creation, workspace management.
 """
 import json
+import logging
 import os
+import secrets
 from collections.abc import Awaitable, Callable
 
 import bcrypt
@@ -14,6 +16,8 @@ from pathlib import Path
 from typing import Optional, Protocol, runtime_checkable
 
 from logic.exceptions import AuthError, GroupError
+
+logger = logging.getLogger("aegis.auth")
 
 
 # --- User creation hook registry ---
@@ -85,6 +89,7 @@ _CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 USERS_FILE = _CONFIG_DIR / "users.json"
 _LEGACY_USERS_FILE = Path("config/users.json")
 _GROUPS_FILE: Path = _CONFIG_DIR / "groups.json"
+_ADMIN_PASSWORD_FILE: Path = _CONFIG_DIR / "admin_password.txt"
 
 
 def _migrate_legacy_users() -> None:
@@ -425,11 +430,32 @@ class AuthService:
         """Returns all registered users."""
         return await self._store.list_users()
 
+    def _resolve_admin_password(self) -> str:
+        """Returns AEGIS_ADMIN_PASSWORD if set, otherwise generates and persists a random one.
+
+        No fixed weak default: an unset or empty env var must never silently
+        resolve to a predictable password. The generated password is written
+        to _ADMIN_PASSWORD_FILE (same persistence convention as session.key)
+        rather than relying solely on logs, since log retention isn't
+        guaranteed (rotation, journalctl limits).
+        """
+        configured = os.getenv("AEGIS_ADMIN_PASSWORD")
+        if configured:
+            return configured
+        generated = secrets.token_urlsafe(16)
+        _ADMIN_PASSWORD_FILE.write_text(generated + "\n", encoding="utf-8")
+        _ADMIN_PASSWORD_FILE.chmod(0o600)
+        logger.warning(
+            "AEGIS_ADMIN_PASSWORD non impostata — password admin generata casualmente e salvata in %s "
+            "(cambiala subito da Impostazioni dopo il primo accesso)",
+            _ADMIN_PASSWORD_FILE,
+        )
+        return generated
+
     def bootstrap_admin(self) -> None:
         """Creates the admin user on first run if no users exist. Always ensures 'admin' group exists."""
         if self._sync_store.is_empty():
-            password = os.getenv("AEGIS_ADMIN_PASSWORD", "admin")
-            self.create_user_sync("admin", password, groups=["admin"])
+            self.create_user_sync("admin", self._resolve_admin_password(), groups=["admin"])
         self._sync_group_store.ensure_admin_group_sync()
 
 
