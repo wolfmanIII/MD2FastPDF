@@ -1,5 +1,5 @@
 """
-AEGIS_GRAPH_ROUTER: Document relationship graph view (Obsidian-style).
+AEGIS_GRAPH_ROUTER: Document relationship graph view.
 """
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse

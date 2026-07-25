@@ -60,7 +60,7 @@ memory/
 # Claude Code local settings (machine-specific permissions)
 .claude/settings.local.json
 
-# obsidian
+# local vault-app config folder
 .obsidian/
 
 # CodeGraph index (local, machine-specific)

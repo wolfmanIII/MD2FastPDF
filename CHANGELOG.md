@@ -2,7 +2,7 @@
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
 ## [5.20.0] - AEGIS GRAPH VIEW & REBRANDING (2026-07-11)
-Vista a grafo stile Obsidian per l'archivio, nuovo logo/favicon, header rinnovato.
+Vista a grafo per l'archivio, nuovo logo/favicon, header rinnovato.
 
 ### Added
 - **`logic/graph.py` — `ArchiveGraphBuilder`**: classe SRP che deriva un grafo nodi/archi dai link Markdown (`[testo](path.md)`) trovati nell'archivio dell'utente attivo. Scan ricorsivo confinato alla root utente (`PathSanitizer.get_root()`), risoluzione e sanitizzazione di ogni link (traversal, path nascosti, file inesistenti o URL esterni scartati silenziosamente). Nessuna eccezione mai propagata.
