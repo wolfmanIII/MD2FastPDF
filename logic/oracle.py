@@ -16,6 +16,16 @@ _EMBEDDING_KEYWORDS: frozenset[str] = frozenset([
     "minilm", "e5-", "gte-", "rerank",
 ])
 
+
+def _is_embedding_model(name: str) -> bool:
+    """True if the model name matches a known embedding-only keyword."""
+    return any(kw in name.lower() for kw in _EMBEDDING_KEYWORDS)
+
+
+def _is_chat_model(name: str) -> bool:
+    """Excludes embedding-only models from chat/synthesis model lists."""
+    return not _is_embedding_model(name)
+
 class PromptTemplates:
     """Centralized prompt vault for tactical consistency."""
 
@@ -112,8 +122,8 @@ class OracleClient:
         if all_models is None:
             self._cache_availability(False)
             return {"ok": False, "status": "DEGRADED", "chat_models": [], "embed_models": []}
-        chat = [m for m in all_models if not any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
-        embed = [m for m in all_models if any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
+        chat = [m for m in all_models if _is_chat_model(m)]
+        embed = [m for m in all_models if _is_embedding_model(m)]
         if not enabled:
             self._cache_availability(False)
             return {"ok": False, "status": "ONLINE // DISABLED_IN_SETTINGS", "chat_models": chat, "embed_models": embed}
@@ -146,7 +156,7 @@ class OracleClient:
             return []
         if all_models is None:
             return []
-        return [m for m in all_models if not any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
+        return [m for m in all_models if _is_chat_model(m)]
 
     async def stream_completion(self, prompt: str, system: Optional[str] = None, options: Optional[dict] = None) -> AsyncGenerator[str, None]:
         """Streams neural completion tokens using hint model."""
