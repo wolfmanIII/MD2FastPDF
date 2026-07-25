@@ -266,11 +266,14 @@ class RelationIndexBuilder:
 
         return index
 
-    async def reindex_file(self, index: RelationIndex, path: Path) -> None:
+    async def reindex_file(self, index: RelationIndex, path: Path, content: str | None = None) -> None:
         """Invalidates and rebuilds every edge originating from `path` (root-
         relative), without rescanning the archive (RF-6). If the file no
         longer exists, drops its entity and demotes incoming edges to
-        dangling. All other files' entities/edges are left untouched."""
+        dangling. All other files' entities/edges are left untouched.
+
+        content: pass the file's text if the caller already has it in memory
+        (e.g. it just wrote it) to skip a redundant re-read from disk."""
         index.drop_path(path)
 
         try:
@@ -287,12 +290,13 @@ class RelationIndexBuilder:
             index.remove_entity_at_path(path)
             return
 
-        try:
-            content = await read_text_at(absolute_path)
-        except (OSError, UnicodeDecodeError) as e:
-            _log.warning("AEGIS_RELATIONS // UNREADABLE_FILE // %s — %s", path, e)
-            index.remove_entity_at_path(path)
-            return
+        if content is None:
+            try:
+                content = await read_text_at(absolute_path)
+            except (OSError, UnicodeDecodeError) as e:
+                _log.warning("AEGIS_RELATIONS // UNREADABLE_FILE // %s — %s", path, e)
+                index.remove_entity_at_path(path)
+                return
 
         frontmatter = extract_frontmatter(content)
         index.register_entity(self._build_entity(path, frontmatter, mtime))

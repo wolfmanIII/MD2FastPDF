@@ -5,6 +5,7 @@ from config.templates import templates
 from logic.files import (
     list_directory_contents, create_new_file, delete_file, rename_file, search_files, read_file_bytes
 )
+from logic.relations_service import RelationGraphService
 from routes import build_breadcrumbs
 
 
@@ -104,12 +105,14 @@ async def perform_rename(request: Request, path: str = Form(...), new_name: str 
     target_path = Path(path)
     parent_dir = str(target_path.parent)
     try:
-        await rename_file(path, new_name)
+        new_path = await rename_file(path, new_name)
     except HTTPException as e:
         return HTMLResponse(
             content=f'<div class="text-red-400 font-bold text-[10px] tracking-widest uppercase mt-4">RENAME_ERROR // {e.detail}</div>',
             status_code=400
         )
+    await RelationGraphService.reindex_file(path)      # old path: entity gone, its edges demoted to dangling
+    await RelationGraphService.reindex_file(new_path)  # new path: entity (re)registered under the new name
     return await list_files(request, parent_dir)
 
 
@@ -176,4 +179,5 @@ async def perform_delete(request: Request, path: str = Form(...)):
     target_path = Path(path)
     parent_dir = str(target_path.parent)
     await delete_file(path)
+    await RelationGraphService.reindex_file(path)
     return await list_files(request, parent_dir)

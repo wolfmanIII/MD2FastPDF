@@ -1,0 +1,22 @@
+<div id="aegis-entity-relations" class="glass-panel p-4 space-y-2">
+    <h4 class="text-[10px] uppercase tracking-widest font-bold text-zinc-100 border-b border-(--glass-border) pb-2">
+        RELAZIONI
+    </h4>
+    {% if not relations %}
+    <p class="text-[10px] text-zinc-600 italic uppercase tracking-widest">Nessuna relazione dichiarata</p>
+    {% else %}
+    <div class="space-y-1.5">
+        {% for relation_name, entities in relations.items() %}
+        <div class="text-[10px] uppercase tracking-widest leading-relaxed">
+            <span class="text-zinc-500">{{ labels.get(relation_name, relation_name) }}:</span>
+            {% for entity in entities %}
+            <a href="/editor?path={{ entity.path | urlencode }}"
+               hx-get="/editor?path={{ entity.path | urlencode }}"
+               hx-target="#aegis-view-core" hx-push-url="true"
+               class="neon-text hover:text-white no-underline">{{ entity.display_name }}</a>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>

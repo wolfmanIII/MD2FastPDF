@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
-from routes import core, archive, editor, pdf, config, oracle, render, settings, login, admin, comms, blueprint, groupspace, graph
+from routes import core, archive, editor, pdf, config, oracle, render, settings, login, admin, comms, blueprint, groupspace, graph, relations
 from logic.auth import auth_service, group_store, register_user_creation_hook, register_user_creation_sync_hook
 from logic.comms import comms_manager as _comms_manager
 from logic.conversion import gotenberg
@@ -109,6 +109,7 @@ app.include_router(comms.router)     # Comms Protocol
 app.include_router(blueprint.router)   # Blueprint Archive
 app.include_router(groupspace.router)  # Group Shared Workspace
 app.include_router(graph.router)       # Document Relationship Graph
+app.include_router(relations.router)   # Typed Frontmatter Relations
 
 # AEGIS_INIT_READY: Server configuration complete.
 # Start via bin/launch.sh to initialize Tailwind and Uvicorn logic.

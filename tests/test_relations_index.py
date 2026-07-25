@@ -365,6 +365,19 @@ class TestReindexFile:
         assert index.entities["tarn mekel"].path == Path("npcs/Tarn Mekel.md")
 
     @pytest.mark.anyio
+    async def test_passed_in_content_is_used_instead_of_rereading_disk(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+
+        # Disk still has the original content (never rewritten) — only the
+        # in-memory `content` argument reflects the "new" state.
+        fresh_content = "---\ntype: ship\ncrew: [Kira Venn]\n---\n\nIn-memory only.\n"
+        await RelationIndexBuilder().reindex_file(index, Path("ships/Beowulf.md"), fresh_content)
+
+        assert index.out_edges[("beowulf", "crew")] == ["kira venn"]
+        assert "tarn mekel" not in index.out_edges.get(("beowulf", "crew"), [])
+
+    @pytest.mark.anyio
     async def test_edit_clears_old_dangling_reference(self, archive_root: Path):
         _seed_basic_vault(archive_root)
         index = await RelationIndexBuilder().build()

@@ -60,6 +60,11 @@
     transition: background 0.15s, box-shadow 0.15s;
 }
 
+#aegis-entity-relations-sidebar {
+    width: 220px;
+    border-left: 1px solid var(--glass-border, rgba(255,255,255,0.08));
+}
+
 #aegis-filetree-resizer:hover,
 #aegis-filetree-resizer.dragging {
     background: rgba(125, 211, 252, 0.5);
