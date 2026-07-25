@@ -17,7 +17,7 @@
 
           <!-- OPERATIONAL STATE -->
           <div class="space-y-2">
-            <h4 class="text-[8px] font-bold text-zinc-500 uppercase tracking-[0.4em]">SYSTEM_STATUS:</h4>
+            <h4 class="text-[8px] font-bold text-zinc-300 uppercase tracking-[0.4em]">SYSTEM_STATUS:</h4>
             <div class="space-y-3 bg-black/40 p-4 border border-white/5">
               <label class="flex items-center justify-between cursor-pointer group">
                 <span class="text-zinc-300 uppercase text-xs tracking-widest group-hover:neon-text transition-colors">Neural Link Protocol</span>
@@ -39,7 +39,7 @@
           <!-- ENDPOINTS — admin only -->
           {% if is_admin %}
           <div class="space-y-2 text-left border-l border-white/10 pl-3">
-            <h4 class="text-[8px] font-bold text-zinc-500 uppercase tracking-[0.4em]">UPLINK_COORDINATES:</h4>
+            <h4 class="text-[8px] font-bold text-zinc-300 uppercase tracking-[0.4em]">UPLINK_COORDINATES:</h4>
             <div class="space-y-3 bg-black/40 p-4 border border-white/5 neural-dependent transition-all duration-300">
               <div class="space-y-1">
                 <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">Ollama Gateway</label>
@@ -56,13 +56,13 @@
           <!-- MODELS — admin only -->
           {% if is_admin %}
           <div class="space-y-2 text-left lg:col-span-2 neural-dependent transition-all duration-300">
-            <h4 class="text-[8px] font-bold text-zinc-500 uppercase tracking-[0.4em]">NEURAL_DEVICES_SELECTION:</h4>
+            <h4 class="text-[8px] font-bold text-zinc-300 uppercase tracking-[0.4em]">NEURAL_DEVICES_SELECTION:</h4>
             <div id="models-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-3 bg-black/40 p-4 border border-white/5">
               <div hx-get="/settings/models"
                    hx-trigger="load"
                    hx-target="#models-grid"
                    hx-swap="innerHTML"
-                   class="lg:col-span-3 text-[10px] font-mono text-zinc-500 animate-pulse tracking-widest">
+                   class="lg:col-span-3 text-[10px] font-mono text-zinc-300 animate-pulse tracking-widest">
                 SCANNING_NEURAL_DEVICES //
               </div>
             </div>
@@ -83,7 +83,7 @@
 
       <!-- ACCESS KEY — separate form -->
       <div class="border-t border-white/5 pt-4">
-        <h4 class="text-[8px] font-bold text-zinc-500 uppercase tracking-[0.4em] mb-3">OPERATOR_ACCESS_KEY:</h4>
+        <h4 class="text-[8px] font-bold text-zinc-300 uppercase tracking-[0.4em] mb-3">OPERATOR_ACCESS_KEY:</h4>
         <form hx-post="/auth/password" hx-target="#pw-notification" hx-swap="outerHTML"
               class="bg-black/40 p-4 border border-white/5">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">

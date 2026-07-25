@@ -46,7 +46,7 @@
         <div id="aegis-filetree">
             <div id="aegis-filetree-inner" hx-get="/tree?active={{ path | urlencode }}" hx-trigger="load delay:50ms"
                 hx-target="this" hx-swap="innerHTML" class="h-full overflow-y-auto overflow-x-hidden">
-                <div class="p-3 text-[10px] text-zinc-600 tracking-widest animate-pulse uppercase">SCANNING_ARCHIVE...
+                <div class="p-3 text-[10px] text-zinc-300 tracking-widest animate-pulse uppercase">SCANNING_ARCHIVE...
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@
         <div id="aegis-entity-relations-sidebar" class="overflow-y-auto overflow-x-hidden shrink-0 p-2">
             <div id="aegis-entity-relations-slot" hx-get="/relations/panel?path={{ path | urlencode }}"
                 hx-trigger="load delay:100ms" hx-target="this" hx-swap="outerHTML">
-                <div class="p-3 text-[10px] text-zinc-600 tracking-widest animate-pulse uppercase">SCANNING_RELATIONS...
+                <div class="p-3 text-[11px] text-zinc-300 tracking-widest animate-pulse uppercase">SCANNING_RELATIONS...
                 </div>
             </div>
         </div>

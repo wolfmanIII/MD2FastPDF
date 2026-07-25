@@ -11,13 +11,13 @@
     <!-- Content -->
     <div class="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
       {% if not categories %}
-      <p class="text-zinc-500 font-mono text-xs uppercase tracking-widest text-center py-8">
+      <p class="text-zinc-300 font-mono text-xs uppercase tracking-widest text-center py-8">
         NO_BLUEPRINTS_FOUND // ADMIN CAN LOAD TEMPLATES
       </p>
       {% else %}
       {% for category, items in categories.items() %}
       <div>
-        <p class="text-zinc-500 font-mono text-[10px] uppercase tracking-widest mb-3 border-b border-zinc-800 pb-1">
+        <p class="text-zinc-300 font-mono text-[10px] uppercase tracking-widest mb-3 border-b border-zinc-800 pb-1">
           {{ category }}
         </p>
         <div class="grid grid-cols-2 gap-2">
@@ -76,7 +76,7 @@ function openVariableModal(path, sections) {
       const id = 'bpvar-' + ph.replace(/[^A-Z0-9]/g, '_');
       fields.innerHTML += `
         <div class="flex flex-col gap-1">
-          <label for="${id}" class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">${ph}</label>
+          <label for="${id}" class="text-[10px] font-mono text-zinc-300 uppercase tracking-widest">${ph}</label>
           <input type="text" id="${id}" data-placeholder="${ph}" class="w-full" placeholder="${ph}" autocomplete="off">
         </div>
       `;

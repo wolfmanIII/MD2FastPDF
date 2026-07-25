@@ -19,7 +19,7 @@
       <input type="hidden" name="category" id="bp-category-value">
       <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-col gap-2">
-          <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Category</label>
+          <label class="text-[10px] font-mono text-zinc-300 uppercase tracking-widest">Category</label>
           <select id="bp-category-select" class="w-full" onchange="bpCategoryChange(this)">
             {% for cat in categories.keys() %}
             <option value="{{ cat }}">{{ cat }}</option>
@@ -30,7 +30,7 @@
                  class="w-full hidden" oninput="bpCategoryChange(document.getElementById('bp-category-select'))">
         </div>
         <div class="flex flex-col gap-1">
-          <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Filename</label>
+          <label class="text-[10px] font-mono text-zinc-300 uppercase tracking-widest">Filename</label>
           <input type="text" name="filename" placeholder="nome-template" class="w-full" required>
         </div>
       </div>
@@ -84,7 +84,7 @@
         (function() { bpCategoryChange(document.getElementById('bp-category-select')); })();
       </script>
       <div class="flex flex-col gap-1">
-        <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Content (Markdown)</label>
+        <label class="text-[10px] font-mono text-zinc-300 uppercase tracking-widest">Content (Markdown)</label>
         <textarea name="content" rows="12" class="w-full font-mono text-sm" placeholder="# Template Title&#10;&#10;[content]" required></textarea>
       </div>
       <div class="flex justify-end">
@@ -103,7 +103,7 @@
     </span>
     {% for category, items in categories.items() %}
     <div>
-      <p class="text-zinc-600 font-mono text-[10px] uppercase tracking-widest mb-2 border-b border-zinc-800 pb-1">
+      <p class="text-zinc-300 font-mono text-[10px] uppercase tracking-widest mb-2 border-b border-zinc-800 pb-1">
         {{ category }}
       </p>
       <div class="space-y-1">
@@ -136,7 +136,7 @@
     {% endfor %}
   </div>
   {% else %}
-  <p class="text-zinc-600 font-mono text-[10px] uppercase tracking-widest text-center py-4">
+  <p class="text-zinc-300 font-mono text-[10px] uppercase tracking-widest text-center py-4">
     NO_BLUEPRINTS_LOADED
   </p>
   {% endif %}

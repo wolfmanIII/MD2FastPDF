@@ -11,7 +11,7 @@
 
     <div class="p-6 space-y-3">
       {% if not blocks %}
-      <p class="text-zinc-500 text-xs uppercase tracking-widest text-center py-6">NO_MERMAID_BLOCKS_FOUND</p>
+      <p class="text-zinc-300 text-xs uppercase tracking-widest text-center py-6">NO_MERMAID_BLOCKS_FOUND</p>
       {% else %}
       <p class="text-zinc-400 text-xs uppercase tracking-widest">
         {{ blocks|length }} DIAGRAM{{ 'S' if blocks|length > 1 else '' }} — SELECT_TO_EXPORT_PNG

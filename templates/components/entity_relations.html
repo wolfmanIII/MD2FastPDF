@@ -3,12 +3,12 @@
         RELAZIONI
     </h4>
     {% if not relations %}
-    <p class="text-[10px] text-zinc-600 italic uppercase tracking-widest">Nessuna relazione dichiarata</p>
+    <p class="text-[11px] text-zinc-300 italic uppercase tracking-widest">Nessuna relazione dichiarata</p>
     {% else %}
-    <div class="space-y-1.5">
+    <div class="space-y-2">
         {% for relation_name, entities in relations.items() %}
-        <div class="text-[10px] uppercase tracking-widest leading-relaxed">
-            <span class="text-zinc-500">{{ labels.get(relation_name, relation_name) }}:</span>
+        <div class="text-[11px] uppercase tracking-widest leading-relaxed">
+            <span class="text-zinc-100 font-semibold">{{ labels.get(relation_name, relation_name) }}:</span>
             {% for entity in entities %}
             <a href="/editor?path={{ entity.path | urlencode }}"
                hx-get="/editor?path={{ entity.path | urlencode }}"

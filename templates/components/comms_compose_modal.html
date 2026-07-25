@@ -15,7 +15,7 @@
         <!-- Recipients -->
         <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">TO:</label>
+            <label class="text-[10px] font-mono text-zinc-300 uppercase tracking-widest">TO:</label>
             <button type="button" id="select-all-btn" onclick="toggleAllRecipients()"
                     class="btn-ghost text-[10px] rounded-sm focus:outline-none">SELECT ALL</button>
           </div>
@@ -33,7 +33,7 @@
 
         <!-- Subject -->
         <div class="space-y-1">
-          <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">SUBJECT:</label>
+          <label class="text-[10px] font-mono text-zinc-300 uppercase tracking-widest">SUBJECT:</label>
           <input type="text" name="subject" class="w-full"
                  value="{% if original %}Re: {{ original.subject }}{% endif %}"
                  placeholder="TRANSMISSION_SUBJECT...">
@@ -42,7 +42,7 @@
         <!-- Body + Preview -->
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-1">
-            <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">BODY:</label>
+            <label class="text-[10px] font-mono text-zinc-300 uppercase tracking-widest">BODY:</label>
             <textarea name="body" id="comms-body"
                       class="w-full resize-none font-mono text-[11px]" style="height: 200px;"
                       placeholder="AWAITING_TRANSMISSION..."
@@ -52,11 +52,11 @@
                       hx-swap="outerHTML"></textarea>
           </div>
           <div class="space-y-1">
-            <label class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">PREVIEW:</label>
+            <label class="text-[10px] font-mono text-zinc-300 uppercase tracking-widest">PREVIEW:</label>
             <div id="comms-preview-panel"
                  class="overflow-y-auto bg-black/40 border border-zinc-800 rounded-sm p-3 prose max-w-none normal-case"
                  style="height: 200px;">
-              <span class="text-zinc-600 text-[10px] uppercase tracking-widest">AWAITING_INPUT...</span>
+              <span class="text-zinc-300 text-[10px] uppercase tracking-widest">AWAITING_INPUT...</span>
             </div>
           </div>
         </div>
@@ -67,10 +67,10 @@
           <summary class="text-[10px] tracking-widest uppercase text-zinc-500 cursor-pointer hover:neon-text transition-colors select-none">
             ↩ ORIGINAL_SIGNAL ▶
           </summary>
-          <div class="mt-3 space-y-2 text-[10px] text-zinc-500 tracking-widest uppercase border-t border-zinc-800 pt-3">
-            <div><span class="text-zinc-600">SUBJECT:</span> {{ original.subject }}</div>
-            <div><span class="text-zinc-600">FROM:</span> {{ original.sender }}</div>
-            <pre class="text-zinc-600 font-mono normal-case text-[10px] mt-2 leading-relaxed whitespace-pre-wrap">{{ original.body.split('\n')[:3] | join('\n') }}{% if original.body.split('\n') | length > 3 %}
+          <div class="mt-3 space-y-2 text-[10px] text-zinc-300 tracking-widest uppercase border-t border-zinc-800 pt-3">
+            <div><span class="text-zinc-200">SUBJECT:</span> {{ original.subject }}</div>
+            <div><span class="text-zinc-200">FROM:</span> {{ original.sender }}</div>
+            <pre class="text-zinc-200 font-mono normal-case text-[10px] mt-2 leading-relaxed whitespace-pre-wrap">{{ original.body.split('\n')[:3] | join('\n') }}{% if original.body.split('\n') | length > 3 %}
 ...{% endif %}</pre>
           </div>
         </details>
