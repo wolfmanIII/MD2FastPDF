@@ -8,6 +8,7 @@ services:
       - sc-archive-config:/app/config
       - sc-archive-userdata:/root/.config/sc-archive
       - sc-archive-workspaces:/root/sc-archive
+      - sc-archive-blueprints:/app/blueprints
     environment:
       - AEGIS_ADMIN_PASSWORD=${AEGIS_ADMIN_PASSWORD:-admin}
       - OLLAMA_IP=${OLLAMA_IP:-http://host.docker.internal:11434}
@@ -32,3 +33,4 @@ volumes:
   sc-archive-config:
   sc-archive-userdata:
   sc-archive-workspaces:
+  sc-archive-blueprints:

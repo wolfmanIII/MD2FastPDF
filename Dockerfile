@@ -45,6 +45,7 @@ COPY routes/ ./routes/
 COPY templates/ ./templates/
 COPY static/ ./static/
 COPY config/__init__.py config/settings.py config/templates.py ./config/
+COPY blueprints/ ./blueprints/
 
 # Compiled CSS from css-builder (overrides any stale output.css)
 COPY --from=css-builder /app/static/css/output.css ./static/css/output.css
