@@ -208,8 +208,8 @@
     <!-- Marked.js (Local) -->
     <script src="/static/js/marked.min.js"></script>
     <script>
-        mermaid.initialize({ 
-            startOnLoad: false, 
+        mermaid.initialize({
+            startOnLoad: false,
             theme: 'dark',
             securityLevel: 'loose',
             themeVariables: {
@@ -220,6 +220,43 @@
                 nodeBorder: '#0ea5e9'
             }
         });
+
+        // AEGIS_VISUAL_PROTOCOL: defined here in <head>, before the page body's own
+        // content block, so component scripts can call it synchronously on a full page
+        // load — a hard reload of a component page (e.g. /editor) runs its inline
+        // <script> before the browser ever reaches a same-named function declared later
+        // in <body>, throwing ReferenceError; on an HTMX-swapped navigation this was
+        // masked because the function was already defined from an earlier full page load.
+        let visualTimer = null;
+        function renderAegisVisuals() {
+            if (visualTimer) clearTimeout(visualTimer);
+            visualTimer = setTimeout(async () => {
+                // 1. Handle Mermaid
+                if (typeof mermaid !== 'undefined') {
+                    const blocks = document.querySelectorAll('pre code.language-mermaid');
+                    blocks.forEach(function(codeBlock) {
+                        const pre = codeBlock.parentElement;
+                        const div = document.createElement('div');
+                        div.className = 'mermaid';
+                        div.textContent = codeBlock.textContent;
+                        pre.parentElement.replaceChild(div, pre);
+                    });
+
+                    try {
+                        await mermaid.run({
+                            nodes: document.querySelectorAll('.mermaid:not([data-processed="true"])')
+                        });
+                    } catch (err) { }
+                }
+
+                // 2. Handle Syntax Highlighting (Highlight.js)
+                if (typeof hljs !== 'undefined') {
+                    document.querySelectorAll('pre code:not(.language-mermaid)').forEach((block) => {
+                        hljs.highlightElement(block);
+                    });
+                }
+            }, 250);
+        }
     </script>
 </head>
 <body class="antialiased min-h-screen bg-[#09090b] flex flex-col w-full overflow-x-hidden" hx-target="#aegis-view-core">
@@ -366,38 +403,8 @@
             }
         }
 
-        // AEGIS_VISUAL_PROTOCOL: Auto-render on page load, HTMX swap, and editor events
-        let visualTimer = null;
-        function renderAegisVisuals() {
-            if (visualTimer) clearTimeout(visualTimer);
-            visualTimer = setTimeout(async () => {
-                // 1. Handle Mermaid
-                if (typeof mermaid !== 'undefined') {
-                    const blocks = document.querySelectorAll('pre code.language-mermaid');
-                    blocks.forEach(function(codeBlock) {
-                        const pre = codeBlock.parentElement;
-                        const div = document.createElement('div');
-                        div.className = 'mermaid';
-                        div.textContent = codeBlock.textContent;
-                        pre.parentElement.replaceChild(div, pre);
-                    });
-                    
-                    try {
-                        await mermaid.run({
-                            nodes: document.querySelectorAll('.mermaid:not([data-processed="true"])')
-                        });
-                    } catch (err) { }
-                }
-
-                // 2. Handle Syntax Highlighting (Highlight.js)
-                if (typeof hljs !== 'undefined') {
-                    document.querySelectorAll('pre code:not(.language-mermaid)').forEach((block) => {
-                        hljs.highlightElement(block);
-                    });
-                }
-            }, 250);
-        }
-
+        // AEGIS_VISUAL_PROTOCOL: renderAegisVisuals itself is defined in <head> above,
+        // before the page body's content block — see the comment there for why.
         document.addEventListener('DOMContentLoaded', renderAegisVisuals);
         document.body.addEventListener('htmx:afterSwap', renderAegisVisuals);
     </script>
