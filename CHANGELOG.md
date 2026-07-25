@@ -1,6 +1,26 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.21.0] - RELAZIONI TIPIZZATE (2026-07-25)
+Fase 1 (MVP) completa: relazioni strutturate nel frontmatter YAML, query dirette/inverse,
+indice live per-root, endpoint HTTP, pannello RELAZIONI nell'editor.
+
+### Added
+- **`logic/relations.py`**: vocabolario dichiarativo (`VOCABULARY`) di 9 tipi di relazione riconosciuti nel frontmatter — 5 iniziali (`crew`, `member_of`, `located_in`, `hostile_to`, `owns`) più 4 emersi da un'analisi del materiale di campagna reale (`owes_debt_to`, `reports_to`, `allied_with`, `mentor_of`). Ogni `RelationDef` ha un'etichetta diretta e una inversa distinte per il pannello UI. `FrontmatterRelationParser` estrae gli archi da un file, ignorando silenziosamente le chiavi fuori vocabolario — nessun errore, retrocompatibile con frontmatter già in uso. `canonical_key`/`strip_wikilink` normalizzano i riferimenti (case-insensitive, spazi multipli collassati, `[[wikilink]]` tollerati ma non richiesti).
+- **`logic/relations_index.py`**: `RelationIndex` + `RelationIndexBuilder` — costruzione a due passaggi (popola prima le entità, poi risolve gli archi, perché un file può referenziarne un altro non ancora letto), query dirette e inverse (`related`/`relations_of` — la query inversa non richiede alcuna dichiarazione sul lato target), `diagnostics()` (riferimenti dangling, collisioni di chiave tra file con lo stesso nome, warning di parsing), `reindex_file()` incrementale (nessuna scansione completa dell'archivio a ogni modifica).
+- **`logic/relations_service.py`**: `RelationGraphService` — un `RelationIndex` live per root archivio attiva, mai un singleton globale condiviso (la root è per-utente, un cache unico mescolerebbe archivi diversi).
+- **`routes/relations.py`**: `GET /api/entities/{key}/relations[/{relation}]`, `GET /api/diagnostics/relations`, `POST /api/index/reindex`, `GET /relations/panel` (fragment HTML server-renderizzato per l'editor).
+- **Sezione RELAZIONI nell'editor**: sidebar destra lazy-loaded via HTMX (stesso pattern del filetree), mostra le relazioni dichiarate e quelle inverse con etichetta leggibile in italiano.
+- Reindex incrementale agganciato a salvataggio, rinomina e cancellazione file — mai una scansione completa dell'archivio in risposta a una singola modifica.
+- **`docs/guida-relazioni-tipizzate.md`**: guida utente in italiano semplice su come scrivere il frontmatter delle relazioni, senza gergo tecnico.
+
+### Fixed
+- **Rendering del frontmatter**: il blocco YAML non compare più come markdown letterale (un `<hr>` seguito da intestazioni spezzate) né nella preview dell'editor, né nel PDF esportato, né nei bookmark PDF generati dai titoli — tutti e tre i punti ora rimuovono il blocco prima di interpretare il testo come Markdown.
+- **Evidenziazione sintattica dell'editor**: CodeMirror non interpreta più la riga di chiusura del blocco frontmatter come sottolineatura di un titolo Setext, né lascia testo semplice del blocco nel colore di default.
+- **Bug preesistente in `renderAegisVisuals`**: la funzione era definita in uno script posizionato dopo il contenuto della pagina — al reload completo (non via navigazione HTMX) lanciava `ReferenceError`, che a sua volta interrompeva la riscrittura dei percorsi relativi (immagini, link `.md`) nella preview dell'editor.
+- **URL-encoding dei percorsi file**: caratteri speciali (`&`, spazi...) nel nome di file o cartelle spezzavano la query string in tutti i link `hx-get`/`href` dell'app (file browser, editor, filetree, group-space, export Mermaid).
+- **Etichette inverse**: il pannello RELAZIONI mostrava la stessa etichetta in entrambe le direzioni (es. "Equipaggio" anche sul file bersaglio); ogni relazione ha ora un'etichetta propria per il verso inverso ("Equipaggio di", "Subordinati", "Posseduto da"...).
+
 ## [5.20.0] - AEGIS GRAPH VIEW & REBRANDING (2026-07-11)
 Vista a grafo per l'archivio, nuovo logo/favicon, header rinnovato.
 

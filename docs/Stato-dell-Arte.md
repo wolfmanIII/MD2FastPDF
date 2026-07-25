@@ -1,7 +1,7 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.20.0
-**Ultimo Aggiornamento**: 11 Luglio 2026
+**Stato Attuale**: Op_Ready / Versione 5.21.0
+**Ultimo Aggiornamento**: 25 Luglio 2026
 
 ---
 
@@ -191,6 +191,20 @@
 - **`DENSITY_CAPACITY`**: soglia della barra storage in dashboard alzata da 100 MB a 10 GB (`STORAGE_CAPACITY_BYTES`, `logic/files.py`); aggiunto livello GB alla formattazione `ARCHIVE_SIZE`.
 - **Fix `bin/launch.sh`**: watcher Tailwind con `--watch=always` — senza `always` il processo si fermava silenziosamente appena stdin si chiudeva (sempre vero sotto systemd `--user`, nessun TTY), impedendo la ricompilazione CSS dopo l'avvio del servizio.
 
+### 1.19 RELAZIONI TIPIZZATE [5.9] (v5.21.0) — FASE 1 (MVP) COMPLETED
+
+- **Vocabolario dichiarativo** (`logic/relations.py::VOCABULARY`): 9 tipi di relazione riconosciuti nel frontmatter YAML — `crew`, `member_of`, `located_in`, `hostile_to` (simmetrica), `owns` (5 iniziali) più `owes_debt_to`, `reports_to`, `allied_with` (simmetrica), `mentor_of` (4 aggiunti dopo analisi del materiale di campagna reale, non teorici). Ogni `RelationDef` ha `label`/`inverse_label` distinte per il pannello UI. Chiavi fuori vocabolario ignorate silenziosamente — retrocompatibile con frontmatter già in uso, criterio di regressione zero rispettato.
+- **`FrontmatterRelationParser`**: estrae gli archi da un file (`Protocol` + implementazione, DIP). Normalizzazione riferimenti via `canonical_key`/`strip_wikilink` (case-insensitive, spazi collassati, `[[wikilink]]` tollerati). Warning di parsing (valore non valido) collezionati come `ParseWarning` oltre che loggati.
+- **`RelationIndex` + `RelationIndexBuilder`** (`logic/relations_index.py`): indice a due passaggi (popola le entità, poi risolve gli archi — un file può referenziarne un altro non ancora letto), `in_edges` popolato nello stesso passaggio di `out_edges` (query inversa gratuita, RF-5). Riferimenti non risolti → `dangling`, mai eccezione. Collisioni di chiave tra file con lo stesso nome in cartelle diverse → registrate, vince il primo incontrato. `reindex_file()` invalida e ricostruisce solo gli archi di un singolo file (RF-6), nessuna scansione completa; gestisce anche cancellazione (entità rimossa, archi entranti retrocessi a dangling).
+- **`RelationGraphService`** (`logic/relations_service.py`): un `RelationIndex` live per root archivio attiva, chiave = path risolto — mai un singleton globale condiviso (la root è per-utente via `PathSanitizer`, un cache unico mescolerebbe archivi diversi). Build lazy al primo accesso, lock per evitare build concorrenti sulla stessa root.
+- **`routes/relations.py`**: `GET /api/entities/{key}/relations`, `GET /api/entities/{key}/relations/{relation}`, `GET /api/diagnostics/relations`, `POST /api/index/reindex` (JSON), `GET /relations/panel?path=` (fragment HTML server-renderizzato per l'editor, coerente con la convenzione HTMX/Jinja2 del resto dell'app).
+- **Sezione RELAZIONI nell'editor**: sidebar destra lazy-loaded via HTMX (stesso pattern del filetree), mostra relazioni dirette e inverse con etichetta leggibile in italiano.
+- **Reindex incrementale agganciato** a salvataggio (`routes/editor.py`), rinomina e cancellazione (`routes/archive.py`) — scoperto durante la review che rinomina/cancellazione lasciavano l'indice con entità fantasma se non agganciate.
+- **Fix rendering frontmatter**: il blocco YAML non appariva come markdown letterale (`<hr>` + intestazioni spezzate) in tre punti indipendenti — preview editor (client-side, `marked.parse`), export PDF/riassunto Oracle (`MarkdownRenderer.render`), bookmark PDF (`PdfOutlineInjector._extract_headings`, un commento YAML `# ...` dentro il blocco avrebbe altrimenti prodotto un bookmark fasullo). Fix anche nell'evidenziazione sintattica CodeMirror del pannello di input (il `---` di chiusura veniva letto come sottolineatura Setext di un titolo).
+- **Fix bug preesistente**: `renderAegisVisuals` era definita in uno script dopo il contenuto della pagina in `base.html` — al reload completo (non via HTMX) lanciava `ReferenceError`, rompendo la riscrittura dei percorsi relativi nella preview.
+- **`docs/guida-relazioni-tipizzate.md`**: guida utente in italiano semplice, senza gergo tecnico.
+- **Fase 2 (archi tipizzati nel grafo, validazione di dominio) e Fase 3 (query NL via Ollama) restano esplicitamente bloccate** finché questa Fase 1 non viene validata in uso reale, come da `docs/ANALISI-relazioni-tipizzate.md`.
+
 ---
 
 ## 2. Infrastruttura Tecnica
@@ -208,8 +222,8 @@
 ### Package Structure
 
 ```text
-logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, auth.py, comms.py, blueprints.py, groupspace.py, graph.py, exceptions.py
-routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, login, comms, admin, blueprint, groupspace, graph, deps
+logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, auth.py, comms.py, blueprints.py, groupspace.py, graph.py, relations.py, relations_index.py, relations_service.py, exceptions.py
+routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, login, comms, admin, blueprint, groupspace, graph, relations, deps
 config/         __init__.py + settings.py (SettingsManager) + settings.json
 blueprints/     narrative/ (session-log, npc-profile, planet-description, ship-description, location-description)
 ~/.config/sc-archive/   users.json, groups.json, session.key
@@ -245,7 +259,10 @@ bin/            launch.sh, create_user.sh, aegis-migrate.sh
 | [5.6] | AEGIS UX REFINEMENTS | **COMPLETED** |
 | [5.7] | AEGIS GRAPH VIEW | **COMPLETED** |
 | [5.8] | AEGIS REBRANDING & HEADER REDESIGN | **COMPLETED** |
+| [5.9] | RELAZIONI TIPIZZATE — Fase 1 (MVP) | **COMPLETED** |
+| [5.10] | RELAZIONI TIPIZZATE — Fase 2 (archi tipizzati nel grafo, validazione dominio) | BLOCCATA — attende validazione Fase 1 in uso reale |
+| [5.11] | RELAZIONI TIPIZZATE — Fase 3 (query NL via Ollama) | ESPLORATIVA — nessuna progettazione ancora |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.20.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.21.0 — DEPLOYMENT_ACTIVE.*
