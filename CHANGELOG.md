@@ -1,6 +1,30 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.22.0] - DOCKER HARDENING & NEURAL AVAILABILITY GATING (2026-07-25)
+Deploy Docker verificato end-to-end e messo in sicurezza (utente non privilegiato, immagini
+pinnate, healthcheck), password admin non più prevedibile, e i controlli AI in editor e viste
+elenco ora riflettono davvero se il Neural Core è disponibile invece di fallire silenziosamente.
+
+### Added
+- **Neural Core Availability Gating**: i pulsanti AI nell'editor (Neural Scan, Mermaid Synthesis, Ghost-Text) e nelle viste elenco (Neural Scan) si disattivano con tooltip "Neural Core disabled or not reachable" quando il toggle è spento o Ollama non risponde — prima restavano sempre attivi e fallivano solo al click. `OracleClient.is_available()` (`logic/oracle.py`) — enabled AND reachable — con cache di 10s per non bloccare il rendering di editor/liste su un probe live a ogni apertura file o cambio cartella.
+- **`OracleClient.service_status()`** distingue ora "raggiungibile ma disattivato nelle Impostazioni" (`ONLINE // DISABLED_IN_SETTINGS`, ambra nel pannello dashboard) da un vero problema di rete (`OFFLINE`, rosso) — prima il probe veniva saltato del tutto quando il toggle era spento, rendendo i due casi indistinguibili a vista.
+- **`bin/ensure_services.sh`**: bootstrap automatico di Gotenberg e Ollama per lo sviluppo locale — usa un'istanza già attiva (nativa, systemd, o container manuale) se raggiungibile, altrimenti crea un container di progetto dedicato (`md2fastpdf-gotenberg`/`md2fastpdf-ollama`), senza mai toccare installazioni esistenti dell'utente.
+- **Container Docker come utente non privilegiato**: `uvicorn` (PID 1) gira ora come utente dedicato `aegis`, non più root. `entrypoint.sh` parte come root solo per sistemare i permessi sui volumi montati (necessario per volumi appena creati o ereditati da un deploy con l'immagine precedente), poi passa il controllo via `gosu` — verificato end-to-end, incluso lo scenario di migrazione da un volume con dati preesistenti di proprietà di root.
+- **Immagini Docker pinnate per digest** (multi-arch, arm64 incluso): `debian:bookworm-slim`, `python:3.13-slim`, `gotenberg/gotenberg:8`, `caddy:alpine` — build riproducibili, niente più versioni diverse silenziosamente tirate giù in rebuild a distanza di tempo.
+- **Healthcheck su `sc-archive` e `gotenberg`** in `docker-compose.yml`, con `depends_on: condition: service_healthy` — `sc-archive` attende che Gotenberg sia pronto, `caddy` attende che `sc-archive` lo sia, eliminando errori di conversione PDF nei primissimi secondi dopo l'avvio.
+- **Verifica checksum del binario Tailwind** (`sha256sum -c`) nello stage `css-builder` del Dockerfile, invece di eseguirlo non verificato dopo il solo download HTTPS.
+- **`docs/configurazione-docker.md`** (rinominata da `docker-raspberry.md`): generalizzata a qualsiasi host Docker, non solo Raspberry Pi — nuova checklist completa "Ollama in rete" (IP corretto, binding, firewall, tranello proxy/"could not resolve host") e sezione su come risalire dal nome di un volume Docker al percorso reale su disco.
+- **README**: nuova sezione "Documentazione di Configurazione" con link diretti a tutte le guide di setup, sia bare-metal che Docker.
+
+### Fixed
+- **Password admin debole di default**: `bootstrap_admin()` non ricade più su `"admin"` se `AEGIS_ADMIN_PASSWORD` non è impostata — genera una password casuale (`secrets.token_urlsafe`) e la salva in `~/.config/sc-archive/admin_password.txt` (permessi `600`), non solo nei log. Rimosso anche il fallback debole equivalente in `docker-compose.yml`.
+- **Persistenza della libreria Blueprint in Docker**: `blueprints/` non veniva copiato nell'immagine né montato come volume — ogni `docker compose up -d --build` cancellava i blueprint creati dagli utenti. Aggiunto volume dedicato, popolato dai template di default al primo avvio.
+- **Modale di creazione file in Group Space**: non si chiudeva mai dopo una creazione riuscita — mancava l'`hx-on::after-request` presente invece nel modale equivalente dell'Archive principale.
+- **Testo poco leggibile** in editor, modali e pannelli: ~25 punti in 20 template usavano grigio scuro (`zinc-500/600/700`) per messaggi di stato, stati vuoti ed etichette di campo, portati a `zinc-100/200/300`.
+- **Due bug preesistenti nel build Docker**, mai emersi perché l'immagine non era mai stata buildata realmente in locale: mancava `ca-certificates` nello stage `css-builder` (curl falliva su HTTPS scaricando Tailwind) e veniva copiato solo `main.css` invece di tutta `static/css/` (mancava `daisyui.min.css`, importato da `main.css`).
+- **`ensure_services.sh`**: fallimento immediato con messaggio chiaro se `docker run`/`start` fallisce, invece di attendere ~20s per poi segnalarlo in modo generico.
+
 ## [5.21.0] - RELAZIONI TIPIZZATE (2026-07-25)
 Fase 1 (MVP) completa: relazioni strutturate nel frontmatter YAML, query dirette/inverse,
 indice live per-root, endpoint HTTP, pannello RELAZIONI nell'editor.

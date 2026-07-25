@@ -1,6 +1,6 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
 
-**Versione 5.15.0** // AEGIS UX REFINEMENTS
+**Versione 5.22.0** // DOCKER HARDENING & NEURAL AVAILABILITY GATING
 
 > **Perché filesystem e niente database?** Non è una svista: è una scelta di design coerente col dominio. → [MANIFESTO.md](MANIFESTO.md)
 >
@@ -65,6 +65,8 @@ Riferimento rapido a tutte le guide di setup — scegli il percorso in base a co
 - **Editor in preview di default**: i documenti Markdown si aprono in modalità preview invece del buffer grezzo.
 - **Badge archivio persistente**: nome della cartella archivio attiva visibile in ogni pagina (non solo in dashboard), con aggiornamento istantaneo al cambio directory.
 - **Nav MODULES**: voci di navigazione secondarie (Archive, Graph, Library, Comms, Admin) raggruppate in un dropdown per una barra superiore meno affollata.
+- **Neural Core Availability Gating**: i controlli AI nell'editor (Neural Scan, Mermaid Synthesis, Ghost-Text) e nelle viste elenco (Neural Scan) si disattivano con tooltip esplicito quando il Neural Link è spento nelle Impostazioni o Ollama non è raggiungibile — prima restavano sempre attivi e fallivano solo al click. Il pannello NEURAL_CORE della dashboard distingue "raggiungibile ma disattivato" (ambra) da un vero problema di rete (rosso).
+- **Deploy Docker rafforzato**: container applicativo eseguito come utente non privilegiato (non più root), immagini pinnate per digest, healthcheck su tutti i servizi con avvio ordinato, verifica checksum del binario Tailwind, nessuna password admin di default prevedibile (generata casualmente se non impostata). Guida completa in [docs/configurazione-docker.md](docs/configurazione-docker.md).
 
 ## 🔐 Primo Accesso (Inizializzazione Operatore)
 
@@ -295,7 +297,7 @@ poetry run pytest
 poetry run pytest --cov=logic --cov-report=term-missing
 ```
 
-170 test, 0 fallimenti. Copertura: `blueprints.py` 100%, `comms.py` 93%, `groupspace.py` 92%. I moduli `conversion`, `oracle`, `render` richiedono Gotenberg/Ollama — non inclusi nella suite unit.
+353 test, 0 fallimenti. Copertura: `blueprints.py` 93%, `comms.py` 93%, `groupspace.py` 92%, `relations.py` 100%, `relations_index.py` 94%. I moduli `conversion`, `oracle`, `render` richiedono Gotenberg/Ollama — non inclusi nella suite unit.
 
 ---
 *Progettato per i narratori della stazione SC-ARCHIVE.*

@@ -1,6 +1,6 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.21.0
+**Stato Attuale**: Op_Ready / Versione 5.22.0
 **Ultimo Aggiornamento**: 25 Luglio 2026
 
 ---
@@ -205,6 +205,24 @@
 - **`docs/guida-relazioni-tipizzate.md`**: guida utente in italiano semplice, senza gergo tecnico.
 - **Fase 2 (archi tipizzati nel grafo, validazione di dominio) e Fase 3 (query NL via Ollama) restano esplicitamente bloccate** finché questa Fase 1 non viene validata in uso reale, come da `docs/ANALISI-relazioni-tipizzate.md`.
 
+### 1.20 DOCKER HARDENING (v5.22.0) — COMPLETED
+
+- **Container non-root**: `uvicorn` (PID 1) gira come utente dedicato `aegis`, non più root. `docker/entrypoint.sh` parte come root solo per sistemare i permessi sui volumi montati (Docker crea i named volume vuoti e di proprietà di root al primo utilizzo, e un volume ereditato da un deploy con l'immagine precedente ha gli stessi permessi), poi passa il controllo via `gosu` prima di eseguire l'app — il processo che serve le richieste non ha mai privilegi di root. Codice sorgente resta root-owned/read-only per l'utente applicativo (hardening aggiuntivo). Verificato end-to-end con build e run reali, incluso lo scenario di migrazione da un volume con `users.json` preesistente di proprietà di root.
+- **Immagini pinnate per digest** (multi-arch, arm64 incluso): `debian:bookworm-slim`, `python:3.13-slim`, `gotenberg/gotenberg:8`, `caddy:alpine` — build riproducibili invece di tag fluttuanti.
+- **Healthcheck su `sc-archive`** (`GET /login`) **e `gotenberg`** (`/health`) in `docker-compose.yml`, con `depends_on: condition: service_healthy` — `sc-archive` attende Gotenberg pronto, `caddy` attende `sc-archive` pronto.
+- **Checksum del binario Tailwind** (`sha256sum -c`) nello stage `css-builder`, invece di eseguirlo non verificato dopo il solo download HTTPS.
+- **Password admin non più prevedibile**: `AuthService._resolve_admin_password()` genera una password casuale (`secrets.token_urlsafe`) se `AEGIS_ADMIN_PASSWORD` non è impostata, salvata in `~/.config/sc-archive/admin_password.txt` (permessi `600`) — non solo loggata, perché i log ruotano/non persistono in modo garantito. Rimosso anche il fallback debole equivalente `${AEGIS_ADMIN_PASSWORD:-admin}` in `docker-compose.yml`.
+- **Persistenza della libreria Blueprint**: `blueprints/` non veniva copiato nell'immagine né montato come volume — ogni `docker compose up -d --build` cancellava i blueprint creati dagli utenti. Aggiunto volume `sc-archive-blueprints` dedicato, popolato dai template di default al primo avvio (Docker copia il contenuto dell'immagine in un volume vuoto al primo mount).
+- **`bin/ensure_services.sh`**: bootstrap automatico di Gotenberg/Ollama per lo sviluppo locale (non il deploy Docker in produzione) — usa un'istanza già attiva se raggiungibile (nativa, systemd, container manuale), altrimenti crea un container di progetto dedicato; su host remoto irraggiungibile o senza Docker si limita a segnalarlo. Fallimento immediato se `docker run`/`start` fallisce, invece di un timeout di 20s con messaggio generico.
+- **Due bug preesistenti nel build Docker**, mai emersi perché l'immagine non era mai stata buildata realmente in locale: mancava `ca-certificates` nello stage `css-builder` (curl falliva su HTTPS scaricando Tailwind) e veniva copiato solo `main.css` invece di tutta `static/css/` (mancava `daisyui.min.css`, importato da `main.css`).
+- **`docs/configurazione-docker.md`** (rinominata da `docker-raspberry.md`): generalizzata a qualsiasi host Docker — checklist completa "Ollama in rete" (IP corretto escludendo i bridge Docker interni, binding, firewall, tranello proxy/"could not resolve host"), sezione su come risalire dal nome di un volume Docker al percorso reale su disco.
+
+### 1.21 NEURAL CORE AVAILABILITY GATING (v5.22.0) — COMPLETED
+
+- **`OracleClient.is_available()`** (`logic/oracle.py`): true solo se il Neural Link è acceso nelle Impostazioni E Ollama è raggiungibile. Cache di 10s per non bloccare il rendering di editor/viste elenco su un probe live a Ollama ad ogni apertura file o cambio cartella — il polling periodico della dashboard (`/services/status`) mantiene la cache calda nella pratica.
+- **Controlli AI disattivati con tooltip esplicito** quando non disponibili: toolbar editor (Neural Scan, Mermaid Synthesis, Ghost-Text via `easyMDE.toolbarElements`) e pulsante Neural Scan nelle viste elenco (Archive, ricerca, dopo cambio root) — prima restavano sempre attivi e fallivano solo al click. `fetchNeuralSuggestion()` ha anche un guard diretto nel codice, non solo il pulsante disabilitato.
+- **`OracleClient.service_status()`** distingue "raggiungibile ma disattivato nelle Impostazioni" (`ONLINE // DISABLED_IN_SETTINGS`, ambra nel pannello NEURAL_CORE) da un vero problema di rete (`OFFLINE`, rosso) — prima il probe veniva saltato del tutto quando il toggle era spento, rendendo i due casi indistinguibili a vista pur essendo cause completamente diverse (impostazione vs. rete).
+
 ---
 
 ## 2. Infrastruttura Tecnica
@@ -226,11 +244,12 @@ logic/          __init__.py + files.py, conversion.py, oracle.py, render.py, aut
 routes/         __init__.py (build_breadcrumbs) + core, archive, editor, pdf, config, oracle, login, comms, admin, blueprint, groupspace, graph, relations, deps
 config/         __init__.py + settings.py (SettingsManager) + settings.json
 blueprints/     narrative/ (session-log, npc-profile, planet-description, ship-description, location-description)
-~/.config/sc-archive/   users.json, groups.json, session.key
+~/.config/sc-archive/   users.json, groups.json, session.key, admin_password.txt (se generata)
 static/css/     output.css, editor-aegis.css, pdf-industrial.css, pdf-preview.css, main.css
 static/js/      htmx.min.js, easymde.min.js, marked.min.js, mermaid.min.js, highlight.min.js, d3.min.js
 static/         logo.jpg, logo.png (trasparente), favicon/ (favicon.svg, favicon.ico, favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png, android-chrome-*.png)
-bin/            launch.sh, create_user.sh, aegis-migrate.sh
+bin/            launch.sh, ensure_services.sh, create_user.sh, aegis-migrate.sh
+docker/         entrypoint.sh, Caddyfile, .env.example — Dockerfile e docker-compose.yml a livello root
 ```
 
 ---
@@ -262,7 +281,9 @@ bin/            launch.sh, create_user.sh, aegis-migrate.sh
 | [5.9] | RELAZIONI TIPIZZATE — Fase 1 (MVP) | **COMPLETED** |
 | [5.10] | RELAZIONI TIPIZZATE — Fase 2 (archi tipizzati nel grafo, validazione dominio) | BLOCCATA — attende validazione Fase 1 in uso reale |
 | [5.11] | RELAZIONI TIPIZZATE — Fase 3 (query NL via Ollama) | ESPLORATIVA — nessuna progettazione ancora |
+| [5.12] | DOCKER HARDENING (non-root, pin immagini, healthcheck, checksum) | **COMPLETED** |
+| [5.13] | NEURAL CORE AVAILABILITY GATING | **COMPLETED** |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.21.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.22.0 — DEPLOYMENT_ACTIVE.*
