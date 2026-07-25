@@ -221,16 +221,16 @@ L'import è interattivo: mostra il percorso originale di blueprints e workspace 
 
 ---
 
-## 🐳 Deploy su Raspberry Pi (Docker)
+## 🐳 Deploy con Docker
 
-Stack completo SC-ARCHIVE containerizzato per Raspberry Pi 4/5 (ARM64), con Caddy come reverse proxy e Gotenberg integrato.
+Stack completo SC-ARCHIVE containerizzato — con Caddy come reverse proxy e Gotenberg integrato. Funziona su qualsiasi host Linux con Docker (PC x86_64, server, Raspberry Pi 4/5 ARM64): le immagini sono multi-arch, nessun passaggio è specifico per il Pi. Su Raspberry Pi o PC poco performanti è consigliato tenere Ollama come servizio esterno (altra macchina in LAN) — vedi la guida completa.
 
-**Guida completa**: [docs/docker-raspberry.md](docs/docker-raspberry.md)
+**Guida completa**: [docs/configurazione-docker.md](docs/configurazione-docker.md)
 
 ### Quick Start
 
 ```bash
-# 1. Clona il repository sul Pi
+# 1. Clona il repository
 git clone <repo-url> ~/sc-archive && cd ~/sc-archive
 
 # 2. Configura le variabili d'ambiente

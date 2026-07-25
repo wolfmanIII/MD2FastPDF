@@ -1,8 +1,11 @@
-# SC-ARCHIVE su Raspberry Pi — Deploy con Docker
+# SC-ARCHIVE — Configurazione Docker
 
 **Stack**: SC-ARCHIVE (FastAPI) + Gotenberg (PDF) + Caddy (reverse proxy)
-**Target**: Raspberry Pi 4/5 con Docker installato
-**Ollama**: esterno — gira su PC Linux in LAN
+**Target**: qualsiasi host Linux con Docker — PC x86_64, server, Raspberry Pi 4/5 (ARM64). Questa non è una guida specifica per Raspberry Pi: la stessa `docker-compose.yml` funziona identica su qualunque architettura, il Pi è solo uno dei target supportati (le immagini sono multi-arch).
+**Ollama**: sempre esterno — non è mai un container di questo stack, va raggiunto via `OLLAMA_IP`.
+
+> [!IMPORTANT]
+> Su **Raspberry Pi e PC poco performanti** tenere Ollama esterno non è opzionale: Gotenberg (Chromium headless) già assorbe RAM/CPU, e i modelli LLM competerebbero per le stesse risorse limitate. La configurazione consigliata è eseguire Ollama su un'altra macchina della LAN (o comunque fuori da questo stack Docker) — vedi sezione "Deploy Ibrido" più sotto. Su hardware più potente puoi comunque tenerlo fuori dallo stack (stessa macchina o un'altra), semplicemente perché questo `docker-compose.yml` non lo gestisce mai direttamente.
 
 ---
 
@@ -30,7 +33,7 @@ SC-ARCHIVE :8000                        │
 
 ---
 
-## Prerequisiti sul Raspberry Pi
+## Prerequisiti sull'host Docker
 
 ### Docker + Docker Compose
 
@@ -49,7 +52,7 @@ docker compose version
 
 ### IP statico (consigliato)
 
-Assegnare IP fisso via riserva DHCP sul router oppure in `/etc/dhcpcd.conf`:
+Assegnare IP fisso via riserva DHCP sul router, oppure localmente sull'host. Su **Raspberry Pi OS** (che usa `dhcpcd`):
 
 ```text
 interface eth0
@@ -62,6 +65,8 @@ static domain_name_servers=192.168.1.1
 sudo systemctl restart dhcpcd
 ```
 
+Su altre distribuzioni (Ubuntu Server con `netplan`, Debian con `NetworkManager`, ecc.) usare lo strumento equivalente della distro — il concetto (IP fisso sull'host che serve lo stack) è lo stesso, cambia solo il meccanismo.
+
 ---
 
 ## Installazione
@@ -72,6 +77,8 @@ sudo systemctl restart dhcpcd
 git clone <repo-url> ~/sc-archive
 cd ~/sc-archive
 ```
+
+Vale sia su un PC x86_64 sia su un Raspberry Pi (ARM64) — nessun passaggio cambia in base all'architettura.
 
 ### 2. Configura le variabili d'ambiente
 
@@ -86,11 +93,11 @@ Contenuto `.env`:
 # Password admin al primo avvio (cambiabile dalla UI Settings in seguito)
 AEGIS_ADMIN_PASSWORD=changeme
 
-# IP Ollama sul PC Linux in LAN
+# IP della macchina in LAN che esegue Ollama (sempre esterno a questo stack)
 OLLAMA_IP=http://192.168.1.X:11434
 ```
 
-Sostituire `192.168.1.X` con l'IP effettivo del PC Linux che esegue Ollama.
+Sostituire `192.168.1.X` con l'IP effettivo della macchina che esegue Ollama. Su Raspberry Pi o PC poco performanti sarà quasi sempre un'altra macchina della LAN (vedi il box in alto e la sezione "Deploy Ibrido"); su un host abbastanza potente può anche essere `localhost` o `host.docker.internal` se Ollama gira nativamente sullo stesso host che ospita i container.
 
 > [!WARNING]
 > Se `AEGIS_ADMIN_PASSWORD` non viene impostata, **non** viene usata nessuna password fissa: SC-ARCHIVE ne genera una casuale al primo avvio e la salva in `/root/.config/sc-archive/admin_password.txt` (nel volume `sc-archive-userdata`, persistente) — vedi sezione "Primo avvio" più sotto.
@@ -123,7 +130,9 @@ http://:80 {
 docker compose up -d --build
 ```
 
-La prima build scarica il binary Tailwind corretto per l'architettura del Pi (ARM64), compila il CSS, installa le dipendenze Python. Durata stimata: 5-10 minuti su Pi 5.
+La prima build scarica il binary Tailwind corretto per l'architettura dell'host (x86_64 o ARM64), compila il CSS, installa le dipendenze Python. Durata stimata: pochi minuti su un PC x86_64, 5-10 minuti su Raspberry Pi 5.
+
+`gotenberg` e `sc-archive` espongono un healthcheck: `sc-archive` attende che `gotenberg` sia healthy prima di partire, `caddy` attende che `sc-archive` sia healthy prima di partire — niente errori di conversione PDF nei primissimi secondi dopo l'avvio.
 
 Verifica che tutti i servizi siano attivi:
 
@@ -134,10 +143,10 @@ docker compose ps
 Output atteso:
 
 ```hosts
-NAME                    STATUS          PORTS
-sc-archive-caddy-1      running         0.0.0.0:80->80/tcp
-sc-archive-gotenberg-1  running
-sc-archive-sc-archive-1 running
+NAME                    STATUS                    PORTS
+md2fastpdf-caddy-1      Up                        0.0.0.0:80->80/tcp
+md2fastpdf-gotenberg-1  Up (healthy)
+md2fastpdf-sc-archive-1 Up (healthy)
 ```
 
 ---
@@ -162,7 +171,7 @@ Su ogni dispositivo in LAN che deve raggiungere `sc-archive.lan`:
 ipconfig /flushdns
 ```
 
-> Alternativa: configurare `dnsmasq` o **Pi-hole** sul router per risolvere `sc-archive.lan` automaticamente su tutti i dispositivi della LAN.
+> Alternativa: configurare `dnsmasq` o **Pi-hole** sul router (indipendentemente da cosa ospita SC-ARCHIVE) per risolvere `sc-archive.lan` automaticamente su tutti i dispositivi della LAN.
 
 ---
 
@@ -204,12 +213,12 @@ docker compose down -v   # rimuove anche i volumi
 
 ---
 
-## Deploy Ibrido: Pi + Nodo GPU Esterno
+## Deploy Ibrido: Host Docker + Nodo GPU Esterno per Ollama
 
-Per scenari event/convention o installazioni permanenti con Oracle attivo, il pattern raccomandato è a due nodi:
+Per scenari event/convention o installazioni permanenti con Oracle attivo, il pattern raccomandato è a due nodi — **particolarmente importante su Raspberry Pi o PC poco performanti**, dove far girare anche Ollama sulla stessa macchina competerebbe per RAM/CPU/GPU con Gotenberg:
 
 ```text
-Raspberry Pi 4/5
+Host Docker (Raspberry Pi 4/5, mini-PC, server...)
 ├── SC-ARCHIVE (Docker)
 ├── Gotenberg (Docker)
 └── Caddy (Docker)
@@ -219,7 +228,7 @@ Raspberry Pi 4/5
                       └── NVIDIA DGX Spark (ARM64 / Blackwell)
 ```
 
-**Vantaggi**: il Pi gestisce i file e la generazione PDF senza carico GPU; il nodo Ollama serve l'Oracle con latenza minima anche sotto carico multi-utente.
+**Vantaggi**: l'host Docker gestisce i file e la generazione PDF senza carico GPU; il nodo Ollama serve l'Oracle con latenza minima anche sotto carico multi-utente. Su un host già potente (con GPU propria) il nodo Ollama può anche essere la stessa macchina — resta comunque un servizio esterno allo stack Docker, mai un container gestito da `docker-compose.yml`.
 
 ### NVIDIA DGX Spark come nodo Ollama
 
@@ -247,13 +256,13 @@ Environment="OLLAMA_HOST=0.0.0.0"
 sudo systemctl daemon-reload && sudo systemctl restart ollama
 ```
 
-Verifica dal Pi:
+Verifica dall'host Docker:
 
 ```bash
 curl http://<IP_DGX>:11434/api/tags
 ```
 
-Nel `.env` del Pi:
+Nel `.env` dell'host Docker:
 
 ```env
 OLLAMA_IP=http://<IP_DGX>:11434
@@ -283,7 +292,7 @@ Environment="OLLAMA_HOST=0.0.0.0"
 sudo systemctl daemon-reload && sudo systemctl restart ollama
 ```
 
-Verifica che il Pi raggiunga Ollama:
+Verifica che l'host Docker raggiunga Ollama:
 
 ```bash
 curl http://192.168.1.X:11434/api/tags
@@ -349,7 +358,7 @@ docker compose logs sc-archive
 Cause comuni:
 
 - `settings.json` corrotto nel volume → `docker compose exec sc-archive cat config/settings.json`
-- Porta 80 già occupata sul Pi → `sudo lsof -i :80`
+- Porta 80 già occupata sull'host → `sudo lsof -i :80`
 
 ### PDF non funziona
 
