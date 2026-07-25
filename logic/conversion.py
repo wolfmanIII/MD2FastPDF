@@ -17,6 +17,7 @@ _log = logging.getLogger(__name__)
 
 from config.settings import settings
 from logic.exceptions import ConversionError
+from logic.relations import strip_frontmatter
 
 # AEGIS_PERFORMANCE_LAYER: Load industrial PDF stylesheet once at module init
 _CSS_PATH = Path(__file__).parent.parent / "static" / "css" / "pdf-industrial.css"
@@ -107,7 +108,7 @@ class MarkdownRenderer:
 
     def render(self, content: str, base_path: Optional[Path] = None) -> str:
         raw_html = markdown.markdown(
-            content,
+            strip_frontmatter(content),
             extensions=['fenced_code', 'tables', 'attr_list', 'toc']
         )
         sanitized_html = CLEANER.clean(raw_html)

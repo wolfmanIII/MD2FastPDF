@@ -106,6 +106,10 @@
                         const currentPath = "{{ path }}";
                         const currentDir = currentPath.split('/').slice(0, -1).join('/');
 
+                        // AEGIS_FRONTMATTER_STRIP: relation metadata is not prose — never preview it as
+                        // literal Markdown (it would render as a stray <hr> + garbled heading).
+                        plainText = plainText.replace(/^---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*\r?\n?/, "");
+
                         // AEGIS_ASSET_RESOLVER: Rewrite relative image paths and internal file links before parsing
                         function normalizePath(base, href) {
                             const raw = base ? `${base}/${href}` : href;

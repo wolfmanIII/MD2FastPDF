@@ -121,6 +121,17 @@ def extract_frontmatter(content: str) -> dict | None:
     return data if isinstance(data, dict) else None
 
 
+def strip_frontmatter(content: str) -> str:
+    """Returns content with its leading frontmatter block removed, if
+    present — untouched otherwise. The block is metadata, not prose: it must
+    never reach a Markdown-to-HTML/PDF renderer, which would otherwise show
+    it as a literal `<hr>` plus garbled paragraphs/headings. Strips the
+    delimited block syntactically even if the YAML inside doesn't parse —
+    rendering shouldn't care whether the metadata itself is well-formed."""
+    match = _FRONTMATTER_RE.match(content)
+    return content[match.end():] if match else content
+
+
 class RelationParser(Protocol):
     """Extracts typed relation edges from a file's already-parsed frontmatter."""
     def parse(self, path: Path, frontmatter: dict, warnings: list[ParseWarning] | None = None) -> list[Edge]: ...

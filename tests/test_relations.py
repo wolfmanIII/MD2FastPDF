@@ -9,6 +9,7 @@ from logic.relations import (
     ParseWarning,
     canonical_key,
     extract_frontmatter,
+    strip_frontmatter,
     strip_wikilink,
 )
 
@@ -104,6 +105,38 @@ class TestExtractFrontmatter:
         content = "---\ncrew: null\n---\n\nBody.\n"
         meta = extract_frontmatter(content)
         assert meta == {"crew": None}
+
+
+class TestStripFrontmatter:
+    def test_removes_leading_frontmatter_block(self):
+        # The blank line that follows the closing delimiter is part of the
+        # body, not the frontmatter block itself, and is left in place.
+        content = "---\ntype: ship\ncrew: [Kira Venn]\n---\n\n## Heading\n\nBody text.\n"
+        assert strip_frontmatter(content) == "\n## Heading\n\nBody text.\n"
+
+    def test_no_frontmatter_returns_content_unchanged(self):
+        content = "## Heading\n\nJust a normal document.\n"
+        assert strip_frontmatter(content) == content
+
+    def test_strips_even_when_yaml_is_malformed(self):
+        # Rendering shouldn't care whether the metadata itself parses — the
+        # delimited block is never prose, valid or not.
+        content = "---\ncrew: [unterminated\n---\n\nBody.\n"
+        assert strip_frontmatter(content) == "\nBody.\n"
+
+    def test_unterminated_block_is_left_untouched(self):
+        # No closing delimiter: not a well-formed frontmatter block, so
+        # nothing is stripped — this text is presumably meant as prose
+        # (e.g. a document that starts with a genuine <hr>).
+        content = "---\ntype: ship\n\nNo closing delimiter, this is just body text.\n"
+        assert strip_frontmatter(content) == content
+
+    def test_two_adjacent_delimiters_with_nothing_between_are_not_frontmatter(self):
+        # Mirrors extract_frontmatter's own test_empty_frontmatter_block_returns_none:
+        # the regex needs at least one line between the delimiters to recognize a
+        # block at all, so this reads as two consecutive literal <hr>s, untouched.
+        content = "---\n---\n\nBody.\n"
+        assert strip_frontmatter(content) == content
 
 
 # ---------------------------------------------------------------------------
