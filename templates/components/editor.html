@@ -221,6 +221,32 @@
             window.aegisEditor = easyMDE;
             const cm = easyMDE.codemirror;
 
+            // AEGIS_FRONTMATTER_DIM: CodeMirror's markdown mode has no concept of a
+            // leading frontmatter block — the closing '---' reads as a Setext heading
+            // underline for whatever text precedes it, so that line gets bolded as if
+            // it were a title. Flag the block's lines with a class and neutralize any
+            // heading/emphasis token styling within it via CSS (see editor-aegis.css).
+            let aegisFrontmatterLines = [];
+            function markFrontmatterLines() {
+                aegisFrontmatterLines.forEach(i => cm.removeLineClass(i, 'text', 'aegis-frontmatter-line'));
+                aegisFrontmatterLines = [];
+
+                const lineCount = cm.lineCount();
+                if (lineCount === 0 || cm.getLine(0).trim() !== '---') return;
+
+                for (let i = 1; i < lineCount; i++) {
+                    if (cm.getLine(i).trim() === '---') {
+                        for (let j = 0; j <= i; j++) {
+                            cm.addLineClass(j, 'text', 'aegis-frontmatter-line');
+                            aegisFrontmatterLines.push(j);
+                        }
+                        return;
+                    }
+                }
+            }
+            markFrontmatterLines();
+            cm.on('change', markFrontmatterLines);
+
             // AEGIS_HUD_SYNC: Force root state and body scroll to match editor mode
             const syncHUD = () => {
                 const isFull = easyMDE.isFullscreenActive();

@@ -436,3 +436,14 @@ body:has(.aegis-fullscreen-active) header {
     left: 0 !important;
     width: 100% !important;
 }
+
+/* AEGIS_FRONTMATTER_DIM: neutralize heading/emphasis token styling CodeMirror's
+   markdown mode applies within a leading frontmatter block (see editor.html's
+   markFrontmatterLines) — the closing '---' otherwise reads as a Setext heading
+   underline for the preceding line. */
+.CodeMirror-line.aegis-frontmatter-line span[class*="cm-"] {
+    font-weight: normal !important;
+    font-style: normal !important;
+    font-size: inherit !important;
+    color: #6b7280 !important;
+}
