@@ -61,17 +61,22 @@ Il programma riconosce **solo queste chiavi** come relazioni. Qualunque altra pa
 tu scriva come chiave (es. `note`, `colore`) viene **ignorata in silenzio**:
 non è un errore, semplicemente non crea nessuna relazione, resta un'annotazione morta.
 
-| Chiave da scrivere | Significato | Etichetta nel pannello RELAZIONI | Esempio |
-| --- | --- | --- | --- |
-| `crew` | equipaggio di una nave | **Equipaggio** | `crew: [Kira Venn, Tarn Mekel]` su `Beowulf.md` |
-| `member_of` | membro di un gruppo/organizzazione | **Membro di** | `member_of: Pax Pirata` su `Kira Venn.md` |
-| `located_in` | situato dentro un luogo | **Situato in** | `located_in: Porozlo` su `Kira Venn.md` |
-| `hostile_to` | ostilità reciproca | **Ostile a** | `hostile_to: [Tarn Mekel]` su `Kira Venn.md` |
-| `owns` | possiede/comanda qualcosa (nave, oggetto...) | **Possiede** | `owns: [Maelstrom]` su `Kira Venn.md` |
-| `owes_debt_to` | è in debito con qualcuno | **Debitore di** | `owes_debt_to: [Malen Trast]` su `Dorel Varr.md` |
-| `reports_to` | risponde/è subordinato a qualcuno (catena di comando o lealtà, anche segreta) | **Risponde a** | `reports_to: [Malen Trast]` su `Tenente Vesk.md` |
-| `allied_with` | alleanza reciproca | **Alleato di** | `allied_with: [Jaro Vey]` su `Alto Sacerdote Khaeden.md` |
-| `mentor_of` | è mentore/maestro di qualcuno | **Mentore di** | `mentor_of: [Fratello Malek]` su `Alto Sacerdote Khaeden.md` |
+| Chiave da scrivere | Significato | Etichetta (sul file che la dichiara) | Etichetta inversa (sull'altro file, automatica) | Esempio |
+| --- | --- | --- | --- | --- |
+| `crew` | equipaggio di una nave | **Equipaggio** | Equipaggio di | `crew: [Kira Venn, Tarn Mekel]` su `Beowulf.md` |
+| `member_of` | membro di un gruppo/organizzazione | **Membro di** | Membri | `member_of: Pax Pirata` su `Kira Venn.md` |
+| `located_in` | situato dentro un luogo | **Situato in** | Contiene | `located_in: Porozlo` su `Kira Venn.md` |
+| `hostile_to` | ostilità reciproca | **Ostile a** | Ostile a *(uguale, è reciproca)* | `hostile_to: [Tarn Mekel]` su `Kira Venn.md` |
+| `owns` | possiede/comanda qualcosa (nave, oggetto...) | **Possiede** | Posseduto da | `owns: [Maelstrom]` su `Kira Venn.md` |
+| `owes_debt_to` | è in debito con qualcuno | **Debitore di** | Creditore di | `owes_debt_to: [Malen Trast]` su `Dorel Varr.md` |
+| `reports_to` | risponde/è subordinato a qualcuno (catena di comando o lealtà, anche segreta) | **Risponde a** | Subordinati | `reports_to: [Malen Trast]` su `Tenente Vesk.md` |
+| `allied_with` | alleanza reciproca | **Alleato di** | Alleato di *(uguale, è reciproca)* | `allied_with: [Jaro Vey]` su `Alto Sacerdote Khaeden.md` |
+| `mentor_of` | è mentore/maestro di qualcuno | **Mentore di** | Allievo di | `mentor_of: [Fratello Malek]` su `Alto Sacerdote Khaeden.md` |
+
+La colonna "etichetta inversa" è quella che vedi **sull'altro file**, quello che non ha
+scritto nulla — es. se `Beowulf.md` scrive `crew: [Kira Venn]`, tu su `Beowulf.md` vedi
+"Equipaggio", ma su `Kira Venn.md` vedi "Equipaggio di" (non "Equipaggio" di nuovo — è
+un'etichetta diversa, pensata apposta per leggersi al contrario).
 
 Le ultime 4 (`owes_debt_to`, `reports_to`, `allied_with`, `mentor_of`) sono state aggiunte
 dopo un'analisi del materiale di campagna reale — non sono teoriche, ricorrono più volte
@@ -114,16 +119,41 @@ Il nome che scrivi **deve corrispondere al nome del file** dell'altra entità (s
 `.md`), ovunque si trovi nell'archivio — non serve il percorso. `Kira Venn` risolve
 a `Kira Venn.md`, non importa in che cartella sia.
 
+**Se il nome del file contiene `:` oppure `,`, mettilo tra apici doppi:**
+
+Sono gli stessi due caratteri che nella sintassi YAML separano chiave/valore e gli
+elementi di una lista — se compaiono dentro un nome senza apici, la riga viene letta
+male. Con nomi Traveller ci si sbatte facilmente:
+
+```yaml
+owns: [Beowulf: Type-A]        # ROTTO — i due punti spezzano la riga
+crew: [Vesk, Tenente]          # ROTTO — letto come DUE nomi, non uno
+
+owns: ["Beowulf: Type-A"]      # corretto
+crew: ["Vesk, Tenente"]        # corretto
+```
+
+Negli altri casi (nomi senza `:` o `,`) gli apici non servono e puoi ometterli.
+
 ---
 
-## 5. Cosa succede se il nome non corrisponde a niente
+## 5. Come vengono risolti i nomi
 
-Niente di grave. Non è un errore, non blocca il salvataggio. Il riferimento diventa
-**dangling** ("penzolante") — visibile nel report diagnostico
-(`GET /api/diagnostics/relations`), ma invisibile e innocuo altrove.
+**Maiuscole e spazi non contano.** `kira venn`, `Kira Venn`, `KIRA VENN` risolvono
+tutti allo stesso file `Kira Venn.md`. Anche gli spazi doppi/multipli vengono
+ridotti a uno solo automaticamente. Non serve essere precisi al carattere.
 
-Cause tipiche: refuso nel nome, il file non esiste ancora, o è scritto diverso
-(es. `Kira Ven` invece di `Kira Venn`).
+**Se il nome non corrisponde a niente**, niente di grave: non è un errore, non
+blocca il salvataggio. Il riferimento diventa **dangling** ("penzolante") —
+visibile nel report diagnostico (`GET /api/diagnostics/relations`), ma invisibile
+e innocuo altrove. Cause tipiche: refuso nel nome, il file non esiste ancora, o è
+scritto diverso (es. `Kira Ven` invece di `Kira Venn`).
+
+**Se due file diversi hanno lo stesso nome** (in cartelle diverse — es. due
+`Manifest.md`), un riferimento a quel nome ne colpisce **uno solo**, e quale dipende
+dall'ordine di scansione dell'archivio (non è scelta tua). La collisione viene
+comunque registrata nel report diagnostico, distinta dai riferimenti dangling.
+Soluzione pratica: dai ai file nomi distinti quando possono confondersi.
 
 ---
 
@@ -148,9 +178,16 @@ freccia al contrario da solo.
 naturale (di solito: la nave dichiara il proprio equipaggio, non ogni membro
 dell'equipaggio dichiara la propria nave).
 
+**E se la dichiari comunque da entrambi i lati?** Non succede nulla di rotto: per le
+relazioni reciproche come `hostile_to` e `allied_with`, il pannello mostra il
+collegamento **una volta sola**, mai duplicato, anche se sia A che B lo dichiarano
+indipendentemente. Non c'è però un avviso dedicato nel report diagnostico per questo
+caso — se vuoi evitare doppioni "manuali" nel testo, resta comunque meglio dichiarare
+da un solo lato, ma non è un problema se ti scappa.
+
 ---
 
-## 7. Esempio completo
+## 8. Esempio completo
 
 **`Beowulf.md`:**
 
@@ -181,11 +218,16 @@ Risultato nel pannello RELAZIONI:
 
 ---
 
-## 8. Riepilogo lampo
+## 9. Riepilogo lampo
 
 1. Blocco `---` / `---` alla primissima riga del file, prima di tutto il resto.
-2. Solo `crew`, `member_of`, `located_in`, `hostile_to`, `owns` creano relazioni —
-   qualunque altra chiave viene ignorata, mai un errore.
+2. Creano relazioni solo queste 9 chiavi: `crew`, `member_of`, `located_in`,
+   `hostile_to`, `owns`, `owes_debt_to`, `reports_to`, `allied_with`, `mentor_of`.
+   Qualunque altra chiave viene ignorata, mai un errore.
 3. Valore = uno o più nomi di file (senza `.md`), tra `[quadre]` se sono più di uno.
-4. Dichiara ogni relazione **da un solo lato** — l'altro compare da solo.
-5. Nome sbagliato = dangling, non un crash. Controllabile nel report diagnostico.
+   Nomi con `:` o `,` vanno tra apici doppi.
+4. Maiuscole e spazi non contano nella risoluzione dei nomi.
+5. Dichiara ogni relazione **da un solo lato** — l'altro compare da solo, con
+   un'etichetta diversa e pensata per leggersi al contrario.
+6. Nome sbagliato = dangling, non un crash. Nomi duplicati tra file = collisione.
+   Entrambi finiscono nel report diagnostico, distinti.

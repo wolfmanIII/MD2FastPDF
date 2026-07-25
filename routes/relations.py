@@ -14,7 +14,7 @@ from logic.relations_service import RelationGraphService
 
 router = APIRouter(tags=["Aegis Relations"])
 
-_LABELS: dict[str, str] = {r.name: r.label for r in VOCABULARY} | {r.inverse: r.label for r in VOCABULARY}
+_LABELS: dict[str, str] = {r.name: r.label for r in VOCABULARY} | {r.inverse: r.inverse_label for r in VOCABULARY}
 
 
 def _serialize_entity(entity: Entity) -> dict:

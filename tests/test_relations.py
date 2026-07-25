@@ -43,6 +43,19 @@ class TestVocabulary:
     def test_mentor_of_inverse_is_student_of(self):
         assert VOCABULARY_BY_NAME["mentor_of"].inverse == "student_of"
 
+    def test_every_relation_has_a_distinct_inverse_label(self):
+        # The reverse-direction UI label must say something different from the
+        # forward one for asymmetric relations — "Equipaggio di" reads correctly
+        # on the target's page, "Equipaggio" (the forward label) would not.
+        for r in VOCABULARY:
+            if r.inverse != r.name:
+                assert r.inverse_label != r.label, r.name
+
+    def test_symmetric_relations_have_matching_inverse_label(self):
+        for r in VOCABULARY:
+            if r.inverse == r.name:
+                assert r.inverse_label == r.label, r.name
+
     def test_inverse_names_are_not_frontmatter_keys(self):
         names = {r.name for r in VOCABULARY}
         inverses = {r.inverse for r in VOCABULARY}
