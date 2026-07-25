@@ -262,48 +262,37 @@ curl -fsSL https://ollama.com/install.sh | sh
 
 # Scarica il modello
 ollama pull qwen2.5-coder:latest
-
-# Esponi Ollama sulla LAN (binding su tutte le interfacce)
-sudo systemctl edit ollama --force
 ```
 
-Aggiungi nel file di override systemd:
-
-```ini
-[Service]
-Environment="OLLAMA_HOST=0.0.0.0"
-```
-
-```bash
-sudo systemctl daemon-reload && sudo systemctl restart ollama
-```
-
-Verifica dall'host Docker:
-
-```bash
-curl http://<IP_DGX>:11434/api/tags
-```
-
-Nel `.env` dell'host Docker:
-
-```env
-OLLAMA_IP=http://<IP_DGX>:11434
-```
-
-> **Firewall DGX**: se attivo, aprire la porta: `sudo ufw allow 11434`
+Per esporlo sulla LAN (binding, firewall, verifica) segui la checklist completa nella sezione "Ollama in rete" più sotto — si applica identica qui.
 
 ---
 
-## Configurazione Ollama
+## Ollama in rete — checklist completa
 
-Ollama deve girare sul PC Linux con binding su tutte le interfacce (non solo localhost):
+Raggiungere Ollama su un'altra macchina della LAN richiede **4 livelli indipendenti**, da verificare in ordine — un problema in uno non implica che gli altri siano a posto:
+
+### 1. Trova l'IP reale della macchina che esegue Ollama
 
 ```bash
-# Sul PC Linux — avvia Ollama accessibile dalla LAN
-OLLAMA_HOST=0.0.0.0 ollama serve
+hostname -I
 ```
 
-Oppure, se Ollama è un servizio systemd, aggiungere in `/etc/systemd/system/ollama.service`:
+Se quella macchina ha anche Docker installato, **ignora gli IP dei bridge interni** (tipicamente `172.17.x.x`, `172.18.x.x`) — non sono raggiungibili dal resto della LAN. Quello che serve è l'IP della rete reale (di solito `192.168.x.x` o `10.x.x.x`).
+
+### 2. Ollama deve ascoltare su tutte le interfacce, non solo localhost
+
+```bash
+ss -tlnp | grep 11434
+```
+
+Deve mostrare `0.0.0.0:11434` o `*:11434`. Se mostra `127.0.0.1:11434`, Ollama accetta connessioni solo dalla propria macchina — nessun'altra macchina della LAN può raggiungerlo, a prescindere da firewall o indirizzo configurato. Fix (systemd):
+
+```bash
+sudo systemctl edit ollama --force
+```
+
+Nel file che si apre:
 
 ```ini
 [Service]
@@ -314,11 +303,34 @@ Environment="OLLAMA_HOST=0.0.0.0"
 sudo systemctl daemon-reload && sudo systemctl restart ollama
 ```
 
-Verifica che l'host Docker raggiunga Ollama:
+(Se Ollama gira senza systemd: `OLLAMA_HOST=0.0.0.0 ollama serve`.)
+
+### 3. Firewall sulla macchina Ollama
 
 ```bash
-curl http://192.168.1.X:11434/api/tags
+sudo ufw status
+sudo ufw allow 11434
 ```
+
+### 4. Verifica dalla macchina che ospita SC-ARCHIVE (non da Ollama stesso)
+
+```bash
+ping -c 2 <IP_OLLAMA>                      # conferma che le due macchine si vedano in rete
+curl http://<IP_OLLAMA>:11434/api/tags     # conferma che Ollama risponda
+```
+
+> [!TIP]
+> Se `curl` restituisce **"could not resolve host"** con un IP letterale (non un hostname), il problema non è la rete né Ollama — è quasi sempre una variabile d'ambiente proxy (`http_proxy`/`https_proxy`) impostata sulla macchina da cui lanci `curl`, che intercetta la richiesta prima ancora di provare a contattare l'IP. Controlla con `echo $http_proxy $https_proxy` su quella macchina.
+
+Una volta che tutti e 4 i punti sono a posto, imposta `OLLAMA_IP=http://<IP_OLLAMA>:11434` nel `.env` di SC-ARCHIVE (vedi step 2 dell'installazione).
+
+### 5. Abilita il toggle nell'app — passo separato, facile da dimenticare
+
+Anche con la rete perfettamente configurata, SC-ARCHIVE in Docker parte con il Neural Link **disattivato di default** (scelta conservativa in `docker/entrypoint.sh`), indipendentemente da cosa hai messo in `OLLAMA_IP` — sono due impostazioni scollegate. Vai su **Settings → SYSTEM_STATUS → Neural Link Protocol**, attivalo, salva.
+
+Il pannello NEURAL_CORE della dashboard distingue i due problemi:
+- `ONLINE // DISABLED_IN_SETTINGS` (ambra) → la rete funziona, manca solo il toggle acceso
+- `OFFLINE` (rosso) → problema di rete reale, torna ai punti 1-4
 
 ---
 
@@ -394,13 +406,13 @@ docker compose exec sc-archive python3 -c "import urllib.request as u; print(u.u
 
 Output atteso: `{"status":"up", ...}`
 
-### Ollama non risponde
+### Ollama non risponde (o il pannello mostra PROTOCOL_OFFLINE)
 
 ```bash
 docker compose exec sc-archive python3 -c "import os, urllib.request as u; print(u.urlopen(os.environ['OLLAMA_IP'] + '/api/tags').read().decode())"
 ```
 
-Se fallisce: verificare firewall sul PC Linux (`sudo ufw allow 11434`) e che Ollama sia in ascolto su `0.0.0.0`.
+Se fallisce, segui la checklist completa nella sezione "Ollama in rete" più sopra (IP corretto, binding, firewall, proxy). Se invece risponde ma il pannello NEURAL_CORE mostra ancora qualcosa di diverso da `ONLINE`, controlla che il toggle **Neural Link Protocol** sia acceso in Settings — è un'impostazione separata dall'indirizzo, disattivata di default nei deploy Docker.
 
 ### Reset password admin
 

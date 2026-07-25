@@ -21,6 +21,18 @@
 - **CSS Optimizer**: Tailwind CSS Standalone Compiler (v4.2.2)
 - **Environment**: Poetry + pyenv
 
+## 📚 Documentazione di Configurazione
+
+Riferimento rapido a tutte le guide di setup — scegli il percorso in base a come vuoi installare SC-ARCHIVE:
+
+**Installazione locale (bare-metal, senza Docker)**
+- [docs/installazione-pyenv-poetry.md](docs/installazione-pyenv-poetry.md) — pyenv + Poetry, ambiente Python
+- [docs/ollama_ubuntu_24_04_guida.md](docs/ollama_ubuntu_24_04_guida.md) — installazione Ollama (Ubuntu 24.04)
+- [docs/rete-lan-caddy.md](docs/rete-lan-caddy.md) — esporre SC-ARCHIVE su LAN con nome host personalizzato via Caddy (bare-metal, ibrido, o Docker — copre tutti gli scenari)
+
+**Deploy Docker**
+- [docs/configurazione-docker.md](docs/configurazione-docker.md) — guida completa: build, volumi, permessi, Ollama in rete (checklist), aggiornamento, troubleshooting
+
 ## 🚀 Features
 
 - **File Metadata temporali**: Data di creazione e ultima modifica visibili sotto ogni file/directory nell'archive browser (`CRE DD/MM/YYYY HH:MM // MOD DD/MM/YYYY HH:MM`). Font mono, accent neon-cyan. Applicato anche ai risultati di ricerca.
