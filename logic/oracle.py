@@ -1,9 +1,14 @@
 import httpx
 import json
+import time
 from typing import AsyncGenerator, Optional
 
 from config.settings import SettingsManager, settings
 from logic.exceptions import OracleError
+
+# is_available() cache TTL — short enough to reflect a real state change quickly,
+# long enough that opening files / browsing folders never blocks on a live Ollama probe.
+_AVAILABILITY_CACHE_TTL = 10.0
 
 # AEGIS_ORACLE_PROTOCOL: Tactical Neural Interface
 _EMBEDDING_KEYWORDS: frozenset[str] = frozenset([
@@ -58,6 +63,8 @@ class OracleClient:
             timeout=httpx.Timeout(connect=5.0, read=600.0, write=30.0, pool=5.0),
             limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
         )
+        self._cached_available: Optional[bool] = None
+        self._cached_at: float = 0.0
 
     def _get_config(self) -> tuple[str, dict]:
         """Dynamically retrieves latest parameters from the core buffer."""
@@ -100,14 +107,35 @@ class OracleClient:
         try:
             all_models = await self._fetch_all_models(url)
         except Exception:
+            self._cache_availability(False)
             return {"ok": False, "status": "OFFLINE", "chat_models": [], "embed_models": []}
         if all_models is None:
+            self._cache_availability(False)
             return {"ok": False, "status": "DEGRADED", "chat_models": [], "embed_models": []}
         chat = [m for m in all_models if not any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
         embed = [m for m in all_models if any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
         if not enabled:
+            self._cache_availability(False)
             return {"ok": False, "status": "ONLINE // DISABLED_IN_SETTINGS", "chat_models": chat, "embed_models": embed}
+        self._cache_availability(True)
         return {"ok": True, "status": "ONLINE", "chat_models": chat, "embed_models": embed}
+
+    def _cache_availability(self, available: bool) -> None:
+        self._cached_available = available
+        self._cached_at = time.monotonic()
+
+    async def is_available(self) -> bool:
+        """Returns True only if Neural Link is enabled AND Ollama is reachable.
+
+        Backs the editor toolbar and list-view AI buttons. Uses a short-lived
+        cache so rendering a page never blocks on a live Ollama probe — the
+        dashboard's periodic /services/status polling keeps it warm in
+        practice, and a cold cache just costs one real check.
+        """
+        if self._cached_available is not None and (time.monotonic() - self._cached_at) < _AVAILABILITY_CACHE_TTL:
+            return self._cached_available
+        status = await self.service_status()
+        return status["ok"]
 
     async def list_models(self) -> list[str]:
         """Probes Ollama for available inference models, excluding embedding-only variants."""

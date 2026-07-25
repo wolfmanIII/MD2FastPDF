@@ -11,6 +11,7 @@ from logic.auth import auth_service
 from logic.exceptions import AccessDeniedError
 from config.templates import templates
 from logic.files import list_only_directories, set_project_root, list_directory_contents
+from logic.oracle import oracle as neural_oracle
 from routes.deps import get_current_user
 
 # AEGIS_CONFIG_ROUTER: System environment and workspace
@@ -127,6 +128,7 @@ async def select_root(
         "items": items,
         "current_path": ".",
         "breadcrumbs": [{"name": "ROOT", "path": "."}],
+        "neural_available": await neural_oracle.is_available(),
     }
     response = templates.TemplateResponse(
         request=request, name="components/file_list.html", context=context

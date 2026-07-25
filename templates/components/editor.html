@@ -221,6 +221,22 @@
             window.aegisEditor = easyMDE;
             const cm = easyMDE.codemirror;
 
+            // AEGIS_NEURAL_GATE: disable the AI-powered toolbar buttons when the
+            // Neural Core is off in Settings or unreachable — fetchNeuralSuggestion()
+            // below has its own guard too, since Tab/Esc consume an already-fetched
+            // suggestion independently of the toolbar button.
+            const AEGIS_NEURAL_AVAILABLE = {{ 'true' if neural_available else 'false' }};
+            if (!AEGIS_NEURAL_AVAILABLE) {
+                ["aegis-oracle-scan", "aegis-mermaid", "aegis-ghost"].forEach((name) => {
+                    const btn = easyMDE.toolbarElements && easyMDE.toolbarElements[name];
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.classList.add("opacity-30", "cursor-not-allowed");
+                        btn.title = "Neural Core disabled or not reachable";
+                    }
+                });
+            }
+
             // AEGIS_FRONTMATTER_DIM: CodeMirror's markdown mode has no concept of a
             // leading frontmatter block — the closing '---' reads as a Setext heading
             // underline for whatever text precedes it, so that line gets bolded as if
@@ -339,7 +355,7 @@
             };
 
             async function fetchNeuralSuggestion() {
-                if (isFetching) return;
+                if (!AEGIS_NEURAL_AVAILABLE || isFetching) return;
                 window.clearAegisGhost();
                 cm.focus(); // AEGIS_FOCUS_RESTORE: Return focus to editor for single-tab acceptance
 

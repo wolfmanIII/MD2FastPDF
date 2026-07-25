@@ -5,6 +5,7 @@ from config.templates import templates
 from logic.files import (
     list_directory_contents, create_new_file, delete_file, rename_file, search_files, read_file_bytes
 )
+from logic.oracle import oracle as neural_oracle
 from logic.relations_service import RelationGraphService
 from routes import build_breadcrumbs
 
@@ -23,12 +24,13 @@ async def list_files(request: Request, path: str = "."):
         "items": items,
         "current_path": path,
         "breadcrumbs": build_breadcrumbs(path),
-        "component_template": "components/file_list.html"
+        "component_template": "components/file_list.html",
+        "neural_available": await neural_oracle.is_available(),
     }
 
     if request.headers.get("HX-Request"):
         return templates.TemplateResponse(request=request, name="components/file_list.html", context=context)
-    
+
     return templates.TemplateResponse(request=request, name="shell.html", context=context)
 
 @router.get("/files/search", response_class=HTMLResponse)
@@ -40,16 +42,17 @@ async def perform_search(request: Request, q: str = ""):
         items = await list_directory_contents(".")
     else:
         items = await search_files(q)
-    
+
     context = {
         "request": request,
         "items": items,
         "current_path": ".",
         "breadcrumbs": [{"name": "SEARCH_RESULTS", "path": "."}],
         "searching": True,
-        "query": q
+        "query": q,
+        "neural_available": await neural_oracle.is_available(),
     }
-    
+
     return templates.TemplateResponse(request=request, name="components/results_grid.html", context=context)
 
 @router.get("/create/form", response_class=HTMLResponse)

@@ -115,6 +115,7 @@
                    <i class="fa fa-image"></i>
                 </button>
                 </div>
+                {% if neural_available %}
                 <div class="tooltip tooltip-bottom" data-tip="Neural scan">
                 <button type="button" class="btn btn-outline btn-neon btn-xs z-20"
                      hx-post="/api/oracle/summarize"
@@ -126,6 +127,14 @@
                      <i class="fa fa-microchip w-3 h-3"></i>
                 </button>
                 </div>
+                {% else %}
+                <div class="tooltip tooltip-bottom" data-tip="Neural Core disabled or not reachable">
+                <button type="button" disabled class="btn btn-outline btn-neon btn-xs z-20 opacity-30 cursor-not-allowed"
+                     onclick="event.preventDefault(); event.stopPropagation();">
+                     <i class="fa fa-microchip w-3 h-3"></i>
+                </button>
+                </div>
+                {% endif %}
                 <div class="tooltip tooltip-bottom" data-tip="Rename">
                 <button type="button" class="btn btn-outline btn-neon btn-xs z-20"
                      hx-get="/rename/form?path={{ item.path|urlencode }}"

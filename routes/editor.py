@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from pathlib import Path
 from config.templates import templates
 from logic.files import read_file_content, write_file_content
+from logic.oracle import oracle as neural_oracle
 from logic.relations_service import RelationGraphService
 from routes import build_breadcrumbs
 
@@ -21,7 +22,8 @@ async def get_editor(request: Request, path: str):
         "path": path,
         "filename": Path(path).name,
         "breadcrumbs": build_breadcrumbs(str(Path(path).parent)),
-        "component_template": "components/editor.html"
+        "component_template": "components/editor.html",
+        "neural_available": await neural_oracle.is_available(),
     }
 
     if request.headers.get("HX-Request"):
