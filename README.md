@@ -235,11 +235,28 @@ git clone <repo-url> ~/sc-archive && cd ~/sc-archive
 
 # 2. Configura le variabili d'ambiente
 cp docker/.env.example .env
-nano .env   # imposta AEGIS_ADMIN_PASSWORD e OLLAMA_IP
+nano .env
 
 # 3. Build e avvio
 docker compose up -d --build
 ```
+
+**Come compilare `.env`:**
+
+```env
+# Opzionale — se ometti questa riga, SC-ARCHIVE genera una password casuale al primo
+# avvio e la salva in /root/.config/sc-archive/admin_password.txt (vedi sezione
+# "Primo Accesso" sopra). Impostala solo se vuoi scegliere tu la password admin.
+AEGIS_ADMIN_PASSWORD=la-tua-password
+
+# Opzionale — IP del PC in LAN che esegue Ollama (es. http://192.168.1.50:11434).
+# Se ometti questa riga, il default è http://host.docker.internal:11434, cioè
+# "l'host Docker stesso" — utile se Ollama gira nativamente sulla stessa macchina
+# del Pi/server che ospita i container.
+OLLAMA_IP=http://192.168.1.X:11434
+```
+
+Entrambe le variabili sono opzionali: se lasci `.env` vuoto o non lo crei affatto, il sistema parte comunque con i default sopra descritti.
 
 Il sistema è raggiungibile su `http://sc-archive.lan` (aggiungi l'IP del Pi in `/etc/hosts` sui dispositivi LAN).
 
