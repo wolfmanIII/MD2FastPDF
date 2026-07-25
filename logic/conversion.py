@@ -216,9 +216,12 @@ class PdfOutlineInjector:
             return pdf_bytes
 
     def _extract_headings(self, content: str) -> list[tuple[int, str]]:
+        # Frontmatter is metadata, never a heading source — a YAML comment line
+        # (`# ...`) inside the block would otherwise match _HEADING and produce
+        # a bogus bookmark for text that was never rendered into the PDF.
         return [
             (len(m.group(1)), self._clean(m.group(2)))
-            for m in self._HEADING.finditer(content)
+            for m in self._HEADING.finditer(strip_frontmatter(content))
         ]
 
     def _clean(self, text: str) -> str:
