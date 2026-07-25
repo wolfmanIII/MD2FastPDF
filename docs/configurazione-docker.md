@@ -217,6 +217,22 @@ I dati sopravvivono a `docker compose down`. Per resettare completamente:
 docker compose down -v   # rimuove anche i volumi
 ```
 
+### Dove sono i file sul disco dell'host
+
+I percorsi della tabella sopra sono **dentro il container**, non sull'host. Per trovare il percorso reale sul disco (es. per backup manuali, ispezione diretta, o recuperare i file senza passare da `docker compose exec`):
+
+```bash
+docker volume inspect md2fastpdf_sc-archive-workspaces
+```
+
+Il campo `Mountpoint` è il percorso reale — di norma qualcosa come `/var/lib/docker/volumes/md2fastpdf_sc-archive-workspaces/_data/`, navigabile solo con `sudo` (i volumi Docker sono di proprietà di root a livello host). Dentro trovi una cartella per ogni username SC-ARCHIVE (es. `admin/`) — **non** una cartella chiamata `aegis`: `aegis` è solo l'utente Linux dentro il container che possiede i file, non uno username dell'app.
+
+Se il prefisso `md2fastpdf_` non corrisponde (dipende dal nome della cartella in cui hai clonato il repository, che diventa il nome del progetto Docker Compose), trova il nome esatto con:
+
+```bash
+docker volume ls | grep sc-archive
+```
+
 ---
 
 ## Deploy Ibrido: Host Docker + Nodo GPU Esterno per Ollama
