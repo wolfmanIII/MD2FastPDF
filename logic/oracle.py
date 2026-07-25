@@ -88,9 +88,14 @@ class OracleClient:
         return None
 
     async def service_status(self) -> dict:
-        """Returns Ollama connectivity status and model lists categorized by type."""
-        if not self._cfg.get("neural_link_enabled", True):
-            return {"ok": False, "status": "PROTOCOL_OFFLINE", "chat_models": [], "embed_models": []}
+        """Returns Ollama connectivity status and model lists categorized by type.
+
+        Always probes the endpoint, even when neural_link_enabled is off, so the
+        dashboard can distinguish "reachable but disabled in Settings" from an
+        actual connectivity failure — the two look identical to an operator
+        otherwise, and only the former is fixed by a UI toggle.
+        """
+        enabled = self._cfg.get("neural_link_enabled", True)
         url = self._cfg.get("ollama_ip", "")
         try:
             all_models = await self._fetch_all_models(url)
@@ -100,6 +105,8 @@ class OracleClient:
             return {"ok": False, "status": "DEGRADED", "chat_models": [], "embed_models": []}
         chat = [m for m in all_models if not any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
         embed = [m for m in all_models if any(kw in m.lower() for kw in _EMBEDDING_KEYWORDS)]
+        if not enabled:
+            return {"ok": False, "status": "ONLINE // DISABLED_IN_SETTINGS", "chat_models": chat, "embed_models": embed}
         return {"ok": True, "status": "ONLINE", "chat_models": chat, "embed_models": embed}
 
     async def list_models(self) -> list[str]:

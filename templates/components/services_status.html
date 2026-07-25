@@ -36,7 +36,7 @@
         <div class="space-y-3">
             <div class="flex items-center justify-between text-sm">
                 <span class="text-zinc-100">STATUS:</span>
-                <span class="font-bold text-xs {% if ollama_ok %}neon-text animate-pulse{% else %}text-red-400{% endif %}">
+                <span class="font-bold text-xs {% if ollama_ok %}neon-text animate-pulse{% elif 'DISABLED_IN_SETTINGS' in ollama_status %}text-amber-400{% else %}text-red-400{% endif %}">
                     {{ ollama_status }}
                 </span>
             </div>
@@ -44,6 +44,11 @@
                 <span class="text-zinc-100">ENDPOINT:</span>
                 <span class="text-zinc-400 font-mono text-[11px]">{{ ollama_url }}</span>
             </div>
+            {% if 'DISABLED_IN_SETTINGS' in ollama_status %}
+            <div class="text-amber-400/80 text-[10px] normal-case tracking-normal italic">
+                Raggiungibile ma disattivato — attivalo in Settings → SYSTEM_STATUS → Neural Link Protocol.
+            </div>
+            {% endif %}
             <div class="flex items-start justify-between text-sm">
                 <span class="text-zinc-100 shrink-0">CHAT_MODELS:</span>
                 <span class="text-zinc-400 text-[11px] text-right font-mono">
