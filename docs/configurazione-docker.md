@@ -192,9 +192,9 @@ L'entrypoint parte sempre come root — non perché l'app giri da root, ma per p
 
 4. **Bootstrap admin**: se `users.json` è assente, crea l'utente `admin` con il gruppo `"admin"`. Password: quella da `AEGIS_ADMIN_PASSWORD` se impostata nel `.env`, altrimenti una password casuale generata al volo e salvata in `/home/aegis/.config/sc-archive/admin_password.txt` (persiste nel volume `sc-archive-userdata`) — recuperabile con:
 
-```bash
-docker compose exec sc-archive cat /home/aegis/.config/sc-archive/admin_password.txt
-```
+     ```bash
+     docker compose exec sc-archive cat /home/aegis/.config/sc-archive/admin_password.txt
+     ```
 
 5. **Passa il controllo a `uvicorn`** eseguito come `aegis` (`exec gosu aegis ...`), non più come root.
 
