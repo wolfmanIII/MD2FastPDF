@@ -6,8 +6,8 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - sc-archive-config:/app/config
-      - sc-archive-userdata:/root/.config/sc-archive
-      - sc-archive-workspaces:/root/sc-archive
+      - sc-archive-userdata:/home/aegis/.config/sc-archive
+      - sc-archive-workspaces:/home/aegis/sc-archive
       - sc-archive-blueprints:/app/blueprints
     environment:
       - AEGIS_ADMIN_PASSWORD=${AEGIS_ADMIN_PASSWORD:-}

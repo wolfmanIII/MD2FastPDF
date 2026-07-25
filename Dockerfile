@@ -36,8 +36,16 @@ RUN python -m venv /venv && \
 # --- Stage 3: Runtime image (ARM64-compatible) ---
 # python:3.13-slim, pinned by digest for reproducible builds (multi-arch index, includes arm64/v8)
 FROM python:3.13-slim@sha256:6771159cd4fa5d9bba1258caf0b82e6b73458c694d178ad97c5e925c2d0e1a91
-RUN apt-get update && apt-get install -y --no-install-recommends openssl \
+RUN apt-get update && apt-get install -y --no-install-recommends openssl gosu \
     && rm -rf /var/lib/apt/lists/*
+
+# Non-root runtime user. entrypoint.sh starts as root (the container default)
+# specifically to fix ownership on volume-mounted paths — Docker creates named
+# volumes root-owned on first use, and upgrades from an older root-only image
+# leave existing data root-owned too — then drops to this user via gosu right
+# before exec'ing uvicorn, so the running app never holds root privileges.
+RUN groupadd -r aegis && useradd -r -g aegis -d /home/aegis -m -s /usr/sbin/nologin aegis
+ENV HOME=/home/aegis
 
 WORKDIR /app
 
@@ -57,6 +65,10 @@ COPY blueprints/ ./blueprints/
 
 # Compiled CSS from css-builder (overrides any stale output.css)
 COPY --from=css-builder /app/static/css/output.css ./static/css/output.css
+
+# Only the directories the app writes to are owned by the runtime user —
+# source code stays root-owned/read-only, a small extra hardening step.
+RUN chown -R aegis:aegis config blueprints
 
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

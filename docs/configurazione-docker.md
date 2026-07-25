@@ -100,7 +100,7 @@ OLLAMA_IP=http://192.168.1.X:11434
 Sostituire `192.168.1.X` con l'IP effettivo della macchina che esegue Ollama. Su Raspberry Pi o PC poco performanti sarà quasi sempre un'altra macchina della LAN (vedi il box in alto e la sezione "Deploy Ibrido"); su un host abbastanza potente può anche essere `localhost` o `host.docker.internal` se Ollama gira nativamente sullo stesso host che ospita i container.
 
 > [!WARNING]
-> Se `AEGIS_ADMIN_PASSWORD` non viene impostata, **non** viene usata nessuna password fissa: SC-ARCHIVE ne genera una casuale al primo avvio e la salva in `/root/.config/sc-archive/admin_password.txt` (nel volume `sc-archive-userdata`, persistente) — vedi sezione "Primo avvio" più sotto.
+> Se `AEGIS_ADMIN_PASSWORD` non viene impostata, **non** viene usata nessuna password fissa: SC-ARCHIVE ne genera una casuale al primo avvio e la salva in `/home/aegis/.config/sc-archive/admin_password.txt` (nel volume `sc-archive-userdata`, persistente) — vedi sezione "Primo avvio" più sotto.
 
 ### 3. Configura il Caddyfile
 
@@ -179,18 +179,24 @@ ipconfig /flushdns
 
 All'avvio del container `sc-archive`, l'entrypoint esegue automaticamente:
 
-1. **Crea `config/settings.json`** con i valori Docker-appropriati:
+L'entrypoint parte sempre come root — non perché l'app giri da root, ma per poter sistemare i permessi sui volumi montati (Docker crea i named volume vuoti e di proprietà di root al primo utilizzo, e un volume ereditato da un deploy precedente a questa versione ha gli stessi permessi) prima di lanciare l'app vera e propria come utente non privilegiato `aegis` (via `gosu`, l'ultima riga di `entrypoint.sh`). Il processo `uvicorn` che serve le richieste non ha mai privilegi di root.
+
+1. **Corregge i permessi** su `config/`, `blueprints/`, `.config/sc-archive/` e `sc-archive/` (proprietario `aegis:aegis`)
+
+2. **Crea `config/settings.json`** con i valori Docker-appropriati:
    - `gotenberg_ip`: `http://gotenberg:3000` (nome container interno)
    - `ollama_ip`: valore da `OLLAMA_IP` nel `.env`
-   - `workspace_base`: `/root/sc-archive`
+   - `workspace_base`: `/home/aegis/sc-archive`
 
-2. **Genera la session key** in `/root/.config/sc-archive/session.key` (persiste nel volume `sc-archive-userdata`)
+3. **Genera la session key** in `/home/aegis/.config/sc-archive/session.key` (persiste nel volume `sc-archive-userdata`)
 
-3. **Bootstrap admin**: se `users.json` è assente, crea l'utente `admin` con il gruppo `"admin"`. Password: quella da `AEGIS_ADMIN_PASSWORD` se impostata nel `.env`, altrimenti una password casuale generata al volo e salvata in `/root/.config/sc-archive/admin_password.txt` (persiste nel volume `sc-archive-userdata`) — recuperabile con:
+4. **Bootstrap admin**: se `users.json` è assente, crea l'utente `admin` con il gruppo `"admin"`. Password: quella da `AEGIS_ADMIN_PASSWORD` se impostata nel `.env`, altrimenti una password casuale generata al volo e salvata in `/home/aegis/.config/sc-archive/admin_password.txt` (persiste nel volume `sc-archive-userdata`) — recuperabile con:
 
 ```bash
-docker compose exec sc-archive cat /root/.config/sc-archive/admin_password.txt
+docker compose exec sc-archive cat /home/aegis/.config/sc-archive/admin_password.txt
 ```
+
+5. **Passa il controllo a `uvicorn`** eseguito come `aegis` (`exec gosu aegis ...`), non più come root.
 
 Aprire il browser su `http://sc-archive.lan` e accedere con `admin` / password scelta.
 
@@ -201,8 +207,8 @@ Aprire il browser su `http://sc-archive.lan` e accedere con `admin` / password s
 | Volume | Percorso nel container | Contenuto |
 | ------ | ---------------------- | --------- |
 | `sc-archive-config` | `/app/config` | `settings.json` |
-| `sc-archive-userdata` | `/root/.config/sc-archive` | `users.json`, `groups.json`, `session.key`, `admin_password.txt` |
-| `sc-archive-workspaces` | `/root/sc-archive` | Workspace file degli utenti |
+| `sc-archive-userdata` | `/home/aegis/.config/sc-archive` | `users.json`, `groups.json`, `session.key`, `admin_password.txt` |
+| `sc-archive-workspaces` | `/home/aegis/sc-archive` | Workspace file degli utenti |
 | `sc-archive-blueprints` | `/app/blueprints` | Template della libreria Blueprint |
 
 I dati sopravvivono a `docker compose down`. Per resettare completamente:
@@ -345,6 +351,8 @@ docker compose down -v     # ferma + rimuove tutto inclusi i volumi
 docker compose exec sc-archive bash
 ```
 
+Apre una shell come root (utile per ispezionare/riparare qualsiasi cosa). L'app in esecuzione (`uvicorn`, PID 1) gira invece come utente non privilegiato `aegis` — per una shell con gli stessi permessi dell'app: `docker compose exec --user aegis sc-archive bash`.
+
 ---
 
 ## Troubleshooting
@@ -362,26 +370,28 @@ Cause comuni:
 
 ### PDF non funziona
 
-Gotenberg non raggiungibile. Verifica:
+Gotenberg non raggiungibile (il container `sc-archive` non ha `curl`, usa `python3`). Verifica:
 
 ```bash
-docker compose exec sc-archive curl http://gotenberg:3000/health
+docker compose exec sc-archive python3 -c "import urllib.request as u; print(u.urlopen('http://gotenberg:3000/health').read().decode())"
 ```
 
-Output atteso: `{"status":"up"}`
+Output atteso: `{"status":"up", ...}`
 
 ### Ollama non risponde
 
 ```bash
-docker compose exec sc-archive curl $OLLAMA_IP/api/tags
+docker compose exec sc-archive python3 -c "import os, urllib.request as u; print(u.urlopen(os.environ['OLLAMA_IP'] + '/api/tags').read().decode())"
 ```
 
 Se fallisce: verificare firewall sul PC Linux (`sudo ufw allow 11434`) e che Ollama sia in ascolto su `0.0.0.0`.
 
 ### Reset password admin
 
+`--user aegis` mantiene la scrittura coerente con l'utente non privilegiato che esegue l'app (un `docker compose exec` senza `--user` gira come root e produrrebbe un `users.json` di proprietà di root — l'entrypoint lo corregge comunque al riavvio successivo, ma è più pulito evitarlo):
+
 ```bash
-docker compose exec sc-archive python3 -c "
+docker compose exec --user aegis sc-archive python3 -c "
 from logic.auth import auth_service
 import asyncio
 asyncio.run(auth_service.change_password('admin', 'nuova_password'))

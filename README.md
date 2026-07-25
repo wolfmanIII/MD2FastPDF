@@ -193,7 +193,7 @@ Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
 - `bin/aegis-migrate.sh`: Export/import completo dei dati per migrazione tra macchine.
 - `Dockerfile`: Build multi-stage (css-builder ARM64, deps-builder, runtime).
 - `docker-compose.yml`: Stack sc-archive + gotenberg + caddy con named volumes.
-- `docker/entrypoint.sh`: Init settings Docker, session key, bootstrap admin.
+- `docker/entrypoint.sh`: Init settings Docker, session key, bootstrap admin; parte come root per sistemare i permessi sui volumi, poi passa il controllo a `uvicorn` come utente non privilegiato (`gosu aegis`).
 - `docker/Caddyfile`: Reverse proxy `http://sc-archive.lan:80`.
 - `docker/.env.example`: Template variabili d'ambiente Docker.
 
@@ -245,8 +245,9 @@ docker compose up -d --build
 
 ```env
 # Opzionale — se ometti questa riga, SC-ARCHIVE genera una password casuale al primo
-# avvio e la salva in /root/.config/sc-archive/admin_password.txt (vedi sezione
-# "Primo Accesso" sopra). Impostala solo se vuoi scegliere tu la password admin.
+# avvio e la salva in /home/aegis/.config/sc-archive/admin_password.txt (l'app gira
+# come utente non privilegiato 'aegis', non come root — vedi docs/configurazione-docker.md).
+# Impostala solo se vuoi scegliere tu la password admin.
 AEGIS_ADMIN_PASSWORD=la-tua-password
 
 # Opzionale — IP del PC in LAN che esegue Ollama (es. http://192.168.1.50:11434).
