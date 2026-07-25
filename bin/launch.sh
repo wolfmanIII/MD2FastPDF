@@ -22,5 +22,9 @@ if [ ! -f "$KEY_FILE" ]; then
 fi
 export AEGIS_SECRET_KEY="$(cat "$KEY_FILE")"
 
+# Ensure Gotenberg and Ollama are reachable (uses an existing local install/container
+# if already up, otherwise creates a project-managed container — see bin/ensure_services.sh)
+./bin/ensure_services.sh
+
 # Start FastAPI server
 poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
