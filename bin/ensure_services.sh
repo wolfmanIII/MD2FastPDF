@@ -61,11 +61,17 @@ _ensure_service() {
 
     if docker container inspect "$container_name" >/dev/null 2>&1; then
         echo "[${label}] riavvio il container di progetto esistente (${container_name})"
-        docker start "$container_name" >/dev/null
+        if ! docker start "$container_name" >/dev/null; then
+            echo "[${label}] ERRORE: avvio del container esistente (${container_name}) fallito — vedi 'docker logs ${container_name}'"
+            return 1
+        fi
     else
         echo "[${label}] nessuna istanza raggiungibile — creo il container di progetto (${container_name}) sulla porta ${port}"
-        docker run -d --name "$container_name" --restart unless-stopped \
-            -p "${port}:${internal_port}" "$image" >/dev/null
+        if ! docker run -d --name "$container_name" --restart unless-stopped \
+            -p "${port}:${internal_port}" "$image" >/dev/null; then
+            echo "[${label}] ERRORE: creazione del container (${container_name}) fallita — porta ${port} già occupata? immagine non scaricabile?"
+            return 1
+        fi
     fi
 
     for _ in $(seq 1 20); do

@@ -13,21 +13,31 @@ services:
       - AEGIS_ADMIN_PASSWORD=${AEGIS_ADMIN_PASSWORD:-}
       - OLLAMA_IP=${OLLAMA_IP:-http://host.docker.internal:11434}
     depends_on:
-      - gotenberg
+      gotenberg:
+        condition: service_healthy
 
   gotenberg:
-    image: gotenberg/gotenberg:8
+    # gotenberg/gotenberg:8, pinned by digest for reproducible builds (multi-arch, includes arm64)
+    image: gotenberg/gotenberg:8@sha256:67097317623a503ba2a6a7e9ae8db6929a1f7e1bbd88077bacf2d325fbdab923
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
 
   caddy:
-    image: caddy:alpine
+    # caddy:alpine, pinned by digest for reproducible builds (multi-arch, includes arm64)
+    image: caddy:alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648
     restart: unless-stopped
     ports:
       - "80:80"
     volumes:
       - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
     depends_on:
-      - sc-archive
+      sc-archive:
+        condition: service_healthy
 
 volumes:
   sc-archive-config:
