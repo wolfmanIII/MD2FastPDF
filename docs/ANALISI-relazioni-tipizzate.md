@@ -438,23 +438,23 @@ tracciamento diagnostico introdotto — fuori scope, coerente con "nessuna modif
 **Implementazione** (solo `templates/components/graph_view.html`, nessun codice Python
 toccato):
 
-- Gli archi da link Markdown (`link`, la selezione D3 preesistente) ricevono uno stile
-  visivamente "debole" ma leggibile: colore più chiaro (zinc-400 invece di zinc-600),
-  `stroke-width` ridotto a un fattore fisso (`0.85×`) dello spessore condiviso con gli
-  archi tipizzati, e opacità di base ridotta (`0.6` invece di `0.9`) — l'enfasi al
-  passaggio del mouse resta identica (`0.9`), quindi restano perfettamente leggibili
-  quando rilevanti. Prima iterazione (`0.35` di opacità, zinc-600, `0.6×` di spessore):
-  troppo aggressiva, segnalata dall'utente come "oscurata" una volta vista sul grafo
-  reale — corretta ai valori sopra nella stessa sessione.
+- Gli archi da link Markdown (`link`, la selezione D3 preesistente) restano distinti
+  dagli archi tipizzati per colore/tratteggio (grigio neutro solido contro colorato
+  tratteggiato), non per opacità/spessore ridotti: due round di feedback dell'utente
+  sul grafo reale ("poco evidenti", poi ancora "falle più evidenti") hanno mostrato
+  che zinc-600 e poi zinc-400 a opacità/spessore ridotti si leggevano come "oscurati".
+  Colore finale zinc-300, spessore pieno (`1×`, uguale agli archi tipizzati), opacità
+  `0.85` (contro `0.9` degli archi tipizzati — quasi indistinguibile, intenzionale).
+  Aggiunto anche un checkbox "Seleziona tutte" nel pannello CONTROLS per il filtro
+  delle relazioni tipizzate (seleziona/deseleziona tutte in un clic, stato
+  indeterminato quando la selezione è parziale).
 - Aggiunta una legenda statica nel pannello CONTROLS ("Legenda linee") che spiega la
-  differenza a colpo d'occhio: linea sottile e chiara = menzione nel testo, linea
+  differenza a colpo d'occhio: linea sottile chiara = menzione nel testo, linea
   tratteggiata colorata = relazione tipizzata dal frontmatter.
-- Verificato via Playwright (utente di test isolato + archivio fixture a 3 file,
-  entrambi ripuliti a verifica completata) ispezionando direttamente gli attributi SVG
-  resi:
-  `stroke: #a1a1aa, stroke-width: 1.02` (= `1.2 × 0.85`), `opacity: 0.6` per l'arco di
-  menzione, contro `stroke: <colore per tipo>, stroke-width: 1.2`, `opacity: 0.9`,
-  `stroke-dasharray: 4,3` per l'arco tipizzato.
+- Verificato via Playwright (utente di test isolato + archivio reale, poi ripuliti)
+  ispezionando direttamente gli attributi SVG resi: `stroke: #d4d4d8, stroke-width:
+  1.2, opacity: 0.85` per l'arco di menzione, contro `stroke: <colore per tipo>,
+  stroke-width: 1.2, opacity: 0.9, stroke-dasharray: 4,3` per l'arco tipizzato.
 
 ---
 

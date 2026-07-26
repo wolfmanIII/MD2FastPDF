@@ -24,7 +24,7 @@
                     <div class="space-y-1.5 pt-4 border-t border-(--glass-border)">
                         <span class="block text-zinc-400 uppercase tracking-widest text-sm">Legenda linee</span>
                         <div class="flex items-center space-x-2 text-zinc-400 text-sm">
-                            <span class="inline-block w-6 h-px bg-zinc-400 opacity-60"></span>
+                            <span class="inline-block w-6 h-px bg-zinc-300 opacity-80"></span>
                             <span>Menzione nel testo (link Markdown)</span>
                         </div>
                         <div class="flex items-center space-x-2 text-zinc-400 text-sm">
@@ -43,9 +43,9 @@
                         <div>
                             <div class="flex items-center justify-between text-zinc-300 uppercase tracking-widest text-sm mb-2">
                                 <span>Dimensione nodi</span>
-                                <span id="aegis-graph-node-size-val" class="neon-text">1.0x</span>
+                                <span id="aegis-graph-node-size-val" class="neon-text">0.5x</span>
                             </div>
-                            <input id="aegis-graph-node-size" type="range" min="0.5" max="2.5" step="0.1" value="1"
+                            <input id="aegis-graph-node-size" type="range" min="0.5" max="2.5" step="0.1" value="0.5"
                                    class="w-full h-2 accent-(--neon-cyan) cursor-pointer">
                         </div>
                         <div>
@@ -118,17 +118,17 @@
     const LABEL_COLOR = "#a1a1aa";   // zinc-400
 
     // A Markdown-link mention in the body is informal prose, not a declared
-    // relation — kept visually "weak" (lighter, thinner) so it never competes
-    // with relationLink's colored/dashed typed edges (RF-8, issue #10). Not
-    // so faded it reads as broken/hidden: zinc-600 at low opacity disappeared
-    // against the dark canvas in practice, so this uses a lighter gray at a
-    // less aggressive opacity/width reduction.
-    const WEAK_LINK_COLOR = "#a1a1aa";   // zinc-400 — lighter than NODE_STROKE/LINK_COLOR
-    const WEAK_LINK_OPACITY = 0.6;
-    const WEAK_LINK_WIDTH_FACTOR = 0.85;
+    // relation — visually distinguished from relationLink's colored/dashed
+    // typed edges (RF-8, issue #10) by color+dash alone (solid neutral gray
+    // vs. colored dashed), not by fading it out: two rounds of user feedback
+    // on the real graph found zinc-600/zinc-400 at reduced opacity+width read
+    // as "obscured", so this stays close to full strength.
+    const WEAK_LINK_COLOR = "#d4d4d8";   // zinc-300 — clearly visible against the dark canvas
+    const WEAK_LINK_OPACITY = 0.85;
+    const WEAK_LINK_WIDTH_FACTOR = 1;
 
     // Live-tunable state (bound to the CONTROLS panel)
-    let nodeSizeMultiplier = 1;
+    let nodeSizeMultiplier = 0.5;
     let lineThickness = 1.2;
     let repelForce = -130;
     let linkDistance = 55;
