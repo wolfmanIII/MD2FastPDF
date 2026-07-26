@@ -209,6 +209,11 @@ VOCABULARY: tuple[RelationDef, ...] = (
     # Grounded in un archivio reale di scene (Protocollo_SIGMA/Scene/, 34 file).
     RelationDef("npcs",          inverse="scenes",           label="NPC coinvolti", inverse_label="Scene",
                 domain=("scene",), range=("npc",)),
+    # inverse="scenes_org", non "scenes": VOCABULARY_BY_INVERSE è una mappa
+    # 1:1 e "scenes" è già l'inverso di npcs — l'etichetta visibile resta
+    # "Scene" in entrambi i casi, solo il nome interno di query è distinto.
+    RelationDef("organizations", inverse="scenes_org",       label="Organizzazioni coinvolte", inverse_label="Scene",
+                domain=("scene",), range=("organization",)),
 )
 ```
 

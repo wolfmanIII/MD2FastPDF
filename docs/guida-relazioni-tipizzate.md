@@ -73,21 +73,25 @@ non è un errore, semplicemente non crea nessuna relazione, resta un'annotazione
 | `allied_with` | alleanza reciproca | **Alleato di** | Alleato di *(uguale, è reciproca)* | `allied_with: [Jaro Vey]` su `Alto Sacerdote Khaeden.md` |
 | `mentor_of` | è mentore/maestro di qualcuno | **Mentore di** | Allievo di | `mentor_of: [Fratello Malek]` su `Alto Sacerdote Khaeden.md` |
 | `npcs` | quali NPC compaiono in una scena | **NPC coinvolti** | Scene | `npcs: [Kira Venn, Tarn Mekel]` su `Scena-0011-Parley-Con-Kira-Lonn.md` |
+| `organizations` | quali organizzazioni/fazioni sono coinvolte in una scena | **Organizzazioni coinvolte** | Scene | `organizations: [Pax Pirata]` su `Scena-0011-Parley-Con-Kira-Lonn.md` |
 
 La colonna "etichetta inversa" è quella che vedi **sull'altro file**, quello che non ha
 scritto nulla — es. se `Beowulf.md` scrive `crew: [Kira Venn]`, tu su `Beowulf.md` vedi
 "Equipaggio", ma su `Kira Venn.md` vedi "Equipaggio di" (non "Equipaggio" di nuovo — è
-un'etichetta diversa, pensata apposta per leggersi al contrario). Per `npcs` funziona
-uguale: scrivilo solo sulla scena, e ogni NPC coinvolto vede da solo "Scene" comparire
-sulla propria scheda, senza doverlo scrivere lì.
+un'etichetta diversa, pensata apposta per leggersi al contrario). Per `npcs` e
+`organizations` funziona uguale: scrivile solo sulla scena, e ogni NPC/organizzazione
+coinvolti vedono da soli "Scene" comparire sulla propria scheda, senza doverlo scrivere
+lì — anche se sono due chiavi diverse, "vedono" la stessa etichetta perché il significato
+per chi legge è lo stesso, cambia solo di cosa parla la scheda che la mostra.
 
 Le 4 relazioni `owes_debt_to`, `reports_to`, `allied_with`, `mentor_of` sono state aggiunte
 dopo un'analisi del materiale di campagna reale — non sono teoriche, ricorrono più volte
 nelle schede NPC. `member_of` resta la scelta giusta per l'appartenenza *formale* a un
 gruppo/organizzazione; `reports_to` è per un rapporto di subordinazione/lealtà *personale*
-verso un singolo individuo (anche quando è segreto o doppiogiochista). `npcs` è nata allo
-stesso modo, dall'archivio scene reale, per rispondere a una domanda concreta: "in quali
-scene appare questo NPC?".
+verso un singolo individuo (anche quando è segreto o doppiogiochista). `npcs` e
+`organizations` sono nate allo stesso modo, dall'archivio scene reale, per rispondere a
+domande concrete: "in quali scene appare questo NPC?", "in quali scene è coinvolta questa
+organizzazione?".
 
 Se in futuro serve un'altra relazione diversa da queste, si aggiunge al vocabolario — ma
 solo quando c'è un caso d'uso concreto nel testo, per non gonfiare la lista all'infinito.
@@ -226,9 +230,9 @@ Risultato nel pannello RELAZIONI:
 ## 9. Riepilogo lampo
 
 1. Blocco `---` / `---` alla primissima riga del file, prima di tutto il resto.
-2. Creano relazioni solo queste 10 chiavi: `crew`, `member_of`, `located_in`,
+2. Creano relazioni solo queste 11 chiavi: `crew`, `member_of`, `located_in`,
    `hostile_to`, `owns`, `owes_debt_to`, `reports_to`, `allied_with`, `mentor_of`,
-   `npcs`. Qualunque altra chiave viene ignorata, mai un errore.
+   `npcs`, `organizations`. Qualunque altra chiave viene ignorata, mai un errore.
 3. Valore = uno o più nomi di file (senza `.md`), tra `[quadre]` se sono più di uno.
    Nomi con `:` o `,` vanno tra apici doppi.
 4. Maiuscole e spazi non contano nella risoluzione dei nomi.
