@@ -263,16 +263,16 @@ che un'altra persona stia "rispondendo" dall'altra parte.
 
 Ordine consigliato, ogni step verificabile in isolamento:
 
-1. Nuovo slot `neural_query` in `config/settings.py` + esposizione nella UI Settings.
-2. `RelationIndex.find_by_display_name()` (§4.4) — puro, testabile senza Ollama.
+1. Nuovo slot `neural_query` in `config/settings.py` + esposizione nella UI Settings. (#13)
+2. `RelationIndex.find_by_display_name()` (§4.4) — puro, testabile senza Ollama. (#14)
 3. `OracleClient.translate_query()` (§4.6) — prompt dinamico, parsing difensivo del
-   JSON, mai un'eccezione propagata.
+   JSON, mai un'eccezione propagata. (#15)
 4. Validazione server-side (§4.3) — `_resolve_translated_query()`, puro, testabile
-   con input JSON fissi senza rete.
-5. Fallback a `DirectoryLister.search()` (§4.5).
-6. Stato di disambiguazione in sessione (§4.4).
-7. Endpoint HTTP `/api/oracle/archive-query` (§4.7).
-8. UI: nuova vista "Terminale Archivio" (§4.8).
+   con input JSON fissi senza rete. (#16)
+5. Fallback a `DirectoryLister.search()` (§4.5). (#17)
+6. Stato di disambiguazione in sessione (§4.4). (#18)
+7. Endpoint HTTP `/api/oracle/archive-query` (§4.7). (#19)
+8. UI: nuova vista "Terminale Archivio" (§4.8). (#20)
 
 Gli step 2 e 4 sono puri e non toccano Ollama: coprono l'80% della logica con test
 verificabili senza un'istanza reale in esecuzione.
