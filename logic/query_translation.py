@@ -33,6 +33,7 @@ class ResolvedQuery:
 class Ambiguous:
     """The named entity matched more than one candidate — the caller must
     ask the user to disambiguate (RF-11.3, issue #18) rather than guess."""
+    relation: str
     candidates: list[Entity]
 
 
@@ -58,7 +59,7 @@ def resolve_translated_query(raw: dict, index: RelationIndex) -> ResolvedQuery |
     if not candidates:
         return None
     if len(candidates) > 1:
-        return Ambiguous(candidates)
+        return Ambiguous(relation=relation_name, candidates=candidates)
 
     return ResolvedQuery(entity_key=candidates[0].key, relation=relation_name)
 

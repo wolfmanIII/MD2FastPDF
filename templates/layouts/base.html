@@ -302,6 +302,8 @@
                                       hx-swap="outerHTML">
                                 </span>
                             </a>
+                            <a href="/archive-terminal" hx-get="/archive-terminal" hx-target="#aegis-view-core" hx-push-url="true"
+                                class="px-3 py-2 rounded text-zinc-400 hover:neon-text hover:bg-white/5 transition-colors cursor-pointer no-underline">ARCHIVE_TERMINAL</a>
                             {% if request.session.get("is_admin") %}
                             <a href="/admin" hx-get="/admin" hx-push-url="true"
                                class="px-3 py-2 rounded text-zinc-400 hover:neon-text hover:bg-white/5 transition-colors cursor-pointer no-underline">SYS_ADMIN</a>

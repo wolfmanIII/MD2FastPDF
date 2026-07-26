@@ -1,0 +1,96 @@
+<div class="w-full grow flex flex-col min-h-0">
+    <div class="px-8 py-4 border-b border-(--glass-border) shrink-0">
+        <h1 class="neon-text font-bold text-lg tracking-widest uppercase">ARCHIVE_TERMINAL // LIBRARY DATA QUERY</h1>
+        <p class="text-zinc-500 text-xs mt-1 uppercase tracking-widest">Interrogazione strutturata dell'archivio — non una chat libera</p>
+    </div>
+
+    <div id="aegis-terminal-log" class="grow overflow-y-auto p-8 space-y-4"></div>
+
+    <div class="p-6 border-t border-(--glass-border) shrink-0">
+        <form id="aegis-terminal-form" class="flex items-center space-x-3">
+            <input id="aegis-terminal-input" type="text" placeholder="Chiedi qualcosa all'archivio... es. 'chi è ostile a Kira Venn?'"
+                   class="w-full" autocomplete="off">
+            <button type="submit" class="btn-solid text-xs shrink-0">INVIA //</button>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    const log = document.getElementById("aegis-terminal-log");
+    const form = document.getElementById("aegis-terminal-form");
+    const input = document.getElementById("aegis-terminal-input");
+
+    function escapeHtml(s) {
+        return s.replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+    }
+
+    function appendBubble(role, html) {
+        const bubble = document.createElement("div");
+        bubble.className = role === "user"
+            ? "ml-auto max-w-xl bg-(--neon-cyan)/10 border border-(--neon-cyan)/30 rounded-lg px-4 py-2 text-zinc-100 text-sm"
+            : "mr-auto max-w-xl bg-black/40 border border-(--glass-border) rounded-lg px-4 py-2 text-zinc-300 text-sm";
+        bubble.innerHTML = html;
+        log.appendChild(bubble);
+        log.scrollTop = log.scrollHeight;
+        if (window.htmx) { htmx.process(bubble); }
+    }
+
+    // serialize_entity() shape (answer/disambiguate kinds): {display_name, path, ...}
+    function renderEntityList(entities) {
+        if (!entities.length) return "<em>Nessun risultato.</em>";
+        return "<ul class=\"list-disc list-inside space-y-1\">" + entities.map(e =>
+            `<li><a href="/editor?path=${encodeURIComponent(e.path)}" hx-get="/editor?path=${encodeURIComponent(e.path)}" hx-target="#aegis-view-core" hx-push-url="true" class="text-(--neon-cyan) hover:underline cursor-pointer">${escapeHtml(e.display_name)}</a></li>`
+        ).join("") + "</ul>";
+    }
+
+    // DirectoryLister.search() shape (fallback_search kind): {name, path, ...} — a
+    // different shape than serialize_entity(), never a structured relation entity.
+    function renderSearchResults(results) {
+        if (!results.length) return "<em>Nessun risultato.</em>";
+        return "<ul class=\"list-disc list-inside space-y-1\">" + results.map(r =>
+            `<li><a href="/editor?path=${encodeURIComponent(r.path)}" hx-get="/editor?path=${encodeURIComponent(r.path)}" hx-target="#aegis-view-core" hx-push-url="true" class="text-(--neon-cyan) hover:underline cursor-pointer">${escapeHtml(r.name)}</a></li>`
+        ).join("") + "</ul>";
+    }
+
+    async function send(message) {
+        appendBubble("user", escapeHtml(message));
+        let data;
+        try {
+            const resp = await fetch("/api/oracle/archive-query", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({message})
+            });
+            data = await resp.json();
+        } catch (e) {
+            appendBubble("system", "<em>NEURAL_UPLINK_FAILURE — impossibile contattare il terminale.</em>");
+            return;
+        }
+
+        if (data.kind === "answer") {
+            appendBubble("system", `<strong>${escapeHtml(data.relation)}</strong><br>` + renderEntityList(data.results));
+        } else if (data.kind === "disambiguate") {
+            const buttons = data.candidates.map(c =>
+                `<button type="button" class="btn-ghost text-xs mr-2 mb-1 aegis-terminal-candidate" data-name="${escapeHtml(c.display_name)}">${escapeHtml(c.display_name)}</button>`
+            ).join("");
+            appendBubble("system", "<em>Più risultati possibili — quale intendi?</em><div class=\"mt-2\">" + buttons + "</div>");
+        } else {
+            appendBubble("system", `<em>${escapeHtml(data.label)}</em><br>` + renderSearchResults(data.results));
+        }
+    }
+
+    log.addEventListener("click", (e) => {
+        const btn = e.target.closest(".aegis-terminal-candidate");
+        if (btn) { send(btn.dataset.name); }
+    });
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const message = input.value.trim();
+        if (!message) return;
+        input.value = "";
+        send(message);
+    });
+})();
+</script>
