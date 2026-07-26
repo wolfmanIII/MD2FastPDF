@@ -43,6 +43,7 @@ Prefer technical accuracy over politeness.
 - DO commit frequently — ogni unità logica (modulo, route, template) è un commit separato. Non accumulare grandi changeset.
 - DO NOT suggest `.venv` local setup unless explicitly asked — project uses Poetry.
 - DO NOT exercise operational complacency. Flag suboptimal patterns immediately.
+- BEFORE running `/simplify` or Playwright verification: evaluate whether actually needed for change size/risk. Skip if trivial/low-risk.
 
 ## PROJECT STRUCTURE
 
