@@ -1,7 +1,7 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.22.0
-**Ultimo Aggiornamento**: 25 Luglio 2026
+**Stato Attuale**: Op_Ready / Versione 5.23.0
+**Ultimo Aggiornamento**: 26 Luglio 2026
 
 ---
 
@@ -193,7 +193,7 @@
 
 ### 1.19 RELAZIONI TIPIZZATE [5.9] (v5.21.0) — FASE 1 (MVP) COMPLETED
 
-- **Vocabolario dichiarativo** (`logic/relations.py::VOCABULARY`): 9 tipi di relazione riconosciuti nel frontmatter YAML — `crew`, `member_of`, `located_in`, `hostile_to` (simmetrica), `owns` (5 iniziali) più `owes_debt_to`, `reports_to`, `allied_with` (simmetrica), `mentor_of` (4 aggiunti dopo analisi del materiale di campagna reale, non teorici). Ogni `RelationDef` ha `label`/`inverse_label` distinte per il pannello UI. Chiavi fuori vocabolario ignorate silenziosamente — retrocompatibile con frontmatter già in uso, criterio di regressione zero rispettato.
+- **Vocabolario dichiarativo** (`logic/relations.py::VOCABULARY`): 11 tipi di relazione riconosciuti nel frontmatter YAML — `crew`, `member_of`, `located_in`, `hostile_to` (simmetrica), `owns` (5 iniziali) più `owes_debt_to`, `reports_to`, `allied_with` (simmetrica), `mentor_of` (4 aggiunti dopo analisi del materiale di campagna reale, non teorici), più `npcs` e `organizations` (v5.23.0, grounded nell'archivio scene reale — v. §1.22). Ogni `RelationDef` ha `label`/`inverse_label` distinte per il pannello UI, e da v5.23.0 anche `domain`/`range` (tupla di tipi ammessi, v. §1.22). Chiavi fuori vocabolario ignorate silenziosamente — retrocompatibile con frontmatter già in uso, criterio di regressione zero rispettato.
 - **`FrontmatterRelationParser`**: estrae gli archi da un file (`Protocol` + implementazione, DIP). Normalizzazione riferimenti via `canonical_key`/`strip_wikilink` (case-insensitive, spazi collassati, `[[wikilink]]` tollerati). Warning di parsing (valore non valido) collezionati come `ParseWarning` oltre che loggati.
 - **`RelationIndex` + `RelationIndexBuilder`** (`logic/relations_index.py`): indice a due passaggi (popola le entità, poi risolve gli archi — un file può referenziarne un altro non ancora letto), `in_edges` popolato nello stesso passaggio di `out_edges` (query inversa gratuita, RF-5). Riferimenti non risolti → `dangling`, mai eccezione. Collisioni di chiave tra file con lo stesso nome in cartelle diverse → registrate, vince il primo incontrato. `reindex_file()` invalida e ricostruisce solo gli archi di un singolo file (RF-6), nessuna scansione completa; gestisce anche cancellazione (entità rimossa, archi entranti retrocessi a dangling).
 - **`RelationGraphService`** (`logic/relations_service.py`): un `RelationIndex` live per root archivio attiva, chiave = path risolto — mai un singleton globale condiviso (la root è per-utente via `PathSanitizer`, un cache unico mescolerebbe archivi diversi). Build lazy al primo accesso, lock per evitare build concorrenti sulla stessa root.
@@ -203,7 +203,6 @@
 - **Fix rendering frontmatter**: il blocco YAML non appariva come markdown letterale (`<hr>` + intestazioni spezzate) in tre punti indipendenti — preview editor (client-side, `marked.parse`), export PDF/riassunto Oracle (`MarkdownRenderer.render`), bookmark PDF (`PdfOutlineInjector._extract_headings`, un commento YAML `# ...` dentro il blocco avrebbe altrimenti prodotto un bookmark fasullo). Fix anche nell'evidenziazione sintattica CodeMirror del pannello di input (il `---` di chiusura veniva letto come sottolineatura Setext di un titolo).
 - **Fix bug preesistente**: `renderAegisVisuals` era definita in uno script dopo il contenuto della pagina in `base.html` — al reload completo (non via HTMX) lanciava `ReferenceError`, rompendo la riscrittura dei percorsi relativi nella preview.
 - **`docs/guida-relazioni-tipizzate.md`**: guida utente in italiano semplice, senza gergo tecnico.
-- **Fase 2 (archi tipizzati nel grafo, validazione di dominio) e Fase 3 (query NL via Ollama) restano esplicitamente bloccate** finché questa Fase 1 non viene validata in uso reale, come da `docs/ANALISI-relazioni-tipizzate.md`.
 
 ### 1.20 DOCKER HARDENING (v5.22.0) — COMPLETED
 
@@ -222,6 +221,22 @@
 - **`OracleClient.is_available()`** (`logic/oracle.py`): true solo se il Neural Link è acceso nelle Impostazioni E Ollama è raggiungibile. Cache di 10s per non bloccare il rendering di editor/viste elenco su un probe live a Ollama ad ogni apertura file o cambio cartella — il polling periodico della dashboard (`/services/status`) mantiene la cache calda nella pratica.
 - **Controlli AI disattivati con tooltip esplicito** quando non disponibili: toolbar editor (Neural Scan, Mermaid Synthesis, Ghost-Text via `easyMDE.toolbarElements`) e pulsante Neural Scan nelle viste elenco (Archive, ricerca, dopo cambio root) — prima restavano sempre attivi e fallivano solo al click. `fetchNeuralSuggestion()` ha anche un guard diretto nel codice, non solo il pulsante disabilitato.
 - **`OracleClient.service_status()`** distingue "raggiungibile ma disattivato nelle Impostazioni" (`ONLINE // DISABLED_IN_SETTINGS`, ambra nel pannello NEURAL_CORE) da un vero problema di rete (`OFFLINE`, rosso) — prima il probe veniva saltato del tutto quando il toggle era spento, rendendo i due casi indistinguibili a vista pur essendo cause completamente diverse (impostazione vs. rete).
+
+### 1.22 RELAZIONI TIPIZZATE — Fase 2: archi tipizzati nel grafo & validazione di dominio (v5.23.0) — COMPLETED
+
+- **Archi tipizzati nella vista a grafo** (RF-8, issue #7): ogni relazione dichiarata nel frontmatter appare come arco colorato e tratteggiato per tipo (`d3.scaleOrdinal` su una palette separata da quella dei nodi/cartelle), con filtro per tipo, legenda, e checkbox **"Seleziona tutte"** (stato indeterminato quando la selezione è parziale) nel pannello CONTROLS.
+- **Archi "deboli" per le menzioni informali** (issue #10): gli archi già estratti da `logic/graph.py` (link Markdown standard `[testo](file.md)` nel corpo del testo — verificato empiricamente che `[[wikilink]]` non è mai usato per riferimenti a entità nell'archivio reale, solo come enfasi tipografica occasionale) sono ora distinti dagli archi tipizzati per colore/tratteggio. Due iterazioni di visibilità dopo feedback sull'uso reale: la prima (opacità ridotta, colore scuro) si leggeva come "oscurata"; portata a colore chiaro (zinc-300), spessore pieno, opacità 0.85.
+- **Validazione di dominio delle relazioni** (RF-9, issue #8): `RelationDef.domain`/`range` da singolo tipo a tupla di tipi ammessi, derivati dall'uso reale osservato nell'archivio (199 file, root reale della campagna) e non progettati a tavolino — es. `owns` ammette range `ship|location|drone|item`, `owes_debt_to` ammette `npc|organization` su entrambi i lati, `located_in` resta volutamente senza vincoli (troppo generica). Nuova `DomainViolation`, diagnostica e mai bloccante, esposta automaticamente da `GET /api/diagnostics/relations` — un tipo mancante non è mai una violazione, solo un conflitto reale tra due tipi noti lo è.
+- **`type:` è una stringa libera, non un'ontologia chiusa**: nessuna whitelist nel codice — classificare un nuovo genere di contenuto (progetti, IA, oggetti) non richiede una nuova voce in `VOCABULARY`, bastano un `type:` adatto e le relazioni già esistenti.
+- **Due nuove relazioni**, entrambe grounded nell'archivio scene reale (34 file, `Protocollo_SIGMA/Scene/`): `npcs` (quali NPC compaiono in una scena, issue #11) e `organizations` (quali organizzazioni/fazioni sono coinvolte, issue #12 — inverso `scenes_org`, non `scenes`, per evitare la collisione con l'inverso di `npcs` dato che `VOCABULARY_BY_INVERSE` è una mappa 1:1; l'etichetta visibile in UI resta "Scene" per entrambe).
+- **Fix duplicazione nodi nel grafo**: tornando indietro col browser dopo aver aperto l'editor da un nodo, HTMX ripristina lo snapshot in cache della pagina e ri-esegue lo script di inizializzazione sopra il DOM esistente — la vecchia simulazione D3 restava orfana con un gruppo di zoom mai più aggiornato (nodi "fissi" durante il pan). `init()` ora ferma la simulazione precedente e pulisce l'SVG prima di ricostruire il grafo.
+- **Dimensione nodi** della vista a grafo impostata di default al minimo dello slider (0.5×).
+
+### 1.23 RELAZIONI TIPIZZATE — Fase 3: documento di analisi per RF-11 (v5.23.0) — DESIGN APERTO
+
+- Gate dell'issue #9 considerato soddisfatto (Fase 1/2 già in uso reale sull'archivio della campagna) — aperto `docs/ANALISI-relazioni-query-nl.md`, il documento di analisi dedicato a RF-11 (query in linguaggio naturale via Ollama sul `RelationIndex`) richiesto esplicitamente dall'issue prima di progettare l'implementazione.
+- Decisioni chiave: gestione ambiguità tramite richiesta di disambiguazione nella stessa conversazione, fallback a `DirectoryLister.search()` (etichettato esplicitamente come diverso da una risposta strutturata) quando la traduzione non è valida, nuovo slot di modello dedicato `neural_query` indipendente dagli altri tre già esistenti.
+- Piano di implementazione tracciato in 8 issue granulari (#13-#20) nello stesso milestone — **nessun codice ancora scritto**, solo il documento di analisi.
 
 ---
 
@@ -279,11 +294,12 @@ docker/         entrypoint.sh, Caddyfile, .env.example — Dockerfile e docker-c
 | [5.7] | AEGIS GRAPH VIEW | **COMPLETED** |
 | [5.8] | AEGIS REBRANDING & HEADER REDESIGN | **COMPLETED** |
 | [5.9] | RELAZIONI TIPIZZATE — Fase 1 (MVP) | **COMPLETED** |
-| [5.10] | RELAZIONI TIPIZZATE — Fase 2 (archi tipizzati nel grafo, validazione dominio) | BLOCCATA — attende validazione Fase 1 in uso reale |
-| [5.11] | RELAZIONI TIPIZZATE — Fase 3 (query NL via Ollama) | ESPLORATIVA — nessuna progettazione ancora |
+| [5.10] | RELAZIONI TIPIZZATE — Fase 2 (archi tipizzati nel grafo, validazione dominio) | **COMPLETED** |
+| [5.11] | RELAZIONI TIPIZZATE — Fase 3 (query NL via Ollama) | Documento di analisi aperto, implementazione non iniziata (issue #9, #13-#20) |
 | [5.12] | DOCKER HARDENING (non-root, pin immagini, healthcheck, checksum) | **COMPLETED** |
 | [5.13] | NEURAL CORE AVAILABILITY GATING | **COMPLETED** |
+| [5.14] | RELAZIONI TIPIZZATE — vocabolario esteso (`npcs`, `organizations`) & graph UX refinements | **COMPLETED** |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.22.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.23.0 — DEPLOYMENT_ACTIVE.*

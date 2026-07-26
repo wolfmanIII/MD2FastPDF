@@ -1,6 +1,28 @@
 # CHANGELOG: SC-ARCHIVE
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.23.0] - RELAZIONI TIPIZZATE FASE 2 & GRAPH REFINEMENTS (2026-07-26)
+Fase 2 delle Relazioni Tipizzate completa (archi tipizzati nel grafo, validazione di
+dominio), vocabolario esteso con due relazioni grounded nell'archivio scene reale, il
+documento di analisi per la Fase 3 (query NL via Ollama) aperto con 8 issue granulari
+di implementazione, e diversi affinamenti/fix alla vista a grafo emersi usandola sui
+dati reali della campagna.
+
+### Added
+- **Archi tipizzati nella vista a grafo** (RF-8, issue #7): ogni relazione dichiarata nel frontmatter appare come arco colorato e tratteggiato per tipo, con filtro e legenda dedicati nel pannello CONTROLS. Nuovo checkbox **"Seleziona tutte"** per mostrare/nascondere tutte le relazioni tipizzate in un clic (stato indeterminato quando la selezione è parziale).
+- **Validazione di dominio delle relazioni** (RF-9, issue #8): `RelationDef.domain`/`range` passano da singolo tipo a tupla di tipi ammessi (derivati dall'uso reale osservato nell'archivio, non progettati a tavolino — es. `owns` ammette `npc→ship|location|drone|item`, `owes_debt_to` ammette `npc|organization` su entrambi i lati). Nuova `DomainViolation`, diagnostica e mai bloccante (coerente con `dangling`/`key_collisions`): un tipo mancante non è mai una violazione, solo un conflitto reale tra due tipi noti lo è.
+- **Due nuove relazioni nel vocabolario**, entrambe grounded nell'archivio scene reale (34 file): `npcs` (quali NPC compaiono in una scena, issue #11) e `organizations` (quali organizzazioni/fazioni sono coinvolte, issue #12 — inverso `scenes_org` per evitare la collisione con l'inverso di `npcs`, `VOCABULARY_BY_INVERSE` essendo una mappa 1:1).
+- **Archi "deboli" per le menzioni nel corpo del testo** (issue #10): gli archi già estratti da `logic/graph.py` (link Markdown standard `[testo](file.md)`, non `[[wikilink]]` — verificato che quella sintassi non è mai usata per riferimenti a entità nell'archivio reale) sono ora visivamente distinti dagli archi tipizzati nella vista a grafo.
+- **Documento di analisi dedicato a RF-11** (`docs/ANALISI-relazioni-query-nl.md`, issue #9): query in linguaggio naturale via Ollama sul `RelationIndex`, con gestione dell'ambiguità (richiesta di disambiguazione), fallback a ricerca testuale quando la traduzione non è valida, e un nuovo slot di modello dedicato `neural_query`. Il piano di implementazione è tracciato in 8 issue granulari (#13-#20).
+
+### Fixed
+- **Duplicazione dei nodi nella vista a grafo** tornando indietro col browser dopo aver aperto l'editor da un nodo: HTMX ripristina lo snapshot in cache della pagina grafo e ri-esegue lo script di inizializzazione sopra il DOM esistente, lasciando una simulazione D3 orfana con un gruppo di zoom che non riceve più aggiornamenti (i nodi apparivano "fissi" durante il pan). `init()` ora ferma la simulazione precedente e pulisce l'SVG prima di ricostruire il grafo, rendendola sicura da rieseguire in qualunque condizione.
+- **Visibilità degli archi di menzione**: due iterazioni successive dopo feedback sull'uso reale — la dimenticanza iniziale (opacità 0.35, colore zinc-600) risultava "oscurata"; portata a colore zinc-300, spessore pieno, opacità 0.85, distinguendosi dagli archi tipizzati solo per colore/tratteggio.
+
+### Changed
+- **Dimensione nodi** della vista a grafo impostata di default al minimo dello slider (0.5×) invece che al centro (1.0×).
+- `logic/oracle.py`: estratto `_is_embedding_model()`/`_is_chat_model()` per eliminare la duplicazione del filtro sui modelli di embedding nella classificazione dei modelli Ollama.
+
 ## [5.22.0] - DOCKER HARDENING & NEURAL AVAILABILITY GATING (2026-07-25)
 Deploy Docker verificato end-to-end e messo in sicurezza (utente non privilegiato, immagini
 pinnate, healthcheck), password admin non più prevedibile, e i controlli AI in editor e viste
