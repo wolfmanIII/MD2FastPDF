@@ -17,7 +17,7 @@ router = APIRouter(tags=["Aegis Relations"])
 _LABELS: dict[str, str] = {r.name: r.label for r in VOCABULARY} | {r.inverse: r.inverse_label for r in VOCABULARY}
 
 
-def _serialize_entity(entity: Entity) -> dict:
+def serialize_entity(entity: Entity) -> dict:
     """Custom shape (not jsonable_encoder): renames entity_type -> type and
     drops mtime, an internal reindex-bookkeeping field with no API meaning."""
     return {
@@ -34,7 +34,7 @@ async def get_entity_relations(key: str) -> JSONResponse:
     index = await RelationGraphService.get_index()
     relations = index.relations_of(key)
     return JSONResponse(content={
-        relation_name: [_serialize_entity(e) for e in entities]
+        relation_name: [serialize_entity(e) for e in entities]
         for relation_name, entities in relations.items()
     })
 
@@ -44,7 +44,7 @@ async def get_entity_relation(key: str, relation: str) -> JSONResponse:
     """RF-4 — a single named relation (accepts either its name or its inverse)."""
     index = await RelationGraphService.get_index()
     entities = index.related(key, relation)
-    return JSONResponse(content=[_serialize_entity(e) for e in entities])
+    return JSONResponse(content=[serialize_entity(e) for e in entities])
 
 
 @router.get("/api/diagnostics/relations", response_class=JSONResponse)

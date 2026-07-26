@@ -9,6 +9,17 @@ from config.settings import settings as app_settings
 from config.templates import templates
 from logic.conversion import MarkdownRenderer
 from logic.files import get_project_root
+from logic.query_translation import (
+    Ambiguous,
+    ResolvedQuery,
+    fallback_text_search,
+    pop_pending_disambiguation,
+    resolve_disambiguation_choice,
+    resolve_translated_query,
+    store_pending_disambiguation,
+)
+from logic.relations_service import RelationGraphService
+from routes.relations import serialize_entity
 
 _md_renderer = MarkdownRenderer()
 
@@ -40,6 +51,10 @@ class MermaidRequest(BaseModel):
 class SummarizeRequest(BaseModel):
     content: Optional[str] = None
     path: Optional[str] = None
+
+
+class ArchiveQueryRequest(BaseModel):
+    message: str
 
 
 @router.post("/complete")
@@ -117,3 +132,42 @@ async def oracle_summarize(request: Request, content: Optional[str] = Form(None)
             "status": "AEGIS_SCAN_STABLE"
         }
     )
+
+
+@router.post("/archive-query", response_class=JSONResponse)
+async def oracle_archive_query(payload: ArchiveQueryRequest, request: Request) -> JSONResponse:
+    """
+    AEGIS_ARCHIVE_TERMINAL: translates a natural-language message into a
+    structured RelationIndex query (RF-11, docs/ANALISI-relazioni-query-nl.md
+    §4.7, issue #19). Never a chatbot — every response is either a structured
+    answer grounded in RelationIndex data, an explicit disambiguation
+    request, or a plain-text search fallback, never freely generated prose
+    about the campaign (RF-11 non-obiettivi).
+    """
+    index = await RelationGraphService.get_index()
+    message = payload.message.strip()
+
+    pending = pop_pending_disambiguation(request)
+    resolved = resolve_disambiguation_choice(pending, message) if pending else None
+
+    if resolved is None:
+        raw = await oracle.translate_query(message)
+        resolved = resolve_translated_query(raw, index)
+
+    if isinstance(resolved, Ambiguous):
+        store_pending_disambiguation(request, resolved.relation, resolved.candidates)
+        return JSONResponse(content={
+            "kind": "disambiguate",
+            "candidates": [serialize_entity(e) for e in resolved.candidates],
+        })
+
+    if isinstance(resolved, ResolvedQuery):
+        entities = index.related(resolved.entity_key, resolved.relation)
+        return JSONResponse(content={
+            "kind": "answer",
+            "relation": resolved.relation,
+            "results": [serialize_entity(e) for e in entities],
+        })
+
+    fallback = await fallback_text_search(message)
+    return JSONResponse(content=fallback)
