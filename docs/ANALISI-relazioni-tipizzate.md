@@ -191,7 +191,10 @@ VOCABULARY: tuple[RelationDef, ...] = (
                 domain=("ship",), range=("npc",)),
     RelationDef("member_of",     inverse="has_member",       label="Membro di",     inverse_label="Membri",
                 domain=("npc", "organization"), range=("organization",)),
-    RelationDef("located_in",    inverse="contains",         label="Situato in",    inverse_label="Contiene"),  # non vincolata: troppo generica
+    # non vincolata: troppo generica per limitarla ai soli tipi visti finora —
+    # copre anche il caso scena→luogo ("dove si svolge la scena"), non ancora
+    # osservato nei dati reali ma già esprimibile senza modifiche al codice.
+    RelationDef("located_in",    inverse="contains",         label="Situato in",    inverse_label="Contiene"),
     RelationDef("hostile_to",    inverse="hostile_to",       label="Ostile a",      inverse_label="Ostile a",  # simmetrica
                 domain=("npc",), range=("npc",)),
     RelationDef("owns",          inverse="owned_by",         label="Possiede",      inverse_label="Posseduto da",
@@ -228,6 +231,12 @@ Note:
   volutamente senza vincoli (es. `located_in`) quando è troppo generica per limitarla
   ai soli tipi visti finora. Un tipo mancante sull'entità (frontmatter senza `type:`)
   non è mai trattato come violazione — solo un conflitto reale tra due tipi noti lo è.
+- Non ogni nuovo caso d'uso richiede una nuova chiave in `VOCABULARY`: `located_in`,
+  essendo non vincolata, copre già "una scena è ambientata in un luogo" (`located_in:
+  Porozlo` su un file di scena) senza modifiche al codice — è un uso *documentato*,
+  non ancora osservato nei dati reali, quindi non è stato aggiunto come voce separata
+  (coerente con il criterio del §8: nuovo tipo solo quando la vocabolario esistente
+  non basta già a rispondere alla domanda).
 
 ### 5.3 Modello dell'indice
 

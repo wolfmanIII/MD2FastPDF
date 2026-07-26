@@ -65,7 +65,7 @@ non è un errore, semplicemente non crea nessuna relazione, resta un'annotazione
 | --- | --- | --- | --- | --- |
 | `crew` | equipaggio di una nave | **Equipaggio** | Equipaggio di | `crew: [Kira Venn, Tarn Mekel]` su `Beowulf.md` |
 | `member_of` | membro di un gruppo/organizzazione | **Membro di** | Membri | `member_of: Pax Pirata` su `Kira Venn.md` |
-| `located_in` | situato dentro un luogo | **Situato in** | Contiene | `located_in: Porozlo` su `Kira Venn.md` |
+| `located_in` | situato dentro un luogo (funziona anche per una scena: dove si svolge) | **Situato in** | Contiene | `located_in: Porozlo` su `Kira Venn.md` **oppure** su `Scena-0011-Parley-Con-Kira-Lonn.md` |
 | `hostile_to` | ostilità reciproca | **Ostile a** | Ostile a *(uguale, è reciproca)* | `hostile_to: [Tarn Mekel]` su `Kira Venn.md` |
 | `owns` | possiede/comanda qualcosa (nave, oggetto...) | **Possiede** | Posseduto da | `owns: [Maelstrom]` su `Kira Venn.md` |
 | `owes_debt_to` | è in debito con qualcuno | **Debitore di** | Creditore di | `owes_debt_to: [Malen Trast]` su `Dorel Varr.md` |
