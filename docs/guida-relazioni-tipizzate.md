@@ -196,6 +196,60 @@ da un solo lato, ma non è un problema se ti scappa.
 
 ---
 
+## 7. `type:` è libero — cosa scrivere per progetti, IA, oggetti e simili
+
+Il valore di `type:` non è vincolato a una lista chiusa. Puoi scrivere `ship`,
+`npc`, `organization`, `location`, `drone`, `item`, `scene` — ma anche una parola
+che non esiste ancora da nessuna parte nel programma, e funzionerà comunque.
+Non serve "registrarla" prima: basta scriverla.
+
+Questo è utile per tutto il materiale che non è ovviamente un personaggio o una
+nave — progetti di ricerca segreti (*Progetto Helix*, *Progetto Aran*),
+intelligenze artificiali (*IUNO*), oggetti/artefatti (un cristallo, un manufatto
+antico), o una partizione criptata su una nave. Due esempi concreti già in uso
+nell'archivio reale:
+
+```yaml
+---
+type: organization        # un progetto/fazione semi-ufficiale
+member_of: Lysander-Consorzio
+---
+```
+
+```yaml
+---
+type: ai                  # un'intelligenza artificiale — tipo inventato, nessun
+                           # problema: non serve dichiararlo prima da nessuna parte
+located_in: Luna-Octavia   # located_in funziona con qualsiasi tipo, essendo generica
+---
+```
+
+**Regola pratica: quasi mai serve una chiave nuova in tabella per questo.** Nella
+maggior parte dei casi bastano due cose:
+
+1. Un `type:` sensato — riusa `organization` per progetti/fazioni, `item` per
+   oggetti/artefatti, oppure inventane uno tuo (`ai`, e così via) se nessuno dei
+   tipi esistenti calza.
+2. Una delle chiavi **già in tabella** per collegarlo a qualcos'altro —
+   `member_of`, `owns`, `located_in` (quest'ultima, non avendo vincoli, funziona
+   con qualunque tipo, anche uno mai visto prima).
+
+Una chiave *davvero* nuova serve solo quando ti trovi a voler fare una domanda
+concreta a cui nessuna delle chiavi esistenti sa rispondere — non solo perché hai
+in archivio un genere di contenuto diverso dal solito.
+
+**E se il tipo "non torna" con una relazione?** Alcune chiavi (es. `owns`) hanno
+un lato ristretto a certi tipi (nave, luogo, drone, oggetto). Se ci scrivi dentro
+qualcosa di un tipo diverso e inatteso (es. `owns: [IUNO]` con `IUNO.md` che ha
+`type: ai`), **non succede nulla di rotto**: il salvataggio funziona lo stesso,
+niente errore, niente blocco. Compare solo una riga in più nel report diagnostico
+(`GET /api/diagnostics/relations`), silenziosa e ignorabile — la stessa logica dei
+riferimenti dangling. Verificato: oggi, nell'archivio reale, le entità `type: ai`
+non generano nessuna di queste segnalazioni, perché l'unica relazione in cui
+compaiono (`located_in`) non ha vincoli di tipo.
+
+---
+
 ## 8. Esempio completo
 
 **`Beowulf.md`:**
@@ -240,3 +294,6 @@ Risultato nel pannello RELAZIONI:
    un'etichetta diversa e pensata per leggersi al contrario.
 6. Nome sbagliato = dangling, non un crash. Nomi duplicati tra file = collisione.
    Entrambi finiscono nel report diagnostico, distinti.
+7. `type:` è libero: puoi inventare un valore nuovo (es. `ai`) senza modificare
+   nulla. Un tipo che non torna con una relazione non blocca niente — finisce solo
+   nel report diagnostico, come i dangling.

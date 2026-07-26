@@ -354,6 +354,51 @@ Da allineare alle convenzioni di routing già presenti nel repo ⚠️.
 Il caso d'uso `CREW MANIFEST: BEOWULF` è servito da
 `GET /api/entities/beowulf/relations/crew`.
 
+### 5.9 `type:` non è un'ontologia chiusa
+
+`entity_type` (il valore del campo `type:` in frontmatter) è una **stringa libera**,
+non un enum. Il codice non mantiene nessuna lista di valori ammessi:
+
+```python
+entity_type = frontmatter.get("type") if frontmatter else None
+if not isinstance(entity_type, str):
+    entity_type = None
+```
+
+Qualunque stringa passa. Il confronto con `domain`/`range` (RF-9) avviene solo
+`casefold()`-normalizzato contro le tuple dichiarate nel `VOCABULARY`, mai contro
+un registro globale di "tipi validi" — non esiste un simile registro.
+
+**Conseguenza pratica:** classificare un nuovo genere di contenuto (un progetto di
+ricerca, un'intelligenza artificiale, la partizione criptata di una nave, un
+oggetto/artefatto) **non richiede quasi mai una nuova voce in `VOCABULARY`**. Bastano
+due cose, entrambe a costo zero di codice:
+
+1. Un valore di `type:` adatto — riusando uno esistente (`organization` per un
+   progetto/fazione come *Progetto Helix*, `item` per un oggetto come un cristallo)
+   oppure inventandone uno nuovo (`ai` per un'intelligenza artificiale come *IUNO*:
+   già in uso in 4 file dell'archivio reale, senza che sia mai stato dichiarato da
+   nessuna parte nel codice — funziona perché non serve dichiararlo).
+2. Le relazioni **già esistenti** per collegarlo (`member_of`, `owns`, `located_in` —
+   quest'ultima non vincolata, quindi utilizzabile subito con qualsiasi tipo, noto o
+   nuovo che sia).
+
+Una nuova voce in `VOCABULARY` serve solo quando emerge una **query strutturale
+concreta** che le chiavi esistenti non possono già esprimere (criterio del rischio
+in §8) — non per il solo fatto di introdurre un nuovo genere di entità.
+
+**Le violazioni di dominio restano sempre diagnostiche, mai bloccanti.** Un tipo
+nuovo o inatteso su un lato di una relazione vincolata (es. `owns`, il cui `range`
+è `("ship", "location", "drone", "item")`) può produrre una `DomainViolation` se
+usato contro quella relazione — ma è solo una riga in più nel report di
+`/api/diagnostics/relations`, mai un errore, mai un salvataggio bloccato. Verificato
+sull'archivio reale: le 4 entità `type: ai` esistenti (`IUNO`, `Daedalus`,
+`Aran-Echo`, `Custode-01`) generano oggi **zero violazioni** — l'unico arco che le
+coinvolge è `Custode-01 --located_in--> Luna-Octavia`, e `located_in` non è
+vincolata. Se in futuro comparisse ad esempio `owns: [IUNO]` su un NPC, verrebbe
+segnalata una violazione (perché `"ai"` non è nella tupla `range` di `owns`) — a
+quel punto, e solo a quel punto, varrebbe la pena valutare se estendere `owns.range`.
+
 ---
 
 ## 6. Piano di implementazione
