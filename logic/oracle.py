@@ -1,10 +1,12 @@
 import httpx
 import json
+import re
 import time
 from typing import AsyncGenerator, Optional
 
 from config.settings import SettingsManager, settings
 from logic.exceptions import OracleError
+from logic.relations import VOCABULARY
 
 # is_available() cache TTL — short enough to reflect a real state change quickly,
 # long enough that opening files / browsing folders never blocks on a live Ollama probe.
@@ -25,6 +27,27 @@ def _is_embedding_model(name: str) -> bool:
 def _is_chat_model(name: str) -> bool:
     """Excludes embedding-only models from chat/synthesis model lists."""
     return not _is_embedding_model(name)
+
+
+_QUERY_JSON_RE = re.compile(r"\{.*\}", re.DOTALL)
+
+
+def _build_query_translation_prompt() -> str:
+    """Enumerates VOCABULARY at call time (RF-11 §4.2) — never a hardcoded
+    list, so vocabulary growth (e.g. the `npcs`/`organizations` additions)
+    never requires remembering to update this prompt too."""
+    relations_desc = "\n".join(
+        f"- {r.name} ({r.label}) / inverso: {r.inverse} ({r.inverse_label})"
+        for r in VOCABULARY
+    )
+    return (
+        "Sei il modulo di interrogazione dell'AEGIS Library Data terminal. "
+        "Traduci la richiesta dell'utente in un oggetto JSON con questo schema: "
+        '{"intent": "relation_query", "entity": "<nome>", "relation": "<chiave>"} '
+        'oppure {"intent": "unresolved"} se non trovi una corrispondenza chiara. '
+        "Relazioni disponibili:\n" + relations_desc + "\n"
+        "Output SOLO il JSON, nessun altro testo."
+    )
 
 class PromptTemplates:
     """Centralized prompt vault for tactical consistency."""
@@ -252,6 +275,44 @@ class OracleClient:
             return result.replace("</div>", "").replace("<div>", "")
         except Exception:
             raise OracleError("BUFFER_OVERFLOW")
+
+    async def translate_query(self, message: str) -> dict:
+        """Translates a natural-language message into a raw candidate query
+        (RF-11 step 3, docs/ANALISI-relazioni-query-nl.md §4.2/§4.6).
+
+        Unlike every other method on this class, this one never raises —
+        the RF-11.4 fallback (plain-text search) must always be able to
+        trigger, so any failure (disabled link, unreachable model, timeout,
+        non-200, unparseable JSON) degrades to {"intent": "unresolved"}
+        instead of propagating. Validating the result against VOCABULARY/
+        RelationIndex is the caller's responsibility (step 4), not this
+        method's — it only returns what the model produced, parsed.
+        """
+        try:
+            url, models = self._get_config()
+            response = await self.client.post(
+                f"{url}/api/generate",
+                json={
+                    "model": models.get("neural_query"),
+                    "prompt": message,
+                    "system": _build_query_translation_prompt(),
+                    "format": "json",
+                    "stream": False,
+                    "options": {"temperature": 0.1},
+                }
+            )
+            if response.status_code != 200:
+                return {"intent": "unresolved"}
+
+            raw_text = response.json().get("response", "")
+            match = _QUERY_JSON_RE.search(raw_text)
+            if not match:
+                return {"intent": "unresolved"}
+
+            parsed = json.loads(match.group(0))
+            return parsed if isinstance(parsed, dict) else {"intent": "unresolved"}
+        except Exception:
+            return {"intent": "unresolved"}
 
 # Global instance for app lifecycle management
 oracle = OracleClient(settings)
