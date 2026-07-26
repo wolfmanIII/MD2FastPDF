@@ -21,6 +21,12 @@
                         <input id="aegis-graph-arrows" type="checkbox" checked class="accent-(--neon-cyan) cursor-pointer w-5 h-5">
                     </label>
 
+                    <div id="aegis-graph-relations-section" class="hidden space-y-3 pt-4 border-t border-(--glass-border)">
+                        <span class="block text-zinc-400 uppercase tracking-widest text-sm">Relazioni tipizzate</span>
+                        <div id="aegis-graph-relation-filters" class="space-y-2"></div>
+                        <div id="aegis-graph-relation-legend" class="space-y-1.5 pt-2"></div>
+                    </div>
+
                     <div class="space-y-4 pt-4 border-t border-(--glass-border)">
                         <div>
                             <div class="flex items-center justify-between text-zinc-300 uppercase tracking-widest text-sm mb-2">
@@ -90,6 +96,9 @@
     const svgEl = document.getElementById("aegis-graph-svg");
     const emptyEl = document.getElementById("aegis-graph-empty");
     const countEl = document.getElementById("aegis-graph-count");
+    const relationsSection = document.getElementById("aegis-graph-relations-section");
+    const relationFiltersEl = document.getElementById("aegis-graph-relation-filters");
+    const relationLegendEl = document.getElementById("aegis-graph-relation-legend");
 
     const NEON_CYAN = "#7dd3fc";
     const NODE_STROKE = "#52525b";   // zinc-600
@@ -108,6 +117,7 @@
     let searchQuery = "";
     let hoveredId = null;
     let currentZoomK = 1;
+    const hiddenRelationTypes = new Set();
 
     async function init() {
         let data;
@@ -121,8 +131,10 @@
 
         const nodes = data.nodes || [];
         const edges = data.edges || [];
+        const relationEdges = data.relation_edges || [];
 
-        countEl.textContent = nodes.length + " NODI // " + edges.length + " COLLEGAMENTI";
+        countEl.textContent = nodes.length + " NODI // " + edges.length + " COLLEGAMENTI"
+            + (relationEdges.length ? " // " + relationEdges.length + " RELAZIONI" : "");
 
         if (nodes.length === 0) {
             emptyEl.classList.remove("hidden");
@@ -137,6 +149,10 @@
             degree.set(e.source, (degree.get(e.source) || 0) + 1);
             degree.set(e.target, (degree.get(e.target) || 0) + 1);
         });
+        relationEdges.forEach(e => {
+            degree.set(e.source, (degree.get(e.source) || 0) + 1);
+            degree.set(e.target, (degree.get(e.target) || 0) + 1);
+        });
 
         const adjacency = new Map();
         nodes.forEach(n => adjacency.set(n.id, new Set()));
@@ -144,9 +160,19 @@
             adjacency.get(e.source)?.add(e.target);
             adjacency.get(e.target)?.add(e.source);
         });
+        relationEdges.forEach(e => {
+            adjacency.get(e.source)?.add(e.target);
+            adjacency.get(e.target)?.add(e.source);
+        });
 
         const groups = Array.from(new Set(nodes.map(n => n.group))).sort();
         const colorScale = d3.scaleOrdinal(groups, d3.schemeTableau10);
+
+        // Separate palette from colorScale (node/folder color) so "color = folder"
+        // and "color = relation type" are never visually confusable.
+        const relationTypes = Array.from(new Set(relationEdges.map(e => e.relation))).sort();
+        const relationColorScale = d3.scaleOrdinal(relationTypes, d3.schemeSet2);
+        const relationLabels = new Map(relationEdges.map(e => [e.relation, e.label]));
 
         function nodeRadius(d) {
             const deg = degree.get(d.id) || 0;
@@ -196,6 +222,34 @@
             .attr("stroke", LINK_COLOR)
             .attr("stroke-width", lineThickness)
             .attr("marker-end", showArrows ? "url(#aegis-arrow)" : null);
+
+        // d3.forceLink(edges) above already replaced `edges`' source/target
+        // strings with node object refs — relationEdges needs the same
+        // resolution done by hand, since it's never passed to a force (see
+        // module comment below: typed-relation edges are a visual overlay
+        // on the existing Markdown-link layout, not a second simulation input).
+        const nodeById = new Map(nodes.map(n => [n.id, n]));
+        relationEdges.forEach(e => {
+            e.source = nodeById.get(e.source);
+            e.target = nodeById.get(e.target);
+        });
+        const resolvedRelationEdges = relationEdges.filter(e => e.source && e.target);
+
+        const relationLink = zoomLayer.append("g")
+            .selectAll("line")
+            .data(resolvedRelationEdges)
+            .join("line")
+            .attr("stroke", d => relationColorScale(d.relation))
+            .attr("stroke-width", lineThickness)
+            .attr("stroke-dasharray", "4,3")
+            .attr("marker-end", showArrows ? "url(#aegis-arrow)" : null);
+
+        relationLink.append("title").text(d => d.label);
+
+        if (relationTypes.length > 0) {
+            relationsSection.classList.remove("hidden");
+            buildRelationControls();
+        }
 
         const node = zoomLayer.append("g")
             .selectAll("g")
@@ -268,6 +322,48 @@
                 }
                 return 0.9;
             });
+
+            relationLink.style("opacity", d => {
+                if (hoveredId) {
+                    return d.source.id === hoveredId || d.target.id === hoveredId ? 0.9 : 0.08;
+                }
+                if (query) {
+                    return nodeMatches(d.source) && nodeMatches(d.target) ? 0.9 : 0.08;
+                }
+                return 0.9;
+            });
+        }
+
+        function refreshRelationFilter() {
+            relationLink.style("display", d => hiddenRelationTypes.has(d.relation) ? "none" : null);
+        }
+
+        function buildRelationControls() {
+            relationFiltersEl.innerHTML = "";
+            relationTypes.forEach(relation => {
+                const id = "aegis-graph-relation-" + relation;
+                const label = document.createElement("label");
+                label.className = "flex items-center justify-between cursor-pointer";
+                label.innerHTML =
+                    '<span class="text-zinc-300 tracking-widest text-sm normal-case">' + relationLabels.get(relation) + '</span>' +
+                    '<input type="checkbox" id="' + id + '" checked class="accent-(--neon-cyan) cursor-pointer w-4 h-4">';
+                relationFiltersEl.appendChild(label);
+                label.querySelector("input").addEventListener("change", (e) => {
+                    if (e.target.checked) hiddenRelationTypes.delete(relation);
+                    else hiddenRelationTypes.add(relation);
+                    refreshRelationFilter();
+                });
+            });
+
+            relationLegendEl.innerHTML = "";
+            relationTypes.forEach(relation => {
+                const row = document.createElement("div");
+                row.className = "flex items-center space-x-2 text-xs normal-case";
+                row.innerHTML =
+                    '<span class="inline-block w-3 h-0.5 shrink-0" style="background:' + relationColorScale(relation) + '"></span>' +
+                    '<span class="text-zinc-400">' + relationLabels.get(relation) + '</span>';
+                relationLegendEl.appendChild(row);
+            });
         }
 
         function refreshTextFade() {
@@ -285,23 +381,35 @@
 
         refreshEmphasis();
         refreshTextFade();
+        refreshRelationFilter();
+
+        // Shared by both edge layers (link, relationLink): trims the line's end
+        // short of the target node's edge so the arrowhead doesn't sit under it.
+        function trimmedEndX(d) {
+            const dx = d.target.x - d.source.x, dy = d.target.y - d.source.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const r = nodeRadius(d.target) + 2;
+            return d.target.x - (dx / dist) * r;
+        }
+        function trimmedEndY(d) {
+            const dx = d.target.x - d.source.x, dy = d.target.y - d.source.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const r = nodeRadius(d.target) + 2;
+            return d.target.y - (dy / dist) * r;
+        }
 
         simulation.on("tick", () => {
             link
                 .attr("x1", d => d.source.x)
                 .attr("y1", d => d.source.y)
-                .attr("x2", d => {
-                    const dx = d.target.x - d.source.x, dy = d.target.y - d.source.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    const r = nodeRadius(d.target) + 2;
-                    return d.target.x - (dx / dist) * r;
-                })
-                .attr("y2", d => {
-                    const dx = d.target.x - d.source.x, dy = d.target.y - d.source.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    const r = nodeRadius(d.target) + 2;
-                    return d.target.y - (dy / dist) * r;
-                });
+                .attr("x2", trimmedEndX)
+                .attr("y2", trimmedEndY);
+
+            relationLink
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", trimmedEndX)
+                .attr("y2", trimmedEndY);
 
             node.attr("transform", d => "translate(" + d.x + "," + d.y + ")");
         });
@@ -341,6 +449,7 @@
         document.getElementById("aegis-graph-arrows").addEventListener("change", (e) => {
             showArrows = e.target.checked;
             link.attr("marker-end", showArrows ? "url(#aegis-arrow)" : null);
+            relationLink.attr("marker-end", showArrows ? "url(#aegis-arrow)" : null);
         });
 
         document.getElementById("aegis-graph-node-size").addEventListener("input", (e) => {
@@ -355,6 +464,7 @@
             lineThickness = parseFloat(e.target.value);
             document.getElementById("aegis-graph-line-thickness-val").textContent = lineThickness.toFixed(1) + "px";
             link.attr("stroke-width", lineThickness);
+            relationLink.attr("stroke-width", lineThickness);
         });
 
         document.getElementById("aegis-graph-repel").addEventListener("input", (e) => {
