@@ -312,6 +312,51 @@ class TestRelationsOf:
 
 
 # ---------------------------------------------------------------------------
+# find_by_display_name() — RF-11 step 2, substring lookup for the NL-query
+# translation (distinct from the exact canonical_key resolution above).
+# ---------------------------------------------------------------------------
+
+class TestFindByDisplayName:
+    @pytest.mark.anyio
+    async def test_no_match_returns_empty_list(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert index.find_by_display_name("Nobody") == []
+
+    @pytest.mark.anyio
+    async def test_exact_match_returns_single_entity(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert [e.display_name for e in index.find_by_display_name("Beowulf")] == ["Beowulf"]
+
+    @pytest.mark.anyio
+    async def test_partial_substring_match(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert [e.display_name for e in index.find_by_display_name("Kira")] == ["Kira Venn"]
+
+    @pytest.mark.anyio
+    async def test_case_insensitive(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert [e.display_name for e in index.find_by_display_name("beowulf")] == ["Beowulf"]
+
+    @pytest.mark.anyio
+    async def test_multiple_matches_returned_together(self, archive_root: Path):
+        _write(archive_root, "Progetto-Aran.md", "---\ntype: organization\n---\n\nProgetto.\n")
+        _write(archive_root, "Aran-Echo.md", "---\ntype: ai\n---\n\nEco.\n")
+        index = await RelationIndexBuilder().build()
+        matches = {e.display_name for e in index.find_by_display_name("Aran")}
+        assert matches == {"Progetto-Aran", "Aran-Echo"}
+
+    @pytest.mark.anyio
+    async def test_empty_query_returns_empty_list(self, archive_root: Path):
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert index.find_by_display_name("   ") == []
+
+
+# ---------------------------------------------------------------------------
 # diagnostics()
 # ---------------------------------------------------------------------------
 

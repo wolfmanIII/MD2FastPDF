@@ -270,6 +270,18 @@ class RelationIndex:
                     result[relation_def.inverse] = backward
         return result
 
+    def find_by_display_name(self, query: str) -> list[Entity]:
+        """Case-insensitive substring match on Entity.display_name — used only
+        by the RF-11 NL-query translation to resolve imprecise entity names
+        ("Kira" for "Kira Venn"). Distinct from the exact canonical_key lookup
+        used everywhere else (frontmatter references, RF-3/RF-4), which stays
+        unchanged. Zero, one, or many results are the caller's signal to treat
+        the query as unresolved, execute directly, or ask for disambiguation."""
+        needle = query.strip().casefold()
+        if not needle:
+            return []
+        return [e for e in self.entities.values() if needle in e.display_name.casefold()]
+
     def diagnostics(self) -> Diagnostics:
         return Diagnostics(
             dangling=list(self.dangling),
