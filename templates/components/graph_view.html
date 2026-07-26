@@ -205,6 +205,22 @@
         const width = container.clientWidth;
         const height = container.clientHeight;
 
+        // init() can run again against an already-populated #aegis-graph-svg:
+        // htmx restores a cached snapshot of this fragment (including its old
+        // node/link elements) on browser back/forward navigation and then
+        // re-executes this script on top of it. Without clearing first, the
+        // old simulation kept ticking in the background (orphaned, its own
+        // zoomLayer transform never updated again by the new zoom listener)
+        // while a second full set of nodes/links was appended alongside it —
+        // the "some nodes look stuck" bug. Stopping the old simulation and
+        // wiping prior children makes a re-run idempotent regardless of why
+        // it happened.
+        if (svgEl.__aegisSimulation) {
+            svgEl.__aegisSimulation.stop();
+        }
+        d3.select(svgEl).selectAll("*").remove();
+        emptyEl.classList.add("hidden");
+
         const svg = d3.select(svgEl)
             .attr("viewBox", [0, 0, width, height]);
 
@@ -236,6 +252,8 @@
             .force("x", d3.forceX(width / 2).strength(0.03))
             .force("y", d3.forceY(height / 2).strength(0.03))
             .force("collide", d3.forceCollide(nodeRadius));
+
+        svgEl.__aegisSimulation = simulation;
 
         const link = zoomLayer.append("g")
             .selectAll("line")
