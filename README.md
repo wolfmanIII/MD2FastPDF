@@ -1,6 +1,6 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
 
-**Versione 5.23.0** // RELAZIONI TIPIZZATE FASE 2 & GRAPH REFINEMENTS
+**Versione 5.24.0** // RELAZIONI TIPIZZATE FASE 3: QUERY IN LINGUAGGIO NATURALE
 
 > **Perché filesystem e niente database?** Non è una svista: è una scelta di design coerente col dominio. → [MANIFESTO.md](MANIFESTO.md)
 >
@@ -60,7 +60,8 @@ Riferimento rapido a tutte le guide di setup — scegli il percorso in base a co
 - **Global PDF Branding**: Esportazione PDF automatizzata con testata e piè di pagina SC-ARCHIVE (configurabile via Uplink).
 - **PDF Bookmark Injection**: outline PDF gerarchico iniettato automaticamente dopo la conversione Gotenberg — titoli `#`/`##`/`###` diventano bookmark navigabili nel pannello del lettore PDF. Localizzazione pagina + coordinata Y via `pypdf` visitor (CTM×TM). Best-effort scroll esatto (`Fit.xyz`); fallback a cima pagina se il testo non è estraibile.
 - **Aegis Graph View**: vista a grafo (`/graph`) dei collegamenti tra i documenti dell'archivio, su due livelli: menzioni informali (link Markdown standard nel corpo del testo) e relazioni tipizzate dichiarate nel frontmatter (colore/tratteggio per tipo, filtro con legenda e checkbox "Seleziona tutte"). Force-directed layout D3.js con pannello controlli live — dimensione nodi (default al minimo dello slider), spessore linee, forza di repulsione, distanza/forza collegamenti, dissolvenza testi su zoom — più ricerca, toggle "nascondi orfani", colorazione nodo per cartella, frecce direzionali e hover highlight su nodo + vicini diretti. Click su un nodo apre il documento nell'editor.
-- **Relazioni tipizzate**: dichiara relazioni strutturate (`crew`, `member_of`, `located_in`, `hostile_to`, `owns`, `owes_debt_to`, `reports_to`, `allied_with`, `mentor_of`, `npcs`, `organizations`) nel frontmatter YAML di un file. Query dirette e inverse gratuite (dichiari da un lato solo, l'altro compare da solo), validazione di dominio non bloccante (un tipo inatteso finisce solo nel report diagnostico), indice live per root d'archivio, endpoint `/api/entities/{key}/relations` e `/api/diagnostics/relations`, sezione RELAZIONI nell'editor. Vedi `docs/guida-relazioni-tipizzate.md`. Query in linguaggio naturale via Ollama in fase di analisi: `docs/ANALISI-relazioni-query-nl.md`.
+- **Relazioni tipizzate**: dichiara relazioni strutturate (`crew`, `member_of`, `located_in`, `hostile_to`, `owns`, `owes_debt_to`, `reports_to`, `allied_with`, `mentor_of`, `npcs`, `organizations`) nel frontmatter YAML di un file. Query dirette e inverse gratuite (dichiari da un lato solo, l'altro compare da solo), validazione di dominio non bloccante (un tipo inatteso finisce solo nel report diagnostico), indice live per root d'archivio, endpoint `/api/entities/{key}/relations` e `/api/diagnostics/relations`, sezione RELAZIONI nell'editor. Vedi `docs/guida-relazioni-tipizzate.md`.
+- **Terminale Archivio** (`/archive-terminal`): chat in linguaggio naturale sopra `RelationIndex` via Ollama — traduce la domanda in una query strutturata, chiede di disambiguare se il nome corrisponde a più entità, ripiega su ricerca testuale se la traduzione non è valida. Mai testo generato liberamente sulla campagna. Vedi `docs/ANALISI-relazioni-query-nl.md`.
 - **Rebranding**: nuovo logo esagonale (`static/logo.png`, trasparenza generata via flood-fill dai bordi) nell'header; favicon vettoriale semplificata (`favicon.svg`) per restare leggibile a 16px, con set completo `favicon.ico`/PNG multi-size e `apple-touch-icon` a piena risoluzione.
 - **Editor in preview di default**: i documenti Markdown si aprono in modalità preview invece del buffer grezzo.
 - **Badge archivio persistente**: nome della cartella archivio attiva visibile in ogni pagina (non solo in dashboard), con aggiornamento istantaneo al cambio directory.
@@ -297,7 +298,7 @@ poetry run pytest
 poetry run pytest --cov=logic --cov-report=term-missing
 ```
 
-381 test, 0 fallimenti. Copertura: `blueprints.py` 93%, `comms.py` 93%, `groupspace.py` 92%, `relations.py` 100%, `relations_index.py` 95%, `relations_service.py` 100%. I moduli `conversion`, `oracle`, `render` richiedono Gotenberg/Ollama — non inclusi nella suite unit.
+449 test, 0 fallimenti. Copertura: `blueprints.py` 93%, `comms.py` 93%, `groupspace.py` 92%, `relations.py` 100%, `relations_index.py` 95%, `relations_service.py` 100%, `query_translation.py` 100%. `conversion` e `render` richiedono Gotenberg — non inclusi nella suite unit; `oracle.py` è parzialmente coperto (`translate_query()` via `httpx.MockTransport`), il resto richiede Ollama.
 
 ---
 *Progettato per i narratori della stazione SC-ARCHIVE.*

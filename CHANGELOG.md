@@ -2,6 +2,34 @@
 
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.24.0] - RELAZIONI TIPIZZATE FASE 3: QUERY IN LINGUAGGIO NATURALE (2026-07-26)
+
+Fase 3 completa: un nuovo Terminale Archivio traduce domande in linguaggio naturale
+in query strutturate sul `RelationIndex` via Ollama, con gestione esplicita di
+ambiguità e fallback — mai una risposta libera non ancorata ai dati della campagna.
+Chiude l'intero epic "Relazioni tipizzate nel frontmatter" (issue #9, #13-#20).
+
+### Added
+
+- **Terminale Archivio** (`/archive-terminal`, nuova voce di navigazione distinta da COMMS): chat NL sopra il nuovo endpoint `POST /api/oracle/archive-query`. Ogni risposta è una di tre: `answer` (risultato strutturato da `RelationIndex.related()`), `disambiguate` (più entità candidate — il terminale chiede di scegliere), `fallback_search` (traduzione non riuscita, ripiega su ricerca testuale già esistente, etichettata esplicitamente come tale).
+- **`OracleClient.translate_query()`**: prompt generato dinamicamente da `VOCABULARY` a runtime (mai una lista hardcoded), `format: json`, parsing difensivo, non propaga mai un'eccezione — qualunque errore degrada a `{"intent": "unresolved"}` così il fallback può sempre scattare.
+- **`resolve_translated_query()`** (`logic/query_translation.py`): valida server-side l'output del modello contro il vocabolario reale e l'indice — mai fidarsi ciecamente. Una relazione inventata o un'entità non trovata diventano `unresolved`, mai un'esecuzione a scatola chiusa.
+- **`RelationIndex.find_by_display_name()`**: risoluzione per sottostringa case-insensitive, distinta dalla risoluzione esatta via `canonical_key` usata dal frontmatter (invariata).
+- **Disambiguazione in sessione**: quando un nome corrisponde a più entità, lo stato "ultima domanda ambigua + candidati" vive in `request.session`, mai persistito su disco — coerente con l'assenza di storico messaggi del Terminale Archivio (a differenza di COMMS).
+- **Nuovo slot di configurazione `neural_query`**, indipendente da `neural_hint`/`neural_scan`/`mermaid_synthesis`, esposto nella UI Settings esistente.
+- **Primi test per `logic/oracle.py`** nel repo (`tests/test_oracle.py`) — `httpx.MockTransport`, zero nuove dipendenze.
+
+### Fixed
+
+- **Bug reale trovato in verifica Playwright**: la UI del Terminale Archivio assumeva il campo `display_name` anche sui risultati di ricerca testuale di fallback, che invece usano `name` (forma diversa di `DirectoryLister.search()`) — causava un errore JS silenzioso (`undefined.replace()`) che bloccava la risposta. Aggiunta una funzione di rendering distinta per le due forme di dati.
+- **`Ambiguous` non portava la relazione**: necessaria per salvare correttamente lo stato di disambiguazione in sessione — dimenticata nel primo commit dell'endpoint, corretta nella stessa sessione di lavoro.
+
+### Changed
+
+- `Entity`/serializzazione: `serialize_entity()` (`routes/relations.py`) reso pubblico (era `_serialize_entity`) per essere riusato anche dal nuovo endpoint, invece di duplicarlo.
+- **Markdownlint configurato** (`.markdownlint.json`): MD024 con `siblings_only` (le intestazioni `### Added`/`Fixed`/`Changed` ripetute per ogni voce di versione non sono duplicati reali), MD013 disattivato (lo stile del progetto usa bullet descrittivi lunghi in tutta la documentazione). Rimossa una voce `[3.0.0]` duplicata per errore nel CHANGELOG.
+- **CLAUDE.md**: aggiunta regola per valutare la reale necessità di `/simplify`/verifica Playwright in base a dimensione/rischio della modifica, prima di eseguirli.
+
 ## [5.23.0] - RELAZIONI TIPIZZATE FASE 2 & GRAPH REFINEMENTS (2026-07-26)
 
 Fase 2 delle Relazioni Tipizzate completa (archi tipizzati nel grafo, validazione di

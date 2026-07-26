@@ -1,6 +1,6 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.23.0
+**Stato Attuale**: Op_Ready / Versione 5.24.0
 **Ultimo Aggiornamento**: 26 Luglio 2026
 
 ---
@@ -232,11 +232,17 @@
 - **Fix duplicazione nodi nel grafo**: tornando indietro col browser dopo aver aperto l'editor da un nodo, HTMX ripristina lo snapshot in cache della pagina e ri-esegue lo script di inizializzazione sopra il DOM esistente — la vecchia simulazione D3 restava orfana con un gruppo di zoom mai più aggiornato (nodi "fissi" durante il pan). `init()` ora ferma la simulazione precedente e pulisce l'SVG prima di ricostruire il grafo.
 - **Dimensione nodi** della vista a grafo impostata di default al minimo dello slider (0.5×).
 
-### 1.23 RELAZIONI TIPIZZATE — Fase 3: documento di analisi per RF-11 (v5.23.0) — DESIGN APERTO
+### 1.23 RELAZIONI TIPIZZATE — Fase 3: query in linguaggio naturale via Ollama (v5.24.0) — COMPLETED
 
-- Gate dell'issue #9 considerato soddisfatto (Fase 1/2 già in uso reale sull'archivio della campagna) — aperto `docs/ANALISI-relazioni-query-nl.md`, il documento di analisi dedicato a RF-11 (query in linguaggio naturale via Ollama sul `RelationIndex`) richiesto esplicitamente dall'issue prima di progettare l'implementazione.
-- Decisioni chiave: gestione ambiguità tramite richiesta di disambiguazione nella stessa conversazione, fallback a `DirectoryLister.search()` (etichettato esplicitamente come diverso da una risposta strutturata) quando la traduzione non è valida, nuovo slot di modello dedicato `neural_query` indipendente dagli altri tre già esistenti.
-- Piano di implementazione tracciato in 8 issue granulari (#13-#20) nello stesso milestone — **nessun codice ancora scritto**, solo il documento di analisi.
+Documento di analisi in `docs/ANALISI-relazioni-query-nl.md` (RF-11), implementato negli 8 step del piano (issue #13-#20), gate #9 chiuso.
+
+- **Terminale Archivio** (`/archive-terminal`, nuova voce di navigazione nel dropdown MODULES, distinta da COMMS): chat NL sopra `POST /api/oracle/archive-query`. Nessuna persistenza dei messaggi su disco — solo lo stato minimo di disambiguazione in `request.session`.
+- **`OracleClient.translate_query()`** (`logic/oracle.py`): prompt di traduzione generato dinamicamente da `VOCABULARY` a runtime — mai una lista hardcoded, si aggiorna da solo a ogni crescita del vocabolario. `format: json`, parsing difensivo (estrazione del primo blocco `{...}` valido), non propaga mai un'eccezione: qualunque fallimento (rete, timeout, JSON non parsabile, link disattivato) degrada a `{"intent": "unresolved"}`.
+- **`logic/query_translation.py`** (nuovo modulo): `resolve_translated_query()` valida server-side l'output del modello contro `VOCABULARY_BY_NAME`/`_BY_INVERSE` e `RelationIndex.find_by_display_name()` — una relazione inventata o un'entità non trovata diventano sempre `unresolved`, mai un'esecuzione a scatola chiusa. `find_by_display_name()` (sottostringa case-insensitive) resta distinta dalla risoluzione esatta via `canonical_key` usata dal frontmatter, invariata. `fallback_text_search()` riusa `DirectoryLister.search()` già esistente, etichettando il risultato come non-strutturato. `store_pending_disambiguation()`/`pop_pending_disambiguation()`/`resolve_disambiguation_choice()` gestiscono il turno successivo quando più entità corrispondono a un nome.
+- **Nuovo slot di configurazione `neural_query`**, indipendente da `neural_hint`/`neural_scan`/`mermaid_synthesis`, esposto nella UI Settings esistente con lo stesso pattern degli altri tre.
+- **Primi test per `logic/oracle.py`** nel repo (`tests/test_oracle.py`, `httpx.MockTransport`, zero nuove dipendenze) — prima di questa fase la copertura era 0%.
+- **Bug reale trovato in verifica Playwright**: la UI assumeva il campo `display_name` (forma di `serialize_entity()`) anche sui risultati di `fallback_search`, che invece usano `name` (forma di `DirectoryLister.search()`) — causava un errore JS silenzioso che bloccava la risposta. Corretto con una funzione di rendering distinta per le due forme di dati.
+- `serialize_entity()` (`routes/relations.py`) reso pubblico (era `_serialize_entity`) per essere riusato dal nuovo endpoint senza duplicarlo.
 
 ---
 
@@ -295,11 +301,11 @@ docker/         entrypoint.sh, Caddyfile, .env.example — Dockerfile e docker-c
 | [5.8] | AEGIS REBRANDING & HEADER REDESIGN | **COMPLETED** |
 | [5.9] | RELAZIONI TIPIZZATE — Fase 1 (MVP) | **COMPLETED** |
 | [5.10] | RELAZIONI TIPIZZATE — Fase 2 (archi tipizzati nel grafo, validazione dominio) | **COMPLETED** |
-| [5.11] | RELAZIONI TIPIZZATE — Fase 3 (query NL via Ollama) | Documento di analisi aperto, implementazione non iniziata (issue #9, #13-#20) |
+| [5.11] | RELAZIONI TIPIZZATE — Fase 3 (query NL via Ollama, Terminale Archivio) | **COMPLETED** |
 | [5.12] | DOCKER HARDENING (non-root, pin immagini, healthcheck, checksum) | **COMPLETED** |
 | [5.13] | NEURAL CORE AVAILABILITY GATING | **COMPLETED** |
 | [5.14] | RELAZIONI TIPIZZATE — vocabolario esteso (`npcs`, `organizations`) & graph UX refinements | **COMPLETED** |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.23.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.24.0 — DEPLOYMENT_ACTIVE.*
