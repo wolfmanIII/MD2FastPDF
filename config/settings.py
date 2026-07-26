@@ -16,7 +16,8 @@ DEFAULT_SETTINGS = {
     "models": {
         "neural_hint": "llama3.2",
         "neural_scan": "llama3.2",
-        "mermaid_synthesis": "qwen2.5-coder:7b"
+        "mermaid_synthesis": "qwen2.5-coder:7b",
+        "neural_query": "llama3.2"
     }
 }
 

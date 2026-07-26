@@ -19,3 +19,10 @@
         {% if settings.models.mermaid_synthesis not in available_models %}<option value="{{ settings.models.mermaid_synthesis }}" class="bg-zinc-900 text-white" selected>[OFFLINE_FALLBACK] // {{ settings.models.mermaid_synthesis|upper }}</option>{% endif %}
     </select>
 </div>
+<div class="space-y-1">
+    <label class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">Neural Query Device</label>
+    <select name="model_neural_query" class="w-full bg-black/60 text-xs font-mono text-(--neon-cyan) focus:outline-none rounded-sm">
+        {% for m in available_models %}<option value="{{ m }}" class="bg-zinc-900 text-white" {% if settings.models.neural_query==m %}selected{% endif %}>{{ m|upper }}</option>{% endfor %}
+        {% if settings.models.neural_query not in available_models %}<option value="{{ settings.models.neural_query }}" class="bg-zinc-900 text-white" selected>[OFFLINE_FALLBACK] // {{ settings.models.neural_query|upper }}</option>{% endif %}
+    </select>
+</div>

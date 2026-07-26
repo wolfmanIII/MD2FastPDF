@@ -50,7 +50,8 @@ async def save_settings(
     gotenberg_ip: str = Form(""),
     model_neural_hint: str = Form(""),
     model_neural_scan: str = Form(""),
-    model_mermaid_synthesis: str = Form("")
+    model_mermaid_synthesis: str = Form(""),
+    model_neural_query: str = Form("")
 ):
     """
     Persists updated operational parameters with data-loss prevention.
@@ -76,7 +77,8 @@ async def save_settings(
         updates["models"] = {
             "neural_hint": model_neural_hint if model_neural_hint else current_models.get("neural_hint"),
             "neural_scan": model_neural_scan if model_neural_scan else current_models.get("neural_scan"),
-            "mermaid_synthesis": model_mermaid_synthesis if model_mermaid_synthesis else current_models.get("mermaid_synthesis")
+            "mermaid_synthesis": model_mermaid_synthesis if model_mermaid_synthesis else current_models.get("mermaid_synthesis"),
+            "neural_query": model_neural_query if model_neural_query else current_models.get("neural_query")
         }
 
     await app_settings.batch_update(updates)
