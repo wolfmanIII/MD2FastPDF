@@ -439,18 +439,22 @@ tracciamento diagnostico introdotto — fuori scope, coerente con "nessuna modif
 toccato):
 
 - Gli archi da link Markdown (`link`, la selezione D3 preesistente) ricevono uno stile
-  visivamente "debole": `stroke-width` ridotto a un fattore fisso (`0.6×`) dello spessore
-  condiviso con gli archi tipizzati, e opacità di base ridotta (`0.35` invece di `0.9`) —
-  l'enfasi al passaggio del mouse resta identica (`0.9`), quindi restano perfettamente
-  leggibili quando rilevanti.
+  visivamente "debole" ma leggibile: colore più chiaro (zinc-400 invece di zinc-600),
+  `stroke-width` ridotto a un fattore fisso (`0.85×`) dello spessore condiviso con gli
+  archi tipizzati, e opacità di base ridotta (`0.6` invece di `0.9`) — l'enfasi al
+  passaggio del mouse resta identica (`0.9`), quindi restano perfettamente leggibili
+  quando rilevanti. Prima iterazione (`0.35` di opacità, zinc-600, `0.6×` di spessore):
+  troppo aggressiva, segnalata dall'utente come "oscurata" una volta vista sul grafo
+  reale — corretta ai valori sopra nella stessa sessione.
 - Aggiunta una legenda statica nel pannello CONTROLS ("Legenda linee") che spiega la
   differenza a colpo d'occhio: linea sottile e chiara = menzione nel testo, linea
   tratteggiata colorata = relazione tipizzata dal frontmatter.
 - Verificato via Playwright (utente di test isolato + archivio fixture a 3 file,
   entrambi ripuliti a verifica completata) ispezionando direttamente gli attributi SVG
   resi:
-  `stroke-width: 0.72` (= `1.2 × 0.6`), `opacity: 0.35` per l'arco di menzione, contro
-  `stroke-width: 1.2`, `opacity: 0.9`, `stroke-dasharray: 4,3` per l'arco tipizzato.
+  `stroke: #a1a1aa, stroke-width: 1.02` (= `1.2 × 0.85`), `opacity: 0.6` per l'arco di
+  menzione, contro `stroke: <colore per tipo>, stroke-width: 1.2`, `opacity: 0.9`,
+  `stroke-dasharray: 4,3` per l'arco tipizzato.
 
 ---
 

@@ -24,7 +24,7 @@
                     <div class="space-y-1.5 pt-4 border-t border-(--glass-border)">
                         <span class="block text-zinc-400 uppercase tracking-widest text-sm">Legenda linee</span>
                         <div class="flex items-center space-x-2 text-zinc-400 text-sm">
-                            <span class="inline-block w-6 h-px bg-zinc-600 opacity-40"></span>
+                            <span class="inline-block w-6 h-px bg-zinc-400 opacity-60"></span>
                             <span>Menzione nel testo (link Markdown)</span>
                         </div>
                         <div class="flex items-center space-x-2 text-zinc-400 text-sm">
@@ -118,10 +118,14 @@
     const LABEL_COLOR = "#a1a1aa";   // zinc-400
 
     // A Markdown-link mention in the body is informal prose, not a declared
-    // relation — kept visually "weak" (thin, faded) so it never competes with
-    // relationLink's colored/dashed typed edges (RF-8, issue #10).
-    const WEAK_LINK_OPACITY = 0.35;
-    const WEAK_LINK_WIDTH_FACTOR = 0.6;
+    // relation — kept visually "weak" (lighter, thinner) so it never competes
+    // with relationLink's colored/dashed typed edges (RF-8, issue #10). Not
+    // so faded it reads as broken/hidden: zinc-600 at low opacity disappeared
+    // against the dark canvas in practice, so this uses a lighter gray at a
+    // less aggressive opacity/width reduction.
+    const WEAK_LINK_COLOR = "#a1a1aa";   // zinc-400 — lighter than NODE_STROKE/LINK_COLOR
+    const WEAK_LINK_OPACITY = 0.6;
+    const WEAK_LINK_WIDTH_FACTOR = 0.85;
 
     // Live-tunable state (bound to the CONTROLS panel)
     let nodeSizeMultiplier = 1;
@@ -237,7 +241,7 @@
             .selectAll("line")
             .data(edges)
             .join("line")
-            .attr("stroke", LINK_COLOR)
+            .attr("stroke", WEAK_LINK_COLOR)
             .attr("stroke-width", lineThickness * WEAK_LINK_WIDTH_FACTOR)
             .attr("marker-end", showArrows ? "url(#aegis-arrow)" : null);
 
