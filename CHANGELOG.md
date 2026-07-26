@@ -1,7 +1,9 @@
 # CHANGELOG: SC-ARCHIVE
+
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
 ## [5.23.0] - RELAZIONI TIPIZZATE FASE 2 & GRAPH REFINEMENTS (2026-07-26)
+
 Fase 2 delle Relazioni Tipizzate completa (archi tipizzati nel grafo, validazione di
 dominio), vocabolario esteso con due relazioni grounded nell'archivio scene reale, il
 documento di analisi per la Fase 3 (query NL via Ollama) aperto con 8 issue granulari
@@ -9,6 +11,7 @@ di implementazione, e diversi affinamenti/fix alla vista a grafo emersi usandola
 dati reali della campagna.
 
 ### Added
+
 - **Archi tipizzati nella vista a grafo** (RF-8, issue #7): ogni relazione dichiarata nel frontmatter appare come arco colorato e tratteggiato per tipo, con filtro e legenda dedicati nel pannello CONTROLS. Nuovo checkbox **"Seleziona tutte"** per mostrare/nascondere tutte le relazioni tipizzate in un clic (stato indeterminato quando la selezione è parziale).
 - **Validazione di dominio delle relazioni** (RF-9, issue #8): `RelationDef.domain`/`range` passano da singolo tipo a tupla di tipi ammessi (derivati dall'uso reale osservato nell'archivio, non progettati a tavolino — es. `owns` ammette `npc→ship|location|drone|item`, `owes_debt_to` ammette `npc|organization` su entrambi i lati). Nuova `DomainViolation`, diagnostica e mai bloccante (coerente con `dangling`/`key_collisions`): un tipo mancante non è mai una violazione, solo un conflitto reale tra due tipi noti lo è.
 - **Due nuove relazioni nel vocabolario**, entrambe grounded nell'archivio scene reale (34 file): `npcs` (quali NPC compaiono in una scena, issue #11) e `organizations` (quali organizzazioni/fazioni sono coinvolte, issue #12 — inverso `scenes_org` per evitare la collisione con l'inverso di `npcs`, `VOCABULARY_BY_INVERSE` essendo una mappa 1:1).
@@ -16,19 +19,23 @@ dati reali della campagna.
 - **Documento di analisi dedicato a RF-11** (`docs/ANALISI-relazioni-query-nl.md`, issue #9): query in linguaggio naturale via Ollama sul `RelationIndex`, con gestione dell'ambiguità (richiesta di disambiguazione), fallback a ricerca testuale quando la traduzione non è valida, e un nuovo slot di modello dedicato `neural_query`. Il piano di implementazione è tracciato in 8 issue granulari (#13-#20).
 
 ### Fixed
+
 - **Duplicazione dei nodi nella vista a grafo** tornando indietro col browser dopo aver aperto l'editor da un nodo: HTMX ripristina lo snapshot in cache della pagina grafo e ri-esegue lo script di inizializzazione sopra il DOM esistente, lasciando una simulazione D3 orfana con un gruppo di zoom che non riceve più aggiornamenti (i nodi apparivano "fissi" durante il pan). `init()` ora ferma la simulazione precedente e pulisce l'SVG prima di ricostruire il grafo, rendendola sicura da rieseguire in qualunque condizione.
 - **Visibilità degli archi di menzione**: due iterazioni successive dopo feedback sull'uso reale — la dimenticanza iniziale (opacità 0.35, colore zinc-600) risultava "oscurata"; portata a colore zinc-300, spessore pieno, opacità 0.85, distinguendosi dagli archi tipizzati solo per colore/tratteggio.
 
 ### Changed
+
 - **Dimensione nodi** della vista a grafo impostata di default al minimo dello slider (0.5×) invece che al centro (1.0×).
 - `logic/oracle.py`: estratto `_is_embedding_model()`/`_is_chat_model()` per eliminare la duplicazione del filtro sui modelli di embedding nella classificazione dei modelli Ollama.
 
 ## [5.22.0] - DOCKER HARDENING & NEURAL AVAILABILITY GATING (2026-07-25)
+
 Deploy Docker verificato end-to-end e messo in sicurezza (utente non privilegiato, immagini
 pinnate, healthcheck), password admin non più prevedibile, e i controlli AI in editor e viste
 elenco ora riflettono davvero se il Neural Core è disponibile invece di fallire silenziosamente.
 
 ### Added
+
 - **Neural Core Availability Gating**: i pulsanti AI nell'editor (Neural Scan, Mermaid Synthesis, Ghost-Text) e nelle viste elenco (Neural Scan) si disattivano con tooltip "Neural Core disabled or not reachable" quando il toggle è spento o Ollama non risponde — prima restavano sempre attivi e fallivano solo al click. `OracleClient.is_available()` (`logic/oracle.py`) — enabled AND reachable — con cache di 10s per non bloccare il rendering di editor/liste su un probe live a ogni apertura file o cambio cartella.
 - **`OracleClient.service_status()`** distingue ora "raggiungibile ma disattivato nelle Impostazioni" (`ONLINE // DISABLED_IN_SETTINGS`, ambra nel pannello dashboard) da un vero problema di rete (`OFFLINE`, rosso) — prima il probe veniva saltato del tutto quando il toggle era spento, rendendo i due casi indistinguibili a vista.
 - **`bin/ensure_services.sh`**: bootstrap automatico di Gotenberg e Ollama per lo sviluppo locale — usa un'istanza già attiva (nativa, systemd, o container manuale) se raggiungibile, altrimenti crea un container di progetto dedicato (`md2fastpdf-gotenberg`/`md2fastpdf-ollama`), senza mai toccare installazioni esistenti dell'utente.
@@ -40,6 +47,7 @@ elenco ora riflettono davvero se il Neural Core è disponibile invece di fallire
 - **README**: nuova sezione "Documentazione di Configurazione" con link diretti a tutte le guide di setup, sia bare-metal che Docker.
 
 ### Fixed
+
 - **Password admin debole di default**: `bootstrap_admin()` non ricade più su `"admin"` se `AEGIS_ADMIN_PASSWORD` non è impostata — genera una password casuale (`secrets.token_urlsafe`) e la salva in `~/.config/sc-archive/admin_password.txt` (permessi `600`), non solo nei log. Rimosso anche il fallback debole equivalente in `docker-compose.yml`.
 - **Persistenza della libreria Blueprint in Docker**: `blueprints/` non veniva copiato nell'immagine né montato come volume — ogni `docker compose up -d --build` cancellava i blueprint creati dagli utenti. Aggiunto volume dedicato, popolato dai template di default al primo avvio.
 - **Modale di creazione file in Group Space**: non si chiudeva mai dopo una creazione riuscita — mancava l'`hx-on::after-request` presente invece nel modale equivalente dell'Archive principale.
@@ -48,10 +56,12 @@ elenco ora riflettono davvero se il Neural Core è disponibile invece di fallire
 - **`ensure_services.sh`**: fallimento immediato con messaggio chiaro se `docker run`/`start` fallisce, invece di attendere ~20s per poi segnalarlo in modo generico.
 
 ## [5.21.0] - RELAZIONI TIPIZZATE (2026-07-25)
+
 Fase 1 (MVP) completa: relazioni strutturate nel frontmatter YAML, query dirette/inverse,
 indice live per-root, endpoint HTTP, pannello RELAZIONI nell'editor.
 
 ### Added
+
 - **`logic/relations.py`**: vocabolario dichiarativo (`VOCABULARY`) di 9 tipi di relazione riconosciuti nel frontmatter — 5 iniziali (`crew`, `member_of`, `located_in`, `hostile_to`, `owns`) più 4 emersi da un'analisi del materiale di campagna reale (`owes_debt_to`, `reports_to`, `allied_with`, `mentor_of`). Ogni `RelationDef` ha un'etichetta diretta e una inversa distinte per il pannello UI. `FrontmatterRelationParser` estrae gli archi da un file, ignorando silenziosamente le chiavi fuori vocabolario — nessun errore, retrocompatibile con frontmatter già in uso. `canonical_key`/`strip_wikilink` normalizzano i riferimenti (case-insensitive, spazi multipli collassati, `[[wikilink]]` tollerati ma non richiesti).
 - **`logic/relations_index.py`**: `RelationIndex` + `RelationIndexBuilder` — costruzione a due passaggi (popola prima le entità, poi risolve gli archi, perché un file può referenziarne un altro non ancora letto), query dirette e inverse (`related`/`relations_of` — la query inversa non richiede alcuna dichiarazione sul lato target), `diagnostics()` (riferimenti dangling, collisioni di chiave tra file con lo stesso nome, warning di parsing), `reindex_file()` incrementale (nessuna scansione completa dell'archivio a ogni modifica).
 - **`logic/relations_service.py`**: `RelationGraphService` — un `RelationIndex` live per root archivio attiva, mai un singleton globale condiviso (la root è per-utente, un cache unico mescolerebbe archivi diversi).
@@ -61,6 +71,7 @@ indice live per-root, endpoint HTTP, pannello RELAZIONI nell'editor.
 - **`docs/guida-relazioni-tipizzate.md`**: guida utente in italiano semplice su come scrivere il frontmatter delle relazioni, senza gergo tecnico.
 
 ### Fixed
+
 - **Rendering del frontmatter**: il blocco YAML non compare più come markdown letterale (un `<hr>` seguito da intestazioni spezzate) né nella preview dell'editor, né nel PDF esportato, né nei bookmark PDF generati dai titoli — tutti e tre i punti ora rimuovono il blocco prima di interpretare il testo come Markdown.
 - **Evidenziazione sintattica dell'editor**: CodeMirror non interpreta più la riga di chiusura del blocco frontmatter come sottolineatura di un titolo Setext, né lascia testo semplice del blocco nel colore di default.
 - **Bug preesistente in `renderAegisVisuals`**: la funzione era definita in uno script posizionato dopo il contenuto della pagina — al reload completo (non via navigazione HTMX) lanciava `ReferenceError`, che a sua volta interrompeva la riscrittura dei percorsi relativi (immagini, link `.md`) nella preview dell'editor.
@@ -68,9 +79,11 @@ indice live per-root, endpoint HTTP, pannello RELAZIONI nell'editor.
 - **Etichette inverse**: il pannello RELAZIONI mostrava la stessa etichetta in entrambe le direzioni (es. "Equipaggio" anche sul file bersaglio); ogni relazione ha ora un'etichetta propria per il verso inverso ("Equipaggio di", "Subordinati", "Posseduto da"...).
 
 ## [5.20.0] - AEGIS GRAPH VIEW & REBRANDING (2026-07-11)
+
 Vista a grafo per l'archivio, nuovo logo/favicon, header rinnovato.
 
 ### Added
+
 - **`logic/graph.py` — `ArchiveGraphBuilder`**: classe SRP che deriva un grafo nodi/archi dai link Markdown (`[testo](path.md)`) trovati nell'archivio dell'utente attivo. Scan ricorsivo confinato alla root utente (`PathSanitizer.get_root()`), risoluzione e sanitizzazione di ogni link (traversal, path nascosti, file inesistenti o URL esterni scartati silenziosamente). Nessuna eccezione mai propagata.
 - **`routes/graph.py`**: `GET /graph` (fragment/shell HTMX) e `GET /graph/data` (JSON nodi/archi).
 - **`templates/components/graph_view.html`**: force-directed graph D3.js v7 (vendorizzato in `static/js/d3.min.js`), zoom/pan/drag, click-to-open sull'editor via HTMX. Pannello **CONTROLS** live: ricerca testuale (dimming), toggle nascondi orfani e frecce direzionali, 6 slider (dimensione nodi, spessore linee, forza di repulsione, distanza collegamenti, forza collegamenti, dissolvenza testi su zoom). Colorazione nodo per cartella padre (`d3.scaleOrdinal` + `schemeTableau10`), dimensione nodo proporzionale al grado, hover highlight su nodo + vicini diretti. Forze di centraggio deboli (`forceX`/`forceY`) per tenere il grafo nel viewport a qualunque intensità di repulsione.
@@ -83,10 +96,12 @@ Vista a grafo per l'archivio, nuovo logo/favicon, header rinnovato.
 - **`DENSITY_CAPACITY`**: soglia della barra di utilizzo storage in dashboard alzata da 100 MB a 10 GB (`STORAGE_CAPACITY_BYTES` in `logic/files.py`); aggiunto il livello GB alla formattazione di `ARCHIVE_SIZE`.
 
 ### Changed
+
 - **Header**: logo da 36px a 96px, header alzato a 128px per farci spazio. Layout a due righe: logo + "SC-ARCHIVE" a sinistra con stato SYS_ACTIVE/tagline sotto; MODULES/USERNAME/LOGOUT a destra con badge archivio sotto, allineati a destra.
 - **`bin/launch.sh`**: watcher Tailwind avviato con `--watch=always` invece di `--watch` — senza `always` il processo si ferma silenziosamente appena stdin si chiude, condizione sempre vera in esecuzione non interattiva (systemd `--user`, nessun TTY). Il CSS non veniva più ricompilato dopo l'avvio del servizio.
 
 ### Fixed
+
 - **`root_badge.html`**: mancavano `id`/attributi `hx-*` sul proprio elemento radice — al primo swap (`load`) l'elemento sostituiva se stesso con uno privo di `hx-trigger`, perdendo polling e ascolto di `root-updated` per sempre. Serviva ricaricare la pagina per vedere la nuova directory.
 - **Repulsione grafo senza effetto visibile**: senza vincolo di centraggio, aumentare "Forza di repulsione" spingeva i nodi fuori dall'area visibile invece di allargarli a vista. Aggiunte forze `forceX`/`forceY` deboli per tenere il grafo centrato nel viewport.
 - **Header visibile durante il fullscreen dell'editor**: leak di stacking-context (backdrop-filter dell'header) reso molto più visibile dall'header ingrandito — nascosto esplicitamente via `body:has(.aegis-fullscreen-active) header`.
@@ -95,9 +110,11 @@ Vista a grafo per l'archivio, nuovo logo/favicon, header rinnovato.
 ---
 
 ## [5.16.0] - PDF BOOKMARK INJECTION (2026-06-27)
+
 Outline PDF gerarchico iniettato automaticamente su ogni esportazione.
 
 ### Added
+
 - **`logic/conversion.py` — `PdfOutlineInjector`**: classe SRP per l'iniezione di outline PDF dopo la conversione Gotenberg. Estrae heading `#`–`######` dal Markdown sorgente, li sanitizza (rimozione inline Markdown), localizza la pagina tramite `pypdf` text extraction, calcola la coordinata Y in PDF user space via CTM×TM (`y_pdf = um[1]*tm[4] + um[3]*tm[5] + um[5]`), inietta l'outline gerarchico con `PdfWriter.add_outline_item()` e `Fit.xyz`. Fallback silenzioso: se l'injection fallisce, restituisce il PDF originale senza eccezioni.
 - **`logic/conversion.py` — `GotenbergClient`**: accetta `outline_injector: Optional[PdfOutlineInjector]` nel costruttore (DIP). `render_pdf()` invoca `inject()` sull'output Gotenberg prima di restituirlo.
 - **`logic/conversion.py` — `MarkdownRenderer`**: aggiunta extension `toc` alla lista `markdown.markdown()`.
@@ -107,9 +124,11 @@ Outline PDF gerarchico iniettato automaticamente su ogni esportazione.
 ---
 
 ## [5.15.0] - AEGIS UX REFINEMENTS (2026-06-19)
+
 Metadati temporali nell'archive browser e sidebar filetree editor ridimensionabile.
 
 ### Added
+
 - **`logic/files.py` — `DirectoryLister.list_contents()`**: ogni item (file e directory) ora espone `mtime_str` e `ctime_str` formattati `DD/MM/YYYY HH:MM`. Usa `st_birthtime` se disponibile (macOS/BSD e filesystem Linux con supporto); fallback a `st_ctime` (inode change time) su ext4/xfs.
 - **`logic/files.py` — `DirectoryLister.search()`**: stessa logica applicata ai risultati di ricerca ricorsiva.
 - **`templates/components/results_grid.html`**: date di creazione e modifica mostrate sotto il nome file/directory come sottotitolo inline (`CRE ... // MOD ...`), visibili da viewport `lg`. Font mono, label `text-zinc-500`, valori `text-(--neon-cyan)`.
@@ -119,9 +138,11 @@ Metadati temporali nell'archive browser e sidebar filetree editor ridimensionabi
 ---
 
 ## [5.14.0] - DOCKER RASPBERRY PI DEPLOY (2026-04-23)
+
 Stack containerizzato completo per Raspberry Pi 4/5 (ARM64). Build multi-stage con risoluzione automatica del binario Tailwind per architettura.
 
 ### Added
+
 - **`Dockerfile`**: Build multi-stage in 3 fasi — `css-builder` (compila Tailwind su `$BUILDPLATFORM`, scarica binario `arm64` o `x64` da GitHub in base a `$BUILDARCH`), `deps-builder` (Poetry 2.3.2 + `poetry-plugin-export`, venv isolato), `runtime` (`python:3.13-slim` + `openssl`). Nessun binario `tailwindcss` nel contesto build.
 - **`docker-compose.yml`**: Tre servizi — `sc-archive` (build .), `gotenberg/gotenberg:8`, `caddy:alpine`. Tre named volumes: `sc-archive-config` (`/app/config`), `sc-archive-userdata` (`/root/.config/sc-archive`), `sc-archive-workspaces` (`/root/sc-archive`). Caddy espone la porta `80` sulla LAN.
 - **`docker/entrypoint.sh`**: Inizializza `config/settings.json` con valori Docker (`gotenberg_ip: http://gotenberg:3000`, `ollama_ip: $OLLAMA_IP`, `workspace_base: /root/sc-archive`). Genera session key via `openssl rand -hex 32` se assente. Bootstrap admin con `AEGIS_ADMIN_PASSWORD`.
@@ -130,7 +151,8 @@ Stack containerizzato completo per Raspberry Pi 4/5 (ARM64). Build multi-stage c
 - **`.dockerignore`**: Esclude `.git`, `__pycache__`, `.venv`, `tests/`, `docs/`, `static/css/output.css`, `config/settings.json`, binario `tailwindcss`.
 - **`docs/docker-raspberry.md`**: Guida operativa completa — architettura, prerequisiti Docker sul Pi, installazione step-by-step, DNS LAN, primo avvio, volumi, configurazione Ollama esterno, aggiornamento, gestione container, troubleshooting.
 
-### Changed
+### Change
+
 - **`docs/rete-lan-caddy.md`** (rinominato da `rete-lan-caddy-wsl2.md`): Aggiunto Scenario B (SC-ARCHIVE su RPi, Gotenberg/Ollama esterni) e Scenario C (SC-ARCHIVE su PC Linux → Caddy su RPi). Nota esplicita che nel deploy Docker su RPi Gotenberg e Ollama sono servizi separati non installati sul Pi stesso.
 
 ---
@@ -695,9 +717,6 @@ Identità finale "Spacecraft Documentation Management System".
 - **PDF Engine**: Passaggio definitivo a **Gotenberg** (Chromium) per rendering professionale.
 - **HUD PDF**: Aggiunta di testata, piè di pagina e numerazione automatica.
 - **View Mode**: Forza la visualizzazione PDF in "Fit Width" (`FitH`).
-
-## [3.0.0] - SC-ARCHIVE RELEASE (2026-03-18)
-Identità finale "Spacecraft Documentation Management System".
 
 ---
 
