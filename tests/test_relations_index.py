@@ -341,6 +341,88 @@ class TestDiagnostics:
         index = await RelationIndexBuilder().build()
         diag = index.diagnostics()
         assert diag.dangling == [] and diag.key_collisions == [] and diag.parse_warnings == []
+        assert diag.domain_violations == []
+
+
+# ---------------------------------------------------------------------------
+# Domain/range violations (RF-9) — non-blocking, reported in diagnostics()
+# ---------------------------------------------------------------------------
+
+class TestDomainViolations:
+    @pytest.mark.anyio
+    async def test_matching_types_produce_no_violation(self, archive_root: Path):
+        # crew: domain=(ship,), range=(npc,) — exactly what's declared here.
+        _seed_basic_vault(archive_root)
+        index = await RelationIndexBuilder().build()
+        assert index.domain_violations == []
+
+    @pytest.mark.anyio
+    async def test_mismatched_types_recorded_as_violation(self, archive_root: Path):
+        # crew requires a ship source — Kira Venn is an npc, not a ship.
+        _write(archive_root, "npcs/Kira Venn.md", "---\ntype: npc\ncrew: [Passenger]\n---\n\nA.\n")
+        _write(archive_root, "npcs/Passenger.md", "---\ntype: npc\n---\n\nB.\n")
+        index = await RelationIndexBuilder().build()
+        assert len(index.domain_violations) == 1
+        v = index.domain_violations[0]
+        assert v.relation == "crew"
+        assert v.source_key == "kira venn"
+        assert v.source_type == "npc"
+        assert v.target_key == "passenger"
+        assert v.target_type == "npc"
+        assert v.origin_path == Path("npcs/Kira Venn.md")
+
+    @pytest.mark.anyio
+    async def test_untyped_source_is_not_a_violation(self, archive_root: Path):
+        # No `type:` declared at all — not enough information to judge,
+        # never treated as a conflict (most entities in a real archive won't
+        # have `type:` set).
+        _write(archive_root, "Unknown.md", "---\ncrew: [Someone]\n---\n\nA.\n")
+        _write(archive_root, "Someone.md", "---\ntype: npc\n---\n\nB.\n")
+        index = await RelationIndexBuilder().build()
+        assert index.domain_violations == []
+
+    @pytest.mark.anyio
+    async def test_untyped_target_is_not_a_violation(self, archive_root: Path):
+        _write(archive_root, "ships/Beowulf.md", "---\ntype: ship\ncrew: [Ghost]\n---\n\nA.\n")
+        _write(archive_root, "Ghost.md", "No frontmatter at all.\n")
+        index = await RelationIndexBuilder().build()
+        assert index.domain_violations == []
+
+    @pytest.mark.anyio
+    async def test_unconstrained_relation_never_violates(self, archive_root: Path):
+        # located_in has no domain/range on purpose — too generic to constrain.
+        _write(archive_root, "A.md", "---\ntype: npc\nlocated_in: [B]\n---\n\nA.\n")
+        _write(archive_root, "B.md", "---\ntype: ship\n---\n\nB.\n")
+        index = await RelationIndexBuilder().build()
+        assert index.domain_violations == []
+
+    @pytest.mark.anyio
+    async def test_multi_type_range_accepts_any_declared_type(self, archive_root: Path):
+        # owns: range=(ship, location, drone, item) — location is one of them.
+        _write(archive_root, "A.md", "---\ntype: npc\nowns: [B]\n---\n\nA.\n")
+        _write(archive_root, "B.md", "---\ntype: location\n---\n\nB.\n")
+        index = await RelationIndexBuilder().build()
+        assert index.domain_violations == []
+
+    @pytest.mark.anyio
+    async def test_multi_type_range_rejects_type_outside_the_set(self, archive_root: Path):
+        # owns: range=(ship, location, drone, item) — organization is not one.
+        _write(archive_root, "A.md", "---\ntype: npc\nowns: [B]\n---\n\nA.\n")
+        _write(archive_root, "B.md", "---\ntype: organization\n---\n\nB.\n")
+        index = await RelationIndexBuilder().build()
+        assert len(index.domain_violations) == 1
+        assert index.domain_violations[0].target_type == "organization"
+
+    @pytest.mark.anyio
+    async def test_reindex_clears_stale_violation(self, archive_root: Path):
+        _write(archive_root, "npcs/Kira Venn.md", "---\ntype: npc\ncrew: [Passenger]\n---\n\nA.\n")
+        _write(archive_root, "npcs/Passenger.md", "---\ntype: npc\n---\n\nB.\n")
+        index = await RelationIndexBuilder().build()
+        assert len(index.domain_violations) == 1
+
+        _write(archive_root, "npcs/Kira Venn.md", "---\ntype: npc\n---\n\nNo more crew declared.\n")
+        await RelationIndexBuilder().reindex_file(index, Path("npcs/Kira Venn.md"))
+        assert index.domain_violations == []
 
 
 # ---------------------------------------------------------------------------

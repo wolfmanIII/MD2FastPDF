@@ -67,11 +67,28 @@ class KeyCollision:
 
 
 @dataclass(frozen=True)
+class DomainViolation:
+    """A resolved edge whose source or target entity type isn't among the
+    relation's declared domain/range (RF-9). Never blocks the edge itself —
+    diagnostic only, same "never an exception" philosophy as dangling refs.
+    Only recorded when both sides have a known, conflicting type: a missing
+    `type:` on either side is not enough information to judge, not a
+    violation (most entities in a real archive won't have `type:` set)."""
+    origin_path: Path
+    relation: str
+    source_key: str
+    source_type: str | None
+    target_key: str
+    target_type: str | None
+
+
+@dataclass(frozen=True)
 class Diagnostics:
     """Snapshot of everything that didn't cleanly resolve (§5.7, RF-7)."""
     dangling: list[DanglingReference]
     key_collisions: list[KeyCollision]
     parse_warnings: list[ParseWarning]
+    domain_violations: list[DomainViolation]
 
 
 class RelationGraphIndex(Protocol):
@@ -100,6 +117,7 @@ class RelationIndex:
     dangling: list[DanglingReference] = field(default_factory=list)
     key_collisions: list[KeyCollision] = field(default_factory=list)
     parse_warnings: list[ParseWarning] = field(default_factory=list)
+    domain_violations: list[DomainViolation] = field(default_factory=list)
 
     # -- write path ----------------------------------------------------
 
@@ -117,6 +135,43 @@ class RelationIndex:
         self.out_edges.setdefault((edge.source, edge.relation), []).append(edge.target)
         self.in_edges.setdefault((edge.target, edge.relation), []).append(edge.source)
         self._track_by_path(edge)
+        self._check_domain_range(edge)
+
+    def _check_domain_range(self, edge: Edge) -> None:
+        """Flags a resolved edge whose entity types don't match the relation's
+        declared domain/range (RF-9) — see DomainViolation for why a missing
+        type on either side is never treated as a violation."""
+        relation_def = VOCABULARY_BY_NAME.get(edge.relation)
+        if relation_def is None:
+            return
+
+        source_entity = self.entities.get(edge.source)
+        target_entity = self.entities.get(edge.target)
+        source_type = source_entity.entity_type if source_entity else None
+        target_type = target_entity.entity_type if target_entity else None
+
+        domain_ok = self._type_allowed(source_type, relation_def.domain)
+        range_ok = self._type_allowed(target_type, relation_def.range)
+        if not domain_ok or not range_ok:
+            self.domain_violations.append(DomainViolation(
+                origin_path=edge.origin_path,
+                relation=edge.relation,
+                source_key=edge.source,
+                source_type=source_type,
+                target_key=edge.target,
+                target_type=target_type,
+            ))
+
+    @staticmethod
+    def _type_allowed(entity_type: str | None, allowed: tuple[str, ...] | None) -> bool:
+        """An unconstrained relation (allowed=None) or an untyped entity
+        (entity_type=None) is always OK — only a known, conflicting type is
+        ever a violation (RF-9)."""
+        return (
+            allowed is None
+            or entity_type is None
+            or entity_type.casefold() in {t.casefold() for t in allowed}
+        )
 
     def record_dangling(self, edge: Edge) -> None:
         self.dangling.append(DanglingReference(edge.origin_path, edge.relation, edge.target))
@@ -126,14 +181,16 @@ class RelationIndex:
         self.parse_warnings.append(warning)
 
     def drop_path(self, path: Path) -> None:
-        """Removes every edge, dangling reference, and parse warning that
-        originated from `path` — the first step of reindexing a single file
-        (RF-6), whether it was edited or deleted. Does not touch `entities`:
-        callers decide separately whether the entity at `path` survives."""
+        """Removes every edge, dangling reference, parse warning, and domain
+        violation that originated from `path` — the first step of reindexing
+        a single file (RF-6), whether it was edited or deleted. Does not touch
+        `entities`: callers decide separately whether the entity at `path`
+        survives."""
         for edge in self.by_path.pop(path, []):
             self._discard_resolved(edge)
         self.dangling = [d for d in self.dangling if d.origin_path != path]
         self.parse_warnings = [w for w in self.parse_warnings if w.origin_path != path]
+        self.domain_violations = [v for v in self.domain_violations if v.origin_path != path]
 
     def remove_entity_at_path(self, path: Path) -> None:
         """Drops the entity registered at `path` (if any) and demotes every
@@ -218,6 +275,7 @@ class RelationIndex:
             dangling=list(self.dangling),
             key_collisions=list(self.key_collisions),
             parse_warnings=list(self.parse_warnings),
+            domain_violations=list(self.domain_violations),
         )
 
     def _resolve_keys(self, keys: list[str]) -> list[Entity]:

@@ -36,26 +36,38 @@ _log = logging.getLogger(__name__)
 @dataclass(frozen=True)
 class RelationDef:
     """Declares one relation type recognized in frontmatter."""
-    name: str                   # frontmatter key
-    inverse: str                 # inverse relation name, for reverse queries (RF-5)
-    label: str                   # human-readable label for the forward direction, for the UI
-    inverse_label: str           # human-readable label for the reverse direction, for the UI
-    domain: str | None = None    # allowed source entity type (RF-9, unused in Fase 1)
-    range: str | None = None     # allowed target entity type (RF-9, unused in Fase 1)
+    name: str                              # frontmatter key
+    inverse: str                            # inverse relation name, for reverse queries (RF-5)
+    label: str                              # human-readable label for the forward direction, for the UI
+    inverse_label: str                      # human-readable label for the reverse direction, for the UI
+    domain: tuple[str, ...] | None = None   # allowed source entity types (RF-9). None = unconstrained.
+    range: tuple[str, ...] | None = None    # allowed target entity types (RF-9). None = unconstrained.
 
 
 VOCABULARY: tuple[RelationDef, ...] = (
-    RelationDef("crew",          inverse="serves_on",       label="Equipaggio",   inverse_label="Equipaggio di"),
-    RelationDef("member_of",     inverse="has_member",       label="Membro di",    inverse_label="Membri"),
+    RelationDef("crew",          inverse="serves_on",       label="Equipaggio",   inverse_label="Equipaggio di",
+                domain=("ship",), range=("npc",)),
+    RelationDef("member_of",     inverse="has_member",       label="Membro di",    inverse_label="Membri",
+                domain=("npc", "organization"), range=("organization",)),
+    # No domain/range: too generic a spatial-containment relation to constrain
+    # on today's observed types alone — real usage already spans location,
+    # ai, ship and item, and a perfectly legitimate future case (an npc
+    # located_in a location) isn't represented yet either.
     RelationDef("located_in",    inverse="contains",         label="Situato in",   inverse_label="Contiene"),
-    RelationDef("hostile_to",    inverse="hostile_to",       label="Ostile a",     inverse_label="Ostile a"),  # simmetrica
-    RelationDef("owns",          inverse="owned_by",         label="Possiede",     inverse_label="Posseduto da"),
+    RelationDef("hostile_to",    inverse="hostile_to",       label="Ostile a",     inverse_label="Ostile a",  # simmetrica
+                domain=("npc",), range=("npc",)),
+    RelationDef("owns",          inverse="owned_by",         label="Possiede",     inverse_label="Posseduto da",
+                domain=("npc",), range=("ship", "location", "drone", "item")),
     # Added after analyzing real campaign content (Protocollo_SIGMA) — each
     # recurs across several NPC sheets, not a theoretical/speculative addition.
-    RelationDef("owes_debt_to",  inverse="creditor_of",      label="Debitore di",  inverse_label="Creditore di"),
-    RelationDef("reports_to",    inverse="has_subordinate",  label="Risponde a",   inverse_label="Subordinati"),
-    RelationDef("allied_with",   inverse="allied_with",      label="Alleato di",   inverse_label="Alleato di"),  # simmetrica
-    RelationDef("mentor_of",     inverse="student_of",       label="Mentore di",   inverse_label="Allievo di"),
+    RelationDef("owes_debt_to",  inverse="creditor_of",      label="Debitore di",  inverse_label="Creditore di",
+                domain=("npc", "organization"), range=("npc", "organization")),
+    RelationDef("reports_to",    inverse="has_subordinate",  label="Risponde a",   inverse_label="Subordinati",
+                domain=("npc",), range=("npc",)),
+    RelationDef("allied_with",   inverse="allied_with",      label="Alleato di",   inverse_label="Alleato di",  # simmetrica
+                domain=("npc",), range=("npc",)),
+    RelationDef("mentor_of",     inverse="student_of",       label="Mentore di",   inverse_label="Allievo di",
+                domain=("npc",), range=("npc",)),
 )
 
 VOCABULARY_BY_NAME: dict[str, RelationDef] = {r.name: r for r in VOCABULARY}

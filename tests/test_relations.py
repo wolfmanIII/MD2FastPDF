@@ -63,6 +63,27 @@ class TestVocabulary:
         asymmetric_inverses = inverses - names
         assert asymmetric_inverses.isdisjoint(names)
 
+    def test_domain_range_match_real_campaign_usage(self):
+        # Values derived from the source/target entity types actually observed
+        # in a real archive (RF-9) — not a designed-up-front ontology. Relations
+        # left unconstrained here (located_in) are deliberately too generic to
+        # constrain on today's observed types alone (see logic/relations.py).
+        expected = {
+            "crew": (("ship",), ("npc",)),
+            "hostile_to": (("npc",), ("npc",)),
+            "allied_with": (("npc",), ("npc",)),
+            "mentor_of": (("npc",), ("npc",)),
+            "reports_to": (("npc",), ("npc",)),
+            "owes_debt_to": (("npc", "organization"), ("npc", "organization")),
+            "member_of": (("npc", "organization"), ("organization",)),
+            "owns": (("npc",), ("ship", "location", "drone", "item")),
+            "located_in": (None, None),
+        }
+        for name, (domain, range_) in expected.items():
+            r = VOCABULARY_BY_NAME[name]
+            assert r.domain == domain, name
+            assert r.range == range_, name
+
 
 # ---------------------------------------------------------------------------
 # strip_wikilink / canonical_key
