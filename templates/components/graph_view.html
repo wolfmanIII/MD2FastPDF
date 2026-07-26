@@ -362,6 +362,23 @@
 
         function buildRelationControls() {
             relationFiltersEl.innerHTML = "";
+
+            const toggleAllLabel = document.createElement("label");
+            toggleAllLabel.className = "flex items-center justify-between cursor-pointer pb-2 mb-1 border-b border-(--glass-border)";
+            toggleAllLabel.innerHTML =
+                '<span class="text-zinc-300 tracking-widest text-sm normal-case font-bold">Seleziona tutte</span>' +
+                '<input type="checkbox" id="aegis-graph-relation-toggle-all" checked class="accent-(--neon-cyan) cursor-pointer w-4 h-4">';
+            relationFiltersEl.appendChild(toggleAllLabel);
+            const toggleAllInput = toggleAllLabel.querySelector("input");
+            const relationCheckboxes = [];
+
+            function refreshToggleAllState() {
+                const allChecked = relationCheckboxes.every(cb => cb.checked);
+                const noneChecked = relationCheckboxes.every(cb => !cb.checked);
+                toggleAllInput.checked = allChecked;
+                toggleAllInput.indeterminate = !allChecked && !noneChecked;
+            }
+
             relationTypes.forEach(relation => {
                 const id = "aegis-graph-relation-" + relation;
                 const label = document.createElement("label");
@@ -370,12 +387,28 @@
                     '<span class="text-zinc-300 tracking-widest text-sm normal-case">' + relationLabels.get(relation) + '</span>' +
                     '<input type="checkbox" id="' + id + '" checked class="accent-(--neon-cyan) cursor-pointer w-4 h-4">';
                 relationFiltersEl.appendChild(label);
-                label.querySelector("input").addEventListener("change", (e) => {
+                const relationInput = label.querySelector("input");
+                relationCheckboxes.push(relationInput);
+                relationInput.addEventListener("change", (e) => {
                     if (e.target.checked) hiddenRelationTypes.delete(relation);
                     else hiddenRelationTypes.add(relation);
                     refreshRelationFilter();
+                    refreshToggleAllState();
                 });
             });
+
+            toggleAllInput.addEventListener("change", (e) => {
+                const shouldShow = e.target.checked;
+                relationCheckboxes.forEach(cb => { cb.checked = shouldShow; });
+                relationTypes.forEach(relation => {
+                    if (shouldShow) hiddenRelationTypes.delete(relation);
+                    else hiddenRelationTypes.add(relation);
+                });
+                toggleAllInput.indeterminate = false;
+                refreshRelationFilter();
+            });
+
+            refreshToggleAllState();
 
             relationLegendEl.innerHTML = "";
             relationTypes.forEach(relation => {
