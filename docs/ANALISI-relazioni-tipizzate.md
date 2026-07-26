@@ -31,8 +31,14 @@ questo documento.
 ### 1.1 Stato attuale
 
 - I contenuti sono file `.md` su filesystem. **Sono la source of truth.**
-- I collegamenti tra entità sono espressi come `[[wikilink]]` nel corpo del testo.
-- La vista a grafo è costruita estraendo i wikilink dai file.
+- I collegamenti tra entità nel corpo del testo sono espressi come link Markdown
+  standard `[testo](file.md)` (`logic/graph.py::_MD_LINK`) — **non** `[[wikilink]]`
+  in stile Obsidian. Questo è stato verificato empiricamente sull'archivio reale
+  durante l'issue #10 (v. §5.10): su 34 file scena, 29 usano link Markdown per
+  citare altre entità in prosa; le 3 occorrenze di `[[...]]` trovate non sono mai
+  riferimenti a entità, ma enfasi tipografica su nomi di handout (es.
+  `[[SCANNER TATTICO // MAELSTROM]]`).
+- La vista a grafo è costruita estraendo questi link Markdown dai file.
 - Non esiste database. L'indice del grafo è derivato e ricostruibile.
 
 ---
@@ -136,8 +142,10 @@ Un riferimento a un'entità inesistente non è un errore fatale: viene registrat
 ### 4.2 Fase 2 (dopo validazione dell'MVP)
 
 **RF-8 — Archi tipizzati nella vista a grafo**
-Colore/stile per tipo di relazione; filtro per tipo; i wikilink del corpo sono resi come
-archi debolmente marcati e distinguibili dalle relazioni strutturali.
+Colore/stile per tipo di relazione; filtro per tipo (implementati in #7); gli archi già
+estratti da `logic/graph.py` (menzioni via link Markdown nel corpo, preesistenti a questa
+epic) sono resi debolmente marcati e distinguibili dalle relazioni strutturali tipizzate
+(implementato in #10 — v. §5.10: nessun nuovo parser, solo restyling della vista).
 
 **RF-9 — Validazione di dominio**
 Il vocabolario dichiara i tipi di entità ammessi ai due estremi di ogni relazione
@@ -398,6 +406,49 @@ coinvolge è `Custode-01 --located_in--> Luna-Octavia`, e `located_in` non è
 vincolata. Se in futuro comparisse ad esempio `owns: [IUNO]` su un NPC, verrebbe
 segnalata una violazione (perché `"ai"` non è nella tupla `range` di `owns`) — a
 quel punto, e solo a quel punto, varrebbe la pena valutare se estendere `owns.range`.
+
+### 5.10 Archi deboli nella vista a grafo (issue #10) — scope ridefinito dopo grounding empirico
+
+L'issue #10 (RF-8, seconda parte) partiva dal presupposto che le menzioni informali nel
+corpo del testo fossero scritte come `[[wikilink]]` in stile Obsidian, e ne richiedeva un
+parser dedicato. Verificando sull'archivio reale **prima** di progettare quel parser
+(stesso criterio empirico usato per il vocabolario, §8), è emerso che il presupposto era
+falso:
+
+- Su 34 file di scena, **29** citano altre entità in prosa con link Markdown standard
+  `[testo](file.md)` — sintassi già estratta da `logic/graph.py::_MD_LINK` per la vista
+  `/graph` **fin da prima di questa epic**.
+- Le uniche **3** occorrenze di `[[...]]` nell'intero archivio non sono mai riferimenti a
+  un'entità: sono enfasi tipografica su nomi di handout (`[[SCANNER TATTICO // MAELSTROM]]`,
+  `[[OLOCRON PUZZLE]]`), o testo di documentazione finito per errore nell'archivio.
+
+**Conseguenza:** costruire un parser per `[[wikilink]]` avrebbe risolto un problema che
+non esiste nei dati — l'"arco debole" richiesto da RF-8 è **già** l'arco che
+`logic/graph.py` estrae oggi (i link Markdown), semplicemente non ancora *distinto
+visivamente* dagli archi tipizzati colorati/tratteggiati introdotti in #7. Questo elimina
+anche le 3 decisioni di design originariamente aperte per #10 (strategia di risoluzione
+del testo libero, dove vive il nuovo parser, se tracciare i non risolti in `Diagnostics`):
+non c'è nessun testo libero da risolvere, nessun parser nuovo, e i link Markdown rotti
+sono già gestiti silenziosamente da `ArchiveGraphBuilder._resolve_link` (nessun nuovo
+tracciamento diagnostico introdotto — fuori scope, coerente con "nessuna modifica a
+`logic/graph.py`").
+
+**Implementazione** (solo `templates/components/graph_view.html`, nessun codice Python
+toccato):
+
+- Gli archi da link Markdown (`link`, la selezione D3 preesistente) ricevono uno stile
+  visivamente "debole": `stroke-width` ridotto a un fattore fisso (`0.6×`) dello spessore
+  condiviso con gli archi tipizzati, e opacità di base ridotta (`0.35` invece di `0.9`) —
+  l'enfasi al passaggio del mouse resta identica (`0.9`), quindi restano perfettamente
+  leggibili quando rilevanti.
+- Aggiunta una legenda statica nel pannello CONTROLS ("Legenda linee") che spiega la
+  differenza a colpo d'occhio: linea sottile e chiara = menzione nel testo, linea
+  tratteggiata colorata = relazione tipizzata dal frontmatter.
+- Verificato via Playwright (utente di test isolato + archivio fixture a 3 file,
+  entrambi ripuliti a verifica completata) ispezionando direttamente gli attributi SVG
+  resi:
+  `stroke-width: 0.72` (= `1.2 × 0.6`), `opacity: 0.35` per l'arco di menzione, contro
+  `stroke-width: 1.2`, `opacity: 0.9`, `stroke-dasharray: 4,3` per l'arco tipizzato.
 
 ---
 
