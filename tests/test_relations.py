@@ -22,8 +22,11 @@ class TestVocabulary:
     def test_expected_relation_names_present(self):
         assert set(VOCABULARY_BY_NAME) == {
             "crew", "member_of", "located_in", "hostile_to", "owns",
-            "owes_debt_to", "reports_to", "allied_with", "mentor_of",
+            "owes_debt_to", "reports_to", "allied_with", "mentor_of", "npcs",
         }
+
+    def test_npcs_inverse_is_scenes(self):
+        assert VOCABULARY_BY_NAME["npcs"].inverse == "scenes"
 
     def test_hostile_to_is_symmetric(self):
         assert VOCABULARY_BY_NAME["hostile_to"].inverse == "hostile_to"
@@ -78,6 +81,7 @@ class TestVocabulary:
             "member_of": (("npc", "organization"), ("organization",)),
             "owns": (("npc",), ("ship", "location", "drone", "item")),
             "located_in": (None, None),
+            "npcs": (("scene",), ("npc",)),
         }
         for name, (domain, range_) in expected.items():
             r = VOCABULARY_BY_NAME[name]

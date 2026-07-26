@@ -68,6 +68,12 @@ VOCABULARY: tuple[RelationDef, ...] = (
                 domain=("npc",), range=("npc",)),
     RelationDef("mentor_of",     inverse="student_of",       label="Mentore di",   inverse_label="Allievo di",
                 domain=("npc",), range=("npc",)),
+    # Grounded in a real 34-file scene archive (Protocollo_SIGMA/Scene/) —
+    # domain="scene" only takes effect once those files adopt `type: scene`
+    # in frontmatter (none do yet); until then it's simply never checked
+    # (RF-9: a missing type is never a violation).
+    RelationDef("npcs",          inverse="scenes",           label="NPC coinvolti", inverse_label="Scene",
+                domain=("scene",), range=("npc",)),
 )
 
 VOCABULARY_BY_NAME: dict[str, RelationDef] = {r.name: r for r in VOCABULARY}
