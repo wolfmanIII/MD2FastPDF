@@ -9,12 +9,16 @@ non-blocking philosophy as DomainViolation/dangling elsewhere in this feature,
 never an exception.
 """
 from dataclasses import dataclass
+from typing import Optional
+
+from fastapi import Request
 
 from logic.files import DirectoryLister
-from logic.relations import VOCABULARY_BY_INVERSE, VOCABULARY_BY_NAME, Entity
+from logic.relations import VOCABULARY_BY_INVERSE, VOCABULARY_BY_NAME, Entity, canonical_key
 from logic.relations_index import RelationIndex
 
 _FALLBACK_LABEL = "Traduzione non riuscita — risultati di ricerca testuale"
+_SESSION_KEY = "archive_query_pending"
 
 
 @dataclass(frozen=True)
@@ -67,3 +71,34 @@ async def fallback_text_search(message: str) -> dict:
     relation-query answer, so the caller never mistakes one for the other."""
     results = await DirectoryLister.search(message)
     return {"kind": "fallback_search", "label": _FALLBACK_LABEL, "results": results}
+
+
+def store_pending_disambiguation(request: Request, relation: str, candidates: list[Entity]) -> None:
+    """Stashes an Ambiguous result in the session (RF-11.3, issue #18) so the
+    next turn can resolve it, without ever touching disk (RF-11.5: the
+    archive terminal has no message persistence, unlike COMMS). Only plain
+    JSON-safe values are stored — Starlette's SessionMiddleware is a signed
+    cookie, not a store for arbitrary Python objects."""
+    request.session[_SESSION_KEY] = {
+        "relation": relation,
+        "candidates": [{"key": e.key, "display_name": e.display_name} for e in candidates],
+    }
+
+
+def pop_pending_disambiguation(request: Request) -> Optional[dict]:
+    """Retrieves and clears any pending disambiguation for this session —
+    always consumed on the next attempt, whether or not it resolves, so a
+    stale disambiguation never lingers across unrelated later questions."""
+    return request.session.pop(_SESSION_KEY, None)
+
+
+def resolve_disambiguation_choice(pending: dict, choice: str) -> Optional[ResolvedQuery]:
+    """Matches the user's follow-up reply against the stashed candidates
+    (same canonical_key normalization used everywhere else for entity
+    references). None if the reply doesn't match any candidate — the caller
+    treats that the same as any other unresolved query (RF-11.4 fallback)."""
+    choice_key = canonical_key(choice)
+    for candidate in pending.get("candidates", []):
+        if candidate["key"] == choice_key:
+            return ResolvedQuery(entity_key=candidate["key"], relation=pending["relation"])
+    return None

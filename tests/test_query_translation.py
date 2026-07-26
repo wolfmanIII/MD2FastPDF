@@ -7,7 +7,16 @@ from pathlib import Path
 
 import pytest
 
-from logic.query_translation import Ambiguous, ResolvedQuery, fallback_text_search, resolve_translated_query
+from logic.query_translation import (
+    Ambiguous,
+    ResolvedQuery,
+    fallback_text_search,
+    pop_pending_disambiguation,
+    resolve_disambiguation_choice,
+    resolve_translated_query,
+    store_pending_disambiguation,
+)
+from logic.relations import Entity
 from logic.relations_index import RelationIndexBuilder
 
 
@@ -120,3 +129,60 @@ async def test_fallback_search_no_match_returns_empty_results(archive_root: Path
     _seed_vault(archive_root)
     result = await fallback_text_search("nessuna corrispondenza possibile xyz")
     assert result["results"] == []
+
+
+# ---------------------------------------------------------------------------
+# Session disambiguation state — RF-11 step 6, issue #18
+# ---------------------------------------------------------------------------
+
+class _FakeRequest:
+    """Duck-typed stand-in for fastapi.Request — only .session is touched."""
+    def __init__(self):
+        self.session: dict = {}
+
+
+def _make_entity(key: str, display_name: str) -> Entity:
+    return Entity(key=key, display_name=display_name, path=Path(f"{display_name}.md"),
+                  entity_type=None, mtime=0.0)
+
+
+def test_store_then_pop_roundtrips_candidates():
+    request = _FakeRequest()
+    candidates = [_make_entity("progetto-aran", "Progetto-Aran"), _make_entity("aran-echo", "Aran-Echo")]
+    store_pending_disambiguation(request, "crew", candidates)
+
+    pending = pop_pending_disambiguation(request)
+    assert pending["relation"] == "crew"
+    assert {c["display_name"] for c in pending["candidates"]} == {"Progetto-Aran", "Aran-Echo"}
+
+
+def test_pop_clears_session_state():
+    request = _FakeRequest()
+    store_pending_disambiguation(request, "crew", [_make_entity("beowulf", "Beowulf")])
+    pop_pending_disambiguation(request)
+    assert pop_pending_disambiguation(request) is None
+
+
+def test_pop_with_nothing_pending_returns_none():
+    request = _FakeRequest()
+    assert pop_pending_disambiguation(request) is None
+
+
+def test_resolve_disambiguation_choice_matches_candidate():
+    pending = {"relation": "crew", "candidates": [
+        {"key": "progetto-aran", "display_name": "Progetto-Aran"},
+        {"key": "aran-echo", "display_name": "Aran-Echo"},
+    ]}
+    result = resolve_disambiguation_choice(pending, "Aran-Echo")
+    assert result == ResolvedQuery(entity_key="aran-echo", relation="crew")
+
+
+def test_resolve_disambiguation_choice_is_case_and_whitespace_insensitive():
+    pending = {"relation": "crew", "candidates": [{"key": "aran-echo", "display_name": "Aran-Echo"}]}
+    result = resolve_disambiguation_choice(pending, "  ARAN-ECHO  ")
+    assert result == ResolvedQuery(entity_key="aran-echo", relation="crew")
+
+
+def test_resolve_disambiguation_choice_no_match_returns_none():
+    pending = {"relation": "crew", "candidates": [{"key": "aran-echo", "display_name": "Aran-Echo"}]}
+    assert resolve_disambiguation_choice(pending, "Qualcun altro") is None
