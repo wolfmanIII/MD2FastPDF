@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from logic.query_translation import Ambiguous, ResolvedQuery, resolve_translated_query
+from logic.query_translation import Ambiguous, ResolvedQuery, fallback_text_search, resolve_translated_query
 from logic.relations_index import RelationIndexBuilder
 
 
@@ -100,3 +100,23 @@ async def test_non_string_entity_returns_none(archive_root: Path):
     index = await RelationIndexBuilder().build()
     result = resolve_translated_query({"intent": "relation_query", "entity": None, "relation": "crew"}, index)
     assert result is None
+
+
+# ---------------------------------------------------------------------------
+# fallback_text_search() — RF-11 step 5, issue #17
+# ---------------------------------------------------------------------------
+
+@pytest.mark.anyio
+async def test_fallback_search_finds_matching_filename(archive_root: Path):
+    _seed_vault(archive_root)
+    result = await fallback_text_search("beowulf")
+    assert result["kind"] == "fallback_search"
+    assert result["label"] == "Traduzione non riuscita — risultati di ricerca testuale"
+    assert [r["name"] for r in result["results"]] == ["Beowulf.md"]
+
+
+@pytest.mark.anyio
+async def test_fallback_search_no_match_returns_empty_results(archive_root: Path):
+    _seed_vault(archive_root)
+    result = await fallback_text_search("nessuna corrispondenza possibile xyz")
+    assert result["results"] == []

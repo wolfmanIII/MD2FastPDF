@@ -10,8 +10,11 @@ never an exception.
 """
 from dataclasses import dataclass
 
+from logic.files import DirectoryLister
 from logic.relations import VOCABULARY_BY_INVERSE, VOCABULARY_BY_NAME, Entity
 from logic.relations_index import RelationIndex
+
+_FALLBACK_LABEL = "Traduzione non riuscita — risultati di ricerca testuale"
 
 
 @dataclass(frozen=True)
@@ -54,3 +57,13 @@ def resolve_translated_query(raw: dict, index: RelationIndex) -> ResolvedQuery |
         return Ambiguous(candidates)
 
     return ResolvedQuery(entity_key=candidates[0].key, relation=relation_name)
+
+
+async def fallback_text_search(message: str) -> dict:
+    """RF-11.4 fallback (issue #17), invoked by the caller when
+    resolve_translated_query() returns None. Reuses DirectoryLister.search()
+    as-is — no new search engine — over the original user message. Results
+    are explicitly labeled as informal text matches, never as a structured
+    relation-query answer, so the caller never mistakes one for the other."""
+    results = await DirectoryLister.search(message)
+    return {"kind": "fallback_search", "label": _FALLBACK_LABEL, "results": results}
