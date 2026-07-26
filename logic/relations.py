@@ -74,6 +74,11 @@ VOCABULARY: tuple[RelationDef, ...] = (
     # (RF-9: a missing type is never a violation).
     RelationDef("npcs",          inverse="scenes",           label="NPC coinvolti", inverse_label="Scene",
                 domain=("scene",), range=("npc",)),
+    # inverse="scenes_org", not "scenes" — VOCABULARY_BY_INVERSE is a 1:1 map
+    # and "scenes" is already npcs' inverse; the UI label is "Scene" either
+    # way, only the internal query name needs to be distinct.
+    RelationDef("organizations", inverse="scenes_org",       label="Organizzazioni coinvolte", inverse_label="Scene",
+                domain=("scene",), range=("organization",)),
 )
 
 VOCABULARY_BY_NAME: dict[str, RelationDef] = {r.name: r for r in VOCABULARY}

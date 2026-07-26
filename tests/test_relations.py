@@ -22,11 +22,21 @@ class TestVocabulary:
     def test_expected_relation_names_present(self):
         assert set(VOCABULARY_BY_NAME) == {
             "crew", "member_of", "located_in", "hostile_to", "owns",
-            "owes_debt_to", "reports_to", "allied_with", "mentor_of", "npcs",
+            "owes_debt_to", "reports_to", "allied_with", "mentor_of",
+            "npcs", "organizations",
         }
 
     def test_npcs_inverse_is_scenes(self):
         assert VOCABULARY_BY_NAME["npcs"].inverse == "scenes"
+
+    def test_organizations_inverse_is_scenes_org(self):
+        assert VOCABULARY_BY_NAME["organizations"].inverse == "scenes_org"
+
+    def test_npcs_and_organizations_inverses_do_not_collide(self):
+        # Both scene relations show "Scene" in the UI, but VOCABULARY_BY_INVERSE
+        # is a 1:1 map — the internal inverse *names* must stay distinct even
+        # though the inverse *label* is deliberately the same for both.
+        assert VOCABULARY_BY_NAME["npcs"].inverse != VOCABULARY_BY_NAME["organizations"].inverse
 
     def test_hostile_to_is_symmetric(self):
         assert VOCABULARY_BY_NAME["hostile_to"].inverse == "hostile_to"
@@ -82,6 +92,7 @@ class TestVocabulary:
             "owns": (("npc",), ("ship", "location", "drone", "item")),
             "located_in": (None, None),
             "npcs": (("scene",), ("npc",)),
+            "organizations": (("scene",), ("organization",)),
         }
         for name, (domain, range_) in expected.items():
             r = VOCABULARY_BY_NAME[name]
