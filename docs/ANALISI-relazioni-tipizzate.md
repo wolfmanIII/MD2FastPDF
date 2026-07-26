@@ -179,24 +179,36 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class RelationDef:
-    name: str              # chiave nel frontmatter
-    inverse: str           # nome della relazione inversa (per RF-5)
-    label: str             # etichetta leggibile, per la UI
-    domain: str | None = None   # tipo di entità ammesso alla sorgente (RF-9)
-    range: str | None = None    # tipo di entità ammesso alla destinazione (RF-9)
+    name: str                              # chiave nel frontmatter
+    inverse: str                            # nome della relazione inversa (per RF-5)
+    label: str                              # etichetta leggibile diretta, per la UI
+    inverse_label: str                      # etichetta leggibile inversa, per la UI
+    domain: tuple[str, ...] | None = None   # tipi di entità ammessi alla sorgente (RF-9). None = non vincolato.
+    range: tuple[str, ...] | None = None    # tipi di entità ammessi alla destinazione (RF-9). None = non vincolato.
 
 VOCABULARY: tuple[RelationDef, ...] = (
-    RelationDef("crew",          inverse="serves_on",       label="Equipaggio"),
-    RelationDef("member_of",     inverse="has_member",       label="Membro di"),
-    RelationDef("located_in",    inverse="contains",         label="Situato in"),
-    RelationDef("hostile_to",    inverse="hostile_to",       label="Ostile a"),  # simmetrica
-    RelationDef("owns",          inverse="owned_by",         label="Possiede"),
+    RelationDef("crew",          inverse="serves_on",       label="Equipaggio",    inverse_label="Equipaggio di",
+                domain=("ship",), range=("npc",)),
+    RelationDef("member_of",     inverse="has_member",       label="Membro di",     inverse_label="Membri",
+                domain=("npc", "organization"), range=("organization",)),
+    RelationDef("located_in",    inverse="contains",         label="Situato in",    inverse_label="Contiene"),  # non vincolata: troppo generica
+    RelationDef("hostile_to",    inverse="hostile_to",       label="Ostile a",      inverse_label="Ostile a",  # simmetrica
+                domain=("npc",), range=("npc",)),
+    RelationDef("owns",          inverse="owned_by",         label="Possiede",      inverse_label="Posseduto da",
+                domain=("npc",), range=("ship", "location", "drone", "item")),
     # Aggiunte dopo analisi del materiale di campagna reale (Protocollo_SIGMA),
     # non teoriche — ricorrono più volte nelle schede NPC.
-    RelationDef("owes_debt_to",  inverse="creditor_of",      label="Debitore di"),
-    RelationDef("reports_to",    inverse="has_subordinate",  label="Risponde a"),
-    RelationDef("allied_with",   inverse="allied_with",      label="Alleato di"),  # simmetrica
-    RelationDef("mentor_of",     inverse="student_of",       label="Mentore di"),
+    RelationDef("owes_debt_to",  inverse="creditor_of",      label="Debitore di",   inverse_label="Creditore di",
+                domain=("npc", "organization"), range=("npc", "organization")),
+    RelationDef("reports_to",    inverse="has_subordinate",  label="Risponde a",    inverse_label="Subordinati",
+                domain=("npc",), range=("npc",)),
+    RelationDef("allied_with",   inverse="allied_with",      label="Alleato di",    inverse_label="Alleato di",  # simmetrica
+                domain=("npc",), range=("npc",)),
+    RelationDef("mentor_of",     inverse="student_of",       label="Mentore di",    inverse_label="Allievo di",
+                domain=("npc",), range=("npc",)),
+    # Grounded in un archivio reale di scene (Protocollo_SIGMA/Scene/, 34 file).
+    RelationDef("npcs",          inverse="scenes",           label="NPC coinvolti", inverse_label="Scene",
+                domain=("scene",), range=("npc",)),
 )
 ```
 
@@ -206,7 +218,11 @@ Note:
   gestire il caso senza duplicare l'arco.
 - I nomi inversi non sono chiavi valide di frontmatter: sono nomi di query. Solo i `name`
   sono riconosciuti in lettura.
-- `domain`/`range` restano `None` in Fase 1 (nessuna validazione, RF-9 differito).
+- `domain`/`range` sono popolati (RF-9, Fase 2, issue #8) — derivati dall'uso reale
+  osservato nell'archivio, non progettati a tavolino. Una relazione può restare
+  volutamente senza vincoli (es. `located_in`) quando è troppo generica per limitarla
+  ai soli tipi visti finora. Un tipo mancante sull'entità (frontmatter senza `type:`)
+  non è mai trattato come violazione — solo un conflitto reale tra due tipi noti lo è.
 
 ### 5.3 Modello dell'indice
 

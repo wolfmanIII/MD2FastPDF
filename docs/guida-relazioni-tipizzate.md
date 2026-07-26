@@ -72,17 +72,22 @@ non è un errore, semplicemente non crea nessuna relazione, resta un'annotazione
 | `reports_to` | risponde/è subordinato a qualcuno (catena di comando o lealtà, anche segreta) | **Risponde a** | Subordinati | `reports_to: [Malen Trast]` su `Tenente Vesk.md` |
 | `allied_with` | alleanza reciproca | **Alleato di** | Alleato di *(uguale, è reciproca)* | `allied_with: [Jaro Vey]` su `Alto Sacerdote Khaeden.md` |
 | `mentor_of` | è mentore/maestro di qualcuno | **Mentore di** | Allievo di | `mentor_of: [Fratello Malek]` su `Alto Sacerdote Khaeden.md` |
+| `npcs` | quali NPC compaiono in una scena | **NPC coinvolti** | Scene | `npcs: [Kira Venn, Tarn Mekel]` su `Scena-0011-Parley-Con-Kira-Lonn.md` |
 
 La colonna "etichetta inversa" è quella che vedi **sull'altro file**, quello che non ha
 scritto nulla — es. se `Beowulf.md` scrive `crew: [Kira Venn]`, tu su `Beowulf.md` vedi
 "Equipaggio", ma su `Kira Venn.md` vedi "Equipaggio di" (non "Equipaggio" di nuovo — è
-un'etichetta diversa, pensata apposta per leggersi al contrario).
+un'etichetta diversa, pensata apposta per leggersi al contrario). Per `npcs` funziona
+uguale: scrivilo solo sulla scena, e ogni NPC coinvolto vede da solo "Scene" comparire
+sulla propria scheda, senza doverlo scrivere lì.
 
-Le ultime 4 (`owes_debt_to`, `reports_to`, `allied_with`, `mentor_of`) sono state aggiunte
+Le 4 relazioni `owes_debt_to`, `reports_to`, `allied_with`, `mentor_of` sono state aggiunte
 dopo un'analisi del materiale di campagna reale — non sono teoriche, ricorrono più volte
 nelle schede NPC. `member_of` resta la scelta giusta per l'appartenenza *formale* a un
 gruppo/organizzazione; `reports_to` è per un rapporto di subordinazione/lealtà *personale*
-verso un singolo individuo (anche quando è segreto o doppiogiochista).
+verso un singolo individuo (anche quando è segreto o doppiogiochista). `npcs` è nata allo
+stesso modo, dall'archivio scene reale, per rispondere a una domanda concreta: "in quali
+scene appare questo NPC?".
 
 Se in futuro serve un'altra relazione diversa da queste, si aggiunge al vocabolario — ma
 solo quando c'è un caso d'uso concreto nel testo, per non gonfiare la lista all'infinito.
@@ -221,9 +226,9 @@ Risultato nel pannello RELAZIONI:
 ## 9. Riepilogo lampo
 
 1. Blocco `---` / `---` alla primissima riga del file, prima di tutto il resto.
-2. Creano relazioni solo queste 9 chiavi: `crew`, `member_of`, `located_in`,
-   `hostile_to`, `owns`, `owes_debt_to`, `reports_to`, `allied_with`, `mentor_of`.
-   Qualunque altra chiave viene ignorata, mai un errore.
+2. Creano relazioni solo queste 10 chiavi: `crew`, `member_of`, `located_in`,
+   `hostile_to`, `owns`, `owes_debt_to`, `reports_to`, `allied_with`, `mentor_of`,
+   `npcs`. Qualunque altra chiave viene ignorata, mai un errore.
 3. Valore = uno o più nomi di file (senza `.md`), tra `[quadre]` se sono più di uno.
    Nomi con `:` o `,` vanno tra apici doppi.
 4. Maiuscole e spazi non contano nella risoluzione dei nomi.
