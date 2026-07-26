@@ -160,7 +160,9 @@ del file. Da introdurre **quando** i rinomini iniziano a rompere i riferimenti, 
 **RF-11 — Query in linguaggio naturale via Ollama**
 L'istanza Ollama locale traduce una richiesta in linguaggio naturale in una query
 strutturata sull'indice. Diegeticamente coerente col terminale Library Data. Nessuna
-progettazione prevista in questo documento.
+progettazione prevista in questo documento — vedi `docs/ANALISI-relazioni-query-nl.md`,
+aperto dopo aver verificato con l'utente che Fase 1/2 sono già validate in uso reale
+(issue #9).
 
 ---
 
