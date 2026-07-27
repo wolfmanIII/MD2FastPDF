@@ -5,7 +5,7 @@
 **Ollama**: sempre esterno — non è mai un container di questo stack, va raggiunto via `OLLAMA_IP`.
 
 > [!IMPORTANT]
-> Su **Raspberry Pi e PC poco performanti** tenere Ollama esterno non è opzionale: Gotenberg (Chromium headless) già assorbe RAM/CPU, e i modelli LLM competerebbero per le stesse risorse limitate. La configurazione consigliata è eseguire Ollama su un'altra macchina della LAN (o comunque fuori da questo stack Docker) — vedi sezione "Deploy Ibrido" più sotto. Su hardware più potente puoi comunque tenerlo fuori dallo stack (stessa macchina o un'altra), semplicemente perché questo `docker-compose.yml` non lo gestisce mai direttamente.
+> Su **Raspberry Pi e PC poco performanti**, Ollama non va installato affatto su quella macchina — né in Docker né nativo: Gotenberg (Chromium headless) già assorbe RAM/CPU, e i modelli LLM competerebbero per le stesse risorse limitate. Va eseguito su un'altra macchina della LAN — vedi sezione "Deploy Ibrido" più sotto. Su hardware più potente puoi tenerlo sulla stessa macchina, ma **sempre installato nativamente, mai in Docker** — questo `docker-compose.yml` non lo gestisce mai direttamente.
 
 ---
 
@@ -250,7 +250,7 @@ Host Docker (Raspberry Pi 4/5, mini-PC, server...)
                       └── NVIDIA DGX Spark (ARM64 / Blackwell)
 ```
 
-**Vantaggi**: l'host Docker gestisce i file e la generazione PDF senza carico GPU; il nodo Ollama serve l'Oracle con latenza minima anche sotto carico multi-utente. Su un host già potente (con GPU propria) il nodo Ollama può anche essere la stessa macchina — resta comunque un servizio esterno allo stack Docker, mai un container gestito da `docker-compose.yml`.
+**Vantaggi**: l'host Docker gestisce i file e la generazione PDF senza carico GPU; il nodo Ollama serve l'Oracle con latenza minima anche sotto carico multi-utente. Su un host già potente (con GPU propria) il nodo Ollama può anche essere la stessa macchina — ma va sempre installato **nativo**, mai in Docker (né come container di `docker-compose.yml`, né come container standalone a parte).
 
 ### NVIDIA DGX Spark come nodo Ollama
 
@@ -329,6 +329,7 @@ Una volta che tutti e 4 i punti sono a posto, imposta `OLLAMA_IP=http://<IP_OLLA
 Anche con la rete perfettamente configurata, SC-ARCHIVE in Docker parte con il Neural Link **disattivato di default** (scelta conservativa in `docker/entrypoint.sh`), indipendentemente da cosa hai messo in `OLLAMA_IP` — sono due impostazioni scollegate. Vai su **Settings → SYSTEM_STATUS → Neural Link Protocol**, attivalo, salva.
 
 Il pannello NEURAL_CORE della dashboard distingue i due problemi:
+
 - `ONLINE // DISABLED_IN_SETTINGS` (ambra) → la rete funziona, manca solo il toggle acceso
 - `OFFLINE` (rosso) → problema di rete reale, torna ai punti 1-4
 
