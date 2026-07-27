@@ -21,7 +21,7 @@ Prefer technical accuracy over politeness.
 5. **Atomic Updates**: Use HTMX for partial DOM updates. Each fragment must be self-contained.
 6. **Asyncio**: All I/O must be async — use `anyio` for file I/O, `httpx` for network (Gotenberg, Ollama).
 7. **No Placeholders**: Write full implementations. Never leave TODOs.
-8. **SOLID Principles**: Apply to **all** `.py` files. After modifying any Python file, run `/solid <file>` to verify compliance before committing.
+8. **SOLID Principles**: Apply to **all** `.py` files. After modifying any Python file, evaluate whether `/solid <file>` is actually needed for the change size/risk before running it — skip if trivial/low-risk.
 9. **Code Organization**: UI logic (templates/HTMX) strictly separated from business logic (Python).
 10. **Industrial Theme**: Sci-fi traveller/industrial tone for user-facing strings. Palette: Slate/Zinc with Neon Cyan (`--neon-cyan: #7dd3fc`) accents.
 11. **Imports**: Always explicit. Never `from module import *`.
