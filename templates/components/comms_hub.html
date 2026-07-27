@@ -1,5 +1,5 @@
-<div class="space-y-6">
-    <div class="flex items-center justify-between py-2 border-b border-white/5">
+<div class="space-y-6 grow flex flex-col min-h-0">
+    <div class="flex items-center justify-between py-2 border-b border-white/5 shrink-0">
         <div>
             <h1 class="text-2xl font-bold text-zinc-100 tracking-tight">COMMS_ARRAY // SIGNAL MANAGEMENT</h1>
             <p class="text-zinc-500 text-sm mt-1">SECURE INTER-OPERATOR COMMUNICATION PROTOCOL</p>
@@ -11,7 +11,7 @@
     </div>
 
     <!-- Tab bar -->
-    <div class="flex items-center space-x-2">
+    <div class="flex items-center space-x-2 shrink-0">
         <button hx-get="/comms?tab=inbound" hx-push-url="true"
             class="{% if tab == 'inbound' %}btn-solid{% else %}btn-ghost{% endif %} text-[10px] rounded-sm focus:outline-none">
             RECEPTION_ARRAY
@@ -27,7 +27,7 @@
     </div>
 
     <!-- Content panel -->
-    <div id="comms-content-panel">
+    <div id="comms-content-panel" class="grow overflow-y-auto overflow-x-hidden min-h-0">
         {% include 'components/comms_message_list.html' %}
     </div>
 </div>

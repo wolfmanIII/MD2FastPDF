@@ -8,7 +8,7 @@
     }
 </style>
 
-<div id="results-grid" class="grid grid-cols-1 gap-1 relative z-10 transition-all duration-300">
+<div id="results-grid" class="grid grid-cols-1 gap-1 relative z-10 transition-all duration-300 grow overflow-y-auto overflow-x-hidden min-h-0 content-start">
     <!-- AEGIS_NEURAL_SCAN_OVERLAY: Modal-like loading layer for document analysis -->
     <div id="scan-overlay" class="absolute inset-x-0 top-0 bottom-0 bg-black/80 backdrop-blur-xs flex-col items-center justify-center z-50 rounded-sm border border-(--neon-cyan)/30 shadow-[inset_0_0_50px_rgba(0,240,255,0.1)]">
         <div class="flex flex-col items-center space-y-4">
