@@ -72,12 +72,20 @@ VOCABULARY: tuple[RelationDef, ...] = (
     # domain="scene" only takes effect once those files adopt `type: scene`
     # in frontmatter (none do yet); until then it's simply never checked
     # (RF-9: a missing type is never a violation).
-    RelationDef("npcs",          inverse="scenes",           label="NPC coinvolti", inverse_label="Scene",
+    #
+    # inverse_label is deliberately NOT "Scene": empirically, `npcs:`/
+    # `organizations:` frontmatter keys are also used by non-scene files
+    # (NPC sheets, lore/archive docs with no `type:` at all) to mean
+    # "associated with this", not "appears in this scene" — a real example:
+    # Dorel-Varr.md (type: npc) lists `organizations: [..., Progetto-Aran]`.
+    # Labeling every inverse source "Scene" misrepresents those. A neutral
+    # label stays accurate regardless of what kind of file the source is.
+    RelationDef("npcs",          inverse="scenes",           label="NPC coinvolti", inverse_label="Riferimenti",
                 domain=("scene",), range=("npc",)),
     # inverse="scenes_org", not "scenes" — VOCABULARY_BY_INVERSE is a 1:1 map
-    # and "scenes" is already npcs' inverse; the UI label is "Scene" either
-    # way, only the internal query name needs to be distinct.
-    RelationDef("organizations", inverse="scenes_org",       label="Organizzazioni coinvolte", inverse_label="Scene",
+    # and "scenes" is already npcs' inverse; the UI label is "Riferimenti"
+    # either way, only the internal query name needs to be distinct.
+    RelationDef("organizations", inverse="scenes_org",       label="Organizzazioni coinvolte", inverse_label="Riferimenti",
                 domain=("scene",), range=("organization",)),
 )
 

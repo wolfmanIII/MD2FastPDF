@@ -33,9 +33,10 @@ class TestVocabulary:
         assert VOCABULARY_BY_NAME["organizations"].inverse == "scenes_org"
 
     def test_npcs_and_organizations_inverses_do_not_collide(self):
-        # Both scene relations show "Scene" in the UI, but VOCABULARY_BY_INVERSE
-        # is a 1:1 map — the internal inverse *names* must stay distinct even
-        # though the inverse *label* is deliberately the same for both.
+        # Both scene relations show "Riferimenti" in the UI, but
+        # VOCABULARY_BY_INVERSE is a 1:1 map — the internal inverse *names*
+        # must stay distinct even though the inverse *label* is deliberately
+        # the same for both.
         assert VOCABULARY_BY_NAME["npcs"].inverse != VOCABULARY_BY_NAME["organizations"].inverse
 
     def test_hostile_to_is_symmetric(self):
