@@ -61,7 +61,7 @@
         </form>
 
         <!-- ENTITY RELATIONS SIDEBAR -->
-        <div id="aegis-entity-relations-sidebar" class="overflow-y-auto overflow-x-hidden shrink-0 p-2">
+        <div id="aegis-entity-relations-sidebar" class="overflow-hidden shrink-0">
             <div id="aegis-entity-relations-slot" hx-get="/relations/panel?path={{ path | urlencode }}"
                 hx-trigger="load delay:100ms" hx-target="this" hx-swap="outerHTML">
                 <div class="p-3 text-[11px] text-zinc-300 tracking-widest animate-pulse uppercase">SCANNING_RELATIONS...

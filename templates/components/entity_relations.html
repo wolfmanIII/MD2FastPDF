@@ -1,22 +1,43 @@
-<div id="aegis-entity-relations" class="glass-panel p-4 space-y-2">
-    <h4 class="text-[10px] uppercase tracking-widest font-bold text-zinc-100 border-b border-(--glass-border) pb-2">
-        RELAZIONI
-    </h4>
-    {% if not relations %}
-    <p class="text-[11px] text-zinc-300 italic uppercase tracking-widest">Nessuna relazione dichiarata</p>
-    {% else %}
-    <div class="space-y-2">
+<div id="aegis-entity-relations" class="flex flex-col h-full overflow-hidden">
+    <div class="px-3 py-2 border-b border-(--glass-border) flex items-center justify-between shrink-0">
+        <span class="text-[10px] font-bold neon-text tracking-[0.3em] uppercase">RELAZIONI</span>
+        <i class="fa fa-diagram-project text-(--neon-cyan) text-[11px] opacity-60"></i>
+    </div>
+    <div class="grow overflow-y-auto overflow-x-hidden py-1 space-y-0.5 px-2">
+        {% if not relations %}
+        <p class="text-[11px] text-zinc-300 italic uppercase tracking-widest p-2">Nessuna relazione dichiarata</p>
+        {% else %}
         {% for relation_name, entities in relations.items() %}
-        <div class="text-[11px] uppercase tracking-widest leading-relaxed">
-            <span class="text-zinc-100 font-semibold">{{ labels.get(relation_name, relation_name) }}:</span>
-            {% for entity in entities %}
-            <a href="/editor?path={{ entity.path | urlencode }}"
-               hx-get="/editor?path={{ entity.path | urlencode }}"
-               hx-target="#aegis-view-core" hx-push-url="true"
-               class="neon-text hover:text-white no-underline">{{ entity.display_name }}</a>{% if not loop.last %}, {% endif %}
-            {% endfor %}
+        <div class="filetree-dir">
+            <div class="w-full flex items-center gap-2 px-2 py-1 text-left text-[11px] tracking-widest uppercase neon-text rounded-sm font-bold">
+                <span class="shrink-0 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]">
+                    {% with class="w-4 h-4" %}{% include 'icons/folder-open.html' %}{% endwith %}
+                </span>
+                <span class="truncate">{{ labels.get(relation_name, relation_name) }}</span>
+            </div>
+            <div class="filetree-children pl-3">
+                {% for entity in entities %}
+                <a href="/editor?path={{ entity.path | urlencode }}"
+                   hx-get="/editor?path={{ entity.path | urlencode }}"
+                   hx-target="#aegis-view-core" hx-push-url="true"
+                   class="filetree-file flex items-center gap-2 px-2 py-1 text-[11px] tracking-widest uppercase no-underline font-bold neon-text hover:bg-(--neon-cyan)/5 transition-colors rounded-sm">
+                    <i class="fa fa-file-lines text-[13px] shrink-0"></i>
+                    <span class="truncate">{{ entity.display_name }}</span>
+                </a>
+                {% endfor %}
+            </div>
         </div>
         {% endfor %}
+        {% endif %}
     </div>
-    {% endif %}
 </div>
+
+<script>
+(function () {
+    document.querySelectorAll('#aegis-entity-relations .truncate').forEach(function (el) {
+        if (el.scrollWidth > el.clientWidth) {
+            el.title = el.textContent.trim();
+        }
+    });
+})();
+</script>
