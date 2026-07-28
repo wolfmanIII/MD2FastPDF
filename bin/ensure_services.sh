@@ -1,14 +1,18 @@
 #!/bin/bash
-# AEGIS_SERVICE_BOOTSTRAP: garantisce che Gotenberg e Ollama siano raggiungibili
-# prima dell'avvio del server.
+# AEGIS_SERVICE_BOOTSTRAP: garantisce che Gotenberg sia raggiungibile prima
+# dell'avvio del server.
 #
-# Per ciascun servizio:
+# Ollama NON è gestito da questo script: va sempre nativo, mai in Docker
+# (vedi docs/configurazione-docker.md) — nessun fallback automatico va creato
+# per Ollama, sarebbe esattamente l'errore che quella doc vieta esplicitamente.
+#
+# Per Gotenberg (previsto in Docker per design):
 #   1. Se qualcosa risponde già all'endpoint configurato (installazione locale,
 #      systemd, container manuale...) viene usato così com'è — non tocchiamo
 #      nulla che non abbiamo creato noi.
 #   2. Altrimenti, se l'host configurato è locale e Docker è disponibile,
 #      viene avviato (o riavviato se già creato in precedenza) un container
-#      dedicato al progetto, con nome riconoscibile (md2fastpdf-<servizio>).
+#      dedicato al progetto, con nome riconoscibile (md2fastpdf-gotenberg).
 #   3. Se l'host configurato è remoto, o Docker non è disponibile, ci si
 #      ferma con un avviso — non ha senso avviare un container locale per
 #      "coprire" un endpoint remoto irraggiungibile.
@@ -83,6 +87,3 @@ _ensure_service() {
 
 _ensure_service "gotenberg" "gotenberg_ip" "http://localhost:3000" "/health" \
     "md2fastpdf-gotenberg" "gotenberg/gotenberg:8" 3000
-
-_ensure_service "ollama" "ollama_ip" "http://localhost:11434" "/api/tags" \
-    "md2fastpdf-ollama" "ollama/ollama" 11434
