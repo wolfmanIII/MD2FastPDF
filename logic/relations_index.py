@@ -257,15 +257,32 @@ class RelationIndex:
 
     def relations_of(self, entity: str) -> dict[str, list[Entity]]:
         """All relations of an entity, forward and inverse, keyed by the name
-        a caller would pass back into related()."""
+        a caller would pass back into related().
+
+        The same target entity can legitimately reach `entity` through more
+        than one relation group — e.g. this file's own `npcs:` list AND a
+        separate file's `organizations:` pointing back here both resolve to
+        the same target. Each fact is real, but showing the same entity twice
+        reads as a duplicate rather than two distinct declarations. First
+        group wins (VOCABULARY order: a relation's forward name before its
+        inverse) — later occurrences of an already-seen entity are dropped,
+        never the earlier one.
+        """
         entity_key = canonical_key(entity)
         result: dict[str, list[Entity]] = {}
+        seen: set[str] = set()
+
+        def _dedup(entities: list[Entity]) -> list[Entity]:
+            fresh = [e for e in entities if e.key not in seen]
+            seen.update(e.key for e in fresh)
+            return fresh
+
         for relation_def in VOCABULARY:
-            forward = self._related_by_key(entity_key, relation_def.name)
+            forward = _dedup(self._related_by_key(entity_key, relation_def.name))
             if forward:
                 result[relation_def.name] = forward
             if relation_def.inverse != relation_def.name:
-                backward = self._related_by_key(entity_key, relation_def.inverse)
+                backward = _dedup(self._related_by_key(entity_key, relation_def.inverse))
                 if backward:
                     result[relation_def.inverse] = backward
         return result

@@ -14,7 +14,40 @@ from logic.relations_service import RelationGraphService
 
 router = APIRouter(tags=["Aegis Relations"])
 
-_LABELS: dict[str, str] = {r.name: r.label for r in VOCABULARY} | {r.inverse: r.inverse_label for r in VOCABULARY}
+_LABELS: dict[str, str] = {r.name: r.label for r in VOCABULARY} | {r.inverse: r.inverse_label for r in VOCABULARY} | {
+    "_scenes": "Scene",
+}
+
+# npcs:/organizations: are also used, in real campaign data, by non-scene
+# files (NPC sheets, lore docs) to mean "associated with this" rather than
+# "appears in this scene" — both land in the same "scenes"/"scenes_org"
+# inverse under the neutral "Riferimenti" label (see logic/relations.py).
+# Now that scene files carry `type: scene`, genuine scene sources can be told
+# apart from the rest — pull them into their own "Scene" bucket instead of
+# leaving them undifferentiated among references that aren't scenes at all.
+_SCENE_INVERSE_KEYS = frozenset({"scenes", "scenes_org"})
+
+
+def _split_scene_references(relations: dict[str, list[Entity]]) -> dict[str, list[Entity]]:
+    """Pulls `type: scene` sources out of the scenes/scenes_org inverse groups
+    into a synthetic "_scenes" bucket, presentation-only (the JSON relation
+    API and RelationIndex.relations_of stay untouched — this only affects the
+    HTML panel's grouping)."""
+    result = dict(relations)
+    scene_entities: list[Entity] = []
+    for key in _SCENE_INVERSE_KEYS:
+        entities = result.get(key)
+        if not entities:
+            continue
+        others = [e for e in entities if e.entity_type != "scene"]
+        scene_entities.extend(e for e in entities if e.entity_type == "scene")
+        if others:
+            result[key] = others
+        else:
+            del result[key]
+    if scene_entities:
+        result["_scenes"] = scene_entities
+    return result
 
 
 def serialize_entity(entity: Entity) -> dict:
@@ -68,7 +101,7 @@ async def relations_panel(request: Request, path: str) -> HTMLResponse:
     stay consistent with the rest of the app's HTMX/Jinja2 convention."""
     entity_key = canonical_key(Path(path).stem)
     index = await RelationGraphService.get_index()
-    relations = index.relations_of(entity_key)
+    relations = _split_scene_references(index.relations_of(entity_key))
 
     context = {
         "request": request,
