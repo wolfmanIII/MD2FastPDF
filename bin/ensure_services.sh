@@ -48,10 +48,17 @@ _ensure_service() {
     local url host port
     { read -r url; read -r host; read -r port; } < <(_read_config "$settings_key" "$default_url")
 
-    if curl -sf -m 3 "${url%/}${health_path}" >/dev/null 2>&1; then
-        echo "[${label}] istanza già attiva su ${url} — la uso così com'è"
-        return 0
-    fi
+    # Retry (non un check singolo): al boot il container "giusto" può metterci
+    # qualche secondo a salire (Docker daemon appena partito) — senza questo
+    # loop il primo curl falliva sempre troppo presto e lo script ne creava
+    # uno nuovo, duplicato, mentre quello vero stava ancora avviandosi.
+    for _ in $(seq 1 15); do
+        if curl -sf -m 2 "${url%/}${health_path}" >/dev/null 2>&1; then
+            echo "[${label}] istanza già attiva su ${url} — la uso così com'è"
+            return 0
+        fi
+        sleep 1
+    done
 
     if [[ "$host" != "localhost" && "$host" != "127.0.0.1" ]]; then
         echo "[${label}] ATTENZIONE: ${settings_key} punta a un host remoto (${host}) non raggiungibile — verificalo manualmente, nessun container locale può sostituirlo"
