@@ -3,19 +3,21 @@
 # dell'avvio del server.
 #
 # Ollama NON è gestito da questo script: va sempre nativo, mai in Docker
-# (vedi docs/configurazione-docker.md) — nessun fallback automatico va creato
-# per Ollama, sarebbe esattamente l'errore che quella doc vieta esplicitamente.
+# (vedi docs/configurazione-docker.md).
 #
-# Per Gotenberg (previsto in Docker per design):
-#   1. Se qualcosa risponde già all'endpoint configurato (installazione locale,
-#      systemd, container manuale...) viene usato così com'è — non tocchiamo
-#      nulla che non abbiamo creato noi.
-#   2. Altrimenti, se l'host configurato è locale e Docker è disponibile,
-#      viene avviato (o riavviato se già creato in precedenza) un container
-#      dedicato al progetto, con nome riconoscibile (md2fastpdf-gotenberg).
-#   3. Se l'host configurato è remoto, o Docker non è disponibile, ci si
-#      ferma con un avviso — non ha senso avviare un container locale per
-#      "coprire" un endpoint remoto irraggiungibile.
+# Per Gotenberg, spesso già gestito da un container condiviso con altre app
+# della stessa macchina (restart:unless-stopped proprio, definito altrove):
+#   1. Se qualcosa risponde già all'endpoint configurato, viene usato così
+#      com'è — non tocchiamo nulla che non abbiamo creato noi.
+#   2. Se non risponde ma Docker ha comunque già un container che pubblica
+#      quella porta (esiste ma sta ancora salendo — capita al boot, prima che
+#      il suo restart:unless-stopped l'abbia riportato su), NON viene creato
+#      un fallback di progetto: occuperebbe la porta al posto del container
+#      condiviso e gli impedirebbe di ripartire quando è pronto — bug reale
+#      già capitato, non un'ipotesi. Si aspetta più a lungo e poi si avvisa.
+#   3. Solo se Docker non ha proprio nulla su quella porta (e l'host è locale,
+#      Docker disponibile) viene creato un container dedicato al progetto,
+#      con nome riconoscibile (md2fastpdf-gotenberg).
 set -u
 
 _read_config() {
@@ -67,6 +69,25 @@ _ensure_service() {
 
     if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
         echo "[${label}] ATTENZIONE: nessuna istanza raggiungibile su ${url} e Docker non è disponibile — servizio non attivo finché non viene avviato manualmente"
+        return 0
+    fi
+
+    # Un container (nostro o condiviso con altre app) che pubblica già questa
+    # porta esiste — anche se non risponde ancora — non va mai duplicato: gli
+    # impedirebbe di riprendersi la porta quando è pronto. Si aspetta più a
+    # lungo invece di crearne uno nostro sopra.
+    local existing_on_port
+    existing_on_port="$(docker ps -a --filter "publish=${port}" --format '{{.Names}} ({{.Status}})' | grep -v "^${container_name} " || true)"
+    if [[ -n "$existing_on_port" ]]; then
+        echo "[${label}] container già presente sulla porta ${port} ma non ancora pronto: ${existing_on_port} — attendo, nessun fallback creato"
+        for _ in $(seq 1 60); do
+            if curl -sf -m 2 "${url%/}${health_path}" >/dev/null 2>&1; then
+                echo "[${label}] istanza attiva su ${url}"
+                return 0
+            fi
+            sleep 1
+        done
+        echo "[${label}] ATTENZIONE: ${existing_on_port} occupa la porta ${port} ma non risponde ancora su ${url}${health_path} — verificalo manualmente"
         return 0
     fi
 
