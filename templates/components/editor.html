@@ -84,6 +84,21 @@
     <script>
         (function () {
             const root = document.getElementById('editor-easymde-root');
+
+            // AEGIS_HISTORY_RESTORE_FIX: htmx's back/forward cache snapshots the
+            // DOM AFTER EasyMDE has already transformed it (.EasyMDEContainer
+            // toolbar + hidden textarea baked into the cached HTML). Re-running
+            // `new EasyMDE()` on that stale snapshot stacks a second toolbar and
+            // editor on top instead of reinitializing cleanly — strip any
+            // leftover EasyMDE DOM and restore the plain textarea before
+            // building a fresh instance (same class of bug as the graph view
+            // history-restore fix: stale DOM must be cleared, not built upon).
+            root.querySelectorAll('.EasyMDEContainer').forEach(function (el) { el.remove(); });
+            const rawTextarea = document.getElementById('easymde-editor');
+            if (rawTextarea) {
+                rawTextarea.style.display = '';
+            }
+
             // AEGIS_COMPLETION_STATE: Persistent neural buffer
             let ghostMark = null;
             let ghostText = "";
