@@ -1,6 +1,6 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
 
-**Versione 5.24.0** // RELAZIONI TIPIZZATE FASE 3: QUERY IN LINGUAGGIO NATURALE
+**Versione 5.25.0** // PANNELLO RELAZIONI: RISTRUTTURAZIONE UI & FIX + HARDENING BOOTSTRAP SERVIZI
 
 > **Perché filesystem e niente database?** Non è una svista: è una scelta di design coerente col dominio. → [MANIFESTO.md](MANIFESTO.md)
 >
@@ -35,6 +35,7 @@ Riferimento rapido a tutte le guide di setup — scegli il percorso in base a co
 
 ## 🚀 Features
 
+- **Pannello RELAZIONI a struttura cartelle**: nell'editor, le relazioni tipizzate di un'entità sono raggruppate come nel pannello ARCHIVE_TREE (icona cartella aperta, indentazione, colori coerenti) invece di un elenco a virgole. Tooltip fixed-position (immune al clipping dei contenitori scrollabili) sui nomi troncati. Entità duplicate tra gruppi forward/inverso deduplicate; fonti realmente `type: scene` separate dalle altre sotto "Riferimenti".
 - **File Metadata temporali**: Data di creazione e ultima modifica visibili sotto ogni file/directory nell'archive browser (`CRE DD/MM/YYYY HH:MM // MOD DD/MM/YYYY HH:MM`). Font mono, accent neon-cyan. Applicato anche ai risultati di ricerca.
 - **Sidebar editor ridimensionabile**: Drag handle tra sidebar filetree e editor. Larghezza regolabile tra 120px e 600px, persistita in `localStorage`.
 - **Aegis Group_Space**: Workspace filesystem condiviso per gruppo. Modello permessi asimmetrico (admin R+W su root, membri R+W su `shared/`). Browser, editor e CRUD file integrati nella navbar.
@@ -298,7 +299,7 @@ poetry run pytest
 poetry run pytest --cov=logic --cov-report=term-missing
 ```
 
-449 test, 0 fallimenti. Copertura: `blueprints.py` 93%, `comms.py` 93%, `groupspace.py` 92%, `relations.py` 100%, `relations_index.py` 95%, `relations_service.py` 100%, `query_translation.py` 100%. `conversion` e `render` richiedono Gotenberg — non inclusi nella suite unit; `oracle.py` è parzialmente coperto (`translate_query()` via `httpx.MockTransport`), il resto richiede Ollama.
+456 test, 0 fallimenti. Copertura: `blueprints.py` 93%, `comms.py` 93%, `groupspace.py` 92%, `relations.py` 100%, `relations_index.py` 95%, `relations_service.py` 100%, `query_translation.py` 100%. `conversion` e `render` richiedono Gotenberg — non inclusi nella suite unit; `oracle.py` è parzialmente coperto (`translate_query()` via `httpx.MockTransport`), il resto richiede Ollama.
 
 ---
 *Progettato per i narratori della stazione SC-ARCHIVE.*

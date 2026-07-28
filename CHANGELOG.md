@@ -2,6 +2,25 @@
 
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.25.0] - PANNELLO RELAZIONI: RISTRUTTURAZIONE UI & FIX + HARDENING BOOTSTRAP SERVIZI (2026-07-29)
+
+### Fixed
+
+- **Entità duplicate nel pannello RELAZIONI**: `RelationIndex.relations_of()` poteva mostrare la stessa entità in due gruppi diversi quando il collegamento era dichiarato da entrambi i lati (es. un'organizzazione lista un NPC via `npcs:`, l'NPC lista l'organizzazione via `organizations:`) — ogni fatto è reale ma la stessa entità due volte legge come duplicato. Ora vince il primo gruppo in cui compare (ordine `VOCABULARY`), i successivi la escludono.
+- **Etichetta "Scene" fuorviante**: le chiavi frontmatter `npcs:`/`organizations:` sono usate nei dati reali anche da file non-scena (NPC, documenti di lore) con significato diverso ("associato a" invece di "compare in questa scena") — etichettarle tutte "Scene" era sbagliato. `inverse_label` ora "Riferimenti" (neutro); il pannello HTML separa inoltre le fonti realmente `type: scene` in un gruppo "Scene" a parte (`routes/relations.py::_split_scene_references`), presentazione-only — l'API JSON e `RelationIndex.relations_of()` restano invariate.
+- **Duplicazione toolbar/EasyMDE al ritorno con le frecce del browser**: lo snapshot di history di HTMX cattura il DOM dopo che EasyMDE l'ha già trasformato (`.EasyMDEContainer` + textarea nascosta cotte nell'HTML cache) — il ritorno da un'altra pagina editor rieseguiva lo script e chiamava di nuovo `new EasyMDE()` su quel DOM già mutato, impilando un secondo toolbar/editor. Stessa classe di bug già risolta nella vista a grafo.
+- **Tooltip ritagliato nel pannello RELAZIONI**: il tooltip DaisyUI (`::before`/`::after`, stesso sistema dei bottoni toolbar) viene tagliato dall'`overflow-y-auto` del pannello scrollabile — qualunque asse con overflow non-`visible` forza anche l'altro ad `auto` per regola CSS, quindi il tooltip non può mai uscire dai bordi del contenitore. Sostituito con un tooltip in `position:fixed` appeso a `document.body`, sfondo pieno (zero trasparenza), immune a qualunque overflow di antenati; pulizia al click sulla riga e su qualunque navigazione HTMX.
+- **`bin/ensure_services.sh` duplicava il container Gotenberg condiviso**: il check guardava solo se l'endpoint rispondeva via `curl` — durante il boot, un container Gotenberg condiviso con altre app della macchina può esistere ma non essere ancora pronto. Lo script concludeva "niente risponde" e creava un container di progetto sulla stessa porta, occupandola per sempre e impedendo a quello condiviso di ripartire quando pronto (bug reale riscontrato: bind fallito con "port is already allocated"). Ora controlla anche a livello Docker (`docker ps -a --filter publish=<porta>`) prima di creare un fallback.
+- **`bin/ensure_services.sh` rimosso fallback Docker per Ollama**: contraddiceva la regola "Ollama sempre nativo, mai Docker" — creava un container CPU-only senza modelli ogni volta che nulla rispondeva al restart.
+
+### Changed
+
+- **Pannello RELAZIONI ristrutturato**: da elenco a virgole a struttura a cartelle identica in stile al pannello ARCHIVE_TREE (stesso header, icona cartella aperta, indentazione, colori neon-text) invece di un blocco testo generico.
+- **Pannelli elenco (ARCHIVE/LIBRARY/COMMS) estesi fino al footer**: non si fermavano più all'altezza del contenuto, lasciando una distanza diversa da header e footer.
+- **Modale root-picker allineata allo stile standard** delle altre modali del progetto (`bg-zinc-900`/`border-zinc-700`/`rounded-none`, header e bottone chiusura coerenti).
+- **CLAUDE.md**: stessa valutazione di necessità reale già in uso per `/simplify`/Playwright estesa a `/solid`.
+- **`docs/configurazione-docker.md`**: chiarita la regola "Ollama sempre esterno, mai in Docker".
+
 ## [5.24.0] - RELAZIONI TIPIZZATE FASE 3: QUERY IN LINGUAGGIO NATURALE (2026-07-26)
 
 Fase 3 completa: un nuovo Terminale Archivio traduce domande in linguaggio naturale

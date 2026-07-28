@@ -1,7 +1,7 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.24.0
-**Ultimo Aggiornamento**: 26 Luglio 2026
+**Stato Attuale**: Op_Ready / Versione 5.25.0
+**Ultimo Aggiornamento**: 29 Luglio 2026
 
 ---
 
@@ -244,6 +244,16 @@ Documento di analisi in `docs/ANALISI-relazioni-query-nl.md` (RF-11), implementa
 - **Bug reale trovato in verifica Playwright**: la UI assumeva il campo `display_name` (forma di `serialize_entity()`) anche sui risultati di `fallback_search`, che invece usano `name` (forma di `DirectoryLister.search()`) — causava un errore JS silenzioso che bloccava la risposta. Corretto con una funzione di rendering distinta per le due forme di dati.
 - `serialize_entity()` (`routes/relations.py`) reso pubblico (era `_serialize_entity`) per essere riusato dal nuovo endpoint senza duplicarlo.
 
+### 1.24 PANNELLO RELAZIONI: RISTRUTTURAZIONE UI & FIX + HARDENING BOOTSTRAP SERVIZI (v5.25.0) — COMPLETED
+
+- **Pannello RELAZIONI ristrutturato** a struttura cartelle, identica in stile al pannello ARCHIVE_TREE: stesso header (`neon-text`, icona a destra), icona cartella aperta per i gruppi, entità come righe file con icona, stessa indentazione/colori — invece dell'elenco a virgole precedente.
+- **Tooltip fixed-position** sui nomi troncati: il tooltip DaisyUI standard (`::before`/`::after`) viene ritagliato dall'`overflow-y-auto` del pannello scrollabile per una regola CSS (un asse con overflow non-`visible` forza anche l'altro ad `auto`) — sostituito con un elemento `position:fixed` appeso a `document.body`, sfondo pieno, immune al clipping. Pulizia automatica al click e su qualunque navigazione HTMX.
+- **Entità duplicate deduplicate**: la stessa entità poteva comparire in due gruppi diversi del pannello quando il collegamento era dichiarato da entrambi i lati (es. un'organizzazione lista un NPC, l'NPC lista l'organizzazione) — ora vince il primo gruppo (ordine `VOCABULARY`).
+- **"Scene" separata da "Riferimenti"**: le chiavi `npcs:`/`organizations:` sono usate nei dati reali anche da file non-scena con significato diverso — `inverse_label` ora neutro ("Riferimenti"), e il pannello HTML separa le fonti realmente `type: scene` in un gruppo "Scene" a parte (`routes/relations.py::_split_scene_references`, presentazione-only).
+- **Fix duplicazione toolbar/EasyMDE al ritorno con le frecce del browser**: stessa classe di bug già vista nella vista a grafo — lo snapshot di history di HTMX cattura il DOM già trasformato da EasyMDE, il re-init sopra quel DOM stantio impilava un secondo toolbar/editor invece di ripulire prima.
+- **`bin/ensure_services.sh` hardening**: non crea più un container Gotenberg di progetto duplicato quando un container condiviso con altre app della macchina esiste ma non è ancora pronto a rispondere (check aggiuntivo a livello Docker, non solo via `curl`). Rimosso il fallback Docker per Ollama (contraddiceva la regola "sempre nativo, mai Docker").
+- **Pannelli elenco (ARCHIVE/LIBRARY/COMMS) estesi fino al footer** e **modale root-picker allineata** allo stile standard delle altre modali del progetto.
+
 ---
 
 ## 2. Infrastruttura Tecnica
@@ -305,7 +315,8 @@ docker/         entrypoint.sh, Caddyfile, .env.example — Dockerfile e docker-c
 | [5.12] | DOCKER HARDENING (non-root, pin immagini, healthcheck, checksum) | **COMPLETED** |
 | [5.13] | NEURAL CORE AVAILABILITY GATING | **COMPLETED** |
 | [5.14] | RELAZIONI TIPIZZATE — vocabolario esteso (`npcs`, `organizations`) & graph UX refinements | **COMPLETED** |
+| [5.15] | PANNELLO RELAZIONI — ristrutturazione UI, fix duplicati/dominio & hardening bootstrap servizi | **COMPLETED** |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.24.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.25.0 — DEPLOYMENT_ACTIVE.*
