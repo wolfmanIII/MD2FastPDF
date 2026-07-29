@@ -9,13 +9,16 @@
         {% else %}
         {% for relation_name, entities in relations.items() %}
         <div class="filetree-dir">
-            <div class="w-full flex items-center gap-2 px-2 py-1 text-left text-[11px] tracking-widest uppercase neon-text rounded-sm font-bold">
-                <span class="shrink-0 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)]">
+            <button type="button" class="aegis-rel-toggle w-full flex items-center gap-2 px-2 py-1 text-left text-[11px] tracking-widest uppercase neon-text rounded-sm font-bold cursor-pointer">
+                <span class="shrink-0 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)] aegis-rel-icon-closed">
+                    {% with class="w-4 h-4" %}{% include 'icons/folder.html' %}{% endwith %}
+                </span>
+                <span class="shrink-0 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)] aegis-rel-icon-open hidden">
                     {% with class="w-4 h-4" %}{% include 'icons/folder-open.html' %}{% endwith %}
                 </span>
                 <span class="truncate">{{ labels.get(relation_name, relation_name) }}</span>
-            </div>
-            <div class="filetree-children pl-3">
+            </button>
+            <div class="filetree-children pl-3 hidden">
                 {% for entity in entities %}
                 <a href="/editor?path={{ entity.path | urlencode }}"
                    hx-get="/editor?path={{ entity.path | urlencode }}"
@@ -52,6 +55,22 @@
 </style>
 <script>
 (function () {
+    // Cartelle chiuse di default: click sull'header espande/collassa,
+    // niente stato persistito, coerente col comportamento richiesto.
+    document.querySelectorAll('#aegis-entity-relations .aegis-rel-toggle').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const dir = btn.closest('.filetree-dir');
+            const children = dir.querySelector('.filetree-children');
+            const iconClosed = dir.querySelector('.aegis-rel-icon-closed');
+            const iconOpen = dir.querySelector('.aegis-rel-icon-open');
+            children.classList.toggle('hidden');
+            iconClosed.classList.toggle('hidden');
+            iconOpen.classList.toggle('hidden');
+        });
+    });
+})();
+
+(function () {
     // Il tooltip daisyUI (::before/::after) viene ritagliato dall'overflow-x
     // -hidden del contenitore scrollabile — stessa cosa vale per il pannello
     // ARCHIVE_TREE a sinistra, che condivide la stessa struttura. Un elemento
@@ -83,16 +102,20 @@
     }
 
     document.querySelectorAll('#aegis-entity-relations .truncate').forEach(function (el) {
-        if (el.scrollWidth > el.clientWidth) {
-            const host = el.parentElement;
-            const text = el.textContent.trim();
-            host.addEventListener('mouseenter', function () { showTip(host, text); });
-            host.addEventListener('mouseleave', hideTip);
-            // Il click naviga (hx-get su #aegis-view-core): il pannello RELAZIONI
-            // viene distrutto, ma il tooltip appeso a document.body no — va
-            // chiuso subito, non c'è un mouseleave naturale prima dello swap.
-            host.addEventListener('click', hideTip);
-        }
+        // Le cartelle partono chiuse (display:none): scrollWidth/clientWidth
+        // sono entrambi 0 al load, quindi il controllo va rifatto ad ogni
+        // mouseenter (quando l'elemento è visibile), non una tantum qui.
+        const host = el.parentElement;
+        host.addEventListener('mouseenter', function () {
+            if (el.scrollWidth > el.clientWidth) {
+                showTip(host, el.textContent.trim());
+            }
+        });
+        host.addEventListener('mouseleave', hideTip);
+        // Il click naviga (hx-get su #aegis-view-core): il pannello RELAZIONI
+        // viene distrutto, ma il tooltip appeso a document.body no — va
+        // chiuso subito, non c'è un mouseleave naturale prima dello swap.
+        host.addEventListener('click', hideTip);
     });
 
     // Rete di sicurezza: qualunque navigazione HTMX chiude un tooltip rimasto
