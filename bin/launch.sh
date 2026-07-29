@@ -22,8 +22,9 @@ if [ ! -f "$KEY_FILE" ]; then
 fi
 export AEGIS_SECRET_KEY="$(cat "$KEY_FILE")"
 
-# Ensure Gotenberg and Ollama are reachable (uses an existing local install/container
-# if already up, otherwise creates a project-managed container — see bin/ensure_services.sh)
+# Verify Gotenberg and Ollama are reachable (both external services, configured
+# via Settings / config/settings.json gotenberg_ip+ollama_ip — this script never
+# creates or starts anything, see bin/ensure_services.sh).
 ./bin/ensure_services.sh
 
 # Start FastAPI server

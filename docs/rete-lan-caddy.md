@@ -389,6 +389,26 @@ journalctl --user -u sc-archive.service -f        # real-time
 journalctl --user -u sc-archive.service -n 100    # ultime 100 righe
 ```
 
+### Gotenberg e Ollama — verifica bootstrap (`bin/ensure_services.sh`)
+
+`bin/ensure_services.sh` gira dentro `bin/launch.sh`, quindi il suo output
+(esito del check di raggiungibilità di Gotenberg e Ollama) finisce nel journal
+del *servizio*, non nell'output di `systemctl status` — quel comando mostra
+solo le ultime righe di log in coda, non l'intera sequenza di avvio:
+
+```bash
+journalctl --user -u sc-archive.service -n 50 --no-pager   # ultime righe di boot, incluso l'esito dei check Gotenberg/Ollama
+journalctl --user -u sc-archive.service -f                 # segui il boot in tempo reale
+journalctl --user -u sc-archive.service -b                 # solo dal boot corrente della macchina
+```
+
+Cosa cercare nell'output: righe `[gotenberg] istanza attiva su ...` /
+`[ollama] istanza attiva su ...` (tutto ok), oppure `[gotenberg] ATTENZIONE:
+nessuna istanza raggiungibile su ...` / `[ollama] ATTENZIONE: ...` — l'URL
+configurato (`gotenberg_ip`/`ollama_ip`, da Settings o
+`config/settings.json`) non risponde. Entrambi sono servizi esterni: lo
+script si limita a controllarli, non li crea né li avvia mai.
+
 ### Caddy
 
 ```bash

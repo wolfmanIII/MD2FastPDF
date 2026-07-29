@@ -168,14 +168,14 @@ chmod +x tailwindcss
 
 ### 7. Kernel di Conversione PDF (Gotenberg) e Strato Neurale (Ollama)
 
-**Gotenberg**: nessuna azione manuale richiesta. `bin/launch.sh` verifica ad ogni avvio se
-`gotenberg_ip` (in `config/settings.json`) risponde già — installazione nativa, systemd, o
-container avviato a mano/condiviso con altre app — e in tal caso lo usa così com'è, senza
-toccarlo. Se l'endpoint è locale e non risponde (e nessun container occupa già quella porta
-in fase di avvio), crea un container di progetto dedicato (`md2fastpdf-gotenberg`,
-`restart: unless-stopped`), riutilizzandolo ai lanci successivi. Se l'endpoint è remoto e
-irraggiungibile, o Docker non è disponibile, si limita a segnalarlo — vedi
-[`bin/ensure_services.sh`](bin/ensure_services.sh).
+**Gotenberg**: sempre esterno, come Ollama — il progetto non lo installa né lo containerizza
+mai. Va eseguito a parte (installazione nativa, systemd, o un container gestito da un altro
+progetto/stack) e il suo indirizzo va impostato in Settings (o `gotenberg_ip` in
+`config/settings.json`). `bin/launch.sh` si limita a verificare ad ogni avvio che l'endpoint
+configurato risponda, segnalando in console se non è raggiungibile — nessuna creazione
+automatica, vedi [`bin/ensure_services.sh`](bin/ensure_services.sh).
+
+- **Avvio rapido (Docker)**: `docker run -d --name gotenberg --restart unless-stopped -p 3000:3000 gotenberg/gotenberg:8`
 
 **Ollama**: sempre nativo, mai in Docker, nessun fallback automatico — lo script non lo
 gestisce affatto (vedi [docs/configurazione-docker.md](docs/configurazione-docker.md) per il
@@ -209,7 +209,7 @@ Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
 - `tests/`: Suite pytest — unit test e async I/O test per il layer `logic/`.
 - `docs/`: Database di documentazione operativa e tecnica.
 - `bin/launch.sh`: Start script (Tailwind watcher + Uvicorn).
-- `bin/ensure_services.sh`: Bootstrap Gotenberg — usa un'istanza locale già attiva, altrimenti crea un container di progetto dedicato. Ollama non è gestito (sempre nativo, mai in Docker).
+- `bin/ensure_services.sh`: Verifica che Gotenberg (servizio esterno, indirizzo da Settings) sia raggiungibile — nessuna creazione di container. Ollama non è gestito (sempre nativo, mai in Docker).
 - `bin/aegis-migrate.sh`: Export/import completo dei dati per migrazione tra macchine.
 - `Dockerfile`: Build multi-stage (css-builder ARM64, deps-builder, runtime).
 - `docker-compose.yml`: Stack sc-archive + gotenberg + caddy con named volumes.
