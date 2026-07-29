@@ -25,12 +25,14 @@
 
 Riferimento rapido a tutte le guide di setup — scegli il percorso in base a come vuoi installare SC-ARCHIVE:
 
-**Installazione locale (bare-metal, senza Docker)**
+## **Installazione locale (bare-metal, senza Docker)**
+
 - [docs/installazione-pyenv-poetry.md](docs/installazione-pyenv-poetry.md) — pyenv + Poetry, ambiente Python
 - [docs/ollama_ubuntu_24_04_guida.md](docs/ollama_ubuntu_24_04_guida.md) — installazione Ollama (Ubuntu 24.04)
 - [docs/rete-lan-caddy.md](docs/rete-lan-caddy.md) — esporre SC-ARCHIVE su LAN con nome host personalizzato via Caddy (bare-metal, ibrido, o Docker — copre tutti gli scenari)
 
-**Deploy Docker**
+## **Deploy Docker**
+
 - [docs/configurazione-docker.md](docs/configurazione-docker.md) — guida completa: build, volumi, permessi, Ollama in rete (checklist), aggiornamento, troubleshooting
 
 ## 🚀 Features
