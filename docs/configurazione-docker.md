@@ -1,11 +1,11 @@
 # SC-ARCHIVE — Configurazione Docker
 
-**Stack**: SC-ARCHIVE (FastAPI) + Gotenberg (PDF) + Caddy (reverse proxy)
+**Stack**: SC-ARCHIVE (FastAPI) + Caddy (reverse proxy)
 **Target**: qualsiasi host Linux con Docker — PC x86_64, server, Raspberry Pi 4/5 (ARM64). Questa non è una guida specifica per Raspberry Pi: la stessa `docker-compose.yml` funziona identica su qualunque architettura, il Pi è solo uno dei target supportati (le immagini sono multi-arch).
-**Ollama**: sempre esterno — non è mai un container di questo stack, va raggiunto via `OLLAMA_IP`.
+**Gotenberg e Ollama**: sempre esterni — nessuno dei due è mai un container di questo stack. Gotenberg gira nella propria istanza/stack Docker indipendente (stesso host o un'altra macchina in LAN), raggiunto via `GOTENBERG_IP`; Ollama sempre nativo (mai Docker), raggiunto via `OLLAMA_IP`.
 
 > [!IMPORTANT]
-> Su **Raspberry Pi e PC poco performanti**, Ollama non va installato affatto su quella macchina — né in Docker né nativo: Gotenberg (Chromium headless) già assorbe RAM/CPU, e i modelli LLM competerebbero per le stesse risorse limitate. Va eseguito su un'altra macchina della LAN — vedi sezione "Deploy Ibrido" più sotto. Su hardware più potente puoi tenerlo sulla stessa macchina, ma **sempre installato nativamente, mai in Docker** — questo `docker-compose.yml` non lo gestisce mai direttamente.
+> Su **Raspberry Pi e PC poco performanti**, Ollama non va installato affatto su quella macchina — né in Docker né nativo: Gotenberg (Chromium headless) già assorbe RAM/CPU, e i modelli LLM competerebbero per le stesse risorse limitate. Va eseguito su un'altra macchina della LAN — vedi sezione "Deploy Ibrido" più sotto. Su hardware più potente puoi tenerlo sulla stessa macchina, ma **sempre installato nativamente, mai in Docker**.
 
 ---
 
@@ -15,21 +15,20 @@
 Browser (LAN)
      │
      ▼
-Caddy :80  ─────────────────────────────┐
-     │                                  │
-     ▼                          docker network interno
-SC-ARCHIVE :8000                        │
-     │                                  │
-     ├──► Gotenberg :3000 ──────────────┘
+Caddy :80          ← unica porta pubblicata sull'host, unico servizio di questo stack
      │
-     └──► Ollama :11434  (PC Linux esterno — LAN)
+     ▼  rete Docker interna, nessuna porta pubblicata sull'host
+SC-ARCHIVE
+     ├──► Gotenberg :3000   (propria istanza/stack Docker indipendente — stesso host o LAN)
+     └──► Ollama :11434     (nativo — stesso host o LAN)
 ```
 
-| Servizio | Container | Porta esposta |
-| -------- | --------- | ------------- |
-| SC-ARCHIVE | `sc-archive` | interna (via Caddy) |
-| Gotenberg | `gotenberg` | interna |
-| Caddy | `caddy` | `80` → LAN |
+| Servizio | Gestito da questo stack | Porta esposta |
+| -------- | ------------------------ | ------------- |
+| SC-ARCHIVE | Sì (`sc-archive`) | interna (via Caddy) |
+| Caddy | Sì (`caddy`) | `80` → LAN |
+| Gotenberg | **No** — stack Docker a sé | esterna, via `GOTENBERG_IP` |
+| Ollama | **No** — sempre nativo | esterna, via `OLLAMA_IP` |
 
 ---
 
@@ -93,11 +92,22 @@ Contenuto `.env`:
 # Password admin al primo avvio (cambiabile dalla UI Settings in seguito)
 AEGIS_ADMIN_PASSWORD=changeme
 
+# Gotenberg è sempre esterno a questo stack (propria istanza/stack Docker
+# indipendente). Se già in ascolto su localhost:3000 sullo stesso host, il
+# default (host.docker.internal:3000) basta e questa riga resta commentata.
+# GOTENBERG_IP=http://192.168.1.X:3000
+
 # IP della macchina in LAN che esegue Ollama (sempre esterno a questo stack)
 OLLAMA_IP=http://192.168.1.X:11434
 ```
 
-Sostituire `192.168.1.X` con l'IP effettivo della macchina che esegue Ollama. Su Raspberry Pi o PC poco performanti sarà quasi sempre un'altra macchina della LAN (vedi il box in alto e la sezione "Deploy Ibrido"); su un host abbastanza potente può anche essere `localhost` o `host.docker.internal` se Ollama gira nativamente sullo stesso host che ospita i container.
+Sostituire `192.168.1.X` con l'IP effettivo della macchina che esegue Gotenberg/Ollama. Su Raspberry Pi o PC poco performanti sarà quasi sempre un'altra macchina della LAN (vedi il box in alto e la sezione "Deploy Ibrido"); su un host abbastanza potente possono anche girare entrambi sullo stesso host che ospita i container — in tal caso i default (`host.docker.internal`) bastano, nessuna variabile da impostare.
+
+Se Gotenberg non è già attivo, avvialo come stack Docker indipendente:
+
+```bash
+docker run -d --name gotenberg --restart unless-stopped -p 3000:3000 gotenberg/gotenberg:8
+```
 
 > [!WARNING]
 > Se `AEGIS_ADMIN_PASSWORD` non viene impostata, **non** viene usata nessuna password fissa: SC-ARCHIVE ne genera una casuale al primo avvio e la salva in `/home/aegis/.config/sc-archive/admin_password.txt` (nel volume `sc-archive-userdata`, persistente) — vedi sezione "Primo avvio" più sotto.
@@ -132,9 +142,9 @@ docker compose up -d --build
 
 La prima build scarica il binary Tailwind corretto per l'architettura dell'host (x86_64 o ARM64), compila il CSS, installa le dipendenze Python. Durata stimata: pochi minuti su un PC x86_64, 5-10 minuti su Raspberry Pi 5.
 
-`gotenberg` e `sc-archive` espongono un healthcheck: `sc-archive` attende che `gotenberg` sia healthy prima di partire, `caddy` attende che `sc-archive` sia healthy prima di partire — niente errori di conversione PDF nei primissimi secondi dopo l'avvio.
+`sc-archive` espone un healthcheck (`GET /login`): `caddy` attende che `sc-archive` sia healthy prima di partire — niente errori nei primissimi secondi dopo l'avvio. Gotenberg non fa parte di questo `docker compose ps` — è uno stack a sé, verificalo separatamente (vedi sezione "Gotenberg in rete" più sotto).
 
-Verifica che tutti i servizi siano attivi:
+Verifica che tutti i servizi di questo stack siano attivi:
 
 ```bash
 docker compose ps
@@ -145,7 +155,6 @@ Output atteso:
 ```hosts
 NAME                    STATUS                    PORTS
 md2fastpdf-caddy-1      Up                        0.0.0.0:80->80/tcp
-md2fastpdf-gotenberg-1  Up (healthy)
 md2fastpdf-sc-archive-1 Up (healthy)
 ```
 
@@ -184,8 +193,8 @@ L'entrypoint parte sempre come root — non perché l'app giri da root, ma per p
 1. **Corregge i permessi** su `config/`, `blueprints/`, `.config/sc-archive/` e `sc-archive/` (proprietario `aegis:aegis`)
 
 2. **Crea `config/settings.json`** con i valori Docker-appropriati:
-   - `gotenberg_ip`: `http://gotenberg:3000` (nome container interno)
-   - `ollama_ip`: valore da `OLLAMA_IP` nel `.env`
+   - `gotenberg_ip`: valore da `GOTENBERG_IP` nel `.env` (default `http://host.docker.internal:3000`)
+   - `ollama_ip`: valore da `OLLAMA_IP` nel `.env` (default `http://host.docker.internal:11434`)
    - `workspace_base`: `/home/aegis/sc-archive`
 
 3. **Genera la session key** in `/home/aegis/.config/sc-archive/session.key` (persiste nel volume `sc-archive-userdata`)
@@ -237,20 +246,20 @@ docker volume ls | grep sc-archive
 
 ## Deploy Ibrido: Host Docker + Nodo GPU Esterno per Ollama
 
-Per scenari event/convention o installazioni permanenti con Oracle attivo, il pattern raccomandato è a due nodi — **particolarmente importante su Raspberry Pi o PC poco performanti**, dove far girare anche Ollama sulla stessa macchina competerebbe per RAM/CPU/GPU con Gotenberg:
+Per scenari event/convention o installazioni permanenti con Oracle attivo, il pattern raccomandato è a due nodi — **particolarmente importante su Raspberry Pi o PC poco performanti**, dove far girare anche Ollama sulla stessa macchina competerebbe per RAM/CPU con Gotenberg:
 
 ```text
 Host Docker (Raspberry Pi 4/5, mini-PC, server...)
-├── SC-ARCHIVE (Docker)
-├── Gotenberg (Docker)
-└── Caddy (Docker)
+├── SC-ARCHIVE (Docker, questo stack)
+├── Caddy (Docker, questo stack)
+└── Gotenberg (Docker, stack a sé — stesso host o altra macchina)
         │
         └──► LAN ──► Nodo GPU (Ollama)
                       ├── PC Linux x86 con NVIDIA GPU
                       └── NVIDIA DGX Spark (ARM64 / Blackwell)
 ```
 
-**Vantaggi**: l'host Docker gestisce i file e la generazione PDF senza carico GPU; il nodo Ollama serve l'Oracle con latenza minima anche sotto carico multi-utente. Su un host già potente (con GPU propria) il nodo Ollama può anche essere la stessa macchina — ma va sempre installato **nativo**, mai in Docker (né come container di `docker-compose.yml`, né come container standalone a parte).
+**Vantaggi**: l'host Docker gestisce i file e la generazione PDF senza carico GPU; il nodo Ollama serve l'Oracle con latenza minima anche sotto carico multi-utente. Su un host già potente (con GPU propria) il nodo Ollama può anche essere la stessa macchina — ma va sempre installato **nativo**, mai in Docker.
 
 ### NVIDIA DGX Spark come nodo Ollama
 
@@ -265,6 +274,28 @@ ollama pull qwen2.5-coder:latest
 ```
 
 Per esporlo sulla LAN (binding, firewall, verifica) segui la checklist completa nella sezione "Ollama in rete" più sotto — si applica identica qui.
+
+---
+
+## Gotenberg — stack Docker indipendente
+
+Gotenberg non fa parte di `docker-compose.yml`: è una sua istanza/stack Docker a sé, sullo stesso host o su un'altra macchina della LAN. Avvio minimo (stesso host):
+
+```bash
+docker run -d --name gotenberg --restart unless-stopped -p 3000:3000 gotenberg/gotenberg:8
+```
+
+- **Stesso host di SC-ARCHIVE**: nessuna variabile da impostare, il default in `docker-compose.yml` (`GOTENBERG_IP=http://host.docker.internal:3000`) raggiunge il container via il gateway Docker dell'host.
+- **Altra macchina in LAN**: imposta `GOTENBERG_IP=http://<IP_LAN>:3000` nel `.env` — stessa firewall/binding da verificare di Ollama (porta raggiungibile dall'host che esegue SC-ARCHIVE, non solo da `localhost` della macchina Gotenberg).
+
+Verifica diretta:
+
+```bash
+curl http://localhost:3000/health          # dallo stesso host di Gotenberg
+curl http://<IP_LAN>:3000/health           # da un'altra macchina della LAN
+```
+
+Output atteso: `{"status":"up", ...}`.
 
 ---
 
@@ -399,13 +430,13 @@ Cause comuni:
 
 ### PDF non funziona
 
-Gotenberg non raggiungibile (il container `sc-archive` non ha `curl`, usa `python3`). Verifica:
+Gotenberg non raggiungibile (il container `sc-archive` non ha `curl`, usa `python3`). Verifica dal punto di vista del container SC-ARCHIVE (usa la stessa `GOTENBERG_IP` che l'app ha in `settings.json`, non un IP a mano):
 
 ```bash
-docker compose exec sc-archive python3 -c "import urllib.request as u; print(u.urlopen('http://gotenberg:3000/health').read().decode())"
+docker compose exec sc-archive python3 -c "import os, urllib.request as u; print(u.urlopen(os.environ['GOTENBERG_IP'] + '/health').read().decode())"
 ```
 
-Output atteso: `{"status":"up", ...}`
+Output atteso: `{"status":"up", ...}`. Se fallisce, verifica che Gotenberg sia effettivamente attivo (`docker ps | grep gotenberg` sulla macchina che lo esegue) — vedi sezione "Gotenberg — stack Docker indipendente" più sopra.
 
 ### Ollama non risponde (o il pannello mostra PROTOCOL_OFFLINE)
 

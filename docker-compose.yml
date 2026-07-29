@@ -11,21 +11,8 @@ services:
       - sc-archive-blueprints:/app/blueprints
     environment:
       - AEGIS_ADMIN_PASSWORD=${AEGIS_ADMIN_PASSWORD:-}
+      - GOTENBERG_IP=${GOTENBERG_IP:-http://host.docker.internal:3000}
       - OLLAMA_IP=${OLLAMA_IP:-http://host.docker.internal:11434}
-    depends_on:
-      gotenberg:
-        condition: service_healthy
-
-  gotenberg:
-    # gotenberg/gotenberg:8, pinned by digest for reproducible builds (multi-arch, includes arm64)
-    image: gotenberg/gotenberg:8@sha256:67097317623a503ba2a6a7e9ae8db6929a1f7e1bbd88077bacf2d325fbdab923
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 10s
-      timeout: 3s
-      start_period: 10s
-      retries: 3
 
   caddy:
     # caddy:alpine, pinned by digest for reproducible builds (multi-arch, includes arm64)

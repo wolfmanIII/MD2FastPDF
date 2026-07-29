@@ -1,6 +1,6 @@
 # SC-ARCHIVE // Spacecraft Documentation Management System
 
-**Versione 5.25.0** // PANNELLO RELAZIONI: RISTRUTTURAZIONE UI & FIX + HARDENING BOOTSTRAP SERVIZI
+**Versione 5.26.0** // GOTENBERG SERVIZIO ESTERNO & RELAZIONI: CARTELLE COLLASSABILI
 
 > **Perché filesystem e niente database?** Non è una svista: è una scelta di design coerente col dominio. → [MANIFESTO.md](MANIFESTO.md)
 >
@@ -37,7 +37,7 @@ Riferimento rapido a tutte le guide di setup — scegli il percorso in base a co
 
 ## 🚀 Features
 
-- **Pannello RELAZIONI a struttura cartelle**: nell'editor, le relazioni tipizzate di un'entità sono raggruppate come nel pannello ARCHIVE_TREE (icona cartella aperta, indentazione, colori coerenti) invece di un elenco a virgole. Tooltip fixed-position (immune al clipping dei contenitori scrollabili) sui nomi troncati. Entità duplicate tra gruppi forward/inverso deduplicate; fonti realmente `type: scene` separate dalle altre sotto "Riferimenti".
+- **Pannello RELAZIONI a struttura cartelle, collassabili**: nell'editor, le relazioni tipizzate di un'entità sono raggruppate come nel pannello ARCHIVE_TREE (icona cartella aperta/chiusa, indentazione, colori coerenti) invece di un elenco a virgole. Gruppi chiusi di default, click sull'header per espandere/collassare. Tooltip fixed-position (immune al clipping dei contenitori scrollabili) sui nomi troncati. Entità duplicate tra gruppi forward/inverso deduplicate; fonti realmente `type: scene` separate dalle altre sotto "Riferimenti".
 - **File Metadata temporali**: Data di creazione e ultima modifica visibili sotto ogni file/directory nell'archive browser (`CRE DD/MM/YYYY HH:MM // MOD DD/MM/YYYY HH:MM`). Font mono, accent neon-cyan. Applicato anche ai risultati di ricerca.
 - **Sidebar editor ridimensionabile**: Drag handle tra sidebar filetree e editor. Larghezza regolabile tra 120px e 600px, persistita in `localStorage`.
 - **Aegis Group_Space**: Workspace filesystem condiviso per gruppo. Modello permessi asimmetrico (admin R+W su root, membri R+W su `shared/`). Browser, editor e CRUD file integrati nella navbar.
@@ -168,18 +168,21 @@ chmod +x tailwindcss
 
 ### 7. Kernel di Conversione PDF (Gotenberg) e Strato Neurale (Ollama)
 
-**Gotenberg**: sempre esterno, come Ollama — il progetto non lo installa né lo containerizza
-mai. Va eseguito a parte (installazione nativa, systemd, o un container gestito da un altro
-progetto/stack) e il suo indirizzo va impostato in Settings (o `gotenberg_ip` in
-`config/settings.json`). `bin/launch.sh` si limita a verificare ad ogni avvio che l'endpoint
-configurato risponda, segnalando in console se non è raggiungibile — nessuna creazione
-automatica, vedi [`bin/ensure_services.sh`](bin/ensure_services.sh).
+**Gotenberg**: sempre esterno, come Ollama — questo progetto non lo installa né lo
+containerizza mai, in nessuno scenario (bare-metal o Docker). Va eseguito a parte
+(installazione nativa, systemd, o una propria istanza/stack Docker indipendente) e il suo
+indirizzo va impostato in Settings (o `gotenberg_ip` in `config/settings.json`).
+`bin/launch.sh` si limita a verificare ad ogni avvio che l'endpoint configurato risponda,
+segnalando in console se non è raggiungibile — nessuna creazione automatica, vedi
+[`bin/ensure_services.sh`](bin/ensure_services.sh).
 
 - **Avvio rapido (Docker)**: `docker run -d --name gotenberg --restart unless-stopped -p 3000:3000 gotenberg/gotenberg:8`
 
-**Ollama**: sempre nativo, mai in Docker, nessun fallback automatico — lo script non lo
-gestisce affatto (vedi [docs/configurazione-docker.md](docs/configurazione-docker.md) per il
-criterio: mai su Raspberry Pi/PC poco performanti, sempre nativo su host capaci):
+**Ollama**: sempre nativo, mai in Docker — `bin/launch.sh` verifica anch'esso che l'endpoint
+configurato (`ollama_ip`) risponda, stessa diagnostica di Gotenberg e stesso
+[`bin/ensure_services.sh`](bin/ensure_services.sh), ma senza alcuna gestione/avvio automatico
+(vedi [docs/configurazione-docker.md](docs/configurazione-docker.md) per il criterio: mai su
+Raspberry Pi/PC poco performanti, sempre nativo su host capaci):
 
 - **Installazione**: `curl -fsSL https://ollama.com/install.sh | sh`
 - **Modello Consigliato**: `ollama pull qwen2.5-coder:7b`
@@ -209,10 +212,10 @@ Per inizializzare la stazione e attivare tutti i watcher (Tailwind & Uvicorn):
 - `tests/`: Suite pytest — unit test e async I/O test per il layer `logic/`.
 - `docs/`: Database di documentazione operativa e tecnica.
 - `bin/launch.sh`: Start script (Tailwind watcher + Uvicorn).
-- `bin/ensure_services.sh`: Verifica che Gotenberg (servizio esterno, indirizzo da Settings) sia raggiungibile — nessuna creazione di container. Ollama non è gestito (sempre nativo, mai in Docker).
+- `bin/ensure_services.sh`: Verifica che Gotenberg e Ollama (entrambi servizi esterni, indirizzi da Settings) siano raggiungibili — solo diagnostica, nessuna creazione/avvio.
 - `bin/aegis-migrate.sh`: Export/import completo dei dati per migrazione tra macchine.
 - `Dockerfile`: Build multi-stage (css-builder ARM64, deps-builder, runtime).
-- `docker-compose.yml`: Stack sc-archive + gotenberg + caddy con named volumes.
+- `docker-compose.yml`: Stack sc-archive + caddy con named volumes. Gotenberg e Ollama restano sempre esterni (non containerizzati da questo progetto).
 - `docker/entrypoint.sh`: Init settings Docker, session key, bootstrap admin; parte come root per sistemare i permessi sui volumi, poi passa il controllo a `uvicorn` come utente non privilegiato (`gosu aegis`).
 - `docker/Caddyfile`: Reverse proxy `http://sc-archive.lan:80`.
 - `docker/.env.example`: Template variabili d'ambiente Docker.
@@ -243,7 +246,7 @@ L'import è interattivo: mostra il percorso originale di blueprints e workspace 
 
 ## 🐳 Deploy con Docker
 
-Stack completo SC-ARCHIVE containerizzato — con Caddy come reverse proxy e Gotenberg integrato. Funziona su qualsiasi host Linux con Docker (PC x86_64, server, Raspberry Pi 4/5 ARM64): le immagini sono multi-arch, nessun passaggio è specifico per il Pi. Su Raspberry Pi o PC poco performanti è consigliato tenere Ollama come servizio esterno (altra macchina in LAN) — vedi la guida completa.
+Stack SC-ARCHIVE + Caddy come reverse proxy, containerizzati. Gotenberg e Ollama restano sempre esterni a questo stack — Gotenberg nella propria istanza/stack Docker indipendente, Ollama sempre nativo — esattamente come nel setup bare-metal. Funziona su qualsiasi host Linux con Docker (PC x86_64, server, Raspberry Pi 4/5 ARM64): le immagini sono multi-arch, nessun passaggio è specifico per il Pi. Su Raspberry Pi o PC poco performanti è consigliato tenere Ollama su un'altra macchina in LAN — vedi la guida completa.
 
 **Guida completa**: [docs/configurazione-docker.md](docs/configurazione-docker.md)
 
@@ -270,6 +273,11 @@ docker compose up -d --build
 # Impostala solo se vuoi scegliere tu la password admin.
 AEGIS_ADMIN_PASSWORD=la-tua-password
 
+# Opzionale — IP/porta di Gotenberg, sempre esterno a questo stack (es. http://192.168.1.50:3000).
+# Se ometti questa riga, il default è http://host.docker.internal:3000 — utile se Gotenberg
+# gira nella propria istanza Docker sulla stessa macchina che ospita questo stack.
+# GOTENBERG_IP=http://192.168.1.X:3000
+
 # Opzionale — IP del PC in LAN che esegue Ollama (es. http://192.168.1.50:11434).
 # Se ometti questa riga, il default è http://host.docker.internal:11434, cioè
 # "l'host Docker stesso" — utile se Ollama gira nativamente sulla stessa macchina
@@ -277,17 +285,20 @@ AEGIS_ADMIN_PASSWORD=la-tua-password
 OLLAMA_IP=http://192.168.1.X:11434
 ```
 
-Entrambe le variabili sono opzionali: se lasci `.env` vuoto o non lo crei affatto, il sistema parte comunque con i default sopra descritti.
+Entrambe le variabili sono opzionali: se lasci `.env` vuoto o non lo crei affatto, il sistema parte comunque con i default sopra descritti — a patto che Gotenberg sia effettivamente raggiungibile a quell'indirizzo (vedi "Avvio rapido Gotenberg" più sotto).
 
 Il sistema è raggiungibile su `http://sc-archive.lan` (aggiungi l'IP del Pi in `/etc/hosts` sui dispositivi LAN).
 
-**Componenti**:
+**Avvio rapido Gotenberg** (se non già attivo altrove): `docker run -d --name gotenberg --restart unless-stopped -p 3000:3000 gotenberg/gotenberg:8`
+
+**Componenti di questo stack**:
 
 | Container | Ruolo |
 | ----------- | ------- |
 | `sc-archive` | Applicazione FastAPI |
-| `gotenberg` | PDF engine (Chromium headless) |
 | `caddy` | Reverse proxy (porta 80 → LAN) |
+
+Gotenberg e Ollama non fanno parte di questo `docker-compose.yml` — sempre esterni, vedi sopra.
 
 **Dati persistenti** in tre named volumes Docker: `sc-archive-config`, `sc-archive-userdata`, `sc-archive-workspaces`.
 

@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="SC-ARCHIVE",
     description="Space Craft Archive Management System // Aegis Class",
-    version="5.25.0",
+    version="5.26.0",
     lifespan=lifespan
 )
 

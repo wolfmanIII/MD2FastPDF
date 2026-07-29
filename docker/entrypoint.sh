@@ -17,7 +17,7 @@ import json, os
 settings = {
     "neural_link_enabled": False,
     "pdf_branding_enabled": False,
-    "gotenberg_ip": "http://gotenberg:3000",
+    "gotenberg_ip": os.getenv("GOTENBERG_IP", "http://localhost:3000"),
     "ollama_ip": os.getenv("OLLAMA_IP", "http://localhost:11434"),
     "workspace_base": os.path.expanduser("~/sc-archive"),
     "models": {

@@ -2,6 +2,22 @@
 
 Tutte le modifiche degne di nota a questo progetto saranno documentate in questo file.
 
+## [5.26.0] - GOTENBERG SERVIZIO ESTERNO & RELAZIONI: CARTELLE COLLASSABILI (2026-07-29)
+
+### Changed
+
+- **Gotenberg rimosso da `docker-compose.yml`**: non è più un service di questo stack — resta sempre esterno, in una propria istanza/stack Docker indipendente (stesso host o un'altra macchina in LAN), esattamente come nel setup bare-metal. `sc-archive` lo raggiunge via la nuova variabile `GOTENBERG_IP` (default `http://host.docker.internal:3000`, stesso meccanismo già usato per `OLLAMA_IP`); rimossi `depends_on`/healthcheck del vecchio service. `docker/entrypoint.sh` scrive `gotenberg_ip` in `config/settings.json` da `GOTENBERG_IP` invece di un hostname interno hardcoded (`http://gotenberg:3000`).
+- **`bin/ensure_services.sh` non crea più container Gotenberg**: rimossa ogni logica `docker run`/`docker start`/immagine di fallback (`md2fastpdf-gotenberg`) — Gotenberg va trattato sempre come Ollama, servizio esterno gestito fuori dal progetto, indirizzo impostato in Settings (`gotenberg_ip`). Lo script ora fa solo un health-check diagnostico con retry, avvisando se l'endpoint configurato non risponde. Path di `config/settings.json` risolto in modo assoluto dalla posizione dello script (`SCRIPT_DIR`/`BASH_SOURCE`), non più relativo alla CWD di chi lo lancia.
+- **Check di raggiungibilità aggiunto anche per Ollama** in `ensure_services.sh`: prima probato solo silenziosamente lato Python (errori inghiottiti, nessuna traccia in log), ora visibile in console/`journalctl` insieme a Gotenberg quando il progetto gira da servizio systemd.
+- **Pannello RELAZIONI: cartelle collassabili**, chiuse di default — click sull'header di gruppo espande/collassa (icona cartella chiusa/aperta), coerente con l'interazione del pannello ARCHIVE_TREE.
+- **Documentazione riallineata al nuovo assetto Docker**: README (§7 e sezione Deploy Docker), `docs/configurazione-docker.md` (architettura, `.env`, troubleshooting, nuova sezione "Gotenberg — stack Docker indipendente") e `docs/rete-lan-caddy.md` (Scenario D, tabella scenari, comandi `journalctl --user -u sc-archive.service` per leggere l'esito dei check di boot).
+
+### Fixed
+
+- **Tooltip perso sui nomi troncati nel pannello RELAZIONI**: il binding avveniva al load, quando i gruppi erano ancora chiusi (`scrollWidth`/`clientWidth` entrambi 0 su elemento `display:none`) — il controllo di troncamento è stato spostato dentro l'handler `mouseenter`, quando l'elemento è effettivamente visibile.
+- **Comandi di verifica Docker (`docs/rete-lan-caddy.md`, D.4) usavano `curl`**, assente nell'immagine runtime (`docker compose exec sc-archive curl ...` falliva sempre) — sostituiti con `python3 -c "...urllib.request..."`, coerente con quanto già usato in `docs/configurazione-docker.md`.
+- **Diagramma Scenario D non spiegava perché `host.docker.internal` raggiunge Ollama**: dipende dal binding `OLLAMA_HOST=0.0.0.0` di D.1 (di default Ollama ascolta solo `127.0.0.1`, non raggiungibile da un container via `host.docker.internal`) — Gotenberg invece non richiede alcuna nota perché `docker run -p` pubblica di default su tutte le interfacce. Verificato empiricamente con un container Alpine su entrambi gli endpoint prima di documentarlo.
+
 ## [5.25.0] - PANNELLO RELAZIONI: RISTRUTTURAZIONE UI & FIX + HARDENING BOOTSTRAP SERVIZI (2026-07-29)
 
 ### Fixed

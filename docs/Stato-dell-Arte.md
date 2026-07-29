@@ -1,6 +1,6 @@
 # Stato del Progetto: SC-ARCHIVE
 
-**Stato Attuale**: Op_Ready / Versione 5.25.0
+**Stato Attuale**: Op_Ready / Versione 5.26.0
 **Ultimo Aggiornamento**: 29 Luglio 2026
 
 ---
@@ -254,6 +254,15 @@ Documento di analisi in `docs/ANALISI-relazioni-query-nl.md` (RF-11), implementa
 - **`bin/ensure_services.sh` hardening**: non crea più un container Gotenberg di progetto duplicato quando un container condiviso con altre app della macchina esiste ma non è ancora pronto a rispondere (check aggiuntivo a livello Docker, non solo via `curl`). Rimosso il fallback Docker per Ollama (contraddiceva la regola "sempre nativo, mai Docker").
 - **Pannelli elenco (ARCHIVE/LIBRARY/COMMS) estesi fino al footer** e **modale root-picker allineata** allo stile standard delle altre modali del progetto.
 
+### 1.25 GOTENBERG SERVIZIO ESTERNO & RELAZIONI: CARTELLE COLLASSABILI (v5.26.0) — COMPLETED
+
+- **Gotenberg disaccoppiato completamente dal progetto, anche nel deploy Docker**: rimosso il service `gotenberg` da `docker-compose.yml` (era nello stesso stack di `sc-archive`/`caddy`) — Gotenberg resta sempre esterno, propria istanza/stack Docker indipendente, in ogni scenario (bare-metal e Docker). `sc-archive` lo raggiunge via la nuova variabile `GOTENBERG_IP` (default `http://host.docker.internal:3000`, stesso meccanismo di `OLLAMA_IP`); `docker/entrypoint.sh` non scrive più l'hostname interno hardcoded `http://gotenberg:3000` in `settings.json`.
+- **`bin/ensure_services.sh` non crea più alcun container**: Gotenberg va sempre trattato come Ollama — servizio esterno gestito fuori dal progetto (nativo, systemd, o container di un altro progetto/stack), indirizzo impostato in Settings (`gotenberg_ip`). Rimossa ogni logica `docker run`/`docker start`/immagine di fallback (`md2fastpdf-gotenberg`); lo script ora fa solo un health-check diagnostico con retry, avvisando in console/journal se l'endpoint configurato non risponde. Path di `config/settings.json` risolto in modo assoluto dalla posizione dello script (`SCRIPT_DIR` via `BASH_SOURCE`), non più relativo alla CWD di chi lo lancia.
+- **Check di raggiungibilità aggiunto anche per Ollama**: prima veniva solo probato silenziosamente lato Python (`neural_oracle.probe_url()`, errori inghiottiti, nessuna traccia in log) — ora `ensure_services.sh` lo verifica insieme a Gotenberg, stessa diagnostica, visibile in `journalctl` quando il progetto gira da servizio systemd.
+- **Servizio systemd utente rinominato** da `md2fastpdf.service` a `sc-archive.service`, coerente con la doc (`docs/rete-lan-caddy.md`) che assumeva già quel nome.
+- **Pannello RELAZIONI: cartelle collassabili**, chiuse di default — click sull'header di gruppo espande/collassa (icona cartella chiusa/aperta), coerente con l'interazione del pannello ARCHIVE_TREE. Fix collaterale: il tooltip sui nomi troncati veniva bindato al load quando i gruppi erano ancora chiusi (`scrollWidth`/`clientWidth` entrambi 0 su elemento `display:none`) — il controllo di troncamento è stato spostato dentro l'handler `mouseenter`, quando l'elemento è effettivamente visibile.
+- **Documentazione riallineata al nuovo assetto Docker**: README (§7 e sezione Deploy Docker), `docs/configurazione-docker.md` (architettura, `.env`, troubleshooting, nuova sezione "Gotenberg — stack Docker indipendente") e `docs/rete-lan-caddy.md` (Scenario D, tabella scenari, comandi `journalctl --user -u sc-archive.service` per leggere l'esito dei check di boot).
+
 ---
 
 ## 2. Infrastruttura Tecnica
@@ -316,7 +325,8 @@ docker/         entrypoint.sh, Caddyfile, .env.example — Dockerfile e docker-c
 | [5.13] | NEURAL CORE AVAILABILITY GATING | **COMPLETED** |
 | [5.14] | RELAZIONI TIPIZZATE — vocabolario esteso (`npcs`, `organizations`) & graph UX refinements | **COMPLETED** |
 | [5.15] | PANNELLO RELAZIONI — ristrutturazione UI, fix duplicati/dominio & hardening bootstrap servizi | **COMPLETED** |
+| [5.16] | Gotenberg servizio esterno anche in Docker (rimosso da docker-compose.yml), check Ollama, RELAZIONI cartelle collassabili | **COMPLETED** |
 
 ---
 
-*SC-ARCHIVE Operational Log // Aegis Stack v5.25.0 — DEPLOYMENT_ACTIVE.*
+*SC-ARCHIVE Operational Log // Aegis Stack v5.26.0 — DEPLOYMENT_ACTIVE.*

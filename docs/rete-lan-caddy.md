@@ -6,29 +6,47 @@
 
 ## Scenari disponibili
 
-| Scenario | SC-ARCHIVE + Gotenberg | Ollama | Caddy | Note |
-| -------- | ---------------------- | ------ | ----- | ---- |
-| **A** | WSL2 (Windows) | PC Windows / LAN | Raspberry Pi | Alta — portproxy necessario |
-| **B** | Raspberry Pi (bare-metal) | PC Linux / LAN | Raspberry Pi (stesso) | Bassa — tutto sul Pi |
-| **C** | PC Linux (bare-metal) | stesso PC | Raspberry Pi (o qualsiasi host) | Media — solo firewall |
-| **D** | PC Linux (Docker) | stesso PC (nativo, GPU diretta) | incluso in Docker | Raccomandato per eventi |
+| Scenario | SC-ARCHIVE | Gotenberg | Ollama | Caddy | Note |
+| -------- | ---------- | --------- | ------ | ----- | ---- |
+| **A** | WSL2 (Windows) | stessa macchina, esterno | PC Windows / LAN | Raspberry Pi | Alta — portproxy necessario |
+| **B** | Raspberry Pi (bare-metal) | altra macchina, esterno | PC Linux / LAN | Raspberry Pi (stesso) | Bassa — tutto sul Pi |
+| **C** | PC Linux (bare-metal) | stessa macchina, esterno | stesso PC | Raspberry Pi (o qualsiasi host) | Media — solo firewall |
+| **D** | PC Linux (Docker, questo stack) | stesso PC, stack Docker a sé | stesso PC (nativo, GPU diretta) | incluso in questo stack | Raccomandato per eventi |
 
 ---
 
 ## Scenario D — PC Linux Docker (Raccomandato per Eventi)
 
-Pattern ottimale per convention ed eventi da tavolo. Un solo PC Linux esegue l'intero stack: SC-ARCHIVE e Gotenberg in Docker, Ollama nativo con accesso diretto alla GPU.
+Pattern ottimale per convention ed eventi da tavolo. Un solo PC Linux esegue SC-ARCHIVE+Caddy
+in un unico stack Docker (`docker-compose.yml`); Gotenberg gira nella propria istanza/stack
+Docker indipendente (stesso PC — un `docker run` separato, non lo stesso `docker-compose.yml`);
+Ollama nativo con accesso diretto alla GPU.
 
 ```text
 Browser (LAN)
      │
      ▼
-PC Linux (x86 / ARM64)
-├── Caddy :80        ← incluso nello stack Docker
-├── SC-ARCHIVE :8000 ← container Docker
-├── Gotenberg :3000  ← container Docker
-└── Ollama :11434    ← nativo, accesso diretto alla GPU host
+Caddy :80          ← unica porta pubblicata sull'host, unico servizio di questo stack
+     │
+     ▼  rete Docker interna, nessuna porta pubblicata sull'host
+SC-ARCHIVE
+     ├──► Gotenberg :3000   (stack Docker a sé, stesso host — via host.docker.internal)
+     └──► Ollama :11434     (nativo sull'host, via host.docker.internal — richiede OLLAMA_HOST=0.0.0.0, GPU diretta)
 ```
+
+Solo Caddy è raggiungibile dalla LAN. SC-ARCHIVE non pubblica porte sull'host
+(`docker-compose.yml`: nessun `ports:` su `sc-archive`) — raggiunge sia Gotenberg
+(container a sé, stesso host) sia Ollama (nativo, stesso host) via
+`host.docker.internal` (`extra_hosts: host-gateway`), stesso meccanismo per entrambi.
+Gotenberg e Ollama non si parlano tra loro: sono entrambi chiamati da SC-ARCHIVE.
+
+Il meccanismo funziona identico per entrambi, ma con una premessa diversa: `docker run
+-p 3000:3000` di Gotenberg pubblica di default su tutte le interfacce dell'host, quindi
+`host.docker.internal` lo raggiunge senza altra configurazione. Ollama invece ascolta di
+default solo su `127.0.0.1` — un container non lo raggiungerebbe via `host.docker.internal`
+(il traffico non passa per il loopback) senza il binding `OLLAMA_HOST=0.0.0.0` impostato in
+D.1. Verificato empiricamente: `ss -tlnp | grep 11434` deve mostrare `*:11434`, non
+`127.0.0.1:11434`.
 
 **Perché Ollama fuori da Docker**: i container non accedono alla GPU host senza configurazione NVIDIA Container Toolkit. Ollama nativo usa la GPU direttamente senza overhead — più semplice e più veloce.
 
@@ -66,16 +84,24 @@ Contenuto `.env`:
 
 ```env
 AEGIS_ADMIN_PASSWORD=changeme
-# OLLAMA_IP non necessario se Ollama gira sullo stesso PC — il default punta a host.docker.internal:11434
-# Decommentare solo se Ollama è su un host remoto:
+# GOTENBERG_IP/OLLAMA_IP non necessarie se entrambi girano sullo stesso PC — i default
+# puntano a host.docker.internal:3000 / host.docker.internal:11434. Decommentare solo
+# se uno dei due è su un host remoto:
+# GOTENBERG_IP=http://192.168.1.X:3000
 # OLLAMA_IP=http://192.168.1.X:11434
+```
+
+Avvia Gotenberg (stack Docker a sé, non parte di questo `docker-compose.yml`) se non già attivo:
+
+```bash
+docker run -d --name gotenberg --restart unless-stopped -p 3000:3000 gotenberg/gotenberg:8
 ```
 
 ```bash
 docker compose up -d --build
 ```
 
-Caddy è incluso nello stack — nessuna installazione separata necessaria.
+Caddy è incluso in questo stack — nessuna installazione separata necessaria.
 
 ### D.3 DNS per i client dell'evento
 
@@ -89,12 +115,15 @@ Su ogni tablet/laptop dei giocatori, aggiungere in `/etc/hosts` (Linux/macOS) o 
 
 ### D.4 Verifica stack completo
 
+Il container `sc-archive` non ha `curl` — verifica con `python3` (già nell'immagine),
+leggendo l'indirizzo effettivo dalle variabili d'ambiente invece di scriverlo a mano:
+
 ```bash
 # Gotenberg
-docker compose exec sc-archive curl http://gotenberg:3000/health
+docker compose exec sc-archive python3 -c "import os, urllib.request as u; print(u.urlopen(os.environ['GOTENBERG_IP'] + '/health').read().decode())"
 
-# Ollama raggiungibile dal container
-docker compose exec sc-archive curl http://<IP_LAN_PC>:11434/api/tags
+# Ollama
+docker compose exec sc-archive python3 -c "import os, urllib.request as u; print(u.urlopen(os.environ['OLLAMA_IP'] + '/api/tags').read().decode())"
 ```
 
 ---

@@ -14,16 +14,23 @@
 # — qui viene solo controllato, mai avviato.
 set -u
 
+# Root del progetto risolta dalla posizione dello script, non dalla CWD di chi
+# lo lancia — se invocato da una directory diversa (o CWD imprevista) un path
+# relativo a "config/settings.json" fallirebbe silenziosamente e userebbe
+# sempre i default hardcoded, senza nessun avviso.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SETTINGS_FILE="${SCRIPT_DIR}/../config/settings.json"
+
 _read_config() {
     # Legge config/settings.json con solo la stdlib (nessuna dipendenza da
     # anyio/poetry: questo script può girare prima che il venv sia pronto).
-    python3 - "$1" "$2" <<'PYEOF'
+    python3 - "$1" "$2" "$SETTINGS_FILE" <<'PYEOF'
 import json
 import sys
 
-key, default_url = sys.argv[1], sys.argv[2]
+key, default_url, settings_file = sys.argv[1], sys.argv[2], sys.argv[3]
 try:
-    with open("config/settings.json") as f:
+    with open(settings_file) as f:
         data = json.load(f)
     url = data.get(key) or default_url
 except (FileNotFoundError, json.JSONDecodeError):
