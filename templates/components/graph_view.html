@@ -385,7 +385,7 @@
             toggleAllLabel.className = "flex items-center justify-between cursor-pointer pb-2 mb-1 border-b border-(--glass-border)";
             toggleAllLabel.innerHTML =
                 '<span class="text-zinc-300 tracking-widest text-sm normal-case font-bold">Seleziona tutte</span>' +
-                '<input type="checkbox" id="aegis-graph-relation-toggle-all" checked class="accent-(--neon-cyan) cursor-pointer w-4 h-4">';
+                '<input type="checkbox" id="aegis-graph-relation-toggle-all" class="accent-(--neon-cyan) cursor-pointer w-4 h-4">';
             relationFiltersEl.appendChild(toggleAllLabel);
             const toggleAllInput = toggleAllLabel.querySelector("input");
             const relationCheckboxes = [];
@@ -398,12 +398,16 @@
             }
 
             relationTypes.forEach(relation => {
+                // Deselezionate di default: troppo rumore visivo se tutte le
+                // relazioni tipizzate appaiono insieme su un archivio denso —
+                // l'utente sceglie quali attivare.
+                hiddenRelationTypes.add(relation);
                 const id = "aegis-graph-relation-" + relation;
                 const label = document.createElement("label");
                 label.className = "flex items-center justify-between cursor-pointer";
                 label.innerHTML =
                     '<span class="text-zinc-300 tracking-widest text-sm normal-case">' + relationLabels.get(relation) + '</span>' +
-                    '<input type="checkbox" id="' + id + '" checked class="accent-(--neon-cyan) cursor-pointer w-4 h-4">';
+                    '<input type="checkbox" id="' + id + '" class="accent-(--neon-cyan) cursor-pointer w-4 h-4">';
                 relationFiltersEl.appendChild(label);
                 const relationInput = label.querySelector("input");
                 relationCheckboxes.push(relationInput);
